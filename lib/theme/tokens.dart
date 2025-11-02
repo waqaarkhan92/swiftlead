@@ -32,7 +32,7 @@ class SwiftleadTokens {
 
   // Border Radius
   static const double radiusCard = 20.0;
-  static const double radiusButton = 16.0;
+  static const double radiusButton = 24.0;
   static const double radiusModal = 28.0;
   static const double radiusBottomNav = 28.0;
   static const double radiusChip = 40.0;
