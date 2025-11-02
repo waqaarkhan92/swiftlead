@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (mounted) {
       setState(() => _isLoading = false);
-    });
+    }
   }
 
   String _getGreeting() {

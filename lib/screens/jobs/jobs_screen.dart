@@ -229,10 +229,9 @@ class _JobsScreenState extends State<JobsScreen> {
             clientName: job.contactName,
             serviceType: job.serviceType,
             status: job.status.displayName,
-            priority: job.priority.displayName,
-            value: job.value,
-            scheduledDate: job.scheduledDate,
-            address: job.address,
+            dueDate: job.scheduledDate,
+            price: '£${job.value.toStringAsFixed(2)}',
+            teamMemberName: job.assignedTo,
             onTap: () {
               // Navigate to job detail
             },
