@@ -158,7 +158,12 @@ class _JobsScreenState extends State<JobsScreen> {
 
   Widget _buildLoadingState() {
     return ListView(
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      padding: const EdgeInsets.only(
+        left: SwiftleadTokens.spaceM,
+        right: SwiftleadTokens.spaceM,
+        top: SwiftleadTokens.spaceM,
+        bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
+      ),
       children: List.generate(
         3,
         (index) => Padding(
@@ -218,7 +223,12 @@ class _JobsScreenState extends State<JobsScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      padding: const EdgeInsets.only(
+        left: SwiftleadTokens.spaceM,
+        right: SwiftleadTokens.spaceM,
+        top: SwiftleadTokens.spaceM,
+        bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
+      ),
       itemCount: _filteredJobs.length,
       itemBuilder: (context, index) {
         final job = _filteredJobs[index];

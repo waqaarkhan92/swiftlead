@@ -50,26 +50,27 @@ class SwiftleadDrawer extends StatelessWidget {
                       ],
               ),
             ),
-            child: Column(
-              children: [
-                // Header
-                Container(
-                  height: 168,
-                  padding: const EdgeInsets.all(SwiftleadTokens.spaceXL),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: isLight
-                            ? Colors.black.withOpacity(0.06)
-                            : Colors.white.withOpacity(0.08),
-                        width: 1,
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // Header
+                  Container(
+                    height: 168,
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceXL),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: isLight
+                              ? Colors.black.withOpacity(0.06)
+                              : Colors.white.withOpacity(0.08),
+                          width: 1,
+                        ),
                       ),
                     ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
                       if (organizationName != null)
                         Text(
                           organizationName!,
@@ -181,13 +182,14 @@ class SwiftleadDrawer extends StatelessWidget {
                   ),
                 ),
                 
-                // Footer
-                if (footer != null)
-                  Container(
-                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-                    child: footer,
-                  ),
-              ],
+                  // Footer
+                  if (footer != null)
+                    Container(
+                      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                      child: footer,
+                    ),
+                ],
+              ),
             ),
           ),
         ),

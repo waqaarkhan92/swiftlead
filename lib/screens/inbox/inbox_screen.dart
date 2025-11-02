@@ -193,7 +193,12 @@ class _InboxScreenState extends State<InboxScreen> {
 
   Widget _buildLoadingState() {
     return ListView(
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      padding: const EdgeInsets.only(
+        left: SwiftleadTokens.spaceM,
+        right: SwiftleadTokens.spaceM,
+        top: SwiftleadTokens.spaceM,
+        bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
+      ),
       children: List.generate(
         5,
         (index) => Padding(
@@ -277,7 +282,11 @@ class _InboxScreenState extends State<InboxScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+      padding: const EdgeInsets.only(
+        left: SwiftleadTokens.spaceM,
+        right: SwiftleadTokens.spaceM,
+        bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
+      ),
       itemCount: _filteredThreads.length,
       itemBuilder: (context, index) {
         final thread = _filteredThreads[index];

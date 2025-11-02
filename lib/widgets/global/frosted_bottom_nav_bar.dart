@@ -21,11 +21,13 @@ class FrostedBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
     final isLight = brightness == Brightness.light;
-    
+    final mediaQuery = MediaQuery.of(context);
+    final bottomPadding = mediaQuery.padding.bottom;
+
     return Positioned(
       left: 16,
       right: 16,
-      bottom: 16,
+      bottom: 16 + bottomPadding,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(SwiftleadTokens.radiusBottomNav),
         child: BackdropFilter(

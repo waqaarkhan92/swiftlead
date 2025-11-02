@@ -168,7 +168,12 @@ class _MoneyScreenState extends State<MoneyScreen> {
 
   Widget _buildLoadingState() {
     return ListView(
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      padding: const EdgeInsets.only(
+        left: SwiftleadTokens.spaceM,
+        right: SwiftleadTokens.spaceM,
+        top: SwiftleadTokens.spaceM,
+        bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
+      ),
       children: [
         // Balance skeleton
         SkeletonLoader(
@@ -239,7 +244,12 @@ class _MoneyScreenState extends State<MoneyScreen> {
         await _loadFinancialData();
       },
       child: ListView(
-        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+        padding: const EdgeInsets.only(
+          left: SwiftleadTokens.spaceM,
+          right: SwiftleadTokens.spaceM,
+          top: SwiftleadTokens.spaceM,
+          bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
+        ),
         children: [
           // BalanceHeader - Large numeric display
           _buildBalanceHeader(),
@@ -270,7 +280,12 @@ class _MoneyScreenState extends State<MoneyScreen> {
         await _loadFinancialData();
       },
       child: ListView(
-        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+        padding: const EdgeInsets.only(
+          left: SwiftleadTokens.spaceM,
+          right: SwiftleadTokens.spaceM,
+          top: SwiftleadTokens.spaceM,
+          bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
+        ),
         children: [
           // Filter Chips
           SingleChildScrollView(
@@ -342,7 +357,12 @@ class _MoneyScreenState extends State<MoneyScreen> {
         await _loadFinancialData();
       },
       child: ListView(
-        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+        padding: const EdgeInsets.only(
+          left: SwiftleadTokens.spaceM,
+          right: SwiftleadTokens.spaceM,
+          top: SwiftleadTokens.spaceM,
+          bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
+        ),
         children: [
           Text(
             'Payment History',

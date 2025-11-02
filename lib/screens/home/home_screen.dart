@@ -168,7 +168,12 @@ class _HomeScreenState extends State<HomeScreen> {
         await _loadDashboardData();
       },
       child: ListView(
-        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+        padding: const EdgeInsets.only(
+          left: SwiftleadTokens.spaceM,
+          right: SwiftleadTokens.spaceM,
+          top: SwiftleadTokens.spaceM,
+          bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
+        ),
         children: [
           // MetricsRow with TrendTile (sparklines, tooltips, animated counters)
           _buildMetricsRow(),

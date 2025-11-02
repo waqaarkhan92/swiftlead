@@ -109,25 +109,28 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Widget _buildLoadingState() {
-    return Padding(
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-      child: Column(
-        children: [
-          // Calendar skeleton
-          SkeletonLoader(
-            width: double.infinity,
-            height: 300,
-            borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-          ),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-          // Booking list skeleton
-          SkeletonLoader(
-            width: double.infinity,
-            height: 100,
-            borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-          ),
-        ],
+    return ListView(
+      padding: const EdgeInsets.only(
+        left: SwiftleadTokens.spaceM,
+        right: SwiftleadTokens.spaceM,
+        top: SwiftleadTokens.spaceM,
+        bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
       ),
+      children: [
+        // Calendar skeleton
+        SkeletonLoader(
+          width: double.infinity,
+          height: 300,
+          borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+        // Booking list skeleton
+        SkeletonLoader(
+          width: double.infinity,
+          height: 100,
+          borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+        ),
+      ],
     );
   }
 
@@ -138,7 +141,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
         await _loadBookings();
       },
       child: ListView(
-        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+        padding: const EdgeInsets.only(
+          left: SwiftleadTokens.spaceM,
+          right: SwiftleadTokens.spaceM,
+          top: SwiftleadTokens.spaceM,
+          bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
+        ),
         children: [
           // CalendarHeader - Month/week navigation
           _buildCalendarHeader(),
