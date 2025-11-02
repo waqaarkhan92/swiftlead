@@ -9,6 +9,9 @@ import '../../widgets/components/chat_title_row.dart';
 import '../../widgets/components/channel_icon_badge.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../theme/tokens.dart';
+import '../../config/mock_config.dart';
+import '../../mock/mock_repository.dart';
+import '../../models/message.dart';
 import 'inbox_thread_screen.dart';
 import 'message_search_screen.dart';
 
@@ -25,14 +28,61 @@ class _InboxScreenState extends State<InboxScreen> {
   bool _isLoading = true;
   final List<String> _channels = ['All', 'SMS', 'WhatsApp', 'Instagram', 'Facebook', 'Email'];
   String _selectedChannel = 'All';
-  int _unreadCount = 24;
+  int _unreadCount = 0;
   int _activeFilters = 0;
+  List<MessageThread> _threads = [];
+  List<MessageThread> _filteredThreads = [];
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted) setState(() => _isLoading = false);
+    _loadMessages();
+  }
+
+  Future<void> _loadMessages() async {
+    setState(() => _isLoading = true);
+
+    if (kUseMockData) {
+      // Load from mock repository
+      _threads = await MockMessages.fetchAllThreads();
+      _unreadCount = await MockMessages.getUnreadCount();
+    } else {
+      // TODO: Load from live backend
+    }
+
+    _applyFilter();
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _applyFilter() {
+    if (_selectedChannel == 'All') {
+      _filteredThreads = List.from(_threads);
+    } else {
+      final channelMap = {
+        'SMS': MessageChannel.sms,
+        'WhatsApp': MessageChannel.whatsapp,
+        'Email': MessageChannel.email,
+        'Facebook': MessageChannel.facebook,
+        'Instagram': MessageChannel.instagram,
+      };
+      final channel = channelMap[_selectedChannel];
+      if (channel != null) {
+        _filteredThreads = _threads.where((t) => t.channel == channel).toList();
+      } else {
+        _filteredThreads = List.from(_threads);
+      }
+    }
+
+    // Sort: Pinned → Unread → Recent
+    _filteredThreads.sort((a, b) {
+      if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
+      if (a.unreadCount > 0 != b.unreadCount > 0) {
+        return a.unreadCount > 0 ? -1 : 1;
+      }
+      return b.lastMessageTime.compareTo(a.lastMessageTime);
     });
   }
 
@@ -176,7 +226,10 @@ class _InboxScreenState extends State<InboxScreen> {
                   child: GestureDetector(
                     onTap: () {
                       HapticFeedback.selectionClick();
-                      setState(() => _selectedChannel = channel);
+                      setState(() {
+                        _selectedChannel = channel;
+                        _applyFilter();
+                      });
                     },
                     onLongPress: () {
                       // Tooltip shows channel name on long-press
@@ -202,10 +255,7 @@ class _InboxScreenState extends State<InboxScreen> {
         // ChatListView - Full-width list with optimized performance
         Expanded(
           child: RefreshIndicator(
-            onRefresh: () async {
-              // Pull-to-refresh syncs all channels
-              await Future.delayed(const Duration(milliseconds: 500));
-            },
+            onRefresh: _loadMessages,
             child: _buildChatList(),
           ),
         ),
@@ -214,12 +264,12 @@ class _InboxScreenState extends State<InboxScreen> {
   }
 
   Widget _buildChatList() {
-    final hasConversations = true; // Replace with actual data check
-    
-    if (!hasConversations) {
+    if (_filteredThreads.isEmpty) {
       return EmptyStateCard(
         title: 'No conversations yet',
-        description: 'All caught up! Your inbox is empty.',
+        description: _selectedChannel == 'All'
+            ? 'All caught up! Your inbox is empty.'
+            : 'No conversations in $_selectedChannel.',
         icon: Icons.inbox_outlined,
         actionLabel: 'Start conversation',
         onAction: () {},
@@ -228,14 +278,15 @@ class _InboxScreenState extends State<InboxScreen> {
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
-      itemCount: 10, // Example count
+      itemCount: _filteredThreads.length,
       itemBuilder: (context, index) {
-        final isPinned = index < 2;
-        final isUnread = index % 3 == 0;
-        final channel = ['WhatsApp', 'SMS', 'Email', 'Facebook', 'Instagram'][index % 5];
+        final thread = _filteredThreads[index];
+        final isPinned = thread.isPinned;
+        final isUnread = thread.unreadCount > 0;
+        final channelName = thread.channel.displayName;
         
         return Dismissible(
-          key: Key('chat_$index'),
+          key: Key('chat_${thread.id}'),
           direction: DismissDirection.horizontal,
           background: Container(
             alignment: Alignment.centerLeft,
@@ -275,8 +326,8 @@ class _InboxScreenState extends State<InboxScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => InboxThreadScreen(
-                    contactName: _getContactName(index),
-                    channel: 'SMS',
+                    contactName: thread.contactName,
+                    channel: channelName,
                   ),
                 ),
               );
@@ -304,11 +355,11 @@ class _InboxScreenState extends State<InboxScreen> {
                 children: [
                   // Channel Icon Badge
                   ChannelIconBadge(
-                    channel: channel,
+                    channel: channelName,
                     size: 24,
                   ),
                   const SizedBox(width: SwiftleadTokens.spaceM),
-                  
+
                   // Chat Title Row Content
                   Expanded(
                     child: Column(
@@ -318,7 +369,7 @@ class _InboxScreenState extends State<InboxScreen> {
                           children: [
                             Expanded(
                               child: Text(
-                                _getContactName(index),
+                                thread.contactName,
                                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                   fontWeight: isUnread ? FontWeight.w600 : FontWeight.w400,
                                 ),
@@ -334,7 +385,7 @@ class _InboxScreenState extends State<InboxScreen> {
                               ),
                             const SizedBox(width: SwiftleadTokens.spaceXS),
                             Text(
-                              _getRelativeTime(index),
+                              _formatRelativeTime(thread.lastMessageTime),
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],
@@ -344,7 +395,7 @@ class _InboxScreenState extends State<InboxScreen> {
                           children: [
                             Expanded(
                               child: Text(
-                                _getLastMessage(index),
+                                thread.lastMessage,
                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   fontWeight: isUnread ? FontWeight.w500 : FontWeight.w400,
                                   color: isUnread
@@ -357,14 +408,22 @@ class _InboxScreenState extends State<InboxScreen> {
                             ),
                             if (isUnread)
                               Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(
-                                  color: Color(SwiftleadTokens.primaryTeal),
-                                  shape: BoxShape.circle,
+                                margin: const EdgeInsets.only(left: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(SwiftleadTokens.primaryTeal),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  '${thread.unreadCount}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
-                            if (!isUnread && index % 4 == 0)
+                            if (!isUnread && thread.status == MessageStatus.delivered)
                               const Icon(
                                 Icons.done_all,
                                 size: 14,
@@ -384,51 +443,26 @@ class _InboxScreenState extends State<InboxScreen> {
     );
   }
 
-  String _getContactName(int index) {
-    final names = [
-      'John Smith',
-      'Sarah Williams',
-      'Mike Johnson',
-      'Emily Davis',
-      'David Brown',
-      'Lisa Anderson',
-      'Tom Wilson',
-      'Emma Thompson',
-      'James Miller',
-      'Olivia Garcia',
-    ];
-    return names[index % names.length];
-  }
+  String _formatRelativeTime(DateTime timestamp) {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
 
-  String _getLastMessage(int index) {
-    final messages = [
-      'Thanks for the quick response!',
-      'When can you start?',
-      'That sounds perfect',
-      'I need a quote for...',
-      'Can we schedule for next week?',
-      'The issue is still happening',
-      'Payment sent, thanks!',
-      'See you tomorrow at 2pm',
-      'Could you send more details?',
-      'Great work, thank you!',
-    ];
-    return messages[index % messages.length];
-  }
-
-  String _getRelativeTime(int index) {
-    final times = [
-      'Just now',
-      '5m ago',
-      '1h ago',
-      '2h ago',
-      'Yesterday',
-      '2 days ago',
-      '3 days ago',
-      '1 week ago',
-      '2 weeks ago',
-      '1 month ago',
-    ];
-    return times[index % times.length];
+    if (difference.inSeconds < 60) {
+      return 'Just now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inDays == 1) {
+      return 'Yesterday';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} days ago';
+    } else if (difference.inDays < 30) {
+      final weeks = (difference.inDays / 7).floor();
+      return weeks == 1 ? '1 week ago' : '$weeks weeks ago';
+    } else {
+      final months = (difference.inDays / 30).floor();
+      return months == 1 ? '1 month ago' : '$months months ago';
+    }
   }
 }
