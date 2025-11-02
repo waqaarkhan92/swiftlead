@@ -1,0 +1,147 @@
+import 'package:flutter/material.dart';
+import '../../theme/tokens.dart';
+import '../global/frosted_container.dart';
+
+/// TrendTile - Metric card with sparkline and percentage change
+/// Exact specification from Screen_Layouts_v2.5.1
+class TrendTile extends StatelessWidget {
+  final String label;
+  final String value;
+  final String? trend;
+  final bool isPositive;
+  final List<double>? sparklineData; // Mini trend graph data
+  final String? tooltip;
+  
+  const TrendTile({
+    super.key,
+    required this.label,
+    required this.value,
+    this.trend,
+    this.isPositive = true,
+    this.sparklineData,
+    this.tooltip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onLongPress: tooltip != null
+          ? () {
+              // Show tooltip on long-press
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(tooltip!),
+                  duration: const Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          : null,
+      child: FrostedContainer(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            if (sparklineData != null && sparklineData!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 20,
+                child: CustomPaint(
+                  painter: _SparklinePainter(
+                    data: sparklineData!,
+                    color: isPositive
+                        ? const Color(SwiftleadTokens.successGreen)
+                        : const Color(SwiftleadTokens.errorRed),
+                  ),
+                ),
+              ),
+            ],
+            if (trend != null) ...[
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(
+                    isPositive ? Icons.trending_up : Icons.trending_down,
+                    size: 12,
+                    color: isPositive
+                        ? const Color(SwiftleadTokens.successGreen)
+                        : const Color(SwiftleadTokens.errorRed),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    trend!,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: isPositive
+                          ? const Color(SwiftleadTokens.successGreen)
+                          : const Color(SwiftleadTokens.errorRed),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SparklinePainter extends CustomPainter {
+  final List<double> data;
+  final Color color;
+
+  _SparklinePainter({
+    required this.data,
+    required this.color,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (data.isEmpty) return;
+
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    final path = Path();
+    final maxValue = data.reduce((a, b) => a > b ? a : b);
+    final minValue = data.reduce((a, b) => a < b ? a : b);
+    final range = maxValue - minValue;
+    final stepX = size.width / (data.length - 1);
+
+    for (int i = 0; i < data.length; i++) {
+      final x = i * stepX;
+      final normalizedValue = range > 0
+          ? (data[i] - minValue) / range
+          : 0.5;
+      final y = size.height - (normalizedValue * size.height);
+      
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_SparklinePainter oldDelegate) {
+    return oldDelegate.data != data || oldDelegate.color != color;
+  }
+}
+
