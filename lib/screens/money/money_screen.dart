@@ -10,6 +10,8 @@ import '../../theme/tokens.dart';
 import '../quotes/quotes_screen.dart';
 import 'invoice_detail_screen.dart';
 import 'create_edit_invoice_screen.dart';
+import '../../config/mock_config.dart';
+import '../../mock/mock_repository.dart';
 
 /// MoneyScreen - Payments & Finance
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -25,14 +27,61 @@ class _MoneyScreenState extends State<MoneyScreen> {
   int _selectedTab = 0; // 0 = Dashboard, 1 = Invoices, 2 = Quotes, 3 = Payments
   String _selectedFilter = 'All';
   final List<String> _filters = ['All', 'Paid', 'Pending', 'Overdue', 'Refunded'];
-  
+
+  // Financial data from mock
+  double _totalRevenue = 0;
+  double _thisMonthRevenue = 0;
+  double _outstanding = 0;
+  double _overdue = 0;
+  List<Invoice> _allInvoices = [];
+  List<Invoice> _filteredInvoices = [];
+  List<Payment> _payments = [];
+
   @override
   void initState() {
     super.initState();
-    // Progressive loading: balance → chart → transactions
-    Future.delayed(const Duration(milliseconds: 400), () {
-      if (mounted) setState(() => _isLoading = false);
-    });
+    _loadFinancialData();
+  }
+
+  Future<void> _loadFinancialData() async {
+    setState(() => _isLoading = true);
+
+    if (kUseMockData) {
+      final revenueStats = await MockPayments.getRevenueStats();
+      _totalRevenue = revenueStats.totalRevenue;
+      _thisMonthRevenue = revenueStats.thisMonthRevenue;
+      _outstanding = revenueStats.outstanding;
+      _overdue = revenueStats.overdue;
+
+      _allInvoices = await MockPayments.fetchAllInvoices();
+      _payments = await MockPayments.fetchAllPayments();
+    }
+
+    _applyInvoiceFilter();
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _applyInvoiceFilter() {
+    if (_selectedFilter == 'All') {
+      _filteredInvoices = List.from(_allInvoices);
+    } else if (_selectedFilter == 'Paid') {
+      _filteredInvoices = _allInvoices
+          .where((i) => i.status == InvoiceStatus.paid)
+          .toList();
+    } else if (_selectedFilter == 'Pending') {
+      _filteredInvoices = _allInvoices
+          .where((i) =>
+              i.status == InvoiceStatus.pending ||
+              i.status == InvoiceStatus.sent)
+          .toList();
+    } else if (_selectedFilter == 'Overdue') {
+      _filteredInvoices = _allInvoices
+          .where((i) => i.status == InvoiceStatus.overdue)
+          .toList();
+    }
   }
 
   @override
@@ -187,7 +236,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
     return RefreshIndicator(
       onRefresh: () async {
         // Pull-to-refresh syncs with Stripe
-        await Future.delayed(const Duration(milliseconds: 500));
+        await _loadFinancialData();
       },
       child: ListView(
         padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
@@ -218,7 +267,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
   Widget _buildInvoicesTab() {
     return RefreshIndicator(
       onRefresh: () async {
-        await Future.delayed(const Duration(milliseconds: 500));
+        await _loadFinancialData();
       },
       child: ListView(
         padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
@@ -235,7 +284,10 @@ class _MoneyScreenState extends State<MoneyScreen> {
                     label: filter,
                     isSelected: isSelected,
                     onTap: () {
-                      setState(() => _selectedFilter = filter);
+                      setState(() {
+                        _selectedFilter = filter;
+                        _applyInvoiceFilter();
+                      });
                     },
                   ),
                 );
@@ -245,31 +297,40 @@ class _MoneyScreenState extends State<MoneyScreen> {
           const SizedBox(height: SwiftleadTokens.spaceM),
           
           // Invoice List
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: 5, // Example
-            itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
-              child: _InvoiceCard(
-                invoiceNumber: 'INV-${1000 + index}',
-                clientName: _getClientName(index),
-                amount: 200.0 + (index * 100.0),
-                status: ['Paid', 'Pending', 'Overdue'][index % 3],
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => InvoiceDetailScreen(
-                        invoiceId: 'invoice_$index',
-                        invoiceNumber: '${1000 + index}',
+          _filteredInvoices.isEmpty
+              ? EmptyStateCard(
+                  title: 'No ${_selectedFilter.toLowerCase()} invoices',
+                  description: 'Invoices will appear here when they match this filter.',
+                  icon: Icons.receipt_outlined,
+                )
+              : ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _filteredInvoices.length,
+                  itemBuilder: (context, index) {
+                    final invoice = _filteredInvoices[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+                      child: _InvoiceCard(
+                        invoiceNumber: invoice.id,
+                        clientName: invoice.contactName,
+                        amount: invoice.amount,
+                        status: invoice.status.displayName,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => InvoiceDetailScreen(
+                                invoiceId: invoice.id,
+                                invoiceNumber: invoice.id,
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
+                    );
+                  },
+                ),
         ],
       ),
     );
@@ -278,7 +339,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
   Widget _buildPaymentsTab() {
     return RefreshIndicator(
       onRefresh: () async {
-        await Future.delayed(const Duration(milliseconds: 500));
+        await _loadFinancialData();
       },
       child: ListView(
         padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
@@ -319,7 +380,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                   Row(
                     children: [
                       Text(
-                        '£2,450.00',
+                        '£${_totalRevenue.toStringAsFixed(2)}',
                         style: Theme.of(context).textTheme.displayLarge,
                       ),
                       const SizedBox(width: 12),

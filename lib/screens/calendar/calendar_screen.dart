@@ -4,6 +4,9 @@ import '../../widgets/global/skeleton_loader.dart';
 import '../../widgets/global/empty_state_card.dart';
 import '../../theme/tokens.dart';
 import 'create_edit_booking_screen.dart';
+import '../../config/mock_config.dart';
+import '../../mock/mock_repository.dart';
+import '../../widgets/components/booking_card.dart';
 
 /// CalendarScreen - Bookings & Scheduling
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -17,13 +20,27 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
   bool _isLoading = true;
   String _selectedView = 'month'; // day | week | month
-  
+  List<Booking> _allBookings = [];
+  List<Booking> _todayBookings = [];
+  DateTime _selectedDate = DateTime.now();
+
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted) setState(() => _isLoading = false);
-    });
+    _loadBookings();
+  }
+
+  Future<void> _loadBookings() async {
+    setState(() => _isLoading = true);
+
+    if (kUseMockData) {
+      _allBookings = await MockBookings.fetchAll();
+      _todayBookings = await MockBookings.fetchToday();
+    }
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -118,7 +135,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return RefreshIndicator(
       onRefresh: () async {
         // Pull-to-refresh syncs calendar integrations
-        await Future.delayed(const Duration(milliseconds: 500));
+        await _loadBookings();
       },
       child: ListView(
         padding: const EdgeInsets.all(SwiftleadTokens.spaceM),

@@ -7,6 +7,8 @@ import '../../widgets/components/quick_action_chip.dart';
 import '../../widgets/components/ai_insight_banner.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../theme/tokens.dart';
+import '../../config/mock_config.dart';
+import '../../mock/mock_repository.dart';
 
 /// HomeScreen - Dashboard hub
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -20,13 +22,45 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = true;
   bool _showAIBanner = true;
-  
+
+  // Dashboard metrics from mock data
+  double _totalRevenue = 0;
+  int _activeJobs = 0;
+  int _unreadMessages = 0;
+  double _conversionRate = 0;
+  int _todayBookings = 0;
+  double _pendingPayments = 0;
+
   @override
   void initState() {
     super.initState();
-    // Progressive loading: metrics → chart → feed
-    Future.delayed(const Duration(milliseconds: 400), () {
-      if (mounted) setState(() => _isLoading = false);
+    _loadDashboardData();
+  }
+
+  Future<void> _loadDashboardData() async {
+    setState(() => _isLoading = true);
+
+    if (kUseMockData) {
+      // Load metrics from mock repositories
+      final revenueStats = await MockPayments.getRevenueStats();
+      _totalRevenue = revenueStats.totalRevenue;
+      _pendingPayments = revenueStats.outstanding;
+
+      final jobsByStatus = await MockJobs.getCountByStatus();
+      _activeJobs = (jobsByStatus[JobStatus.inProgress] ?? 0) +
+                    (jobsByStatus[JobStatus.scheduled] ?? 0);
+
+      _unreadMessages = await MockMessages.getUnreadCount();
+
+      final todayBookings = await MockBookings.fetchToday();
+      _todayBookings = todayBookings.length;
+
+      // Mock conversion rate
+      _conversionRate = 68.0;
+    }
+
+    if (mounted) {
+      setState(() => _isLoading = false);
     });
   }
 
@@ -130,9 +164,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildContent() {
     return RefreshIndicator(
       onRefresh: () async {
-        // Pull-to-refresh: updates only what's changed
-        await Future.delayed(const Duration(milliseconds: 500));
-        // Show "Updated just now" toast would go here
+        // Pull-to-refresh: reload dashboard data
+        await _loadDashboardData();
       },
       child: ListView(
         padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
@@ -176,40 +209,64 @@ class _HomeScreenState extends State<HomeScreen> {
         Expanded(
           child: TrendTile(
             label: 'Revenue',
-            value: '£2,450',
+            value: '£${_totalRevenue.toStringAsFixed(0)}',
             trend: '+12%',
             isPositive: true,
-            sparklineData: [1200, 1500, 1800, 2000, 2100, 2300, 2450],
-            tooltip: 'Revenue breakdown: Services £1,800, Products £650',
+            sparklineData: [
+              _totalRevenue * 0.5,
+              _totalRevenue * 0.6,
+              _totalRevenue * 0.7,
+              _totalRevenue * 0.8,
+              _totalRevenue * 0.9,
+              _totalRevenue * 0.95,
+              _totalRevenue,
+            ],
+            tooltip: 'Total revenue from all paid invoices',
           ),
         ),
         const SizedBox(width: SwiftleadTokens.spaceS),
         Expanded(
           child: TrendTile(
             label: 'Active Jobs',
-            value: '18',
-            trend: '+3',
+            value: '$_activeJobs',
+            trend: '+${(_activeJobs * 0.2).toInt()}',
             isPositive: true,
-            sparklineData: [12, 14, 15, 16, 17, 17, 18],
-            tooltip: 'Active jobs by status: In Progress 12, Scheduled 6',
+            sparklineData: [
+              (_activeJobs * 0.6).toDouble(),
+              (_activeJobs * 0.7).toDouble(),
+              (_activeJobs * 0.8).toDouble(),
+              (_activeJobs * 0.85).toDouble(),
+              (_activeJobs * 0.9).toDouble(),
+              (_activeJobs * 0.95).toDouble(),
+              _activeJobs.toDouble(),
+            ],
+            tooltip: 'Jobs in progress or scheduled',
           ),
         ),
         const SizedBox(width: SwiftleadTokens.spaceS),
         Expanded(
           child: TrendTile(
             label: 'Messages',
-            value: '24',
+            value: '$_unreadMessages',
             trend: 'Unread',
             isPositive: false,
-            sparklineData: [5, 8, 12, 15, 18, 22, 24],
-            tooltip: 'Unread by channel: SMS 15, WhatsApp 6, Email 3',
+            sparklineData: [
+              (_unreadMessages * 0.2).toDouble(),
+              (_unreadMessages * 0.4).toDouble(),
+              (_unreadMessages * 0.6).toDouble(),
+              (_unreadMessages * 0.7).toDouble(),
+              (_unreadMessages * 0.8).toDouble(),
+              (_unreadMessages * 0.9).toDouble(),
+              _unreadMessages.toDouble(),
+            ],
+            tooltip: 'Unread messages across all channels',
           ),
         ),
         const SizedBox(width: SwiftleadTokens.spaceS),
         Expanded(
           child: TrendTile(
             label: 'Conversion',
-            value: '68%',
+            value: '${_conversionRate.toInt()}%',
             trend: '+5%',
             isPositive: true,
             sparklineData: [55, 58, 60, 62, 65, 66, 68],
@@ -270,8 +327,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: _SmartTile(
                 icon: Icons.inbox_outlined,
                 label: 'Inbox',
-                badge: '24',
-                preview: '24 unread messages across 5 channels',
+                badge: '$_unreadMessages',
+                preview: '$_unreadMessages unread messages across all channels',
               ),
             ),
             const SizedBox(width: SwiftleadTokens.spaceS),
@@ -279,8 +336,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: _SmartTile(
                 icon: Icons.work_outline,
                 label: 'Jobs',
-                badge: '18',
-                preview: '18 active jobs, 6 scheduled today',
+                badge: '$_activeJobs',
+                preview: '$_activeJobs active jobs in progress',
               ),
             ),
           ],
@@ -292,8 +349,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: _SmartTile(
                 icon: Icons.calendar_today_outlined,
                 label: 'Calendar',
-                badge: '8',
-                preview: '8 bookings today, 3 tomorrow',
+                badge: '$_todayBookings',
+                preview: '$_todayBookings bookings scheduled for today',
               ),
             ),
             const SizedBox(width: SwiftleadTokens.spaceS),
@@ -301,8 +358,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: _SmartTile(
                 icon: Icons.attach_money_outlined,
                 label: 'Money',
-                badge: '£2.4k',
-                preview: '£2.4k pending, £450 overdue',
+                badge: '£${_pendingPayments.toStringAsFixed(0)}',
+                preview: '£${_pendingPayments.toStringAsFixed(0)} in pending payments',
               ),
             ),
           ],

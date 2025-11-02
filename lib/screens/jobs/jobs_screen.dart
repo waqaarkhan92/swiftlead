@@ -6,6 +6,8 @@ import '../../widgets/global/empty_state_card.dart';
 import '../../widgets/components/segmented_control.dart';
 import '../../widgets/components/job_card.dart';
 import '../../theme/tokens.dart';
+import '../../config/mock_config.dart';
+import '../../mock/mock_repository.dart';
 
 /// JobsScreen - Job management pipeline
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -20,15 +22,61 @@ class _JobsScreenState extends State<JobsScreen> {
   bool _isLoading = true;
   int _selectedTabIndex = 0;
   final List<String> _tabs = ['All', 'Active', 'Completed', 'Cancelled'];
-  final List<int> _tabCounts = [24, 18, 6, 0];
+  List<int> _tabCounts = [0, 0, 0, 0];
   int _activeFilters = 0;
+  List<Job> _allJobs = [];
+  List<Job> _filteredJobs = [];
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted) setState(() => _isLoading = false);
-    });
+    _loadJobs();
+  }
+
+  Future<void> _loadJobs() async {
+    setState(() => _isLoading = true);
+
+    if (kUseMockData) {
+      _allJobs = await MockJobs.fetchAll();
+      final statusCounts = await MockJobs.getCountByStatus();
+
+      _tabCounts = [
+        _allJobs.length, // All
+        (statusCounts[JobStatus.inProgress] ?? 0) +
+            (statusCounts[JobStatus.scheduled] ?? 0), // Active
+        statusCounts[JobStatus.completed] ?? 0, // Completed
+        statusCounts[JobStatus.cancelled] ?? 0, // Cancelled
+      ];
+    }
+
+    _applyFilter();
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _applyFilter() {
+    if (_selectedTabIndex == 0) {
+      _filteredJobs = List.from(_allJobs);
+    } else if (_selectedTabIndex == 1) {
+      // Active jobs
+      _filteredJobs = _allJobs
+          .where((j) =>
+              j.status == JobStatus.inProgress ||
+              j.status == JobStatus.scheduled)
+          .toList();
+    } else if (_selectedTabIndex == 2) {
+      // Completed
+      _filteredJobs = _allJobs
+          .where((j) => j.status == JobStatus.completed)
+          .toList();
+    } else if (_selectedTabIndex == 3) {
+      // Cancelled
+      _filteredJobs = _allJobs
+          .where((j) => j.status == JobStatus.cancelled)
+          .toList();
+    }
   }
 
   @override
@@ -133,7 +181,10 @@ class _JobsScreenState extends State<JobsScreen> {
             badgeCounts: _tabCounts,
             onSelectionChanged: (index) {
               HapticFeedback.selectionClick();
-              setState(() => _selectedTabIndex = index);
+              setState(() {
+                _selectedTabIndex = index;
+                _applyFilter();
+              });
             },
           ),
         ),
@@ -142,7 +193,7 @@ class _JobsScreenState extends State<JobsScreen> {
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
-              await Future.delayed(const Duration(milliseconds: 500));
+              await _loadJobs();
             },
             child: _buildJobList(),
           ),
@@ -152,13 +203,42 @@ class _JobsScreenState extends State<JobsScreen> {
   }
 
   Widget _buildJobList() {
-    // Empty state when no jobs
-    return EmptyStateCard(
-      title: 'Create your first job',
-      description: 'Start tracking work and managing payments.',
-      icon: Icons.work_outline,
-      actionLabel: 'Create Job',
-      onAction: () {},
+    if (_filteredJobs.isEmpty) {
+      return EmptyStateCard(
+        title: _selectedTabIndex == 0
+            ? 'Create your first job'
+            : 'No ${_tabs[_selectedTabIndex].toLowerCase()} jobs',
+        description: _selectedTabIndex == 0
+            ? 'Start tracking work and managing payments.'
+            : 'Jobs will appear here when their status matches this filter.',
+        icon: Icons.work_outline,
+        actionLabel: _selectedTabIndex == 0 ? 'Create Job' : null,
+        onAction: _selectedTabIndex == 0 ? () {} : null,
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      itemCount: _filteredJobs.length,
+      itemBuilder: (context, index) {
+        final job = _filteredJobs[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+          child: JobCard(
+            jobTitle: job.title,
+            clientName: job.contactName,
+            serviceType: job.serviceType,
+            status: job.status.displayName,
+            priority: job.priority.displayName,
+            value: job.value,
+            scheduledDate: job.scheduledDate,
+            address: job.address,
+            onTap: () {
+              // Navigate to job detail
+            },
+          ),
+        );
+      },
     );
   }
 }
