@@ -70,19 +70,19 @@
 | Item | Location | Action Required | Status |
 |------|----------|----------------|--------|
 | Search icon handler | `lib/screens/calendar/calendar_screen.dart:70` | Implement search | ✅ |
-| Prev month button | `lib/screens/calendar/calendar_screen.dart:171` | Navigate to previous month | ⬜ |
-| Next month button | `lib/screens/calendar/calendar_screen.dart:188` | Navigate to next month | ⬜ |
-| Day tap handler | `lib/screens/calendar/calendar_screen.dart:237` | Show day events | ⬜ |
+| Prev month button | `lib/screens/calendar/calendar_screen.dart:171` | Navigate to previous month | ✅ |
+| Next month button | `lib/screens/calendar/calendar_screen.dart:188` | Navigate to next month | ✅ |
+| Day tap handler | `lib/screens/calendar/calendar_screen.dart:237` | Show day events | ✅ |
 | ~~Duplicate booking~~ | ~~Removed - not needed~~ | ~~Removed per user request~~ | ❌ Cancelled |
 
 ### Money Module
 
 | Item | Location | Action Required | Status |
 |------|----------|----------------|--------|
-| Date range filter | `lib/screens/money/money_screen.dart:140` | Wire to date picker | ⬜ |
+| Date range filter | `lib/screens/money/money_screen.dart:140` | Wire to date picker | ✅ |
 | Export icon handler | `lib/screens/money/money_screen.dart:147` | Wire to export builder | ✅ |
 | Search icon handler | `lib/screens/money/money_screen.dart:151` | Implement search | ✅ |
-| Add payment handler | `lib/screens/money/money_screen.dart:219-221` | Implement payment creation | ⬜ |
+| Add payment handler | `lib/screens/money/money_screen.dart:219-221` | Implement payment creation | ✅ |
 | Send invoice handler | `lib/screens/money/invoice_detail_screen.dart:74-76` | Implement send logic | ⬜ |
 | ~~Duplicate invoice~~ | ~~Removed - not needed~~ | ~~Removed per user request~~ | ❌ Cancelled |
 | Mark paid handler | `lib/screens/money/invoice_detail_screen.dart:80-82` | Implement mark paid logic | ⬜ |
