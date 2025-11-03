@@ -94,7 +94,7 @@ class _LeadSourcePieChartState extends State<LeadSourcePieChart> {
                             color: isSelected 
                                 ? source.color.withOpacity(0.2)
                                 : Colors.transparent,
-                            borderRadius: BorderRadius.circular(SwiftleadTokens.radiusSmall),
+                            borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
                             border: isSelected 
                                 ? Border.all(color: source.color)
                                 : null,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/components/progress_pill.dart';
 import '../../widgets/components/date_chip.dart';
+import '../../widgets/components/media_thumbnail.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/components/segmented_control.dart';
 import '../../widgets/global/primary_button.dart';
@@ -336,6 +337,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             _buildMediaTab(),
           ],
         ),
+        const SizedBox(height: 96), // Bottom padding for nav bar
       ],
     );
   }
@@ -352,6 +354,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     }
 
     return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       children: [
         ...List.generate(5, (index) => Padding(
@@ -422,6 +426,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     }
 
     return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       children: [
         Row(
@@ -537,6 +543,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
   Widget _buildDetailsTab() {
     return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       children: [
         FrostedContainer(
@@ -650,6 +658,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     }
 
     return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       children: [
         Text(
@@ -696,6 +706,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     }
 
     return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       children: [
         Row(
@@ -721,7 +733,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             mainAxisSpacing: SwiftleadTokens.spaceS,
           ),
           itemCount: 9, // Example
-          itemBuilder: (context, index) => _MediaThumbnail(
+          itemBuilder: (context, index) => MediaThumbnail(
             label: 'Photo ${index + 1}',
             onTap: () {
               // Open full screen gallery
@@ -994,59 +1006,6 @@ class _MessageCard extends StatelessWidget {
               ),
             ),
             const Icon(Icons.chevron_right),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MediaThumbnail extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-
-  const _MediaThumbnail({
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.light
-              ? Colors.black.withOpacity(0.05)
-              : Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-        ),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Center(
-              child: Icon(
-                Icons.photo,
-                size: 32,
-                color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.4),
-              ),
-            ),
-            Positioned(
-              bottom: 4,
-              right: 4,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Icon(
-                  Icons.photo_camera,
-                  size: 12,
-                  color: Colors.white,
-                ),
-              ),
-            ),
           ],
         ),
       ),

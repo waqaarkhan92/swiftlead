@@ -160,7 +160,7 @@ class _TimelineItem extends StatelessWidget {
                   padding: const EdgeInsets.all(SwiftleadTokens.spaceS),
                   decoration: BoxDecoration(
                     color: const Color(SwiftleadTokens.errorRed).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusSmall),
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
                   ),
                   child: Row(
                     children: [

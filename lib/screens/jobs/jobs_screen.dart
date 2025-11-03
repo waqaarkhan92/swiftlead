@@ -9,6 +9,7 @@ import '../../theme/tokens.dart';
 import '../../config/mock_config.dart';
 import '../../mock/mock_repository.dart';
 import '../main_navigation.dart' as main_nav;
+import 'job_detail_screen.dart';
 
 /// JobsScreen - Job management pipeline
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -234,7 +235,15 @@ class _JobsScreenState extends State<JobsScreen> {
             price: '£${job.value.toStringAsFixed(2)}',
             teamMemberName: job.assignedTo,
             onTap: () {
-              // Navigate to job detail
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => JobDetailScreen(
+                    jobId: job.id,
+                    jobTitle: job.title,
+                  ),
+                ),
+              );
             },
           ),
         );

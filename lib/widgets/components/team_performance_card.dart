@@ -79,7 +79,7 @@ class TeamPerformanceCard extends StatelessWidget {
                                 index < rating! ? Icons.star : Icons.star_border,
                                 size: 14,
                                 color: index < rating!
-                                    ? const Color(SwiftleadTokens.warningOrange)
+                                    ? const Color(SwiftleadTokens.warningYellow)
                                     : Colors.grey.shade300,
                               );
                             }),
@@ -163,7 +163,7 @@ class _MetricChip extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusSmall),
+        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

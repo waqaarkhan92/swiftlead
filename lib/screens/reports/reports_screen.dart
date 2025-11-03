@@ -4,6 +4,7 @@ import '../../widgets/global/skeleton_loader.dart';
 import '../../widgets/global/empty_state_card.dart';
 import '../../widgets/components/segmented_control.dart';
 import '../../widgets/components/trend_tile.dart';
+import '../../widgets/components/kpi_card.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/chip.dart';
 import '../../widgets/global/bottom_sheet.dart';
@@ -316,21 +317,23 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _buildKPISummaryRow() {
+    // Use KPICard for the primary metric (Revenue) and TrendTile for others
     return Column(
       children: [
+        // Large KPICard for Revenue
+        KPICard(
+          label: 'Revenue',
+          value: '£12.4k',
+          trend: '+12%',
+          vsPreviousPeriod: 'Last Month',
+          isPositive: true,
+          sparklineData: [8000, 9000, 10000, 11000, 12000, 12200, 12400],
+          tooltip: 'Total revenue this month vs last month',
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceM),
+        // TrendTiles for secondary metrics
         Row(
           children: [
-            Expanded(
-              child: TrendTile(
-                label: 'Revenue',
-                value: '£12.4k',
-                trend: '+12%',
-                isPositive: true,
-                sparklineData: [8000, 9000, 10000, 11000, 12000, 12200, 12400],
-                tooltip: 'Total revenue this month',
-              ),
-            ),
-            const SizedBox(width: SwiftleadTokens.spaceS),
             Expanded(
               child: TrendTile(
                 label: 'Jobs',
@@ -341,11 +344,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 tooltip: 'Completed jobs',
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceS),
-        Row(
-          children: [
+            const SizedBox(width: SwiftleadTokens.spaceS),
             Expanded(
               child: TrendTile(
                 label: 'Clients',
@@ -356,7 +355,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 tooltip: 'Total clients',
               ),
             ),
-            const SizedBox(width: SwiftleadTokens.spaceS),
+          ],
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceS),
+        Row(
+          children: [
             Expanded(
               child: TrendTile(
                 label: 'Conversion',
@@ -367,6 +370,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 tooltip: 'Inquiry to booking rate',
               ),
             ),
+            const SizedBox(width: SwiftleadTokens.spaceS),
+            // Empty space to maintain grid
+            Expanded(child: Container()),
           ],
         ),
       ],

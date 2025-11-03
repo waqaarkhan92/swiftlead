@@ -80,7 +80,7 @@ class ConversionFunnelChart extends StatelessWidget {
     final colors = [
       const Color(SwiftleadTokens.primaryTeal),
       const Color(SwiftleadTokens.successGreen),
-      const Color(SwiftleadTokens.warningOrange),
+      const Color(SwiftleadTokens.warningYellow),
       const Color(SwiftleadTokens.errorRed),
     ];
     return colors[index % colors.length];
@@ -95,7 +95,7 @@ class _FunnelBar extends StatelessWidget {
   final bool isFirst;
   final bool isLast;
 
-  const _FunnelBar({
+  _FunnelBar({
     required this.label,
     required this.value,
     required this.percentage,
@@ -118,7 +118,7 @@ class _FunnelBar extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusSmall),
+        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
         border: Border.all(color: color),
       ),
       child: Row(
@@ -147,7 +147,7 @@ class _FunnelBar extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: color,
-              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusSmall),
+              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
             ),
             child: Text(
               '${percentage.toStringAsFixed(0)}%',
@@ -170,7 +170,7 @@ class _LegendItem extends StatelessWidget {
   final int value;
   final double? dropOff;
 
-  const _LegendItem({
+  _LegendItem({
     required this.color,
     required this.label,
     required this.value,

@@ -5,6 +5,8 @@ import '../../widgets/global/skeleton_loader.dart';
 import '../../widgets/global/badge.dart';
 import '../../widgets/global/info_banner.dart';
 import '../../widgets/global/primary_button.dart';
+import '../../widgets/components/refund_progress.dart';
+import '../../widgets/components/payment_link_button.dart';
 import '../../widgets/forms/refund_modal.dart';
 import '../../theme/tokens.dart';
 
@@ -163,6 +165,15 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
           ),
         const SizedBox(height: SwiftleadTokens.spaceM),
 
+        // Refund Progress (if processing)
+        // This would show if refund is in progress - for now it's hidden
+        // RefundProgress(
+        //   status: RefundStatus.processing,
+        //   progress: 0.5,
+        //   message: 'Refund is being processed...',
+        // ),
+        // const SizedBox(height: SwiftleadTokens.spaceM),
+
         // Refund Button
         if (_status == 'Completed')
           PrimaryButton(
@@ -173,6 +184,12 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                 paymentId: widget.paymentId,
                 amount: _amount,
                 invoiceNumber: _invoiceNumber,
+                onRefundProcessed: (refundAmount) {
+                  // Show refund progress after processing starts
+                  setState(() {
+                    _status = 'Refunded';
+                  });
+                },
               );
             },
             icon: Icons.refresh,

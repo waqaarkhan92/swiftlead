@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../theme/tokens.dart';
 import '../global/frosted_container.dart';
-import '../global/primary_button.dart';
+import '../global/primary_button.dart' as global;
 import '../global/toast.dart';
 
 /// PaymentLinkButton - Component for generating/copying payment links
@@ -50,11 +50,11 @@ class _PaymentLinkButtonState extends State<PaymentLinkButton> {
   @override
   Widget build(BuildContext context) {
     if (widget.isCompact) {
-      return PrimaryButton(
+      return global.PrimaryButton(
         label: _isCopied ? 'Copied!' : 'Copy Payment Link',
         onPressed: _isCopied ? null : _copyToClipboard,
         icon: _isCopied ? Icons.check : Icons.link,
-        size: ButtonSize.small,
+        size: global.ButtonSize.small,
       );
     }
 
@@ -88,7 +88,7 @@ class _PaymentLinkButtonState extends State<PaymentLinkButton> {
             padding: const EdgeInsets.all(SwiftleadTokens.spaceS),
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusSmall),
+              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
               border: Border.all(color: Colors.grey.shade300),
             ),
             child: Row(
@@ -127,11 +127,10 @@ class _PaymentLinkButtonState extends State<PaymentLinkButton> {
             children: [
               if (widget.showCopyButton)
                 Expanded(
-                  child: PrimaryButton(
+                  child: global.PrimaryButton(
                     label: _isCopied ? 'Copied!' : 'Copy Link',
                     onPressed: _isCopied ? null : _copyToClipboard,
                     icon: _isCopied ? Icons.check : Icons.copy,
-                    size: ButtonSize.medium,
                   ),
                 ),
               if (widget.showCopyButton && widget.onShare != null)
@@ -154,67 +153,5 @@ class _PaymentLinkButtonState extends State<PaymentLinkButton> {
       ),
     );
   }
-}
-
-/// PrimaryButton helper class
-class PrimaryButton extends StatelessWidget {
-  final String label;
-  final VoidCallback? onPressed;
-  final IconData? icon;
-  final ButtonSize size;
-
-  const PrimaryButton({
-    super.key,
-    required this.label,
-    this.onPressed,
-    this.icon,
-    this.size = ButtonSize.medium,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final height = size == ButtonSize.small ? 36.0 : 48.0;
-    final fontSize = size == ButtonSize.small ? 14.0 : 16.0;
-
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(SwiftleadTokens.primaryTeal),
-        foregroundColor: Colors.white,
-        minimumSize: Size(double.infinity, height),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-        ),
-      ),
-      child: icon != null
-          ? Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 18),
-                const SizedBox(width: SwiftleadTokens.spaceS),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            )
-          : Text(
-              label,
-              style: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-    );
-  }
-}
-
-enum ButtonSize {
-  small,
-  medium,
-  large,
 }
 

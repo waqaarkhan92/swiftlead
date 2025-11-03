@@ -3,6 +3,7 @@ import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/primary_button.dart';
 import '../../widgets/global/badge.dart';
+import '../../widgets/components/payment_link_button.dart';
 import '../../widgets/forms/payment_link_sheet.dart';
 import '../../widgets/forms/payment_request_modal.dart';
 import '../../theme/tokens.dart';
@@ -118,6 +119,23 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
         // LineItems
         _buildLineItems(),
         const SizedBox(height: SwiftleadTokens.spaceL),
+
+        // Payment Link Button
+        if (_status == 'Pending' || _status == 'Overdue')
+          PaymentLinkButton(
+            paymentLink: 'https://swiftlead.app/pay/${widget.invoiceId}',
+            showCopyButton: true,
+            onShare: () {
+              PaymentLinkSheet.show(
+                context: context,
+                invoiceId: widget.invoiceId,
+                invoiceNumber: widget.invoiceNumber,
+                amount: _total,
+              );
+            },
+          ),
+        if (_status == 'Pending' || _status == 'Overdue')
+          const SizedBox(height: SwiftleadTokens.spaceL),
 
         // PaymentHistory
         if (_amountPaid > 0) ...[

@@ -5,6 +5,7 @@ import '../global/frosted_container.dart';
 import '../global/primary_button.dart';
 import '../global/progress_bar.dart';
 import '../global/toast.dart';
+import '../components/refund_progress.dart';
 
 /// RefundModal - Process refund for payment
 /// Exact specification from UI_Inventory_v2.5.1
@@ -170,7 +171,11 @@ class RefundModal {
                 const SizedBox(height: SwiftleadTokens.spaceM),
 
                 if (isProcessing)
-                  const SwiftleadProgressBar(),
+                  RefundProgress(
+                    status: RefundStatus.processing,
+                    progress: 0.5,
+                    message: 'Processing refund...',
+                  ),
               ],
             ),
           ),

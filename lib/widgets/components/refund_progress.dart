@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/tokens.dart';
 import '../global/frosted_container.dart';
+import '../global/badge.dart' as global_badge;
 
 /// RefundProgress - Shows refund processing status
 /// Exact specification from UI_Inventory_v2.5.1
@@ -25,7 +26,7 @@ class RefundProgress extends StatelessWidget {
     switch (status) {
       case RefundStatus.processing:
         displayMessage = message ?? 'Processing refund...';
-        progressColor = const Color(SwiftleadTokens.warningOrange);
+        progressColor = const Color(SwiftleadTokens.warningYellow);
         statusIcon = Icons.refresh;
         break;
       case RefundStatus.completed:
@@ -62,10 +63,10 @@ class RefundProgress extends StatelessWidget {
                       ),
                 ),
               ),
-              SwiftleadBadge(
+              global_badge.SwiftleadBadge(
                 label: status.displayName,
                 variant: _getBadgeVariant(status),
-                size: BadgeSize.small,
+                size: global_badge.BadgeSize.small,
               ),
             ],
           ),
@@ -79,7 +80,7 @@ class RefundProgress extends StatelessWidget {
           if (status == RefundStatus.processing && progress > 0) ...[
             const SizedBox(height: SwiftleadTokens.spaceS),
             ClipRRect(
-              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusSmall),
+              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
               child: LinearProgressIndicator(
                 value: progress,
                 backgroundColor: Colors.grey.shade300,
@@ -93,16 +94,16 @@ class RefundProgress extends StatelessWidget {
     );
   }
 
-  BadgeVariant _getBadgeVariant(RefundStatus status) {
+  global_badge.BadgeVariant _getBadgeVariant(RefundStatus status) {
     switch (status) {
       case RefundStatus.completed:
-        return BadgeVariant.success;
+        return global_badge.BadgeVariant.success;
       case RefundStatus.failed:
-        return BadgeVariant.error;
+        return global_badge.BadgeVariant.error;
       case RefundStatus.processing:
-        return BadgeVariant.warning;
+        return global_badge.BadgeVariant.warning;
       case RefundStatus.pending:
-        return BadgeVariant.secondary;
+        return global_badge.BadgeVariant.secondary;
     }
   }
 }
@@ -130,79 +131,4 @@ extension RefundStatusExtension on RefundStatus {
   }
 }
 
-/// Helper class for BadgeVariant and SwiftleadBadge
-class SwiftleadBadge extends StatelessWidget {
-  final String label;
-  final BadgeVariant variant;
-  final BadgeSize size;
-
-  const SwiftleadBadge({
-    super.key,
-    required this.label,
-    required this.variant,
-    this.size = BadgeSize.medium,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    Color backgroundColor;
-    Color textColor;
-
-    switch (variant) {
-      case BadgeVariant.primary:
-        backgroundColor = const Color(SwiftleadTokens.primaryTeal);
-        textColor = Colors.white;
-        break;
-      case BadgeVariant.success:
-        backgroundColor = const Color(SwiftleadTokens.successGreen);
-        textColor = Colors.white;
-        break;
-      case BadgeVariant.warning:
-        backgroundColor = const Color(SwiftleadTokens.warningOrange);
-        textColor = Colors.white;
-        break;
-      case BadgeVariant.error:
-        backgroundColor = const Color(SwiftleadTokens.errorRed);
-        textColor = Colors.white;
-        break;
-      case BadgeVariant.secondary:
-        backgroundColor = Colors.grey.shade200;
-        textColor = Colors.grey.shade800;
-        break;
-    }
-
-    final fontSize = size == BadgeSize.small ? 10.0 : 12.0;
-    final padding = size == BadgeSize.small ? 4.0 : 6.0;
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: padding, vertical: 2),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusSmall),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: textColor,
-          fontSize: fontSize,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
-enum BadgeVariant {
-  primary,
-  success,
-  warning,
-  error,
-  secondary,
-}
-
-enum BadgeSize {
-  small,
-  medium,
-  large,
-}
 

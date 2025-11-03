@@ -96,7 +96,7 @@ class RecurringScheduleCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusSmall),
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
                   ),
                   child: Text(
                     frequency.displayName,
