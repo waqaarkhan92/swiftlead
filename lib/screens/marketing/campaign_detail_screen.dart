@@ -10,7 +10,9 @@ import '../../widgets/global/chip.dart';
 import '../../widgets/global/primary_button.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/global/toast.dart';
+import '../../widgets/global/confirmation_dialog.dart';
 import 'campaign_builder_screen.dart';
+import 'campaign_analytics_screen.dart';
 
 /// Campaign Detail Screen - View campaign details and analytics
 /// Exact specification from UI_Inventory_v2.5.1
@@ -30,7 +32,98 @@ class CampaignDetailScreen extends StatefulWidget {
 
 class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
   bool _isLoading = false;
+  bool _isPaused = false;
+  bool _isArchived = false;
   int _selectedTab = 0; // 0 = Overview, 1 = Analytics, 2 = Recipients
+
+  Future<void> _handlePauseCampaign() async {
+    if (_isPaused) {
+      // Resume campaign
+      final confirmed = await SwiftleadConfirmationDialog.show(
+        context: context,
+        title: 'Resume Campaign',
+        description: 'Are you sure you want to resume "${widget.campaignName}"?',
+        primaryActionLabel: 'Resume',
+        secondaryActionLabel: 'Cancel',
+        icon: Icons.play_arrow,
+      );
+
+      if (confirmed == true && mounted) {
+        setState(() {
+          _isPaused = false;
+        });
+        Toast.show(
+          context,
+          message: 'Campaign resumed',
+          type: ToastType.success,
+        );
+      }
+    } else {
+      // Pause campaign
+      final confirmed = await SwiftleadConfirmationDialog.show(
+        context: context,
+        title: 'Pause Campaign',
+        description: 'Are you sure you want to pause "${widget.campaignName}"? The campaign will stop sending messages.',
+        primaryActionLabel: 'Pause',
+        secondaryActionLabel: 'Cancel',
+        icon: Icons.pause,
+      );
+
+      if (confirmed == true && mounted) {
+        setState(() {
+          _isPaused = true;
+        });
+        Toast.show(
+          context,
+          message: 'Campaign paused',
+          type: ToastType.success,
+        );
+      }
+    }
+  }
+
+  Future<void> _handleArchiveCampaign() async {
+    final confirmed = await SwiftleadConfirmationDialog.show(
+      context: context,
+      title: 'Archive Campaign',
+      description: 'Are you sure you want to archive "${widget.campaignName}"? You can restore it later.',
+      primaryActionLabel: 'Archive',
+      secondaryActionLabel: 'Cancel',
+      icon: Icons.archive,
+    );
+
+    if (confirmed == true && mounted) {
+      setState(() {
+        _isArchived = true;
+      });
+      Toast.show(
+        context,
+        message: 'Campaign archived',
+        type: ToastType.success,
+      );
+    }
+  }
+
+  Future<void> _handleDeleteCampaign() async {
+    final confirmed = await SwiftleadConfirmationDialog.show(
+      context: context,
+      title: 'Delete Campaign',
+      description: 'Are you sure you want to permanently delete "${widget.campaignName}"? This action cannot be undone.',
+      primaryActionLabel: 'Delete',
+      secondaryActionLabel: 'Cancel',
+      icon: Icons.warning_rounded,
+      isDestructive: true,
+    );
+
+    if (confirmed == true && mounted) {
+      Toast.show(
+        context,
+        message: 'Campaign deleted',
+        type: ToastType.success,
+      );
+      Navigator.of(context).pop(true); // Return true to signal deletion
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,18 +155,21 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
             onSelected: (value) {
               switch (value) {
                 case 'pause':
-                  // Pause campaign
+                  _handlePauseCampaign();
                   break;
                 case 'archive':
-                  // Archive campaign
+                  _handleArchiveCampaign();
                   break;
                 case 'delete':
-                  // Delete campaign
+                  _handleDeleteCampaign();
                   break;
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'pause', child: Text('Pause')),
+              PopupMenuItem(
+                value: 'pause',
+                child: Text(_isPaused ? 'Resume' : 'Pause'),
+              ),
               const PopupMenuItem(value: 'archive', child: Text('Archive')),
               const PopupMenuItem(value: 'delete', child: Text('Delete')),
             ],
@@ -226,17 +322,37 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Campaign Analytics',
-                style: Theme.of(context).textTheme.headlineSmall,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Campaign Analytics',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CampaignAnalyticsScreen(
+                            campaignId: widget.campaignId,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.open_in_new, size: 18),
+                    label: const Text('View Full Analytics'),
+                  ),
+                ],
               ),
               const SizedBox(height: SwiftleadTokens.spaceM),
               SizedBox(
                 height: 200,
                 child: Center(
                   child: Text(
-                    'Analytics Chart Placeholder',
+                    'Quick Analytics Summary\n(Tap "View Full Analytics" for details)',
                     style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ),

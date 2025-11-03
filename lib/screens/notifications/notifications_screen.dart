@@ -4,6 +4,7 @@ import '../../widgets/global/skeleton_loader.dart';
 import '../../widgets/global/empty_state_card.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/chip.dart';
+import '../../widgets/components/preference_grid.dart';
 import '../../theme/tokens.dart';
 
 /// Notifications Screen - Notification preferences and center
@@ -18,6 +19,18 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   int _selectedTab = 0;
   bool _isLoading = false;
+  
+  // Full notification preferences matrix
+  Map<String, Map<String, bool>> _preferences = {
+    'New Messages': {'Push': true, 'Email': true, 'SMS': false},
+    'Job Updates': {'Push': true, 'Email': true, 'SMS': false},
+    'Payment Received': {'Push': true, 'Email': true, 'SMS': false},
+    'Quote Accepted': {'Push': true, 'Email': false, 'SMS': false},
+    'Booking Reminders': {'Push': true, 'Email': true, 'SMS': true},
+    'Campaign Results': {'Push': false, 'Email': true, 'SMS': false},
+    'Review Requests': {'Push': true, 'Email': true, 'SMS': false},
+    'System Alerts': {'Push': true, 'Email': false, 'SMS': false},
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -61,47 +74,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return ListView(
       padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       children: [
-        FrostedContainer(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Notification Preferences',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: SwiftleadTokens.spaceM),
-              Text(
-                'Choose which notifications you want to receive and how',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: SwiftleadTokens.spaceL),
-              // Preference Grid would go here
-              _NotificationPreferenceRow(
-                title: 'New Messages',
-                channels: ['Push', 'Email', 'SMS'],
-                enabled: true,
-              ),
-              const Divider(),
-              _NotificationPreferenceRow(
-                title: 'Job Updates',
-                channels: ['Push', 'Email'],
-                enabled: true,
-              ),
-              const Divider(),
-              _NotificationPreferenceRow(
-                title: 'Payment Received',
-                channels: ['Push', 'Email'],
-                enabled: true,
-              ),
-              const Divider(),
-              _NotificationPreferenceRow(
-                title: 'Campaign Results',
-                channels: ['Email'],
-                enabled: false,
-              ),
-            ],
-          ),
+        PreferenceGrid(
+          preferences: _preferences,
+          onToggle: (notificationType, channel, value) {
+            setState(() {
+              _preferences[notificationType]![channel] = value;
+            });
+          },
         ),
       ],
     );

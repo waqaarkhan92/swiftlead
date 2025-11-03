@@ -1,5 +1,6 @@
 import '../config/mock_config.dart';
 import '../models/job.dart';
+import '../models/job_timeline_event.dart';
 
 /// Mock Jobs Repository
 /// Provides realistic mock job data for Jobs screen preview
@@ -161,6 +162,35 @@ class MockJobs {
     }
     logMockOperation('Job value by status: $values');
     return values;
+  }
+
+  /// Mark job as complete
+  static Future<bool> markJobComplete(String jobId) async {
+    await simulateDelay();
+    final index = _jobs.indexWhere((j) => j.id == jobId);
+    if (index == -1) {
+      logMockOperation('Job not found: $jobId');
+      return false;
+    }
+    final job = _jobs[index];
+    _jobs[index] = Job(
+      id: job.id,
+      title: job.title,
+      contactId: job.contactId,
+      contactName: job.contactName,
+      serviceType: job.serviceType,
+      description: job.description,
+      status: JobStatus.completed,
+      priority: job.priority,
+      value: job.value,
+      scheduledDate: job.scheduledDate,
+      createdAt: job.createdAt,
+      completedAt: DateTime.now(),
+      address: job.address,
+      assignedTo: job.assignedTo,
+    );
+    logMockOperation('Job marked complete: ${job.title}');
+    return true;
   }
 }
 

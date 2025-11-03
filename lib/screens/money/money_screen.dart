@@ -14,7 +14,12 @@ import 'invoice_detail_screen.dart';
 import 'create_edit_invoice_screen.dart';
 import 'payment_detail_screen.dart';
 import 'money_search_screen.dart';
+import 'recurring_invoices_screen.dart';
+import 'payment_methods_screen.dart';
+import 'deposits_screen.dart';
 import '../../widgets/forms/job_export_sheet.dart';
+import '../../widgets/forms/money_filter_sheet.dart';
+import '../../widgets/components/trend_line_chart.dart';
 import '../../config/mock_config.dart';
 import '../../mock/mock_repository.dart';
 import '../main_navigation.dart' as main_nav;
@@ -30,7 +35,7 @@ class MoneyScreen extends StatefulWidget {
 
 class _MoneyScreenState extends State<MoneyScreen> {
   bool _isLoading = true;
-  int _selectedTab = 0; // 0 = Dashboard, 1 = Invoices, 2 = Quotes, 3 = Payments
+  int _selectedTab = 0; // 0 = Dashboard, 1 = Invoices, 2 = Quotes, 3 = Payments, 4 = Deposits
   String _selectedFilter = 'All';
   final List<String> _filters = ['All', 'Paid', 'Pending', 'Overdue', 'Refunded'];
   String _selectedQuoteFilter = 'All';
@@ -136,6 +141,17 @@ class _MoneyScreenState extends State<MoneyScreen> {
         scaffoldKey: main_nav.MainNavigation.scaffoldKey,
         title: 'Money',
         actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list_outlined),
+            onPressed: () async {
+              final filters = await MoneyFilterSheet.show(
+                context: context,
+              );
+              if (filters != null) {
+                // TODO: Apply filters
+              }
+            },
+          ),
           // Date range filter
           IconButton(
             icon: const Icon(Icons.date_range_outlined),
@@ -198,6 +214,30 @@ class _MoneyScreenState extends State<MoneyScreen> {
                 case 'quote':
                   _handleAddQuote();
                   break;
+                case 'recurring':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const RecurringInvoicesScreen(),
+                    ),
+                  );
+                  break;
+                case 'payment_methods':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PaymentMethodsScreen(),
+                    ),
+                  );
+                  break;
+                case 'deposits':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const DepositsScreen(),
+                    ),
+                  );
+                  break;
               }
             },
             itemBuilder: (BuildContext context) => [
@@ -228,6 +268,37 @@ class _MoneyScreenState extends State<MoneyScreen> {
                     Icon(Icons.description, size: 20),
                     SizedBox(width: 12),
                     Text('Create Quote'),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem<String>(
+                value: 'recurring',
+                child: Row(
+                  children: [
+                    Icon(Icons.repeat, size: 20),
+                    SizedBox(width: 12),
+                    Text('Recurring Invoices'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'payment_methods',
+                child: Row(
+                  children: [
+                    Icon(Icons.credit_card, size: 20),
+                    SizedBox(width: 12),
+                    Text('Payment Methods'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'deposits',
+                child: Row(
+                  children: [
+                    Icon(Icons.payments, size: 20),
+                    SizedBox(width: 12),
+                    Text('Deposits'),
                   ],
                 ),
               ),
@@ -352,7 +423,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
         Padding(
           padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
           child: SegmentedControl(
-            segments: const ['Dashboard', 'Invoices', 'Quotes', 'Payments'],
+            segments: const ['Dashboard', 'Invoices', 'Quotes', 'Payments', 'Deposits'],
             selectedIndex: _selectedTab,
             onSelectionChanged: (index) {
               setState(() => _selectedTab = index);
@@ -369,6 +440,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
               _buildInvoicesTab(),
               _buildQuotesTab(), // Quotes tab
               _buildPaymentsTab(),
+              _buildDepositsTab(),
             ],
           ),
         ),
@@ -509,6 +581,42 @@ class _MoneyScreenState extends State<MoneyScreen> {
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
           _buildPaymentList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDepositsTab() {
+    return RefreshIndicator(
+      onRefresh: () async {
+        await _loadFinancialData();
+      },
+      child: ListView(
+        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+        children: [
+          FrostedContainer(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Deposits',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                const SizedBox(height: SwiftleadTokens.spaceM),
+                Text(
+                  'Manage deposit payments and requests',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: SwiftleadTokens.spaceL),
+                EmptyStateCard(
+                  title: 'No deposits yet',
+                  description: 'Deposits will appear here when requested',
+                  icon: Icons.payment,
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -818,15 +926,54 @@ class _MoneyScreenState extends State<MoneyScreen> {
             ),
           ),
           const SizedBox(height: SwiftleadTokens.spaceL),
-          SizedBox(
-            height: 200,
-            child: Center(
-              child: Text(
-                'Chart will be implemented with fl_chart\n(Tap data points for drill-down, interactive legend)',
-                style: Theme.of(context).textTheme.bodySmall,
-                textAlign: TextAlign.center,
-              ),
-            ),
+          TrendLineChart(
+            title: '',
+            dataPoints: [
+              ChartDataPoint(label: 'Week 1', value: 5000),
+              ChartDataPoint(label: 'Week 2', value: 6200),
+              ChartDataPoint(label: 'Week 3', value: 5800),
+              ChartDataPoint(label: 'Week 4', value: 7500),
+            ],
+            periodData: {
+              '7D': [
+                ChartDataPoint(label: 'D1', value: 800),
+                ChartDataPoint(label: 'D2', value: 950),
+                ChartDataPoint(label: 'D3', value: 720),
+                ChartDataPoint(label: 'D4', value: 1050),
+                ChartDataPoint(label: 'D5', value: 920),
+                ChartDataPoint(label: 'D6', value: 1100),
+                ChartDataPoint(label: 'D7', value: 1250),
+              ],
+              '30D': [
+                ChartDataPoint(label: 'Week 1', value: 5000),
+                ChartDataPoint(label: 'Week 2', value: 6200),
+                ChartDataPoint(label: 'Week 3', value: 5800),
+                ChartDataPoint(label: 'Week 4', value: 7500),
+              ],
+              '90D': [
+                ChartDataPoint(label: 'Month 1', value: 22000),
+                ChartDataPoint(label: 'Month 2', value: 24800),
+                ChartDataPoint(label: 'Month 3', value: 28500),
+              ],
+            },
+            lineColor: const Color(SwiftleadTokens.successGreen),
+            yAxisLabel: '£',
+            onDataPointTap: (point) {
+              // Drill-down: Show detailed breakdown for this period
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('Revenue: ${point.label}'),
+                  content: Text('£${point.value.toStringAsFixed(2)}\n\nTap for detailed breakdown'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close'),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),

@@ -5,6 +5,7 @@ import '../../widgets/global/primary_button.dart';
 import '../../widgets/global/progress_bar.dart';
 import '../../widgets/global/info_banner.dart';
 import '../../theme/tokens.dart';
+import 'contact_import_results_screen.dart';
 
 /// Contact Import Wizard - Multi-step import process
 /// Exact specification from UI_Inventory_v2.5.1
@@ -365,6 +366,24 @@ class _ContactImportWizardScreenState extends State<ContactImportWizardScreen> {
                       Future.delayed(const Duration(seconds: 3), () {
                         if (mounted) {
                           Navigator.of(context).pop();
+                          // Navigate to import results screen
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ContactImportResultsScreen(
+                                importJobId: 'import_${DateTime.now().millisecondsSinceEpoch}',
+                                successCount: 120,
+                                errorCount: 5,
+                                errors: [
+                                  ImportError(rowNumber: 3, message: 'Invalid email format'),
+                                  ImportError(rowNumber: 7, message: 'Duplicate phone number'),
+                                  ImportError(rowNumber: 12, message: 'Missing required field: name'),
+                                  ImportError(rowNumber: 18, message: 'Invalid date format'),
+                                  ImportError(rowNumber: 25, message: 'Phone number too short'),
+                                ],
+                              ),
+                            ),
+                          );
                         }
                       });
                     }

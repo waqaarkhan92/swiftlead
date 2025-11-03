@@ -12,6 +12,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/global/toast.dart';
 import 'create_edit_booking_screen.dart';
 import '../../widgets/forms/on_my_way_sheet.dart';
+import 'reminder_settings_screen.dart';
 
 /// BookingDetailScreen - Comprehensive booking view
 /// Exact specification from UI_Inventory_v2.5.1 and Screen_Layouts_v2.5.1
@@ -65,6 +66,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             icon: const Icon(Icons.more_vert),
             onSelected: (value) {
               switch (value) {
+                case 'reminder_settings':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ReminderSettingsScreen(),
+                    ),
+                  );
+                  break;
                 case 'reschedule':
                   RescheduleSheet.show(
                     context: context,
@@ -93,6 +102,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               }
             },
             itemBuilder: (context) => [
+              const PopupMenuItem(value: 'reminder_settings', child: Text('Reminder Settings')),
+              const PopupMenuDivider(),
               const PopupMenuItem(value: 'reschedule', child: Text('Reschedule')),
               const PopupMenuItem(value: 'cancel', child: Text('Cancel')),
             ],
@@ -128,6 +139,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
         // StatusAndConfirmation
         _buildStatusCard(),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+
+        // Reminder Status
+        _buildReminderStatus(),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+
+        // Booking Notes
+        _buildBookingNotes(),
         const SizedBox(height: SwiftleadTokens.spaceL),
 
         // OnMyWayButton (if applicable)
@@ -449,7 +468,15 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           const SizedBox(height: SwiftleadTokens.spaceM),
           OutlinedButton(
             onPressed: () {
-              // Mark as arrived
+              setState(() {
+                _onMyWay = false;
+                _status = 'In Progress';
+              });
+              Toast.show(
+                context,
+                message: 'Marked as arrived',
+                type: ToastType.success,
+              );
             },
             child: const Text('Mark as Arrived'),
           ),
@@ -506,6 +533,95 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   String _formatTime(DateTime date) {
     return '${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  Widget _buildReminderStatus() {
+    return FrostedContainer(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Reminder Status',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          Row(
+            children: [
+              Icon(
+                Icons.notifications_active,
+                size: 18,
+                color: const Color(SwiftleadTokens.successGreen),
+              ),
+              const SizedBox(width: SwiftleadTokens.spaceS),
+              Expanded(
+                child: Text(
+                  '24h reminder sent',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+              Text(
+                '2 hours ago',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
+          Row(
+            children: [
+              Icon(
+                Icons.notifications_active,
+                size: 18,
+                color: const Color(SwiftleadTokens.warningYellow),
+              ),
+              const SizedBox(width: SwiftleadTokens.spaceS),
+              Expanded(
+                child: Text(
+                  '2h reminder pending',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+              Text(
+                'In 22 hours',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBookingNotes() {
+    return FrostedContainer(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Booking Notes',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              TextButton.icon(
+                onPressed: () {
+                  // Edit notes
+                },
+                icon: const Icon(Icons.edit, size: 18),
+                label: const Text('Edit'),
+              ),
+            ],
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          Text(
+            'Client mentioned that the sink is leaking and making strange noises. Please bring extra washers and check the water pressure.',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -14,6 +14,15 @@ import 'email_configuration_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../support/support_screen.dart';
 import '../main_navigation.dart' as main_nav;
+import 'edit_profile_screen.dart';
+import 'change_password_screen.dart';
+import 'security_settings_screen.dart';
+import 'data_export_screen.dart';
+import 'account_deletion_screen.dart';
+import 'app_preferences_screen.dart';
+import 'invoice_customization_screen.dart';
+import 'subscription_billing_screen.dart';
+import 'custom_fields_manager_screen.dart';
 
 /// Settings Screen - Organization configuration and preferences
 /// Exact specification from Screen_Layouts_v2.5.1 and UI_Inventory_v2.5.1
@@ -29,6 +38,10 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _isLoading = false;
+  String _profileName = 'Alex Johnson';
+  String _profileEmail = 'alex@abcplumbing.co.uk';
+  String _profilePhone = '+44 20 1234 5678';
+  String _profileCompany = 'ABC Plumbing';
   
   ThemeMode get _themeMode => widget.currentThemeMode;
 
@@ -136,18 +149,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         // Edit profile
                       },
                       child: Text(
-                        'Alex Johnson',
+                        _profileName,
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                     ),
                     const SizedBox(height: SwiftleadTokens.spaceXS),
                     Text(
-                      'alex@abcplumbing.co.uk',
+                      _profileEmail,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     const SizedBox(height: SwiftleadTokens.spaceXS),
                     Text(
-                      '+44 20 1234 5678',
+                      _profilePhone,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -158,7 +171,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: SwiftleadTokens.spaceM),
           // OrganisationName
           Text(
-            'ABC Plumbing',
+            _profileCompany,
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: SwiftleadTokens.spaceXS),
@@ -193,12 +206,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _SettingsItem(
               icon: Icons.person_outline,
               label: 'Edit Profile',
-              onTap: () {},
+              onTap: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const EditProfileScreen(),
+                  ),
+                );
+                if (result != null && mounted) {
+                  setState(() {
+                    final data = result as Map<String, dynamic>;
+                    _profileName = data['name'] ?? _profileName;
+                    _profileEmail = data['email'] ?? _profileEmail;
+                    _profilePhone = data['phone'] ?? _profilePhone;
+                    _profileCompany = data['company'] ?? _profileCompany;
+                  });
+                }
+              },
             ),
             _SettingsItem(
               icon: Icons.lock_outline,
               label: 'Change Password',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChangePasswordScreen(),
+                  ),
+                );
+              },
+            ),
+            _SettingsItem(
+              icon: Icons.security,
+              label: 'Security Settings',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SecuritySettingsScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.email_outlined,
@@ -248,6 +296,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const TeamManagementScreen(),
+                  ),
+                );
+              },
+            ),
+            _SettingsItem(
+              icon: Icons.label_outline,
+              label: 'Custom Fields',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CustomFieldsManagerScreen(),
                   ),
                 );
               },
@@ -457,12 +517,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             _SettingsItem(
               icon: Icons.language_outlined,
-              label: 'Language',
+              label: 'App Preferences',
               trailing: Text(
-                'English',
+                'Settings',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AppPreferencesScreen(),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -473,12 +540,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _SettingsItem(
               icon: Icons.download_outlined,
               label: 'Data Export',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DataExportScreen(),
+                  ),
+                );
+              },
+            ),
+            _SettingsItem(
+              icon: Icons.receipt_long_outlined,
+              label: 'Invoice Customization',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const InvoiceCustomizationScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.delete_outline,
-              label: 'Data Deletion',
-              onTap: () {},
+              label: 'Delete Account',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AccountDeletionScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.privacy_tip_outlined,
@@ -526,7 +619,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SubscriptionBillingScreen(),
+                    ),
+                  );
+                },
                 child: const Text('Manage Plan'),
               ),
             ],

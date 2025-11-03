@@ -1,5 +1,6 @@
 import '../config/mock_config.dart';
 import '../models/message.dart';
+import '../models/scheduled_message.dart';
 import 'mock_contacts.dart';
 
 /// Mock Messages Repository
@@ -208,6 +209,8 @@ class MockMessages {
   static final Set<String> _mutedThreadIds = {};
   // Track archived thread IDs
   static final Set<String> _archivedThreadIds = {};
+  // Track pinned thread IDs
+  static final Set<String> _pinnedThreadIds = {'1', '5'}; // Initialize with existing pinned threads
 
   /// Fetch all message threads (excluding archived and blocked)
   static Future<List<MessageThread>> fetchAllThreads() async {
@@ -299,6 +302,17 @@ class MockMessages {
     return _archivedThreadIds.contains(threadId);
   }
 
+  /// Unarchive thread
+  static Future<bool> unarchiveThread(String threadId) async {
+    await simulateDelay();
+    if (_archivedThreadIds.remove(threadId)) {
+      logMockOperation('Unarchived thread: $threadId');
+      // In real implementation, this would update the database
+      return true;
+    }
+    return false;
+  }
+
   /// Delete thread
   static Future<bool> deleteThread(String threadId) async {
     await simulateDelay();
@@ -364,6 +378,78 @@ class MockMessages {
   /// Check if thread is muted
   static bool isThreadMuted(String threadId) {
     return _mutedThreadIds.contains(threadId);
+  }
+
+  /// Pin thread
+  static Future<bool> pinThread(String threadId) async {
+    await simulateDelay();
+    final thread = _threads.where((t) => t.id == threadId).firstOrNull;
+    if (thread != null) {
+      _pinnedThreadIds.add(threadId);
+      logMockOperation('Pinned thread: ${thread.contactName}');
+      return true;
+    }
+    return false;
+  }
+
+  /// Unpin thread
+  static Future<bool> unpinThread(String threadId) async {
+    await simulateDelay();
+    final thread = _threads.where((t) => t.id == threadId).firstOrNull;
+    if (thread != null) {
+      _pinnedThreadIds.remove(threadId);
+      logMockOperation('Unpinned thread: ${thread.contactName}');
+      return true;
+    }
+    return false;
+  }
+
+  /// Check if thread is pinned
+  static bool isThreadPinned(String threadId) {
+    return _pinnedThreadIds.contains(threadId);
+  }
+
+  // Scheduled Messages methods
+  static Future<List<ScheduledMessage>> fetchAllScheduled() async {
+    return MockMessagesScheduled.fetchAllScheduled();
+  }
+
+  static Future<ScheduledMessage> scheduleMessage({
+    required String threadId,
+    String? contactId,
+    required MessageChannel channel,
+    required String content,
+    required DateTime scheduledFor,
+    List<String>? mediaUrls,
+  }) async {
+    return MockMessagesScheduled.scheduleMessage(
+      threadId: threadId,
+      contactId: contactId,
+      channel: channel,
+      content: content,
+      scheduledFor: scheduledFor,
+      mediaUrls: mediaUrls,
+    );
+  }
+
+  static Future<void> updateScheduledMessage(
+    String messageId, {
+    String? content,
+    DateTime? scheduledFor,
+  }) async {
+    return MockMessagesScheduled.updateScheduledMessage(
+      messageId,
+      content: content,
+      scheduledFor: scheduledFor,
+    );
+  }
+
+  static Future<void> deleteScheduledMessage(String messageId) async {
+    return MockMessagesScheduled.deleteScheduledMessage(messageId);
+  }
+
+  static Future<void> cancelScheduledMessage(String messageId) async {
+    return MockMessagesScheduled.cancelScheduledMessage(messageId);
   }
 }
 
@@ -443,6 +529,120 @@ extension MessageChannelExtension on MessageChannel {
         return 'Facebook';
       case MessageChannel.instagram:
         return 'Instagram';
+    }
+  }
+}
+
+// Scheduled Messages - Add to MockMessages class
+extension MockMessagesScheduled on MockMessages {
+  static final List<ScheduledMessage> _scheduledMessages = [
+    ScheduledMessage(
+      id: 'sched1',
+      threadId: '1',
+      contactId: '1',
+      channel: MessageChannel.sms,
+      content: 'Reminder: Your appointment is tomorrow at 2pm.',
+      scheduledFor: DateTime.now().add(const Duration(hours: 18)),
+      createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+      status: ScheduledMessageStatus.pending,
+    ),
+    ScheduledMessage(
+      id: 'sched2',
+      threadId: '2',
+      contactId: '2',
+      channel: MessageChannel.whatsapp,
+      content: 'Thank you for your inquiry! We\'ll get back to you soon.',
+      scheduledFor: DateTime.now().add(const Duration(days: 1)),
+      createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+      status: ScheduledMessageStatus.pending,
+    ),
+  ];
+
+  /// Fetch all scheduled messages
+  static Future<List<ScheduledMessage>> fetchAllScheduled() async {
+    await simulateDelay();
+    logMockOperation('Fetched ${_scheduledMessages.length} scheduled messages');
+    return List.from(_scheduledMessages);
+  }
+
+  /// Schedule a message
+  static Future<ScheduledMessage> scheduleMessage({
+    required String threadId,
+    String? contactId,
+    required MessageChannel channel,
+    required String content,
+    required DateTime scheduledFor,
+    List<String>? mediaUrls,
+  }) async {
+    await simulateDelay();
+    final message = ScheduledMessage(
+      id: 'sched_${DateTime.now().millisecondsSinceEpoch}',
+      threadId: threadId,
+      contactId: contactId,
+      channel: channel,
+      content: content,
+      scheduledFor: scheduledFor,
+      createdAt: DateTime.now(),
+      status: ScheduledMessageStatus.pending,
+      mediaUrls: mediaUrls,
+    );
+    _scheduledMessages.add(message);
+    logMockOperation('Scheduled message for ${scheduledFor.toString()}');
+    return message;
+  }
+
+  /// Update scheduled message
+  static Future<void> updateScheduledMessage(
+    String messageId, {
+    String? content,
+    DateTime? scheduledFor,
+  }) async {
+    await simulateDelay();
+    final index = _scheduledMessages.indexWhere((m) => m.id == messageId);
+    if (index != -1) {
+      final existing = _scheduledMessages[index];
+      _scheduledMessages[index] = ScheduledMessage(
+        id: existing.id,
+        threadId: existing.threadId,
+        contactId: existing.contactId,
+        channel: existing.channel,
+        content: content ?? existing.content,
+        scheduledFor: scheduledFor ?? existing.scheduledFor,
+        createdAt: existing.createdAt,
+        status: existing.status,
+        mediaUrls: existing.mediaUrls,
+        sentAt: existing.sentAt,
+      );
+      logMockOperation('Updated scheduled message: $messageId');
+    }
+  }
+
+  /// Delete scheduled message
+  static Future<void> deleteScheduledMessage(String messageId) async {
+    await simulateDelay();
+    _scheduledMessages.removeWhere((m) => m.id == messageId);
+    logMockOperation('Deleted scheduled message: $messageId');
+  }
+
+  /// Cancel scheduled message
+  static Future<void> cancelScheduledMessage(String messageId) async {
+    await simulateDelay();
+    final index = _scheduledMessages.indexWhere((m) => m.id == messageId);
+    if (index != -1) {
+      final existing = _scheduledMessages[index];
+      _scheduledMessages[index] = ScheduledMessage(
+        id: existing.id,
+        threadId: existing.threadId,
+        contactId: existing.contactId,
+        channel: existing.channel,
+        content: existing.content,
+        scheduledFor: existing.scheduledFor,
+        createdAt: existing.createdAt,
+        status: ScheduledMessageStatus.cancelled,
+        mediaUrls: existing.mediaUrls,
+        sentAt: existing.sentAt,
+      );
+      logMockOperation('Cancelled scheduled message: $messageId');
     }
   }
 }

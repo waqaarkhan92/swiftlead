@@ -7,6 +7,7 @@ import '../../widgets/global/search_bar.dart';
 import '../../widgets/global/chip.dart';
 import '../../widgets/global/primary_button.dart';
 import '../../theme/tokens.dart';
+import 'service_editor_screen.dart';
 
 /// Service Catalog Screen - Browse and select services for bookings
 /// Exact specification from UI_Inventory_v2.5.1
@@ -107,6 +108,21 @@ class _ServiceCatalogScreenState extends State<ServiceCatalogScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ServiceEditorScreen(),
+                ),
+              ).then((_) {
+                setState(() {});
+              });
+            },
+          ),
+        ],
       ),
       body: _isLoading
           ? _buildLoadingState()
@@ -140,7 +156,15 @@ class _ServiceCatalogScreenState extends State<ServiceCatalogScreen> {
         icon: Icons.search_off,
         actionLabel: 'Add Service',
         onAction: () {
-          // Navigate to service editor
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ServiceEditorScreen(),
+            ),
+          ).then((_) {
+            // Reload services if needed
+            setState(() {});
+          });
         },
       );
     }

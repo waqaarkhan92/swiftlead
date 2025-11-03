@@ -13,11 +13,15 @@ import '../../widgets/forms/job_assignment_sheet.dart';
 import '../../widgets/forms/job_export_sheet.dart';
 import '../../widgets/forms/media_upload_sheet.dart';
 import '../../widgets/global/confirmation_dialog.dart';
+import '../../widgets/components/chase_history_timeline.dart';
+import '../../widgets/global/info_banner.dart';
 import '../../widgets/global/toast.dart';
 import '../../widgets/global/progress_bar.dart';
 import '../../theme/tokens.dart';
 import '../../models/job.dart';
+import '../../models/job_timeline_event.dart';
 import '../../mock/mock_repository.dart';
+import '../../mock/mock_jobs.dart';
 import '../../config/mock_config.dart';
 import 'create_edit_job_screen.dart';
 import '../quotes/create_edit_quote_screen.dart';
@@ -42,7 +46,7 @@ class JobDetailScreen extends StatefulWidget {
 
 class _JobDetailScreenState extends State<JobDetailScreen> {
   int _selectedTabIndex = 0;
-  final List<String> _tabs = ['Timeline', 'Details', 'Notes', 'Messages', 'Media'];
+  final List<String> _tabs = ['Timeline', 'Details', 'Notes', 'Messages', 'Media', 'Chasers'];
   Job? _job;
   bool _isLoading = true;
   String? _error;
@@ -166,6 +170,53 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     );
   }
 
+  Future<void> _handleMarkComplete() async {
+    if (_job == null) return;
+    
+    final confirmed = await SwiftleadConfirmationDialog.show(
+      context: context,
+      title: 'Mark Job Complete',
+      description: 'Are you sure you want to mark "${_job!.title}" as complete?',
+      primaryActionLabel: 'Mark Complete',
+      secondaryActionLabel: 'Cancel',
+      icon: Icons.check_circle,
+    );
+    
+    if (confirmed != true) return;
+    
+    final success = await MockJobs.markJobComplete(_job!.id);
+    if (success && mounted) {
+      // Show celebration
+      _showCelebration();
+      // Reload job to show updated status
+      await _loadJob();
+      Toast.show(
+        context,
+        message: 'Job marked as complete! 🎉',
+        type: ToastType.success,
+      );
+    } else if (mounted) {
+      Toast.show(
+        context,
+        message: 'Failed to mark job as complete',
+        type: ToastType.error,
+      );
+    }
+  }
+
+  void _showCelebration() {
+    // Simple celebration overlay with animated emojis
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.3),
+      barrierDismissible: false,
+      builder: (context) => const _CelebrationDialog(),
+    );
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) Navigator.of(context).pop();
+    });
+  }
+
   void _handleCallClient() async {
     if (_job == null) return;
     // TODO: Get phone number from contact
@@ -262,7 +313,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   JobExportSheet.show(
                     context: context,
                     onExportComplete: (format) {
-                      // Handle export completion
+                      Toast.show(
+                        context,
+                        message: 'Job exported as ${format.toUpperCase()}',
+                        type: ToastType.success,
+                      );
                     },
                   );
                   break;
@@ -296,15 +351,25 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           ),
         ],
       ),
-      body: ListView(
+      body: Column(
         children: [
-          // JobSummaryCard - Key information at top
-          _buildJobSummaryCard(),
+          // Scrollable header section
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // JobSummaryCard - Key information at top
+                  _buildJobSummaryCard(),
+                  
+                  // ActionButtonsRow - Sticky on scroll
+                  _buildActionButtonsRow(),
+                ],
+              ),
+            ),
+          ),
           
-          // ActionButtonsRow - Sticky on scroll
-          _buildActionButtonsRow(),
-          
-          // JobTabView - Horizontal tabs
+          // JobTabView - Horizontal tabs (fixed at bottom)
           _buildJobTabView(),
         ],
       ),
@@ -445,28 +510,33 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         horizontal: SwiftleadTokens.spaceM,
         vertical: SwiftleadTokens.spaceS,
       ),
-      child: Wrap(
-        spacing: SwiftleadTokens.spaceS,
-        runSpacing: SwiftleadTokens.spaceS,
+      child: Column(
         children: [
-          OutlinedButton.icon(
-            onPressed: _handleMessageClient,
-            icon: const Icon(Icons.message),
-            label: const Text('Message Client'),
+          Wrap(
+            spacing: SwiftleadTokens.spaceS,
+            runSpacing: SwiftleadTokens.spaceS,
+            children: [
+              OutlinedButton.icon(
+                onPressed: _handleMessageClient,
+                icon: const Icon(Icons.message),
+                label: const Text('Message Client'),
+              ),
+              OutlinedButton.icon(
+                onPressed: _handleCreateQuoteFromJob,
+                icon: const Icon(Icons.request_quote),
+                label: const Text('Send Quote'),
+              ),
+              OutlinedButton.icon(
+                onPressed: _handleSendInvoiceFromJob,
+                icon: const Icon(Icons.receipt),
+                label: const Text('Send Invoice'),
+              ),
+            ],
           ),
-          OutlinedButton.icon(
-            onPressed: _handleCreateQuoteFromJob,
-            icon: const Icon(Icons.request_quote),
-            label: const Text('Send Quote'),
-          ),
-          OutlinedButton.icon(
-            onPressed: _handleSendInvoiceFromJob,
-            icon: const Icon(Icons.receipt),
-            label: const Text('Send Invoice'),
-          ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
           PrimaryButton(
             label: 'Mark Complete',
-            onPressed: () {},
+            onPressed: _job != null && _job!.status != JobStatus.completed ? _handleMarkComplete : null,
             icon: Icons.check_circle,
           ),
         ],
@@ -489,16 +559,20 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           ),
         ),
         
-        // Tab content
-        IndexedStack(
-          index: _selectedTabIndex,
-          children: [
-            _buildTimelineTab(),
-            _buildDetailsTab(),
-            _buildNotesTab(),
-            _buildMessagesTab(),
-            _buildMediaTab(),
-          ],
+        // Tab content - Use IndexedStack with fixed height
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.5,
+          child: IndexedStack(
+            index: _selectedTabIndex,
+            children: [
+              _buildTimelineTab(),
+              _buildDetailsTab(),
+              _buildNotesTab(),
+              _buildMessagesTab(),
+              _buildMediaTab(),
+              _buildChasersTab(),
+            ],
+          ),
         ),
         const SizedBox(height: 96), // Bottom padding for nav bar
       ],
@@ -506,9 +580,17 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   Widget _buildTimelineTab() {
-    final hasActivity = true; // Replace with actual data check
+    // Show loading state if job not loaded yet
+    if (_isLoading || _job == null) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+    
+    // Generate timeline events from job data
+    final timelineEvents = _generateTimelineEvents();
 
-    if (!hasActivity) {
+    if (timelineEvents.isEmpty) {
       return EmptyStateCard(
         title: 'No activity yet',
         description: 'Activity timeline will show job updates and events.',
@@ -517,60 +599,95 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     }
 
     return ListView(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       children: [
-        ...List.generate(5, (index) => Padding(
+        ...timelineEvents.map((event) => Padding(
           padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
           child: _TimelineItem(
-            icon: _getTimelineIcon(index),
-            title: _getTimelineTitle(index),
-            subtitle: _getTimelineSubtitle(index),
-            timestamp: DateTime.now().subtract(Duration(hours: index * 3)),
-            user: _getTimelineUser(index),
+            icon: event.eventType.icon,
+            title: event.summary,
+            subtitle: event.eventId != null ? 'ID: ${event.eventId}' : event.eventType.displayName,
+            timestamp: event.timestamp,
+            user: event.userName ?? 'System',
           ),
         )),
       ],
     );
   }
 
-  IconData _getTimelineIcon(int index) {
-    final icons = [
-      Icons.check_circle,
-      Icons.assignment,
-      Icons.camera_alt,
-      Icons.message,
-      Icons.person_add,
-    ];
-    return icons[index % icons.length];
-  }
-
-  String _getTimelineTitle(int index) {
-    final titles = [
-      'Job marked complete',
-      'Invoice sent',
-      'Photos uploaded',
-      'Message sent to client',
-      'Assigned to team member',
-    ];
-    return titles[index % titles.length];
-  }
-
-  String _getTimelineSubtitle(int index) {
-    final subtitles = [
-      'Job completed successfully',
-      'Invoice #INV-1234',
-      '3 photos added',
-      'Check-in message sent',
-      'Sarah Williams',
-    ];
-    return subtitles[index % subtitles.length];
-  }
-
-  String _getTimelineUser(int index) {
-    final users = ['Alex Johnson', 'System', 'Alex Johnson', 'System', 'System'];
-    return users[index % users.length];
+  List<JobTimelineEvent> _generateTimelineEvents() {
+    if (_job == null) return [];
+    
+    final events = <JobTimelineEvent>[];
+    final now = DateTime.now();
+    
+    // Safe substring helper
+    String safeSubstring(String str, int length) {
+      return str.length >= length ? str.substring(0, length) : str;
+    }
+    
+    // Add events based on job status and history
+    if (_job!.status == JobStatus.completed && _job!.completedAt != null) {
+      events.add(JobTimelineEvent(
+        id: 'e1',
+        jobId: _job!.id,
+        eventType: JobTimelineEventType.statusChange,
+        summary: 'Job marked as complete',
+        timestamp: _job!.completedAt!,
+        userName: 'Alex Johnson',
+      ));
+    }
+    
+    // Add invoice event if job has value
+    if (_job!.value > 0) {
+      events.add(JobTimelineEvent(
+        id: 'e2',
+        jobId: _job!.id,
+        eventType: JobTimelineEventType.invoice,
+        eventId: 'INV-${safeSubstring(_job!.id, 8)}',
+        summary: 'Invoice created',
+        timestamp: now.subtract(const Duration(days: 2)),
+        userName: 'System',
+      ));
+    }
+    
+    // Add booking event if scheduled
+    if (_job!.scheduledDate != null) {
+      events.add(JobTimelineEvent(
+        id: 'e3',
+        jobId: _job!.id,
+        eventType: JobTimelineEventType.booking,
+        summary: 'Booking scheduled',
+        timestamp: _job!.scheduledDate!,
+        userName: 'System',
+      ));
+    }
+    
+    // Add message event
+    events.add(JobTimelineEvent(
+      id: 'e4',
+      jobId: _job!.id,
+      eventType: JobTimelineEventType.message,
+      summary: 'Message sent to client',
+      timestamp: now.subtract(const Duration(hours: 6)),
+      userName: 'Alex Johnson',
+    ));
+    
+    // Add quote event
+    events.add(JobTimelineEvent(
+      id: 'e5',
+      jobId: _job!.id,
+      eventType: JobTimelineEventType.quote,
+      eventId: 'QUO-${safeSubstring(_job!.id, 8)}',
+      summary: 'Quote sent to client',
+      timestamp: now.subtract(const Duration(days: 5)),
+      userName: 'System',
+    ));
+    
+    // Sort by timestamp descending (most recent first)
+    events.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    
+    return events;
   }
 
   Widget _buildNotesTab() {
@@ -679,11 +796,45 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       child: ListView(
         padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
         children: [
+          // Rich text formatting toolbar (basic)
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.format_bold, size: 20),
+                onPressed: () {
+                  // TODO: Toggle bold formatting
+                },
+                tooltip: 'Bold',
+              ),
+              IconButton(
+                icon: const Icon(Icons.format_italic, size: 20),
+                onPressed: () {
+                  // TODO: Toggle italic formatting
+                },
+                tooltip: 'Italic',
+              ),
+              IconButton(
+                icon: const Icon(Icons.link, size: 20),
+                onPressed: () {
+                  // TODO: Add link
+                },
+                tooltip: 'Add Link',
+              ),
+              IconButton(
+                icon: const Icon(Icons.alternate_email, size: 20),
+                onPressed: () {
+                  // TODO: Mention user (@username)
+                },
+                tooltip: 'Mention',
+              ),
+            ],
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
           TextField(
             controller: noteController,
             maxLines: 8,
             decoration: InputDecoration(
-              hintText: 'Enter your note...',
+              hintText: 'Enter your note... Use @ to mention team members.',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
               ),
@@ -706,8 +857,6 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
   Widget _buildDetailsTab() {
     return ListView(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       children: [
         FrostedContainer(
@@ -761,6 +910,48 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               Text(
                 'Kitchen sink is leaking from the base. Needs repair or replacement of faucet assembly.',
                 style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceM),
+        // Custom Fields Section
+        FrostedContainer(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Custom Fields',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add, size: 20),
+                    onPressed: () {
+                      // TODO: Add custom field
+                    },
+                    tooltip: 'Add custom field',
+                  ),
+                ],
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              // Example custom fields
+              _CustomFieldRow(
+                label: 'Property Type',
+                value: 'Residential',
+              ),
+              const Divider(),
+              _CustomFieldRow(
+                label: 'Warranty Period',
+                value: '12 months',
+              ),
+              const Divider(),
+              _CustomFieldRow(
+                label: 'License Required',
+                value: 'Yes',
               ),
             ],
           ),
@@ -887,6 +1078,15 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           ],
         ),
         const SizedBox(height: SwiftleadTokens.spaceM),
+        
+        // Before Section
+        Text(
+          'Before',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceS),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -895,9 +1095,36 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             crossAxisSpacing: SwiftleadTokens.spaceS,
             mainAxisSpacing: SwiftleadTokens.spaceS,
           ),
-          itemCount: 9, // Example
+          itemCount: 4, // Before photos
           itemBuilder: (context, index) => MediaThumbnail(
-            label: 'Photo ${index + 1}',
+            label: 'Before ${index + 1}',
+            onTap: () {
+              // Open full screen gallery
+            },
+          ),
+        ),
+        
+        const SizedBox(height: SwiftleadTokens.spaceL),
+        
+        // After Section
+        Text(
+          'After',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceS),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: SwiftleadTokens.spaceS,
+            mainAxisSpacing: SwiftleadTokens.spaceS,
+          ),
+          itemCount: 5, // After photos
+          itemBuilder: (context, index) => MediaThumbnail(
+            label: 'After ${index + 1}',
             onTap: () {
               // Open full screen gallery
             },
@@ -946,6 +1173,57 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildChasersTab() {
+    // Mock quote chaser records - according to spec: quote_chasers WHERE job_id
+    // Quote chasers are automated follow-ups sent at T+1, T+3, T+7 days after quote sent
+    final chaseRecords = [
+      ChaseRecord(
+        message: 'Quote chaser sent via email (T+1 day)',
+        timestamp: DateTime.now().subtract(const Duration(days: 2)),
+        status: ChaseStatus.sent,
+        channel: ChaseChannel.email,
+      ),
+      ChaseRecord(
+        message: 'Quote chaser sent via SMS (T+3 days)',
+        timestamp: DateTime.now().subtract(const Duration(days: 1)),
+        status: ChaseStatus.delivered,
+        channel: ChaseChannel.sms,
+      ),
+      ChaseRecord(
+        message: 'Quote chaser scheduled (T+7 days)',
+        timestamp: DateTime.now().add(const Duration(days: 4)),
+        status: ChaseStatus.sent,
+        channel: ChaseChannel.email,
+      ),
+    ];
+
+    return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      children: [
+        // Empty state check - according to spec: "No chasers scheduled" + InfoBanner
+        if (chaseRecords.isEmpty)
+          Column(
+            children: [
+              EmptyStateCard(
+                title: 'No chasers scheduled',
+                description: 'Auto-follow-ups help close deals',
+                icon: Icons.schedule,
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              InfoBanner(
+                message: 'Auto-follow-ups help close deals',
+                type: InfoBannerType.info,
+              ),
+            ],
+          )
+        else
+          ChaseHistoryTimeline(chaseRecords: chaseRecords),
+      ],
     );
   }
 }
@@ -1174,6 +1452,139 @@ class _MessageCard extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildChasersTab() {
+    // Mock quote chaser records - according to spec: quote_chasers WHERE job_id
+    // Quote chasers are automated follow-ups sent at T+1, T+3, T+7 days after quote sent
+    final chaseRecords = [
+      ChaseRecord(
+        message: 'Quote chaser sent via email (T+1 day)',
+        timestamp: DateTime.now().subtract(const Duration(days: 2)),
+        status: ChaseStatus.sent,
+        channel: ChaseChannel.email,
+      ),
+      ChaseRecord(
+        message: 'Quote chaser sent via SMS (T+3 days)',
+        timestamp: DateTime.now().subtract(const Duration(days: 1)),
+        status: ChaseStatus.delivered,
+        channel: ChaseChannel.sms,
+      ),
+      ChaseRecord(
+        message: 'Quote chaser scheduled (T+7 days)',
+        timestamp: DateTime.now().add(const Duration(days: 4)),
+        status: ChaseStatus.sent,
+        channel: ChaseChannel.email,
+      ),
+    ];
+
+    return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      children: [
+        // Empty state check - according to spec: "No chasers scheduled" + InfoBanner
+        if (chaseRecords.isEmpty)
+          Column(
+            children: [
+              EmptyStateCard(
+                title: 'No chasers scheduled',
+                description: 'Auto-follow-ups help close deals',
+                icon: Icons.schedule,
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              InfoBanner(
+                message: 'Auto-follow-ups help close deals',
+                type: InfoBannerType.info,
+              ),
+            ],
+          )
+        else
+          ChaseHistoryTimeline(chaseRecords: chaseRecords),
+      ],
+    );
+  }
+}
+
+/// Celebration Dialog - Shows confetti-like celebration animation
+class _CelebrationDialog extends StatefulWidget {
+  const _CelebrationDialog();
+
+  @override
+  State<_CelebrationDialog> createState() => _CelebrationDialogState();
+}
+
+class _CelebrationDialogState extends State<_CelebrationDialog>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: Container(
+              padding: const EdgeInsets.all(40),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 20,
+                    spreadRadius: 5,
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    '🎉',
+                    style: TextStyle(fontSize: 80),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Job Complete!',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: const Color(SwiftleadTokens.primaryTeal),
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
 
 class _KeyMetricItem extends StatelessWidget {
@@ -1199,6 +1610,42 @@ class _KeyMetricItem extends StatelessWidget {
           value,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CustomFieldRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _CustomFieldRow({
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).textTheme.bodySmall?.color,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.right,
           ),
         ),
       ],

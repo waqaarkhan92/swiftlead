@@ -231,6 +231,44 @@ class MockPayments {
     logMockOperation('Revenue stats: Total £${stats.totalRevenue}, This month £${stats.thisMonthRevenue}');
     return stats;
   }
+
+  /// Mark invoice as paid
+  static Future<bool> markInvoicePaid(String invoiceId) async {
+    await simulateDelay();
+    final index = _invoices.indexWhere((i) => i.id == invoiceId);
+    if (index == -1) {
+      logMockOperation('Invoice not found: $invoiceId');
+      return false;
+    }
+    final invoice = _invoices[index];
+    _invoices[index] = Invoice(
+      id: invoice.id,
+      contactId: invoice.contactId,
+      contactName: invoice.contactName,
+      amount: invoice.amount,
+      status: InvoiceStatus.paid,
+      dueDate: invoice.dueDate,
+      paidDate: DateTime.now(),
+      serviceDescription: invoice.serviceDescription,
+      items: invoice.items,
+      createdAt: invoice.createdAt,
+    );
+    logMockOperation('Invoice marked paid: ${invoice.id}');
+    return true;
+  }
+
+  /// Delete invoice
+  static Future<bool> deleteInvoice(String invoiceId) async {
+    await simulateDelay();
+    final index = _invoices.indexWhere((i) => i.id == invoiceId);
+    if (index == -1) {
+      logMockOperation('Invoice not found: $invoiceId');
+      return false;
+    }
+    _invoices.removeAt(index);
+    logMockOperation('Invoice deleted: $invoiceId');
+    return true;
+  }
 }
 
 /// Invoice model

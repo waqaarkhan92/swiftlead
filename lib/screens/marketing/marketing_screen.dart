@@ -9,6 +9,7 @@ import '../../widgets/global/bottom_sheet.dart';
 import '../../theme/tokens.dart';
 import 'campaign_detail_screen.dart';
 import 'campaign_builder_screen.dart';
+import 'landing_page_builder_screen.dart';
 import '../main_navigation.dart' as main_nav;
 
 /// Marketing Screen - Campaign list and management
@@ -45,9 +46,45 @@ class _MarketingScreenState extends State<MarketingScreen> {
             icon: const Icon(Icons.filter_list_outlined),
             onPressed: () => _showFilterSheet(context),
           ),
-          IconButton(
+          PopupMenuButton<String>(
             icon: const Icon(Icons.add),
-            onPressed: () => _showCreateCampaignSheet(context),
+            onSelected: (value) {
+              switch (value) {
+                case 'campaign':
+                  _showCreateCampaignSheet(context);
+                  break;
+                case 'landing_page':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LandingPageBuilderScreen(),
+                    ),
+                  );
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'campaign',
+                child: Row(
+                  children: [
+                    Icon(Icons.campaign, size: 20),
+                    SizedBox(width: SwiftleadTokens.spaceS),
+                    Text('Create Campaign'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'landing_page',
+                child: Row(
+                  children: [
+                    Icon(Icons.landscape, size: 20),
+                    SizedBox(width: SwiftleadTokens.spaceS),
+                    Text('Create Landing Page'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

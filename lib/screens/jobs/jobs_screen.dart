@@ -159,12 +159,20 @@ class _JobsScreenState extends State<JobsScreen> {
 
   int _countActiveFilters(JobsFilters filters) {
     int count = 0;
-    if (!filters.statusFilters.contains('All') || filters.statusFilters.length > 1) {
-      count += filters.statusFilters.length - (filters.statusFilters.contains('All') ? 1 : 0);
+    // Count status filters (excluding 'All')
+    if (filters.statusFilters.isNotEmpty && !filters.statusFilters.contains('All')) {
+      count += filters.statusFilters.length;
+    } else if (filters.statusFilters.length > 1) {
+      // If 'All' is present but there are other filters, count the others
+      count += filters.statusFilters.length - 1;
     }
-    if (!filters.serviceTypeFilters.contains('All') || filters.serviceTypeFilters.length > 1) {
-      count += filters.serviceTypeFilters.length - (filters.serviceTypeFilters.contains('All') ? 1 : 0);
+    // Count service type filters (excluding 'All')
+    if (filters.serviceTypeFilters.isNotEmpty && !filters.serviceTypeFilters.contains('All')) {
+      count += filters.serviceTypeFilters.length;
+    } else if (filters.serviceTypeFilters.length > 1) {
+      count += filters.serviceTypeFilters.length - 1;
     }
+    // Count date range filter
     if (filters.dateRange != 'All Time') {
       count++;
     }
@@ -288,16 +296,21 @@ class _JobsScreenState extends State<JobsScreen> {
                   );
                   print('[JOBS FILTER] Filter sheet returned: ${filters?.statusFilters} | ${filters?.serviceTypeFilters} | ${filters?.dateRange}');
                   if (filters != null && mounted) {
-                    // Always apply filters, even if they're defaults
                     setState(() {
                       _currentFilters = filters;
                       _activeFilters = _countActiveFilters(filters);
-                      print('[JOBS FILTER] Setting filters: activeFilters=$_activeFilters');
-                      // Always reapply filters
+                      print('[JOBS FILTER] Setting filters: activeFilters=$_activeFilters, status=${filters.statusFilters}, serviceType=${filters.serviceTypeFilters}, dateRange=${filters.dateRange}');
                       _applyFilter();
                     });
                   } else if (filters == null && _currentFilters != null && mounted) {
-                    // Clear filters if user cancelled or cleared
+                    // Clear filters if user cancelled
+                    setState(() {
+                      _currentFilters = null;
+                      _activeFilters = 0;
+                      _applyFilter();
+                    });
+                  } else if (filters != null && _countActiveFilters(filters) == 0 && mounted) {
+                    // Filters were cleared (all set to 'All')
                     setState(() {
                       _currentFilters = null;
                       _activeFilters = 0;

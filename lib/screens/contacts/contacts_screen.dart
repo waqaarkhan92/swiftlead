@@ -5,13 +5,18 @@ import '../../widgets/global/empty_state_card.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/search_bar.dart';
 import '../../widgets/global/chip.dart';
-import '../../widgets/global/badge.dart';
 import '../../widgets/global/bottom_sheet.dart';
 import '../../theme/tokens.dart';
+import '../../mock/mock_contacts.dart';
+import '../../models/contact.dart';
 import 'contact_detail_screen.dart';
 import 'contact_import_wizard_screen.dart';
 import 'contact_export_builder_screen.dart';
+import 'create_edit_contact_screen.dart';
+import 'duplicate_detector_screen.dart';
+import 'segments_screen.dart';
 import '../main_navigation.dart' as main_nav;
+import '../../widgets/forms/contacts_filter_sheet.dart';
 
 /// Contacts Screen - Contact list view with search and filters
 /// Exact specification from UI_Inventory_v2.5.1
@@ -26,13 +31,26 @@ class _ContactsScreenState extends State<ContactsScreen> {
   bool _isLoading = true;
   final TextEditingController _searchController = TextEditingController();
   String _selectedFilter = 'All';
+  List<Contact> _contacts = [];
+  List<Contact> _filteredContacts = [];
+  ContactsFilters? _currentFilters;
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted) setState(() => _isLoading = false);
-    });
+    _loadContacts();
+  }
+
+  Future<void> _loadContacts() async {
+    setState(() => _isLoading = true);
+    final contacts = await MockContacts.fetchAll();
+    if (mounted) {
+      setState(() {
+        _contacts = contacts;
+        _filteredContacts = contacts;
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -68,6 +86,22 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     ),
                   );
                   break;
+                case 'duplicates':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const DuplicateDetectorScreen(),
+                    ),
+                  );
+                  break;
+                case 'segments':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SegmentsScreen(),
+                    ),
+                  );
+                  break;
               }
             },
             itemBuilder: (context) => [
@@ -88,6 +122,27 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     Icon(Icons.download, size: 20),
                     SizedBox(width: SwiftleadTokens.spaceS),
                     Text('Export Contacts'),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                value: 'duplicates',
+                child: Row(
+                  children: [
+                    Icon(Icons.find_in_page, size: 20),
+                    SizedBox(width: SwiftleadTokens.spaceS),
+                    Text('Find Duplicates'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'segments',
+                child: Row(
+                  children: [
+                    Icon(Icons.category, size: 20),
+                    SizedBox(width: SwiftleadTokens.spaceS),
+                    Text('Segments'),
                   ],
                 ),
               ),
@@ -158,113 +213,134 @@ class _ContactsScreenState extends State<ContactsScreen> {
           const SizedBox(height: SwiftleadTokens.spaceM),
           
           // Contact List
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: 10, // Example
-            itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
-              child: _ContactCard(
-                contactName: _getContactName(index),
-                contactEmail: _getContactEmail(index),
-                stage: _getStage(index),
-                score: _getScore(index),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ContactDetailScreen(
-                        contactId: 'contact_$index',
-                      ),
-                    ),
-                  );
-                },
-              ),
+          if (_filteredContacts.isEmpty)
+            EmptyStateCard(
+              title: 'No contacts found',
+              description: _currentFilters != null 
+                  ? 'No contacts match the selected filters'
+                  : 'Add your first contact to get started',
+              icon: Icons.people_outline,
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _filteredContacts.length,
+              itemBuilder: (context, index) {
+                final contact = _filteredContacts[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+                  child: _ContactCard(
+                    contactName: contact.name,
+                    contactEmail: contact.email ?? 'No email',
+                    stage: contact.stage.displayName,
+                    score: contact.score,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ContactDetailScreen(
+                            contactId: contact.id,
+                          ),
+                        ),
+                      ).then((result) {
+                        if (result == true) {
+                          _loadContacts(); // Refresh list if contact was updated
+                        }
+                      });
+                    },
+                  ),
+                );
+              },
             ),
-          ),
         ],
       ),
     );
   }
 
-  void _showFilterSheet(BuildContext context) {
-    SwiftleadBottomSheet.show(
+  void _showFilterSheet(BuildContext context) async {
+    final filters = await ContactsFilterSheet.show(
       context: context,
-      title: 'Filter Contacts',
-      height: SheetHeight.half,
-      child: ListView(
-        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-        children: [
-          // Filter options would go here
-          Text(
-            'Filter options:\n- Stage\n- Score\n- Source\n- Date Range\n- Tags',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ],
+    );
+    if (filters != null) {
+      // Apply filters to contact list
+      _applyFilters(filters);
+    }
+  }
+
+  void _applyFilters(ContactsFilters filters) {
+    setState(() {
+      _currentFilters = filters;
+      _filteredContacts = _contacts.where((contact) {
+        // Stage filter
+        if (filters.stageFilters.isNotEmpty) {
+          if (!filters.stageFilters.contains(contact.stage)) {
+            return false;
+          }
+        }
+        
+        // Score filter
+        if (filters.scoreFilters.isNotEmpty) {
+          bool matchesScore = false;
+          for (final scoreFilter in filters.scoreFilters) {
+            if (scoreFilter == 'Hot (80+)' && contact.score >= 80) {
+              matchesScore = true;
+              break;
+            } else if (scoreFilter == 'Warm (60-79)' && contact.score >= 60 && contact.score < 80) {
+              matchesScore = true;
+              break;
+            } else if (scoreFilter == 'Cold (<60)' && contact.score < 60) {
+              matchesScore = true;
+              break;
+            }
+          }
+          if (!matchesScore) return false;
+        }
+        
+        // Source filter
+        if (filters.sourceFilters.isNotEmpty) {
+          if (contact.source == null || !filters.sourceFilters.contains(contact.source)) {
+            return false;
+          }
+        }
+        
+        // Tag filter
+        if (filters.tagFilters.isNotEmpty) {
+          bool hasTag = false;
+          for (final tag in filters.tagFilters) {
+            if (contact.tags.contains(tag)) {
+              hasTag = true;
+              break;
+            }
+          }
+          if (!hasTag) return false;
+        }
+        
+        return true;
+      }).toList();
+    });
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${_filteredContacts.length} contact(s) match filters'),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
 
   void _showAddContactSheet(BuildContext context) {
-    SwiftleadBottomSheet.show(
-      context: context,
-      title: 'Add Contact',
-      height: SheetHeight.threeQuarter,
-      child: ListView(
-        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-        children: [
-          // Contact form would go here
-          TextField(
-            decoration: const InputDecoration(labelText: 'Name'),
-          ),
-          const SizedBox(height: SwiftleadTokens.spaceM),
-          TextField(
-            decoration: const InputDecoration(labelText: 'Email'),
-          ),
-          const SizedBox(height: SwiftleadTokens.spaceM),
-          TextField(
-            decoration: const InputDecoration(labelText: 'Phone'),
-          ),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Create contact
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(SwiftleadTokens.primaryTeal),
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 52),
-            ),
-            child: const Text('Create Contact'),
-          ),
-        ],
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CreateEditContactScreen(),
       ),
-    );
+    ).then((result) {
+      if (result == true) {
+        _loadContacts(); // Refresh list if contact was created
+      }
+    });
   }
-
-  String _getContactName(int index) {
-    final names = [
-      'John Smith',
-      'Sarah Williams',
-      'Mike Johnson',
-      'Emily Davis',
-      'David Brown',
-    ];
-    return names[index % names.length];
-  }
-
-  String _getContactEmail(int index) {
-    final emails = [
-      'john@example.com',
-      'sarah@example.com',
-      'mike@example.com',
-      'emily@example.com',
-      'david@example.com',
-    ];
-    return emails[index % emails.length];
-  }
-
+  
   String _getStage(int index) {
     final stages = ['Lead', 'Prospect', 'Customer', 'Repeat Customer'];
     return stages[index % stages.length];

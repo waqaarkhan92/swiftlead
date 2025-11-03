@@ -11,7 +11,10 @@ import 'faq_management_screen.dart';
 import 'ai_activity_log_screen.dart';
 import 'ai_training_mode_screen.dart';
 import 'ai_configuration_screen.dart';
+import 'call_transcript_screen.dart';
+import 'ai_performance_screen.dart';
 import '../main_navigation.dart' as main_nav;
+import '../../widgets/forms/ai_tone_selector_sheet.dart';
 
 /// AI Hub Screen - Central control for AI features
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -25,12 +28,29 @@ class AIHubScreen extends StatefulWidget {
 class _AIHubScreenState extends State<AIHubScreen> {
   bool _isLoading = true;
   bool _isAIActive = true;
+  String _selectedTone = 'Friendly';
   
   @override
   void initState() {
     super.initState();
     Future.delayed(const Duration(milliseconds: 800), () {
       if (mounted) setState(() => _isLoading = false);
+    });
+  }
+
+  void _showToneSelector() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => AIToneSelectorSheet(
+        selectedTone: _selectedTone,
+      ),
+    ).then((result) {
+      if (result != null && mounted) {
+        setState(() {
+          _selectedTone = result as String;
+        });
+      }
     });
   }
 
@@ -159,26 +179,32 @@ class _AIHubScreenState extends State<AIHubScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // StatusIndicator: Active (green pulse) / Paused / Error
-              Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: _isAIActive
-                          ? const Color(SwiftleadTokens.successGreen)
-                          : Colors.grey,
-                      shape: BoxShape.circle,
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: _isAIActive
+                            ? const Color(SwiftleadTokens.successGreen)
+                            : Colors.grey,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    _isAIActive ? 'Active' : 'Paused',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        _isAIActive ? 'Active' : 'Paused',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               // QuickToggle: Pause/Resume AI
               Switch(
@@ -294,23 +320,52 @@ class _AIHubScreenState extends State<AIHubScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Recent AI Interactions',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AIActivityLogScreen(),
-                    ),
-                  );
-                },
-                child: const Text('View All'),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CallTranscriptScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('Transcripts'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AIPerformanceScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('Performance'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AIActivityLogScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('View All'),
+                  ),
+                ],
               ),
             ],
           ),
@@ -327,31 +382,34 @@ class _AIHubScreenState extends State<AIHubScreen> {
                 // AIBubble with AI badge
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.auto_awesome,
-                            size: 16,
-                            color: Color(SwiftleadTokens.primaryTeal),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'AI',
-                            style: TextStyle(
-                              color: const Color(SwiftleadTokens.primaryTeal),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.auto_awesome,
+                              size: 16,
+                              color: Color(SwiftleadTokens.primaryTeal),
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 4),
+                            Text(
+                              'AI',
+                              style: TextStyle(
+                                color: const Color(SwiftleadTokens.primaryTeal),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -425,8 +483,10 @@ class _AIHubScreenState extends State<AIHubScreen> {
                 padding: const EdgeInsets.only(right: SwiftleadTokens.spaceS),
                 child: SwiftleadChip(
                   label: tone,
-                  isSelected: tone == 'Friendly',
-                  onTap: () {},
+                  isSelected: tone == _selectedTone,
+                  onTap: () {
+                    _showToneSelector();
+                  },
                 ),
               );
             }).toList(),

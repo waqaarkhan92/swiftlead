@@ -13,6 +13,11 @@ import '../../mock/mock_contacts.dart';
 import '../quotes/create_edit_quote_screen.dart';
 import '../inbox/inbox_thread_screen.dart';
 import '../jobs/create_edit_job_screen.dart';
+import 'create_edit_contact_screen.dart';
+import '../../widgets/components/score_breakdown_card.dart';
+import '../../widgets/forms/contact_stage_change_sheet.dart';
+import '../../widgets/global/primary_button.dart';
+import '../../mock/mock_contacts.dart';
 
 /// Contact Detail Screen - Comprehensive contact view
 /// Exact specification from UI_Inventory_v2.5.1
@@ -177,6 +182,37 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
     }
   }
 
+  void _showDeleteConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Contact'),
+        content: Text('Are you sure you want to delete ${_contact?.name ?? 'this contact'}? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Toast.show(
+                context,
+                message: 'Contact deleted',
+                type: ToastType.success,
+              );
+              Navigator.of(context).pop(); // Go back to contacts list
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(SwiftleadTokens.errorRed),
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -187,11 +223,76 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () {},
+            onPressed: _contact != null ? () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CreateEditContactScreen(
+                    contactId: _contact!.id,
+                    initialContact: _contact,
+                  ),
+                ),
+              ).then((result) {
+                if (result == true) {
+                  _loadContact();
+                }
+              });
+            } : null,
           ),
           IconButton(
             icon: const Icon(Icons.more_vert),
-            onPressed: () {},
+            onPressed: _contact != null ? () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                builder: (context) => Container(
+                  padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardTheme.color,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(SwiftleadTokens.radiusCard),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.delete_outline),
+                        title: const Text('Delete Contact'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          _showDeleteConfirmation();
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.archive_outlined),
+                        title: const Text('Archive Contact'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Toast.show(
+                            context,
+                            message: 'Contact archived',
+                            type: ToastType.success,
+                          );
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.copy_outlined),
+                        title: const Text('Duplicate Contact'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Toast.show(
+                            context,
+                            message: 'Contact duplication coming soon',
+                            type: ToastType.info,
+                          );
+                        },
+                      ),
+          ],
+        ),
+      ),
+    );
+  } : null,
           ),
         ],
       ),
@@ -381,42 +482,61 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
     final stages = ['Lead', 'Prospect', 'Customer', 'Repeat Customer'];
     final currentStage = _contact!.stage.displayName;
     final currentIndex = stages.indexWhere((s) => s == currentStage);
+    
     final displayIndex = currentIndex >= 0 ? currentIndex : 0;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Lifecycle Stage',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceXS),
-        Container(
-          height: 8,
-          decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.light
-                ? Colors.black.withOpacity(0.06)
-                : Colors.white.withOpacity(0.06),
-            borderRadius: BorderRadius.circular(4),
+    return GestureDetector(
+      onTap: () async {
+        final newStage = await ContactStageChangeSheet.show(
+          context: context,
+          currentStage: _contact!.stage,
+        );
+        if (newStage != null && newStage != _contact!.stage) {
+          // Update contact stage
+          await MockContacts.updateContactStage(_contact!.id, newStage);
+          await _loadContact();
+          Toast.show(
+            context,
+            message: 'Stage updated to ${newStage.displayName}',
+            type: ToastType.success,
+          );
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Lifecycle Stage',
+            style: Theme.of(context).textTheme.bodySmall,
           ),
-          child: FractionallySizedBox(
-            widthFactor: (displayIndex + 1) / stages.length,
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(SwiftleadTokens.primaryTeal),
-                borderRadius: BorderRadius.circular(4),
+          const SizedBox(height: SwiftleadTokens.spaceXS),
+          Container(
+            height: 8,
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.light
+                  ? Colors.black.withOpacity(0.06)
+                  : Colors.white.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: FractionallySizedBox(
+              widthFactor: (displayIndex + 1) / stages.length,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(SwiftleadTokens.primaryTeal),
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceXS),
-        Text(
-          currentStage,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600,
+          const SizedBox(height: SwiftleadTokens.spaceXS),
+          Text(
+            currentStage,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -429,53 +549,63 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
         ? const Color(SwiftleadTokens.errorRed)
         : (score >= 60 ? const Color(SwiftleadTokens.warningYellow) : const Color(SwiftleadTokens.infoBlue));
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withOpacity(0.3),
+    return GestureDetector(
+      onTap: () {
+        ScoreBreakdownCard.show(
+          context: context,
+          contactId: _contact!.id,
+          contactName: _contact!.name,
+          score: score,
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: color.withOpacity(0.3),
+          ),
         ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Lead Score',
-                style: Theme.of(context).textTheme.bodySmall,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Lead Score',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                Text(
+                  '$score',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 6,
               ),
-              Text(
-                '$score',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w700,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                classification,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            ],
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 6,
             ),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              classification,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -521,37 +651,76 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
   }
 
   Widget _buildTimelineTab() {
-    return ListView(
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-      children: [
-        FrostedContainer(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Activity Timeline',
-                style: Theme.of(context).textTheme.headlineSmall,
+    String? _selectedActivityFilter;
+    final List<String> _activityTypes = ['All', 'Messages', 'Jobs', 'Bookings', 'Invoices', 'Quotes'];
+    
+    return StatefulBuilder(
+      builder: (context, setState) => Column(
+        children: [
+          // Filter chips
+          Padding(
+            padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: _activityTypes.map((type) {
+                  final isSelected = _selectedActivityFilter == type || (_selectedActivityFilter == null && type == 'All');
+                  return Padding(
+                    padding: const EdgeInsets.only(right: SwiftleadTokens.spaceS),
+                    child: SwiftleadChip(
+                      label: type,
+                      isSelected: isSelected,
+                      onTap: () {
+                        setState(() {
+                          _selectedActivityFilter = type == 'All' ? null : type;
+                        });
+                      },
+                    ),
+                  );
+                }).toList(),
               ),
-              const SizedBox(height: SwiftleadTokens.spaceM),
-              // Timeline items would go here
-              _TimelineItem(
-                icon: Icons.message,
-                title: 'Message received',
-                subtitle: 'From John via WhatsApp',
-                time: '2 hours ago',
-              ),
-              const SizedBox(height: SwiftleadTokens.spaceM),
-              _TimelineItem(
-                icon: Icons.work,
-                title: 'Job created',
-                subtitle: 'Kitchen sink repair',
-                time: '1 day ago',
-              ),
-            ],
+            ),
           ),
-        ),
-      ],
+          // Timeline list
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              children: [
+                FrostedContainer(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Activity Timeline',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: SwiftleadTokens.spaceM),
+                      // Filtered timeline items
+                      if (_selectedActivityFilter == null || _selectedActivityFilter == 'Messages' || _selectedActivityFilter == 'All')
+                        _TimelineItem(
+                          icon: Icons.message,
+                          title: 'Message received',
+                          subtitle: 'From John via WhatsApp',
+                          time: '2 hours ago',
+                        ),
+                      if (_selectedActivityFilter == null || _selectedActivityFilter == 'Jobs' || _selectedActivityFilter == 'All') ...[
+                        if (_selectedActivityFilter == null || _selectedActivityFilter == 'All') const SizedBox(height: SwiftleadTokens.spaceM),
+                        _TimelineItem(
+                          icon: Icons.work,
+                          title: 'Job created',
+                          subtitle: 'Kitchen sink repair',
+                          time: '1 day ago',
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -571,12 +740,16 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                     'Notes',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text('Add Note'),
+                  TextButton.icon(
+                    onPressed: () {
+                      _showAddNoteSheet(context);
+                    },
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Add Note'),
                   ),
                 ],
               ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
               // Notes list would go here
               Text(
                 'No notes yet',
@@ -585,7 +758,138 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
             ],
           ),
         ),
+        const SizedBox(height: SwiftleadTokens.spaceM),
+        // Custom Fields Section
+        FrostedContainer(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Custom Fields',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add, size: 20),
+                    onPressed: () {
+                      // TODO: Add custom field
+                    },
+                    tooltip: 'Add custom field',
+                  ),
+                ],
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              // Example custom fields
+              _CustomFieldRow(
+                label: 'Preferred Contact Method',
+                value: 'WhatsApp',
+              ),
+              const Divider(),
+              _CustomFieldRow(
+                label: 'Referral Source',
+                value: 'Google Ads',
+              ),
+              const Divider(),
+              _CustomFieldRow(
+                label: 'Industry',
+                value: 'Residential',
+              ),
+            ],
+          ),
+        ),
       ],
+    );
+  }
+
+  void _showAddNoteSheet(BuildContext context) {
+    final TextEditingController noteController = TextEditingController();
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(SwiftleadTokens.radiusModal),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Add Note',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              // Rich text formatting toolbar (basic)
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.format_bold, size: 20),
+                    onPressed: () {
+                      // TODO: Toggle bold formatting
+                    },
+                    tooltip: 'Bold',
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.format_italic, size: 20),
+                    onPressed: () {
+                      // TODO: Toggle italic formatting
+                    },
+                    tooltip: 'Italic',
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.alternate_email, size: 20),
+                    onPressed: () {
+                      // TODO: Mention user (@username)
+                    },
+                    tooltip: 'Mention',
+                  ),
+                ],
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              TextField(
+                controller: noteController,
+                maxLines: 6,
+                decoration: InputDecoration(
+                  hintText: 'Enter your note... Use @ to mention team members.',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                  ),
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              PrimaryButton(
+                label: 'Save Note',
+                onPressed: () {
+                  Navigator.pop(context);
+                  // TODO: Save note
+                },
+                icon: Icons.save,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -640,6 +944,42 @@ class _InfoRow extends StatelessWidget {
           child: Text(
             value,
             style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CustomFieldRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _CustomFieldRow({
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).textTheme.bodySmall?.color,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.right,
           ),
         ),
       ],

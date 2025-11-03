@@ -122,5 +122,78 @@ class ScoreBreakdownCard extends StatelessWidget {
       ),
     );
   }
+
+  static void show({
+    required BuildContext context,
+    required String contactId,
+    required String contactName,
+    required int score,
+  }) {
+    // Mock score breakdown data
+    final scoreData = {
+      'Engagement': 25,
+      'Response Time': 20,
+      'Budget Fit': 15,
+      'Timeline': 10,
+      'Authority': 10,
+      'Need': 20,
+    };
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.7,
+        ),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(SwiftleadTokens.radiusCard),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Score Breakdown',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        contactName,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                child: ScoreBreakdownCard(scoreData: scoreData),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 

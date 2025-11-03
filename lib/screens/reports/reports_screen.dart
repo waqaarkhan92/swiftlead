@@ -20,6 +20,10 @@ import '../../widgets/global/bottom_sheet.dart';
 import '../../widgets/global/primary_button.dart';
 import '../../theme/tokens.dart';
 import '../main_navigation.dart' as main_nav;
+import 'custom_report_builder_screen.dart';
+import 'benchmark_comparison_screen.dart';
+import 'goal_tracking_screen.dart';
+import 'scheduled_reports_screen.dart';
 
 /// Reports & Analytics Screen
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -78,6 +82,32 @@ class _ReportsScreenState extends State<ReportsScreen> {
             icon: const Icon(Icons.track_changes_outlined),
             onPressed: () => _showGoalTracking(context),
             tooltip: 'Goal Tracking',
+          ),
+          // Benchmark Comparison (v2.5.1)
+          IconButton(
+            icon: const Icon(Icons.compare_outlined),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BenchmarkComparisonScreen(),
+                ),
+              );
+            },
+            tooltip: 'Benchmark Comparison',
+          ),
+          // Scheduled Reports (v2.5.1)
+          IconButton(
+            icon: const Icon(Icons.schedule_outlined),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ScheduledReportsScreen(),
+                ),
+              );
+            },
+            tooltip: 'Scheduled Reports',
           ),
           // Date range picker
           IconButton(
@@ -449,6 +479,15 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   void _showCustomReportBuilder(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CustomReportBuilderScreen(),
+      ),
+    );
+  }
+
+  void _showCustomReportBuilderOld(BuildContext context) {
     SwiftleadBottomSheet.show(
       context: context,
       title: 'Custom Report Builder',
@@ -487,6 +526,15 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   void _showGoalTracking(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const GoalTrackingScreen(),
+      ),
+    );
+  }
+
+  void _showGoalTrackingOld(BuildContext context) {
     SwiftleadBottomSheet.show(
       context: context,
       title: 'Goal Tracking',

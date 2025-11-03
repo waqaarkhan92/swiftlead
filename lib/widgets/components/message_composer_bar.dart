@@ -6,6 +6,10 @@ import '../global/primary_button.dart';
 import '../global/bottom_sheet.dart';
 import '../../screens/settings/canned_responses_screen.dart';
 import '../forms/smart_reply_suggestions_sheet.dart';
+import '../forms/schedule_message_sheet.dart';
+import '../../models/message.dart';
+import '../../mock/mock_messages.dart';
+import '../../screens/inbox/scheduled_messages_screen.dart';
 
 /// MessageComposerBar - Bottom sticky input with all buttons
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -17,6 +21,9 @@ class MessageComposerBar extends StatefulWidget {
   final VoidCallback? onAIReply;
   final bool isTyping;
   final bool isSending;
+  final String? threadId;
+  final String? contactId;
+  final MessageChannel? channel;
   
   const MessageComposerBar({
     super.key,
@@ -27,6 +34,9 @@ class MessageComposerBar extends StatefulWidget {
     this.onAIReply,
     this.isTyping = false,
     this.isSending = false,
+    this.threadId,
+    this.contactId,
+    this.channel,
   });
 
   @override
@@ -35,11 +45,14 @@ class MessageComposerBar extends StatefulWidget {
 
 class _MessageComposerBarState extends State<MessageComposerBar> {
   bool _showCharacterCounter = false;
+  bool _isSMS = true; // Track if current channel is SMS - always show counter for SMS
 
   @override
   void initState() {
     super.initState();
     widget.controller.addListener(_onTextChanged);
+    // For SMS, always show character counter per spec
+    _showCharacterCounter = _isSMS;
   }
 
   @override
@@ -50,7 +63,8 @@ class _MessageComposerBarState extends State<MessageComposerBar> {
 
   void _onTextChanged() {
     setState(() {
-      _showCharacterCounter = widget.controller.text.length >= 140;
+      // Always show for SMS, otherwise show at 140+ characters
+      _showCharacterCounter = _isSMS || widget.controller.text.length >= 140;
     });
   }
 
@@ -156,30 +170,46 @@ class _MessageComposerBarState extends State<MessageComposerBar> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                       )
-                    : IconButton(
-                        icon: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(SwiftleadTokens.primaryTeal),
-                                Color(SwiftleadTokens.accentAqua),
-                              ],
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Schedule button (long-press send)
+                          IconButton(
+                            icon: const Icon(Icons.schedule_outlined),
+                            onPressed: widget.controller.text.isNotEmpty &&
+                                    widget.threadId != null &&
+                                    widget.channel != null
+                                ? () => _showScheduleSheet(context)
+                                : null,
+                            tooltip: 'Schedule message',
+                          ),
+                          // Send button
+                          IconButton(
+                            icon: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(SwiftleadTokens.primaryTeal),
+                                    Color(SwiftleadTokens.accentAqua),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Icon(
+                                Icons.send,
+                                color: Colors.white,
+                                size: 18,
+                              ),
                             ),
-                            borderRadius: BorderRadius.circular(20),
+                            onPressed: widget.controller.text.isNotEmpty
+                                ? () {
+                                    HapticFeedback.mediumImpact();
+                                    widget.onSend?.call();
+                                  }
+                                : null,
                           ),
-                          child: const Icon(
-                            Icons.send,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ),
-                        onPressed: widget.controller.text.isNotEmpty
-                            ? () {
-                                HapticFeedback.mediumImpact();
-                                widget.onSend?.call();
-                              }
-                            : null,
+                        ],
                       ),
               ],
             ),
@@ -187,6 +217,58 @@ class _MessageComposerBarState extends State<MessageComposerBar> {
         ),
       ),
     );
+  }
+
+  void _showScheduleSheet(BuildContext context) {
+    if (widget.threadId == null || widget.channel == null) return;
+
+    ScheduleMessageSheet.show(
+      context: context,
+      threadId: widget.threadId!,
+      contactId: widget.contactId,
+      channel: widget.channel!,
+      content: widget.controller.text,
+    ).then((scheduled) {
+      if (scheduled != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Message scheduled for ${_formatScheduledTime(scheduled.scheduledFor)}'),
+            backgroundColor: const Color(SwiftleadTokens.successGreen),
+            action: SnackBarAction(
+              label: 'View',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ScheduledMessagesScreen(),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+        widget.controller.clear();
+      }
+    });
+  }
+
+  String _formatScheduledTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final date = DateTime(dateTime.year, dateTime.month, dateTime.day);
+
+    String dateStr;
+    if (date == today) {
+      dateStr = 'Today';
+    } else if (date == tomorrow) {
+      dateStr = 'Tomorrow';
+    } else {
+      dateStr = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    }
+
+    final timeStr = '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+    return '$dateStr at $timeStr';
   }
 
   void _showQuickReplyTemplates(BuildContext context) {
@@ -203,7 +285,13 @@ class _MessageComposerBarState extends State<MessageComposerBar> {
             title: const Text('Business Hours'),
             subtitle: const Text('We are open Monday to Friday, 9am to 5pm.'),
             onTap: () {
-              // Insert template into message
+              final text = 'We are open Monday to Friday, 9am to 5pm.';
+              widget.controller.text = widget.controller.text.isEmpty 
+                  ? text 
+                  : '${widget.controller.text}\n\n$text';
+              widget.controller.selection = TextSelection.fromPosition(
+                TextPosition(offset: widget.controller.text.length),
+              );
               Navigator.pop(context);
             },
           ),
@@ -212,6 +300,13 @@ class _MessageComposerBarState extends State<MessageComposerBar> {
             title: const Text('Booking Confirmation'),
             subtitle: const Text('Thank you! Your appointment is confirmed...'),
             onTap: () {
+              final text = 'Thank you! Your appointment is confirmed. We look forward to seeing you.';
+              widget.controller.text = widget.controller.text.isEmpty 
+                  ? text 
+                  : '${widget.controller.text}\n\n$text';
+              widget.controller.selection = TextSelection.fromPosition(
+                TextPosition(offset: widget.controller.text.length),
+              );
               Navigator.pop(context);
             },
           ),
@@ -220,6 +315,13 @@ class _MessageComposerBarState extends State<MessageComposerBar> {
             title: const Text('Pricing Inquiry'),
             subtitle: const Text('Our standard rate is £150-300...'),
             onTap: () {
+              final text = 'Our standard rate is £150-300 depending on the job. Would you like a detailed quote?';
+              widget.controller.text = widget.controller.text.isEmpty 
+                  ? text 
+                  : '${widget.controller.text}\n\n$text';
+              widget.controller.selection = TextSelection.fromPosition(
+                TextPosition(offset: widget.controller.text.length),
+              );
               Navigator.pop(context);
             },
           ),

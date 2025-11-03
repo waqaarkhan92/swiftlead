@@ -7,6 +7,11 @@ import '../../widgets/global/chip.dart';
 import '../../widgets/global/progress_bar.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/forms/deposit_request_sheet.dart';
+import '../../widgets/forms/contact_selector_sheet.dart';
+import '../../models/contact.dart';
+import '../../mock/mock_services.dart';
+import '../../widgets/forms/job_template_selector_sheet.dart';
+import '../../models/job_template.dart';
 
 /// Create/Edit Job Form - Create or edit a job
 /// Exact specification from UI_Inventory_v2.5.1
@@ -36,10 +41,14 @@ class _CreateEditJobScreenState extends State<CreateEditJobScreen> {
   String? _selectedStatus;
   String? _selectedPriority;
   String? _selectedServiceType;
+  List<Service> _availableServices = [];
+  bool _servicesLoaded = false;
+  JobTemplate? _selectedTemplate;
 
   @override
   void initState() {
     super.initState();
+    _loadServices();
     if (widget.initialData != null) {
       _titleController.text = widget.initialData!['title'] ?? '';
       _descriptionController.text = widget.initialData!['description'] ?? '';
@@ -48,6 +57,16 @@ class _CreateEditJobScreenState extends State<CreateEditJobScreen> {
       _selectedStatus = widget.initialData!['status'];
       _selectedPriority = widget.initialData!['priority'];
       _selectedServiceType = widget.initialData!['serviceType'];
+    }
+  }
+
+  Future<void> _loadServices() async {
+    final services = await MockServices.fetchAll();
+    if (mounted) {
+      setState(() {
+        _availableServices = services;
+        _servicesLoaded = true;
+      });
     }
   }
 
@@ -127,6 +146,64 @@ class _CreateEditJobScreenState extends State<CreateEditJobScreen> {
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
 
+            // Job Template Selector (only for new jobs)
+            if (widget.jobId == null) ...[
+              Text(
+                'Job Template',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              InkWell(
+                onTap: () async {
+                  final template = await JobTemplateSelectorSheet.show(context: context);
+                  if (template != null) {
+                    setState(() {
+                      _selectedTemplate = template;
+                      // Pre-fill fields from template
+                      if (template.defaultTitle != null) {
+                        _titleController.text = template.defaultTitle!;
+                      }
+                      if (template.defaultDescription != null) {
+                        _descriptionController.text = template.defaultDescription!;
+                      }
+                      if (template.jobType != null) {
+                        _selectedServiceType = template.jobType;
+                      }
+                    });
+                  }
+                },
+                borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                child: Container(
+                  padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).dividerColor,
+                    ),
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _selectedTemplate != null
+                            ? _selectedTemplate!.name
+                            : 'Select a template (optional)',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: _selectedTemplate != null
+                              ? null
+                              : Theme.of(context).textTheme.bodySmall?.color,
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+            ],
+
             // Job Title
             TextFormField(
               controller: _titleController,
@@ -149,10 +226,25 @@ class _CreateEditJobScreenState extends State<CreateEditJobScreen> {
             // Client Selector
             TextFormField(
               controller: _clientController,
+              readOnly: true,
               decoration: InputDecoration(
                 labelText: 'Client *',
                 hintText: 'Select or enter client name',
-                suffixIcon: const Icon(Icons.person),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.person_search),
+                  onPressed: () async {
+                    final contact = await ContactSelectorSheet.show(
+                      context: context,
+                      title: 'Select Client',
+                      hintText: 'Search for client...',
+                    );
+                    if (contact != null) {
+                      setState(() {
+                        _clientController.text = contact.name;
+                      });
+                    }
+                  },
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
                 ),
@@ -162,6 +254,18 @@ class _CreateEditJobScreenState extends State<CreateEditJobScreen> {
                   return 'Please select a client';
                 }
                 return null;
+              },
+              onTap: () async {
+                final contact = await ContactSelectorSheet.show(
+                  context: context,
+                  title: 'Select Client',
+                  hintText: 'Search for client...',
+                );
+                if (contact != null) {
+                  setState(() {
+                    _clientController.text = contact.name;
+                  });
+                }
               },
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
@@ -174,21 +278,27 @@ class _CreateEditJobScreenState extends State<CreateEditJobScreen> {
               ),
             ),
             const SizedBox(height: SwiftleadTokens.spaceS),
-            Wrap(
-              spacing: SwiftleadTokens.spaceS,
-              children: ['Repair', 'Installation', 'Maintenance', 'Consultation'].map((type) {
-                final isSelected = _selectedServiceType == type;
-                return SwiftleadChip(
-                  label: type,
-                  isSelected: isSelected,
-                  onTap: () {
-                    setState(() {
-                      _selectedServiceType = isSelected ? null : type;
-                    });
-                  },
-                );
-              }).toList(),
-            ),
+            _servicesLoaded
+                ? Wrap(
+                    spacing: SwiftleadTokens.spaceS,
+                    runSpacing: SwiftleadTokens.spaceS,
+                    children: _availableServices.map((service) {
+                      final isSelected = _selectedServiceType == service.name;
+                      return SwiftleadChip(
+                        label: service.name,
+                        isSelected: isSelected,
+                        onTap: () {
+                          setState(() {
+                            _selectedServiceType = isSelected ? null : service.name;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  )
+                : const SizedBox(
+                    height: 40,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
             const SizedBox(height: SwiftleadTokens.spaceM),
 
             // Status

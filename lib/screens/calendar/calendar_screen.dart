@@ -12,6 +12,7 @@ import '../../config/mock_config.dart';
 import '../../mock/mock_repository.dart';
 import '../../widgets/components/booking_card.dart';
 import '../../widgets/forms/on_my_way_sheet.dart';
+import '../../widgets/forms/calendar_filter_sheet.dart';
 import '../main_navigation.dart' as main_nav;
 
 /// CalendarScreen - Bookings & Scheduling
@@ -26,6 +27,7 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
   bool _isLoading = true;
   String _selectedView = 'month'; // day | week | month
+  bool _isTeamView = false; // Personal vs Team calendar
   List<Booking> _allBookings = [];
   List<Booking> _todayBookings = [];
   late DateTime _selectedDate;
@@ -63,6 +65,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
         scaffoldKey: main_nav.MainNavigation.scaffoldKey,
         title: 'Calendar',
         actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list_outlined),
+            onPressed: () async {
+              final filters = await CalendarFilterSheet.show(
+                context: context,
+              );
+              if (filters != null) {
+                // TODO: Apply filters
+              }
+            },
+          ),
+          IconButton(
+            icon: Icon(_isTeamView ? Icons.people : Icons.person),
+            tooltip: _isTeamView ? 'Switch to Personal' : 'Switch to Team',
+            onPressed: () {
+              setState(() {
+                _isTeamView = !_isTeamView;
+              });
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.today_outlined),
             onPressed: () {

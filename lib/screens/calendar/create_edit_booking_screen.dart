@@ -11,6 +11,9 @@ import '../../theme/tokens.dart';
 import '../calendar/service_catalog_screen.dart';
 import '../../widgets/forms/deposit_request_sheet.dart';
 import '../../widgets/forms/booking_offer_sheet.dart';
+import '../../widgets/components/recurrence_pattern_picker.dart';
+import '../../widgets/components/conflict_warning_card.dart';
+import '../../widgets/forms/ai_availability_suggestions_sheet.dart';
 
 /// Create/Edit Booking Form - Create or edit a booking
 /// Exact specification from UI_Inventory_v2.5.1
@@ -46,6 +49,11 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
   bool _requiresDeposit = false;
   double? _depositAmount;
   bool _isRecurring = false;
+  bool _isMultiDay = false; // Multi-day booking support
+  DateTime? _selectedEndDate; // End date for multi-day bookings
+  bool _hasConflict = false; // Track if booking time conflicts with existing booking
+  String? _conflictingBookingTitle;
+  DateTime? _conflictingTime;
 
   @override
   void initState() {
@@ -69,6 +77,40 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
     super.dispose();
   }
 
+  void _checkForConflicts() {
+    // Mock conflict detection - in real app, this would check against existing bookings
+    if (_selectedDate != null && _selectedStartTime != null) {
+      final bookingTime = DateTime(
+        _selectedDate!.year,
+        _selectedDate!.month,
+        _selectedDate!.day,
+        _selectedStartTime!.hour,
+        _selectedStartTime!.minute,
+      );
+      
+      // Mock: Check if time conflicts (e.g., 10am-11am on same day)
+      final now = DateTime.now();
+      final mockConflictTime = DateTime(now.year, now.month, now.day + 1, 10, 0);
+      
+      if (bookingTime.year == mockConflictTime.year &&
+          bookingTime.month == mockConflictTime.month &&
+          bookingTime.day == mockConflictTime.day &&
+          bookingTime.hour >= 9 && bookingTime.hour <= 11) {
+        setState(() {
+          _hasConflict = true;
+          _conflictingBookingTitle = 'Bathroom Renovation';
+          _conflictingTime = mockConflictTime;
+        });
+      } else {
+        setState(() {
+          _hasConflict = false;
+          _conflictingBookingTitle = null;
+          _conflictingTime = null;
+        });
+      }
+    }
+  }
+
   Future<void> _saveBooking() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -78,6 +120,24 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
       Toast.show(
         context,
         message: 'Please fill in all required fields',
+        type: ToastType.error,
+      );
+      return;
+    }
+    
+    if (_isMultiDay && _selectedEndDate == null) {
+      Toast.show(
+        context,
+        message: 'Please select an end date for multi-day booking',
+        type: ToastType.error,
+      );
+      return;
+    }
+    
+    if (_isMultiDay && _selectedEndDate != null && _selectedDate != null && _selectedEndDate!.isBefore(_selectedDate!)) {
+      Toast.show(
+        context,
+        message: 'End date must be after start date',
         type: ToastType.error,
       );
       return;
@@ -142,6 +202,39 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
               type: InfoBannerType.info,
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Conflict Warning Card - Show if booking time conflicts
+            if (_hasConflict && _conflictingBookingTitle != null && _conflictingTime != null && _selectedDate != null && _selectedStartTime != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceM),
+                child: ConflictWarningCard(
+                  conflictingBookingTitle: _conflictingBookingTitle!,
+                  conflictingTime: _conflictingTime!,
+                  newBookingTime: DateTime(
+                    _selectedDate!.year,
+                    _selectedDate!.month,
+                    _selectedDate!.day,
+                    _selectedStartTime!.hour,
+                    _selectedStartTime!.minute,
+                  ),
+                  onAdjust: () {
+                    // Allow user to adjust time
+                    setState(() {
+                      _hasConflict = false;
+                    });
+                  },
+                  onContinue: () {
+                    // Continue with conflicting time
+                    setState(() {
+                      _hasConflict = false;
+                    });
+                  },
+                  onCancel: () {
+                    // Cancel booking creation
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
 
             // Client Selector
             TextFormField(
@@ -220,6 +313,7 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                   setState(() {
                     _selectedDate = picked;
                   });
+                  _checkForConflicts();
                 }
               },
               icon: const Icon(Icons.calendar_today),
@@ -234,6 +328,60 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
 
+            // Multi-Day Booking Toggle
+            SwitchListTile(
+              title: const Text('Multi-Day Booking'),
+              subtitle: const Text('Booking spans multiple days'),
+              value: _isMultiDay,
+              onChanged: (value) {
+                setState(() {
+                  _isMultiDay = value;
+                  if (value && _selectedDate != null) {
+                    _selectedEndDate = _selectedDate!.add(const Duration(days: 1));
+                  } else {
+                    _selectedEndDate = null;
+                  }
+                });
+              },
+            ),
+            
+            // End Date Picker (shown when multi-day is enabled)
+            if (_isMultiDay) ...[
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              Text(
+                'End Date *',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedEndDate ?? (_selectedDate?.add(const Duration(days: 1)) ?? DateTime.now().add(const Duration(days: 2))),
+                    firstDate: _selectedDate ?? DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      _selectedEndDate = picked;
+                    });
+                  }
+                },
+                icon: const Icon(Icons.calendar_today),
+                label: Text(
+                  _selectedEndDate != null
+                      ? '${_selectedEndDate!.day}/${_selectedEndDate!.month}/${_selectedEndDate!.year}'
+                      : 'Select End Date',
+                ),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 52),
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+            ],
+
             // Time Pickers
             Text(
               'Time *',
@@ -247,6 +395,33 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () async {
+                      // Show AI suggestions first
+                      if (_selectedDate != null) {
+                        final suggestedTime = await AIAvailabilitySuggestionsSheet.show(
+                          context: context,
+                          startDate: _selectedDate!,
+                          durationMinutes: _duration ?? 60,
+                        );
+                        if (suggestedTime != null && mounted) {
+                          setState(() {
+                            _selectedStartTime = TimeOfDay(
+                              hour: suggestedTime.hour,
+                              minute: suggestedTime.minute,
+                            );
+                            if (_duration != null) {
+                              final startMinutes = suggestedTime.hour * 60 + suggestedTime.minute;
+                              final endMinutes = startMinutes + _duration!;
+                              _selectedEndTime = TimeOfDay(
+                                hour: (endMinutes ~/ 60) % 24,
+                                minute: endMinutes % 60,
+                              );
+                            }
+                          });
+                          _checkForConflicts();
+                          return;
+                        }
+                      }
+                      // Fallback to regular time picker
                       final time = await showTimePicker(
                         context: context,
                         initialTime: _selectedStartTime ?? TimeOfDay.now(),
@@ -263,6 +438,7 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                             );
                           }
                         });
+                        _checkForConflicts();
                       }
                     },
                     icon: const Icon(Icons.access_time),
@@ -439,6 +615,15 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                 ],
               ),
             ),
+            // Show recurrence pattern picker when recurring is enabled
+            if (_isRecurring) ...[
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              RecurrencePatternPicker(
+                onPatternChanged: (pattern) {
+                  // Handle pattern selection
+                },
+              ),
+            ],
             const SizedBox(height: SwiftleadTokens.spaceM),
 
             // Notes

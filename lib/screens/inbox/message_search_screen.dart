@@ -7,6 +7,8 @@ import '../../widgets/global/search_bar.dart';
 import '../../widgets/components/chat_bubble.dart';
 import '../../widgets/components/date_separator.dart';
 import '../../theme/tokens.dart';
+import '../../mock/mock_messages.dart';
+import '../../models/message.dart';
 
 /// MessageSearchScreen - Full-text search for messages
 /// Exact specification from UI_Inventory_v2.5.1
@@ -21,11 +23,62 @@ class _MessageSearchScreenState extends State<MessageSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   bool _hasResults = false;
+  List<Message> _searchResults = [];
+  List<MessageThread> _allThreads = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAllMessages();
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadAllMessages() async {
+    // Load all threads and their messages for search
+    _allThreads = await MockMessages.fetchAllThreads();
+    setState(() {});
+  }
+
+  void _performSearch(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        _isSearching = false;
+        _hasResults = false;
+        _searchResults = [];
+      });
+      return;
+    }
+
+    setState(() {
+      _isSearching = true;
+    });
+
+    // Full-text search across all messages
+    final queryLower = query.toLowerCase();
+    final results = <Message>[];
+
+    for (final thread in _allThreads) {
+      for (final message in thread.messages) {
+        // Search in message content
+        if (message.content.toLowerCase().contains(queryLower)) {
+          results.add(message);
+        }
+        // Search in contact name
+        if (thread.contactName.toLowerCase().contains(queryLower)) {
+          results.add(message);
+        }
+      }
+    }
+
+    setState(() {
+      _searchResults = results;
+      _hasResults = results.isNotEmpty;
+    });
   }
 
   @override
@@ -49,10 +102,7 @@ class _MessageSearchScreenState extends State<MessageSearchScreen> {
               controller: _searchController,
               hintText: 'Search messages, contacts, or keywords...',
               onChanged: (value) {
-                setState(() {
-                  _isSearching = value.isNotEmpty;
-                  _hasResults = value.isNotEmpty; // Replace with actual search
-                });
+                _performSearch(value);
               },
             ),
           ),
@@ -111,30 +161,81 @@ class _MessageSearchScreenState extends State<MessageSearchScreen> {
   }
 
   Widget _buildSearchResults() {
+    if (_searchResults.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    // Group results by date
+    final groupedResults = <DateTime, List<Message>>{};
+    for (final message in _searchResults) {
+      final date = DateTime(
+        message.timestamp.year,
+        message.timestamp.month,
+        message.timestamp.day,
+      );
+      if (!groupedResults.containsKey(date)) {
+        groupedResults[date] = [];
+      }
+      groupedResults[date]!.add(message);
+    }
+
+    final sortedDates = groupedResults.keys.toList()..sort((a, b) => b.compareTo(a));
+
     return ListView(
       padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       children: [
         Text(
-          'Search Results',
-          style: Theme.of(context).textTheme.headlineSmall,
+          '${_searchResults.length} result${_searchResults.length != 1 ? 's' : ''} found',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: SwiftleadTokens.spaceM),
-        DateSeparator(date: DateTime.now()),
-        const SizedBox(height: SwiftleadTokens.spaceS),
-        ChatBubble(
-          message: 'Found matching message: "Can you schedule the repair?"',
-          type: BubbleType.inbound,
-          timestamp: '2 hours ago',
-          senderName: 'John Smith',
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceS),
-        ChatBubble(
-          message: 'Response: "Yes, we can come tomorrow at 2pm."',
-          type: BubbleType.outbound,
-          timestamp: '1 hour ago',
-        ),
+        ...sortedDates.expand((date) {
+          final messages = groupedResults[date]!;
+          return [
+            DateSeparator(date: date),
+            const SizedBox(height: SwiftleadTokens.spaceS),
+            ...messages.map((message) {
+              // Find thread for this message
+              final thread = _allThreads.firstWhere(
+                (t) => t.messages.any((m) => m.id == message.id),
+                orElse: () => _allThreads.first,
+              );
+              
+              return Padding(
+                padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+                child: ChatBubble(
+                  message: message.content,
+                  type: message.isInbound ? BubbleType.inbound : BubbleType.outbound,
+                  timestamp: _formatTime(message.timestamp),
+                  senderName: message.isInbound ? thread.contactName : null,
+                ),
+              );
+            }),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+          ];
+        }),
       ],
     );
+  }
+
+  String _formatTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays == 0) {
+      if (difference.inHours == 0) {
+        return '${difference.inMinutes} minutes ago';
+      }
+      return '${difference.inHours} hour${difference.inHours != 1 ? 's' : ''} ago';
+    } else if (difference.inDays == 1) {
+      return 'Yesterday';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} days ago';
+    } else {
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    }
   }
 }
 

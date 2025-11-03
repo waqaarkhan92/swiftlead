@@ -7,6 +7,7 @@ import '../../widgets/global/chip.dart';
 import '../../widgets/components/campaign_type_selector.dart';
 import '../../widgets/components/audience_selector.dart';
 import '../../theme/tokens.dart';
+import 'visual_workflow_editor_screen.dart';
 
 /// Campaign Builder Screen - Multi-step campaign creation wizard
 /// Exact specification from UI_Inventory_v2.5.1
@@ -27,6 +28,8 @@ class _CampaignBuilderScreenState extends State<CampaignBuilderScreen> {
   final int _totalSteps = 4;
   String? _selectedCampaignType;
   bool _isSaving = false;
+  bool _enableABTest = false;
+  String? _abTestVariant; // A or B
 
   @override
   Widget build(BuildContext context) {
@@ -193,10 +196,126 @@ class _CampaignBuilderScreenState extends State<CampaignBuilderScreen> {
             ),
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
+          
+          // Visual Workflow Editor button for multichannel campaigns
+          if (_selectedCampaignType?.toLowerCase().contains('multichannel') ?? false)
+            PrimaryButton(
+              label: 'Open Workflow Editor',
+              icon: Icons.account_tree,
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => VisualWorkflowEditorScreen(
+                      campaignId: widget.campaignId,
+                    ),
+                  ),
+                );
+                if (result == true && mounted) {
+                  // Workflow saved, continue
+                }
+              },
+            ),
+          
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          
           Text(
             'Email Composer with rich text editor, templates, and merge fields would go here',
             style: Theme.of(context).textTheme.bodySmall,
           ),
+          
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          
+          // A/B Test Setup
+          Divider(),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'A/B Test',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  Text(
+                    'Test two variants to find the best performer',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              Switch(
+                value: _enableABTest,
+                onChanged: (value) {
+                  setState(() {
+                    _enableABTest = value;
+                    if (!value) _abTestVariant = null;
+                  });
+                },
+                activeTrackColor: const Color(SwiftleadTokens.primaryTeal),
+              ),
+            ],
+          ),
+          
+          if (_enableABTest) ...[
+            const SizedBox(height: SwiftleadTokens.spaceM),
+            Text(
+              'Select Variant',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceS),
+            SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(
+                  value: 'A',
+                  label: Text('Variant A'),
+                  tooltip: 'Original variant',
+                ),
+                ButtonSegment(
+                  value: 'B',
+                  label: Text('Variant B'),
+                  tooltip: 'Alternative variant',
+                ),
+              ],
+              selected: _abTestVariant != null ? {_abTestVariant!} : <String>{},
+              onSelectionChanged: (Set<String> selected) {
+                setState(() {
+                  _abTestVariant = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.info_outline, size: 16, color: Colors.blue),
+                      const SizedBox(width: SwiftleadTokens.spaceS),
+                      Text(
+                        'A/B Test Configuration',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: SwiftleadTokens.spaceS),
+                  Text(
+                    'The winning variant will automatically be sent to the remaining audience once statistical significance is reached (95% confidence).',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

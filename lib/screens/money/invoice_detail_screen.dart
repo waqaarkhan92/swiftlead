@@ -6,6 +6,11 @@ import '../../widgets/global/badge.dart';
 import '../../widgets/components/payment_link_button.dart';
 import '../../widgets/forms/payment_link_sheet.dart';
 import '../../widgets/forms/payment_request_modal.dart';
+import '../../widgets/global/confirmation_dialog.dart';
+import '../../widgets/global/toast.dart';
+import '../../mock/mock_payments.dart';
+import '../../widgets/components/chase_history_timeline.dart';
+import '../../widgets/forms/link_invoice_to_job_sheet.dart';
 import '../../theme/tokens.dart';
 import 'create_edit_invoice_screen.dart';
 
@@ -32,6 +37,118 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
   double _total = 540.00;
   double _amountPaid = 0.0;
   double _amountDue = 540.00;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInvoice();
+  }
+
+  Future<void> _loadInvoice() async {
+    final invoice = await MockPayments.fetchInvoiceById(widget.invoiceId);
+    if (invoice != null && mounted) {
+      setState(() {
+        _status = invoice.status.displayName;
+        _total = invoice.amount;
+        _amountPaid = invoice.status == InvoiceStatus.paid ? invoice.amount : 0.0;
+        _amountDue = invoice.status == InvoiceStatus.paid ? 0.0 : invoice.amount;
+      });
+    }
+  }
+
+  Future<void> _handleMarkPaid() async {
+    final confirmed = await SwiftleadConfirmationDialog.show(
+      context: context,
+      title: 'Mark Invoice as Paid',
+      description: 'Are you sure you want to mark this invoice as paid?',
+      primaryActionLabel: 'Mark as Paid',
+      secondaryActionLabel: 'Cancel',
+      icon: Icons.check_circle,
+    );
+
+    if (confirmed != true) return;
+
+    final success = await MockPayments.markInvoicePaid(widget.invoiceId);
+    if (success && mounted) {
+      await _loadInvoice();
+      Toast.show(
+        context,
+        message: 'Invoice marked as paid',
+        type: ToastType.success,
+      );
+    } else if (mounted) {
+      Toast.show(
+        context,
+        message: 'Failed to mark invoice as paid',
+        type: ToastType.error,
+      );
+    }
+  }
+
+  Future<void> _handleDeleteInvoice() async {
+    final confirmed = await SwiftleadConfirmationDialog.show(
+      context: context,
+      title: 'Delete Invoice',
+      description: 'Are you sure you want to delete this invoice? This action cannot be undone.',
+      primaryActionLabel: 'Delete',
+      secondaryActionLabel: 'Cancel',
+      icon: Icons.warning_rounded,
+      isDestructive: true,
+    );
+
+    if (confirmed != true) return;
+
+    final success = await MockPayments.deleteInvoice(widget.invoiceId);
+    if (success && mounted) {
+      Toast.show(
+        context,
+        message: 'Invoice deleted',
+        type: ToastType.success,
+      );
+      Navigator.of(context).pop(true); // Return true to signal deletion
+    } else if (mounted) {
+      Toast.show(
+        context,
+        message: 'Failed to delete invoice',
+        type: ToastType.error,
+      );
+    }
+  }
+
+  Future<void> _handleSendInvoice() async {
+    final confirmed = await SwiftleadConfirmationDialog.show(
+      context: context,
+      title: 'Send Invoice',
+      description: 'Send invoice #${widget.invoiceNumber} to the client?',
+      primaryActionLabel: 'Send',
+      secondaryActionLabel: 'Cancel',
+      icon: Icons.send,
+    );
+
+    if (confirmed == true && mounted) {
+      // Simulate sending
+      await Future.delayed(const Duration(seconds: 1));
+      Toast.show(
+        context,
+        message: 'Invoice sent successfully',
+        type: ToastType.success,
+      );
+    }
+  }
+
+  Future<void> _handleLinkToJob() async {
+    final jobId = await LinkInvoiceToJobSheet.show(
+      context: context,
+      invoiceId: widget.invoiceId,
+    );
+    if (jobId != null && mounted) {
+      Toast.show(
+        context,
+        message: 'Invoice linked to job',
+        type: ToastType.success,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,19 +189,23 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
                   );
                   break;
                 case 'send':
-                  // Send invoice
+                  _handleSendInvoice();
+                  break;
+                case 'link_job':
+                  _handleLinkToJob();
                   break;
                 case 'mark_paid':
-                  // Mark as paid
+                  _handleMarkPaid();
                   break;
                 case 'delete':
-                  // Delete invoice
+                  _handleDeleteInvoice();
                   break;
               }
             },
             itemBuilder: (context) => [
               const PopupMenuItem(value: 'send', child: Text('Send Invoice')),
               const PopupMenuItem(value: 'request_payment', child: Text('Request Payment')),
+              const PopupMenuItem(value: 'link_job', child: Text('Link to Job')),
               const PopupMenuItem(value: 'mark_paid', child: Text('Mark as Paid')),
               const PopupMenuItem(value: 'delete', child: Text('Delete')),
             ],
@@ -146,6 +267,12 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
         // PaymentHistory
         if (_amountPaid > 0) ...[
           _buildPaymentHistory(),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+        ],
+
+        // Payment Reminders Timeline
+        if (_status != 'Paid') ...[
+          _buildPaymentRemindersTimeline(),
           const SizedBox(height: SwiftleadTokens.spaceL),
         ],
 
@@ -382,6 +509,26 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildPaymentRemindersTimeline() {
+    // Mock chase records for payment reminders
+    final chaseRecords = [
+      ChaseRecord(
+        message: 'Payment reminder sent via email',
+        timestamp: DateTime.now().subtract(const Duration(days: 3)),
+        status: ChaseStatus.sent,
+        channel: ChaseChannel.email,
+      ),
+      ChaseRecord(
+        message: 'Payment reminder sent via SMS',
+        timestamp: DateTime.now().subtract(const Duration(days: 1)),
+        status: ChaseStatus.delivered,
+        channel: ChaseChannel.sms,
+      ),
+    ];
+
+    return ChaseHistoryTimeline(chaseRecords: chaseRecords);
   }
 
   Widget _buildTermsCard() {

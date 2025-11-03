@@ -155,6 +155,32 @@ class MockContacts {
   static bool isContactBlocked(String contactId) {
     return _blockedContactIds.contains(contactId);
   }
+
+  /// Update contact stage
+  static Future<bool> updateContactStage(String contactId, ContactStage newStage) async {
+    await simulateDelay();
+    final contactIndex = _contacts.indexWhere((c) => c.id == contactId);
+    if (contactIndex >= 0) {
+      final contact = _contacts[contactIndex];
+      _contacts[contactIndex] = Contact(
+        id: contact.id,
+        name: contact.name,
+        email: contact.email,
+        phone: contact.phone,
+        company: contact.company,
+        avatarUrl: contact.avatarUrl,
+        stage: newStage,
+        score: contact.score,
+        source: contact.source,
+        tags: contact.tags,
+        createdAt: contact.createdAt,
+        lastContactedAt: contact.lastContactedAt,
+      );
+      logMockOperation('Updated contact stage: ${contact.name} -> ${newStage.displayName}');
+      return true;
+    }
+    return false;
+  }
 }
 
 /// Contact model

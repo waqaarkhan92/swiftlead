@@ -12,14 +12,22 @@ import '../contacts/contact_detail_screen.dart';
 import '../../models/contact.dart';
 import '../../mock/mock_contacts.dart';
 import '../../mock/mock_messages.dart';
+import '../../models/message.dart';
 import '../../widgets/components/internal_notes_modal.dart';
+import '../../widgets/components/ai_summary_card.dart';
+import '../../widgets/components/reaction_picker.dart';
+import '../../widgets/components/message_detail_sheet.dart';
+import '../../widgets/components/voice_note_player.dart';
+import '../../widgets/components/link_preview_card.dart';
+import '../../widgets/components/typing_indicator.dart';
+import '../../widgets/forms/message_actions_sheet.dart';
 import 'thread_search_screen.dart';
 
 /// InboxThreadScreen - Conversation thread view
 /// Exact specification from Screen_Layouts_v2.5.1
 class InboxThreadScreen extends StatefulWidget {
   final String contactName;
-  final String channel;
+  final String channel; // Display name like "SMS", "WhatsApp"
   final String? contactId; // Optional contact ID for direct lookup
   final String? threadId; // Optional thread ID for search and other operations
   
@@ -38,7 +46,25 @@ class InboxThreadScreen extends StatefulWidget {
 class _InboxThreadScreenState extends State<InboxThreadScreen> {
   final TextEditingController _messageController = TextEditingController();
   bool _isTyping = false;
+  bool _contactIsTyping = false; // Track if contact is typing
   int _noteCount = 3;
+  
+  MessageChannel get _messageChannel {
+    switch (widget.channel.toLowerCase()) {
+      case 'sms':
+        return MessageChannel.sms;
+      case 'whatsapp':
+        return MessageChannel.whatsapp;
+      case 'email':
+        return MessageChannel.email;
+      case 'facebook':
+        return MessageChannel.facebook;
+      case 'instagram':
+        return MessageChannel.instagram;
+      default:
+        return MessageChannel.sms;
+    }
+  }
   
   bool get _isMuted {
     // Get threadId - either from widget or use contactName as fallback identifier
@@ -310,6 +336,32 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
     }
   }
 
+  void _showReactionPicker() {
+    ReactionPicker.show(
+      context,
+      (emoji) {
+        Toast.show(
+          context,
+          message: 'Reacted with $emoji',
+          type: ToastType.success,
+        );
+      },
+    );
+  }
+
+  void _showMessageDetails() {
+    String threadId = widget.threadId ?? widget.contactId ?? widget.contactName;
+    MessageDetailSheet.show(
+      context: context,
+      messageId: 'msg_${threadId}_1',
+      messageContent: 'Sample message content',
+      senderName: widget.contactName,
+      timestamp: DateTime.now().subtract(const Duration(hours: 2)),
+      status: 'read',
+      channel: widget.channel,
+    );
+  }
+
   void _handleCreateQuoteFromInbox() {
     Navigator.push(
       context,
@@ -372,9 +424,36 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
                 case 'block':
                   _blockContact();
                   break;
+                case 'react':
+                  _showReactionPicker();
+                  break;
+                case 'details':
+                  _showMessageDetails();
+                  break;
               }
             },
             itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'react',
+                child: Row(
+                  children: [
+                    Icon(Icons.add_reaction, size: 18),
+                    SizedBox(width: 8),
+                    Text('React'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'details',
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 18),
+                    SizedBox(width: 8),
+                    Text('Details'),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
               const PopupMenuItem(
                 value: 'view_contact',
                 child: Row(
@@ -467,39 +546,163 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async {
+                // Actual message sync - reload messages from mock data
                 await Future.delayed(const Duration(milliseconds: 500));
+                // In real app, this would sync with backend
+                setState(() {
+                  // Trigger rebuild to show updated messages
+                });
               },
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: SwiftleadTokens.spaceM),
                 children: [
+                  // AI Summary Card - placed at top of scrollable message list per spec
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: AISummaryCard(
+                      threadId: widget.threadId ?? widget.contactId ?? widget.contactName,
+                    ),
+                  ),
+                  // Typing Indicator - show when contact is typing
+                  if (_contactIsTyping)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+                      child: TypingIndicator(contactName: widget.contactName),
+                    ),
                   DateSeparator(date: DateTime.now().subtract(const Duration(days: 1))),
-                  chat_bubble.ChatBubble(
-                    message: 'Hi, I need a quote for kitchen sink repair',
-                    type: chat_bubble.BubbleType.inbound,
-                    timestamp: '10:30 AM',
-                    senderName: widget.contactName,
-                  ),
-                  chat_bubble.ChatBubble(
-                    message: 'Hi! I\'d be happy to help. When would be a good time for me to take a look?',
-                    type: chat_bubble.BubbleType.outbound,
-                    status: chat_bubble.MessageStatus.read,
-                    timestamp: '10:32 AM',
-                  ),
+                  // Message with voice note example
+                  Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            GestureDetector(
+                              onLongPress: () async {
+                                final action = await MessageActionsSheet.show(
+                                  context: context,
+                                  messageId: 'msg_1',
+                                  channel: _messageChannel,
+                                  canEdit: false,
+                                  canDelete: false,
+                                );
+                                if (action != null && mounted) {
+                                  switch (action) {
+                                    case 'copy':
+                                      Toast.show(context, message: 'Message copied', type: ToastType.success);
+                                      break;
+                                    case 'share':
+                                      Toast.show(context, message: 'Share functionality coming soon', type: ToastType.info);
+                                      break;
+                                    case 'forward':
+                                      Toast.show(context, message: 'Forward functionality coming soon', type: ToastType.info);
+                                      break;
+                                    case 'react':
+                                      _showReactionPicker();
+                                      break;
+                                    case 'details':
+                                      _showMessageDetails();
+                                      break;
+                                  }
+                                }
+                              },
+                              child: chat_bubble.ChatBubble(
+                                message: 'Hi, I need a quote for kitchen sink repair',
+                                type: chat_bubble.BubbleType.inbound,
+                                timestamp: '10:30 AM',
+                                senderName: widget.contactName,
+                              ),
+                            ),
+                            // Example: Add voice note player if message has voice note
+                            Padding(
+                              padding: const EdgeInsets.only(left: SwiftleadTokens.spaceM, top: 4),
+                              child: VoiceNotePlayer(
+                                url: 'https://example.com/voice_note.mp3',
+                                duration: const Duration(seconds: 45),
+                                isOutbound: false,
+                              ),
+                            ),
+                          ],
+                        ),
+                  GestureDetector(
+                          onLongPress: () async {
+                            final action = await MessageActionsSheet.show(
+                              context: context,
+                              messageId: 'msg_2',
+                              channel: _messageChannel,
+                              canEdit: true,
+                              canDelete: true,
+                            );
+                            if (action != null && mounted) {
+                              switch (action) {
+                                case 'copy':
+                                  Toast.show(context, message: 'Message copied', type: ToastType.success);
+                                  break;
+                                case 'edit':
+                                  Toast.show(context, message: 'Edit functionality coming soon', type: ToastType.info);
+                                  break;
+                                case 'delete':
+                                  Toast.show(context, message: 'Delete functionality coming soon', type: ToastType.info);
+                                  break;
+                                case 'details':
+                                  _showMessageDetails();
+                                  break;
+                              }
+                            }
+                          },
+                          child: chat_bubble.ChatBubble(
+                            message: 'Hi! I\'d be happy to help. When would be a good time for me to take a look?',
+                            type: chat_bubble.BubbleType.outbound,
+                            status: chat_bubble.MessageStatus.read,
+                            timestamp: '10:32 AM',
+                          ),
+                        ),
                   DateSeparator(date: DateTime.now()),
-                  chat_bubble.ChatBubble(
-                    message: 'Can you come today afternoon?',
-                    type: chat_bubble.BubbleType.inbound,
-                    timestamp: '10:33 AM',
-                    senderName: widget.contactName,
-                  ),
-                ],
-              ),
+                  // Message with link preview example
+                  Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            GestureDetector(
+                              onLongPress: () {
+                                // Show reaction picker on long-press per spec
+                                ReactionPicker.show(
+                                  context,
+                                  (emoji) {
+                                    Toast.show(
+                                      context,
+                                      message: 'Reacted with $emoji',
+                                      type: ToastType.success,
+                                    );
+                                  },
+                                );
+                              },
+                              child: chat_bubble.ChatBubble(
+                                message: 'Can you come today afternoon? Here\'s a link: https://example.com',
+                                type: chat_bubble.BubbleType.inbound,
+                                timestamp: '10:33 AM',
+                                senderName: widget.contactName,
+                              ),
+                            ),
+                            // Example: Add link preview if message has URL
+                            Padding(
+                              padding: const EdgeInsets.only(left: SwiftleadTokens.spaceM, right: SwiftleadTokens.spaceM, top: 4),
+                              child: LinkPreviewCard(
+                                url: 'https://example.com',
+                                title: 'Example Website',
+                                description: 'This is an example link preview',
+                                onTap: () {},
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
             ),
           ),
           
           // MessageComposerBar - Bottom sticky input
           MessageComposerBar(
             controller: _messageController,
+            threadId: widget.threadId,
+            contactId: widget.contactId,
+            channel: _messageChannel,
             isTyping: _isTyping,
             onSend: () {
               _messageController.clear();

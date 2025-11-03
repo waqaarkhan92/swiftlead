@@ -22,6 +22,8 @@ import '../../widgets/global/toast.dart';
 import '../../widgets/global/context_menu.dart';
 import '../../widgets/components/internal_notes_modal.dart';
 import '../../widgets/forms/thread_assignment_sheet.dart';
+import '../../widgets/global/confirmation_dialog.dart';
+import 'scheduled_messages_screen.dart';
 import '../main_navigation.dart' as main_nav;
 
 /// InboxScreen - Unified messaging hub
@@ -42,6 +44,8 @@ class _InboxScreenState extends State<InboxScreen> {
   List<MessageThread> _threads = [];
   List<MessageThread> _filteredThreads = [];
   InboxFilters? _currentFilters;
+  bool _isBatchMode = false;
+  Set<String> _selectedThreadIds = {};
 
   @override
   void initState() {
@@ -181,7 +185,9 @@ class _InboxScreenState extends State<InboxScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
         scaffoldKey: main_nav.MainNavigation.scaffoldKey,
-        title: 'Inbox',
+        title: _isBatchMode 
+            ? '${_selectedThreadIds.length} selected'
+            : 'Inbox',
         actions: [
           IconButton(
             icon: const Icon(Icons.search_outlined),
@@ -239,6 +245,29 @@ class _InboxScreenState extends State<InboxScreen> {
                   ),
                 ),
             ],
+          ),
+          if (_isBatchMode)
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () {
+                setState(() {
+                  _isBatchMode = false;
+                  _selectedThreadIds.clear();
+                });
+              },
+            ),
+          if (!_isBatchMode)
+          IconButton(
+            icon: const Icon(Icons.schedule_outlined),
+            tooltip: 'Scheduled Messages',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ScheduledMessagesScreen(),
+                ),
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.edit),
@@ -339,8 +368,204 @@ class _InboxScreenState extends State<InboxScreen> {
             child: _buildChatList(),
           ),
         ),
+        
+        // Batch Action Bar
+        if (_isBatchMode)
+          FrostedContainer(
+            padding: const EdgeInsets.symmetric(
+              horizontal: SwiftleadTokens.spaceM,
+              vertical: SwiftleadTokens.spaceS,
+            ),
+            borderRadius: 0,
+            child: SafeArea(
+              top: false,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildBatchActionButton(
+                    icon: Icons.archive_outlined,
+                    label: 'Archive',
+                    onPressed: _handleBatchArchive,
+                  ),
+                  _buildBatchActionButton(
+                    icon: Icons.mark_email_read_outlined,
+                    label: 'Mark Read',
+                    onPressed: _handleBatchMarkRead,
+                  ),
+                  _buildBatchActionButton(
+                    icon: Icons.push_pin_outlined,
+                    label: 'Pin',
+                    onPressed: _handleBatchPin,
+                  ),
+                  _buildBatchActionButton(
+                    icon: Icons.delete_outline,
+                    label: 'Delete',
+                    onPressed: _handleBatchDelete,
+                    isDestructive: true,
+                  ),
+                ],
+              ),
+            ),
+          ),
       ],
     );
+  }
+  
+  Widget _buildBatchActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    bool isDestructive = false,
+  }) {
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(SwiftleadTokens.radiusButton),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: SwiftleadTokens.spaceS,
+          vertical: SwiftleadTokens.spaceS,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isDestructive 
+                  ? const Color(SwiftleadTokens.errorRed)
+                  : Theme.of(context).iconTheme.color,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: isDestructive 
+                    ? const Color(SwiftleadTokens.errorRed)
+                    : null,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  void _handleBatchArchive() {
+    if (_selectedThreadIds.isEmpty) return;
+    
+    final count = _selectedThreadIds.length;
+    final threadIdsCopy = Set<String>.from(_selectedThreadIds);
+    
+    for (final threadId in threadIdsCopy) {
+      MockMessages.archiveThread(threadId);
+    }
+    
+    setState(() {
+      _isBatchMode = false;
+      _selectedThreadIds.clear();
+    });
+    
+    _loadMessages();
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$count conversations archived'),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () {
+            for (final threadId in threadIdsCopy) {
+              MockMessages.unarchiveThread(threadId);
+            }
+            _loadMessages();
+          },
+        ),
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+  
+  void _handleBatchMarkRead() {
+    if (_selectedThreadIds.isEmpty) return;
+    
+    final count = _selectedThreadIds.length;
+    final threadIdsCopy = Set<String>.from(_selectedThreadIds);
+    
+    for (final threadId in threadIdsCopy) {
+      MockMessages.markThreadRead(threadId);
+    }
+    
+    setState(() {
+      _isBatchMode = false;
+      _selectedThreadIds.clear();
+    });
+    
+    _loadMessages();
+    
+    Toast.show(
+      context,
+      message: '$count conversations marked as read',
+      type: ToastType.success,
+    );
+  }
+  
+  void _handleBatchPin() {
+    if (_selectedThreadIds.isEmpty) return;
+    
+    final count = _selectedThreadIds.length;
+    final threadIdsCopy = Set<String>.from(_selectedThreadIds);
+    
+    for (final threadId in threadIdsCopy) {
+      MockMessages.pinThread(threadId);
+    }
+    
+    setState(() {
+      _isBatchMode = false;
+      _selectedThreadIds.clear();
+    });
+    
+    _loadMessages();
+    
+    Toast.show(
+      context,
+      message: '$count conversations pinned',
+      type: ToastType.success,
+    );
+  }
+  
+  void _handleBatchDelete() {
+    if (_selectedThreadIds.isEmpty) return;
+    
+    final count = _selectedThreadIds.length;
+    final threadIdsCopy = Set<String>.from(_selectedThreadIds);
+    
+    SwiftleadConfirmationDialog.show(
+      context: context,
+      title: 'Delete $count conversations',
+      description: 'Are you sure you want to delete these conversations? This action cannot be undone.',
+      primaryActionLabel: 'Delete',
+      isDestructive: true,
+      secondaryActionLabel: 'Cancel',
+      icon: Icons.warning_rounded,
+    ).then((confirmed) {
+      if (confirmed == true && mounted) {
+        for (final threadId in threadIdsCopy) {
+          MockMessages.deleteThread(threadId);
+        }
+        
+        setState(() {
+          _isBatchMode = false;
+          _selectedThreadIds.clear();
+        });
+        
+        _loadMessages();
+        
+        Toast.show(
+          context,
+          message: '$count conversations deleted',
+          type: ToastType.success,
+        );
+      }
+    });
   }
 
   Widget _buildChatList() {
@@ -365,7 +590,7 @@ class _InboxScreenState extends State<InboxScreen> {
       itemCount: _filteredThreads.length,
       itemBuilder: (context, index) {
         final thread = _filteredThreads[index];
-        final isPinned = thread.isPinned;
+        final isPinned = MockMessages.isThreadPinned(thread.id) || thread.isPinned; // Check both set and original value
         final isUnread = thread.unreadCount > 0;
         final isMuted = MockMessages.isThreadMuted(thread.id);
         final channelName = thread.channel.displayName;
@@ -404,23 +629,45 @@ class _InboxScreenState extends State<InboxScreen> {
             
             if (direction == DismissDirection.startToEnd) {
               // Archive
-              if (kUseMockData) {
-                await MockMessages.archiveThread(threadId);
-              } else {
-                // TODO: Call archive-thread edge function
+              final matchingThreads = _threads.where((t) => t.id == threadId);
+              final archivedThread = matchingThreads.isNotEmpty ? matchingThreads.first : null;
+              
+              if (archivedThread != null) {
+                if (kUseMockData) {
+                  await MockMessages.archiveThread(threadId);
+                } else {
+                  // TODO: Call archive-thread edge function
+                }
+                
+                // Remove from local list
+                setState(() {
+                  _threads.removeWhere((t) => t.id == threadId);
+                  _filteredThreads.removeWhere((t) => t.id == threadId);
+                });
+                
+                // Show undo snackbar
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Conversation archived'),
+                    action: SnackBarAction(
+                      label: 'Undo',
+                      textColor: Colors.white,
+                      onPressed: () {
+                        // Restore thread
+                        if (kUseMockData) {
+                          MockMessages.unarchiveThread(threadId);
+                        }
+                        setState(() {
+                          _threads.insert(0, archivedThread);
+                          _filteredThreads.insert(0, archivedThread);
+                        });
+                      },
+                    ),
+                    duration: const Duration(seconds: 4),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
               }
-              
-              // Remove from local list
-              setState(() {
-                _threads.removeWhere((t) => t.id == threadId);
-                _filteredThreads.removeWhere((t) => t.id == threadId);
-              });
-              
-              Toast.show(
-                context,
-                message: 'Conversation archived',
-                type: ToastType.success,
-              );
             } else {
               // Delete
               if (kUseMockData) {
@@ -456,26 +703,59 @@ class _InboxScreenState extends State<InboxScreen> {
           },
           child: GestureDetector(
             onTap: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => InboxThreadScreen(
-                    contactName: thread.contactName,
-                    channel: channelName,
-                    contactId: thread.contactId,
-                    threadId: thread.id,
+              if (_isBatchMode) {
+                // Toggle selection in batch mode
+                setState(() {
+                  if (_selectedThreadIds.contains(thread.id)) {
+                    _selectedThreadIds.remove(thread.id);
+                  } else {
+                    _selectedThreadIds.add(thread.id);
+                  }
+                  if (_selectedThreadIds.isEmpty) {
+                    _isBatchMode = false;
+                  }
+                });
+              } else {
+                // Normal tap - open thread
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => InboxThreadScreen(
+                      contactName: thread.contactName,
+                      channel: channelName,
+                      contactId: thread.contactId,
+                      threadId: thread.id,
+                    ),
                   ),
-                ),
-              );
-              
-              // If mute/archive state changed, refresh the list
-              if (result == true && mounted) {
-                _loadMessages(); // Reload to update list (removes archived threads)
+                );
+                
+                // If mute/archive state changed, refresh the list
+                if (result == true && mounted) {
+                  _loadMessages(); // Reload to update list (removes archived threads)
+                }
               }
             },
             onLongPress: () {
               HapticFeedback.mediumImpact();
-              _showContextMenu(context, thread);
+              if (!_isBatchMode) {
+                // Enter batch mode
+                setState(() {
+                  _isBatchMode = true;
+                  _selectedThreadIds = {thread.id};
+                });
+              } else {
+                // Toggle selection in batch mode
+                setState(() {
+                  if (_selectedThreadIds.contains(thread.id)) {
+                    _selectedThreadIds.remove(thread.id);
+                  } else {
+                    _selectedThreadIds.add(thread.id);
+                  }
+                  if (_selectedThreadIds.isEmpty) {
+                    _isBatchMode = false;
+                  }
+                });
+              }
             },
             child: Container(
               padding: const EdgeInsets.symmetric(
@@ -494,6 +774,25 @@ class _InboxScreenState extends State<InboxScreen> {
               ),
               child: Row(
                 children: [
+                  // Selection checkbox in batch mode
+                  if (_isBatchMode) ...[
+                    Checkbox(
+                      value: _selectedThreadIds.contains(thread.id),
+                      onChanged: (value) {
+                        setState(() {
+                          if (value == true) {
+                            _selectedThreadIds.add(thread.id);
+                          } else {
+                            _selectedThreadIds.remove(thread.id);
+                            if (_selectedThreadIds.isEmpty) {
+                              _isBatchMode = false;
+                            }
+                          }
+                        });
+                      },
+                    ),
+                    const SizedBox(width: SwiftleadTokens.spaceS),
+                  ],
                   // Channel Icon Badge
                   ChannelIconBadge(
                     channel: channelName,
@@ -658,6 +957,67 @@ class _InboxScreenState extends State<InboxScreen> {
             Toast.show(
               context,
               message: 'Marked as unread',
+              type: ToastType.success,
+            );
+          }
+        },
+      ),
+      ContextMenuItem(
+        icon: thread.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+        label: thread.isPinned ? 'Unpin' : 'Pin',
+        onTap: () async {
+          if (thread.isPinned) {
+            if (kUseMockData) {
+              await MockMessages.unpinThread(thread.id);
+            }
+            setState(() {
+              final index = _threads.indexWhere((t) => t.id == thread.id);
+              if (index != -1) {
+                _threads[index] = MessageThread(
+                  id: _threads[index].id,
+                  contactId: _threads[index].contactId,
+                  contactName: _threads[index].contactName,
+                  channel: _threads[index].channel,
+                  lastMessage: _threads[index].lastMessage,
+                  lastMessageTime: _threads[index].lastMessageTime,
+                  unreadCount: _threads[index].unreadCount,
+                  isPinned: false,
+                  status: _threads[index].status,
+                  messages: _threads[index].messages,
+                );
+              }
+              _applyFilter();
+            });
+            Toast.show(
+              context,
+              message: 'Thread unpinned',
+              type: ToastType.success,
+            );
+          } else {
+            if (kUseMockData) {
+              await MockMessages.pinThread(thread.id);
+            }
+            setState(() {
+              final index = _threads.indexWhere((t) => t.id == thread.id);
+              if (index != -1) {
+                _threads[index] = MessageThread(
+                  id: _threads[index].id,
+                  contactId: _threads[index].contactId,
+                  contactName: _threads[index].contactName,
+                  channel: _threads[index].channel,
+                  lastMessage: _threads[index].lastMessage,
+                  lastMessageTime: _threads[index].lastMessageTime,
+                  unreadCount: _threads[index].unreadCount,
+                  isPinned: true,
+                  status: _threads[index].status,
+                  messages: _threads[index].messages,
+                );
+              }
+              _applyFilter();
+            });
+            Toast.show(
+              context,
+              message: 'Thread pinned',
               type: ToastType.success,
             );
           }
