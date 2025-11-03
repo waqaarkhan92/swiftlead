@@ -10,11 +10,12 @@
 
 This report documents all buttons/actions found in the codebase with empty handlers (`onPressed: () {}` or `onTap: () {}`) and compares them against the product specification documents to determine their intended functionality.
 
-**Status:** ✅ **UPDATED** - 12 buttons successfully wired (December 2024)
+**Status:** ✅ **UPDATED** - Integration screens restructured (December 2024)
 
 **Key Findings:**
 - **69 total dead buttons** found across all screens
-- **✅ 12 buttons FIXED** (100% confidence + existing targets)
+- **✅ 12 buttons FIXED** (100% confidence + existing targets)  
+- **Integration screens restructured** - Removed orphaned IntegrationsHubScreen
 - **57 dead buttons remaining**
   - **1 HIGH PRIORITY** button affecting critical user flows
   - **0 MEDIUM PRIORITY** buttons affecting important features
@@ -215,6 +216,24 @@ This report documents all buttons/actions found in the codebase with empty handl
 **Examples:**
 - Notifications, Team, Integrations, Stripe, etc.
 
+**✅ **INTEGRATION SCREENS FIXED** - All 6 integration items now wired to individual config screens:**
+1. ✅ WhatsApp Connect → TwilioConfigurationScreen
+2. ✅ Instagram Connect → MetaBusinessSetupScreen
+3. ✅ Facebook Connect → MetaBusinessSetupScreen
+4. ✅ Google Calendar Sync → GoogleCalendarSetupScreen
+5. ✅ Stripe Connect → StripeConnectionScreen
+6. ✅ IMAP/SMTP Email → EmailConfigurationScreen
+
+**Orphaned Screen Removed:**
+- ❌ IntegrationsHubScreen deleted (lib/screens/settings/integrations_hub_screen.dart)
+- ✅ All references removed from codebase
+- ✅ Replaced with spec-compliant individual integration screens
+
+**Still Missing Sub-Screens:**
+- Business Hours, Services & Pricing, Tax Settings
+- AI Configuration, Security Settings, Data Export
+- Invoice Customization, Subscription & Billing
+
 **Priority:** LOW (niche settings functionality)
 
 ---
@@ -320,6 +339,7 @@ All expected behaviors are documented in:
 - ❌ Confetti animation widget (v2.5.1 enhancement)
 - ❌ FilterSheet with date picker
 - ❌ Note input modal/sheet
+- ❌ 7 missing settings sub-screens (Business Hours, Services & Pricing, Tax Settings, AI Configuration, Security Settings, Data Export, Invoice Customization, Subscription & Billing)
 
 ### V2.5.1 Enhancements Referenced:
 - Confetti animation on job complete (UI_Inventory:202)
@@ -359,3 +379,26 @@ All expected behaviors are documented in:
 - Phase 2: 8-10 hours (search, export, help, settings, secondary features)
 
 **Last Updated:** December 2024 - 12 buttons fixed (17% complete)
+
+---
+
+## ARCHITECTURAL CHANGES (December 2024)
+
+### Integration Screens Restructuring
+**Issue:** IntegrationsHubScreen was creating a hub that all 6 integration items opened, but spec requires individual config screens.
+
+**Solution:** Created individual integration configuration screens per Cross_Reference_Matrix_v2.5.1 Module 16:
+- ✅ TwilioConfigurationScreen (WhatsApp/SMS)
+- ✅ MetaBusinessSetupScreen (Facebook/Instagram)  
+- ✅ GoogleCalendarSetupScreen (Calendar sync)
+- ✅ StripeConnectionScreen (Payments)
+- ✅ EmailConfigurationScreen (IMAP/SMTP)
+
+**Changes:**
+- Deleted: lib/screens/settings/integrations_hub_screen.dart
+- Updated: lib/widgets/global/badge.dart - Added SwiftleadBadge.status() constructor
+- Wired: All 6 integration settings items to their respective screens
+- Verified: No references to IntegrationsHubScreen remain in codebase
+- Spec Compliance: Now matches Cross_Reference_Matrix_v2.5.1 Module 16
+
+**Impact:** Integration navigation now follows spec - each integration opens its own dedicated configuration screen.

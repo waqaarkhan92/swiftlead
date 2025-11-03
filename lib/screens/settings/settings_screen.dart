@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/global/skeleton_loader.dart';
 import '../../widgets/global/frosted_container.dart';
-import '../../widgets/global/empty_state_card.dart';
-import '../../widgets/global/chip.dart';
 import '../../theme/tokens.dart';
 import 'canned_responses_screen.dart';
+import 'organization_profile_screen.dart';
+import 'team_management_screen.dart';
+import 'twilio_configuration_screen.dart';
+import 'meta_business_setup_screen.dart';
+import 'google_calendar_setup_screen.dart';
+import 'stripe_connection_screen.dart';
+import 'email_configuration_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../support/support_screen.dart';
 import '../main_navigation.dart' as main_nav;
@@ -226,12 +231,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _SettingsItem(
               icon: Icons.business_outlined,
               label: 'Organisation Details',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const OrganizationProfileScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.people_outline,
               label: 'Team Members',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TeamManagementScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.access_time_outlined,
@@ -258,37 +277,79 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: Icons.chat_bubble_outline,
               label: 'WhatsApp Connect',
               trailing: _IntegrationStatus(isConnected: true),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TwilioConfigurationScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.camera_alt_outlined,
               label: 'Instagram Connect',
               trailing: _IntegrationStatus(isConnected: false),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MetaBusinessSetupScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.facebook,
               label: 'Facebook Connect',
               trailing: _IntegrationStatus(isConnected: true),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MetaBusinessSetupScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.calendar_today_outlined,
               label: 'Google Calendar Sync',
               trailing: _IntegrationStatus(isConnected: true),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const GoogleCalendarSetupScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.payment_outlined,
               label: 'Stripe Connect',
               trailing: _IntegrationStatus(isConnected: true),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const StripeConnectionScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.email_outlined,
               label: 'IMAP/SMTP Email',
               trailing: _IntegrationStatus(isConnected: false),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const EmailConfigurationScreen(),
+                  ),
+                );
+              },
             ),
           ],
         ),

@@ -12,47 +12,84 @@ enum BadgeSize { small, medium, large }
 
 /// SwiftleadBadge - Compatible version used throughout the app
 class SwiftleadBadge extends StatelessWidget {
-  final String label;
-  final BadgeVariant variant;
+  final String? label;
+  final BadgeVariant? variant;
+  final BadgeStatus? status;
   final IconData? icon;
   final BadgeSize size;
+  final int? count;
+  final Widget? child;
 
   const SwiftleadBadge({
     super.key,
-    required this.label,
-    required this.variant,
+    this.label,
+    this.variant,
+    this.status,
     this.icon,
     this.size = BadgeSize.medium,
+    this.count,
+    this.child,
   });
+
+  // Named constructor for status badges
+  factory SwiftleadBadge.status({
+    Key? key,
+    required String label,
+    required BadgeStatus status,
+  }) {
+    return SwiftleadBadge(key: key, label: label, status: status);
+  }
+
+  // Named constructor for variant badges
+  factory SwiftleadBadge.variant({
+    Key? key,
+    required String label,
+    required BadgeVariant variant,
+  }) {
+    return SwiftleadBadge(key: key, label: label, variant: variant);
+  }
 
   @override
   Widget build(BuildContext context) {
-    BadgeStatus status;
-    switch (variant) {
-      case BadgeVariant.success:
-        status = BadgeStatus.success;
-        break;
-      case BadgeVariant.warning:
-        status = BadgeStatus.warning;
-        break;
-      case BadgeVariant.error:
-        status = BadgeStatus.error;
-        break;
-      case BadgeVariant.info:
-        status = BadgeStatus.info;
-        break;
-      case BadgeVariant.neutral:
-        status = BadgeStatus.neutral;
-        break;
-      case BadgeVariant.secondary:
-        status = BadgeStatus.neutral;
-        break;
+    // If status is provided, use it directly
+    if (status != null) {
+      return Badge.status(
+        label: label!,
+        status: status!,
+      );
     }
-
-    return Badge.status(
-      label: label,
-      status: status,
-    );
+    
+    // Otherwise, convert variant to status
+    BadgeStatus badgeStatus;
+    if (variant != null) {
+      switch (variant!) {
+        case BadgeVariant.success:
+          badgeStatus = BadgeStatus.success;
+          break;
+        case BadgeVariant.warning:
+          badgeStatus = BadgeStatus.warning;
+          break;
+        case BadgeVariant.error:
+          badgeStatus = BadgeStatus.error;
+          break;
+        case BadgeVariant.info:
+          badgeStatus = BadgeStatus.info;
+          break;
+        case BadgeVariant.neutral:
+          badgeStatus = BadgeStatus.neutral;
+          break;
+        case BadgeVariant.secondary:
+          badgeStatus = BadgeStatus.neutral;
+          break;
+      }
+      return Badge.status(
+        label: label!,
+        status: badgeStatus,
+      );
+    }
+    
+    // Should not reach here
+    return const SizedBox.shrink();
   }
 }
 

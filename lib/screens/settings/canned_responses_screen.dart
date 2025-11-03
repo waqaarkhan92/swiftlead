@@ -5,7 +5,6 @@ import '../../widgets/global/empty_state_card.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/primary_button.dart';
 import '../../widgets/global/bottom_sheet.dart';
-import '../../widgets/global/swipe_action.dart';
 import '../../theme/tokens.dart';
 
 /// CannedResponsesScreen - Quick reply templates management
