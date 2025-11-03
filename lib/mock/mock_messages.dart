@@ -204,11 +204,23 @@ class MockMessages {
     ),
   ];
 
-  /// Fetch all message threads
+  // Track muted thread IDs
+  static final Set<String> _mutedThreadIds = {};
+  // Track archived thread IDs
+  static final Set<String> _archivedThreadIds = {};
+
+  /// Fetch all message threads (excluding archived and blocked)
   static Future<List<MessageThread>> fetchAllThreads() async {
     await simulateDelay();
-    logMockOperation('Fetched ${_threads.length} message threads');
-    return List.from(_threads);
+    // Filter out archived threads and threads from blocked contacts
+    final activeThreads = _threads.where((t) {
+      if (_archivedThreadIds.contains(t.id)) return false;
+      // Check if contact is blocked (import MockContacts to check)
+      // For now, we'll filter in inbox screen after loading
+      return true;
+    }).toList();
+    logMockOperation('Fetched ${activeThreads.length} message threads (${_archivedThreadIds.length} archived)');
+    return activeThreads;
   }
 
   /// Fetch thread by ID
@@ -267,6 +279,91 @@ class MockMessages {
     );
     logMockOperation('Sent message: "${content.substring(0, content.length > 30 ? 30 : content.length)}..."');
     return message;
+  }
+
+  /// Archive thread
+  static Future<bool> archiveThread(String threadId) async {
+    await simulateDelay();
+    final thread = _threads.where((t) => t.id == threadId).firstOrNull;
+    if (thread != null) {
+      _archivedThreadIds.add(threadId);
+      logMockOperation('Archived thread: ${thread.contactName}');
+      // In real implementation, this would update the database
+      return true;
+    }
+    return false;
+  }
+
+  /// Check if thread is archived
+  static bool isThreadArchived(String threadId) {
+    return _archivedThreadIds.contains(threadId);
+  }
+
+  /// Delete thread
+  static Future<bool> deleteThread(String threadId) async {
+    await simulateDelay();
+    final thread = _threads.where((t) => t.id == threadId).firstOrNull;
+    if (thread != null) {
+      logMockOperation('Deleted thread: ${thread.contactName}');
+      // In real implementation, this would soft-delete in the database
+      return true;
+    }
+    return false;
+  }
+
+  /// Mark thread as read (clear unread count)
+  static Future<bool> markThreadRead(String threadId) async {
+    await simulateDelay();
+    final thread = _threads.where((t) => t.id == threadId).firstOrNull;
+    if (thread != null) {
+      logMockOperation('Marked thread as read: ${thread.contactName}');
+      // In real implementation, this would update unread_count to 0
+      return true;
+    }
+    return false;
+  }
+
+  /// Mark thread as unread
+  static Future<bool> markThreadUnread(String threadId) async {
+    await simulateDelay();
+    final thread = _threads.where((t) => t.id == threadId).firstOrNull;
+    if (thread != null) {
+      logMockOperation('Marked thread as unread: ${thread.contactName}');
+      // In real implementation, this would set unread_count > 0
+      return true;
+    }
+    return false;
+  }
+
+  /// Mute thread (stop notifications)
+  static Future<bool> muteThread(String threadId) async {
+    await simulateDelay();
+    final thread = _threads.where((t) => t.id == threadId).firstOrNull;
+    if (thread != null) {
+      _mutedThreadIds.add(threadId);
+      logMockOperation('Muted thread: ${thread.contactName}');
+      // In real implementation, this would set muted = true
+      return true;
+    }
+    return false;
+  }
+
+  /// Unmute thread (resume notifications)
+  static Future<bool> unmuteThread(String threadId) async {
+    await simulateDelay();
+    final thread = _threads.where((t) => t.id == threadId).firstOrNull;
+    if (thread != null) {
+      _mutedThreadIds.remove(threadId);
+      logMockOperation('Unmuted thread: ${thread.contactName}');
+      // In real implementation, this would set muted = false
+      return true;
+    }
+    return false;
+  }
+
+  /// Check if thread is muted
+  static bool isThreadMuted(String threadId) {
+    return _mutedThreadIds.contains(threadId);
   }
 }
 

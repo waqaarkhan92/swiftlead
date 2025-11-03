@@ -10,6 +10,7 @@ import '../../theme/tokens.dart';
 import 'faq_management_screen.dart';
 import 'ai_activity_log_screen.dart';
 import 'ai_training_mode_screen.dart';
+import 'ai_configuration_screen.dart';
 import '../main_navigation.dart' as main_nav;
 
 /// AI Hub Screen - Central control for AI features
@@ -44,11 +45,38 @@ class _AIHubScreenState extends State<AIHubScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AIConfigurationScreen(),
+                ),
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.help_outline),
-            onPressed: () {},
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('AI Hub Help'),
+                  content: const Text(
+                    'The AI Hub helps you manage your AI receptionist settings.\n\n'
+                    '• Configure response tone and behavior\n'
+                    '• Train the AI with your business information\n'
+                    '• View activity logs and performance\n'
+                    '• Manage FAQs and auto-responses',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Got it'),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -421,7 +449,14 @@ class _AIHubScreenState extends State<AIHubScreen> {
               ),
               Expanded(
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AIConfigurationScreen(),
+                      ),
+                    );
+                  },
                   child: const Text('Full Settings'),
                 ),
               ),

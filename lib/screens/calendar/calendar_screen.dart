@@ -7,6 +7,7 @@ import '../../widgets/global/primary_button.dart';
 import '../../theme/tokens.dart';
 import 'create_edit_booking_screen.dart';
 import 'booking_detail_screen.dart';
+import 'calendar_search_screen.dart';
 import '../../config/mock_config.dart';
 import '../../mock/mock_repository.dart';
 import '../../widgets/components/booking_card.dart';
@@ -67,7 +68,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.search_outlined),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CalendarSearchScreen(),
+                ),
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.add),

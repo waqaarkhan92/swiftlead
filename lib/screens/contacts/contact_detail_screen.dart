@@ -5,7 +5,11 @@ import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/badge.dart';
 import '../../widgets/global/chip.dart';
 import '../../widgets/global/toast.dart';
+import '../../widgets/global/skeleton_loader.dart';
+import '../../widgets/global/empty_state_card.dart';
 import '../../theme/tokens.dart';
+import '../../models/contact.dart';
+import '../../mock/mock_contacts.dart';
 import '../quotes/create_edit_quote_screen.dart';
 import '../inbox/inbox_thread_screen.dart';
 import '../jobs/create_edit_job_screen.dart';
@@ -26,14 +30,59 @@ class ContactDetailScreen extends StatefulWidget {
 
 class _ContactDetailScreenState extends State<ContactDetailScreen> {
   int _selectedTab = 0;
+  Contact? _contact;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadContact();
+  }
+
+  Future<void> _loadContact() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final contact = await MockContacts.fetchById(widget.contactId);
+      if (mounted) {
+        setState(() {
+          _contact = contact;
+          _isLoading = false;
+          if (contact == null) {
+            _error = 'Contact not found';
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Error loading contact: ${e.toString()}';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  String _getInitials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.isEmpty) return '';
+    if (parts.length == 1) return parts[0][0].toUpperCase();
+    return '${parts[0][0]}${parts[parts.length - 1][0]}'.toUpperCase();
+  }
 
   void _handleCreateQuoteFromContact() {
+    if (_contact == null) return;
+    
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const CreateEditQuoteScreen(
+        builder: (context) => CreateEditQuoteScreen(
           initialData: {
-            'clientName': 'John Smith', // Would come from contact data
+            'clientName': _contact!.name,
             'taxRate': 20.0,
           },
         ),
@@ -48,24 +97,32 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
   }
 
   void _handleMessageContact() {
+    if (_contact == null) return;
+    
+    // Determine channel - use SMS as default, could be enhanced
+    final channel = 'SMS';
+    
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => InboxThreadScreen(
-          contactName: 'John Smith', // Would come from contact data
-          channel: 'SMS',
+          contactName: _contact!.name,
+          channel: channel,
+          contactId: _contact!.id,
         ),
       ),
     );
   }
 
   void _handleCreateJobFromContact() {
+    if (_contact == null) return;
+    
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => CreateEditJobScreen(
           initialData: {
-            'clientName': 'John Smith', // Would come from contact data
+            'clientName': _contact!.name,
           },
         ),
       ),
@@ -73,7 +130,16 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
   }
 
   void _handleCallContact() async {
-    final uri = Uri.parse('tel:+442012345678');
+    if (_contact == null || _contact!.phone == null) {
+      Toast.show(
+        context,
+        message: 'Phone number not available',
+        type: ToastType.error,
+      );
+      return;
+    }
+    
+    final uri = Uri.parse('tel:${_contact!.phone}');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
@@ -88,7 +154,16 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
   }
 
   void _handleEmailContact() async {
-    final uri = Uri.parse('mailto:john.smith@example.com');
+    if (_contact == null || _contact!.email == null) {
+      Toast.show(
+        context,
+        message: 'Email address not available',
+        type: ToastType.error,
+      );
+      return;
+    }
+    
+    final uri = Uri.parse('mailto:${_contact!.email}');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
@@ -108,7 +183,7 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
-        title: 'Contact Details',
+        title: _isLoading ? 'Loading...' : (_contact?.name ?? 'Contact Details'),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
@@ -125,6 +200,37 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
   }
 
   Widget _buildContent() {
+    if (_isLoading) {
+      return ListView(
+        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+        children: [
+          SkeletonLoader(
+            width: double.infinity,
+            height: 200,
+            borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          SkeletonLoader(
+            width: double.infinity,
+            height: 100,
+            borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+          ),
+        ],
+      );
+    }
+
+    if (_error != null || _contact == null) {
+      return Center(
+        child: EmptyStateCard(
+          title: 'Contact not found',
+          description: _error ?? 'Unable to load contact details',
+          icon: Icons.person_off,
+          actionLabel: 'Retry',
+          onAction: _loadContact,
+        ),
+      );
+    }
+
     return DefaultTabController(
       length: 4,
       child: Column(
@@ -162,6 +268,8 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
   }
 
   Widget _buildProfileCard() {
+    if (_contact == null) return const SizedBox.shrink();
+    
     return FrostedContainer(
       margin: const EdgeInsets.all(SwiftleadTokens.spaceM),
       padding: const EdgeInsets.all(20),
@@ -174,36 +282,53 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
             decoration: BoxDecoration(
               color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
               shape: BoxShape.circle,
+              image: _contact!.avatarUrl != null
+                  ? DecorationImage(
+                      image: NetworkImage(_contact!.avatarUrl!),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
-            child: const Center(
-              child: Text(
-                'JS',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w600,
-                  color: Color(SwiftleadTokens.primaryTeal),
-                ),
-              ),
-            ),
+            child: _contact!.avatarUrl == null
+                ? Center(
+                    child: Text(
+                      _getInitials(_contact!.name),
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w600,
+                        color: Color(SwiftleadTokens.primaryTeal),
+                      ),
+                    ),
+                  )
+                : null,
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
           
           // Name
           Text(
-            'John Smith',
+            _contact!.name,
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           const SizedBox(height: SwiftleadTokens.spaceXS),
           
           // Contact Info
-          Text(
-            'john.smith@example.com',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          Text(
-            '+44 20 1234 5678',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          if (_contact!.email != null)
+            Text(
+              _contact!.email!,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          if (_contact!.phone != null)
+            Text(
+              _contact!.phone!,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          if (_contact!.company != null) ...[
+            const SizedBox(height: SwiftleadTokens.spaceXS),
+            Text(
+              _contact!.company!,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
           const SizedBox(height: SwiftleadTokens.spaceM),
           
           // Stage Progress Bar
@@ -251,9 +376,12 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
   }
 
   Widget _buildStageProgressBar() {
+    if (_contact == null) return const SizedBox.shrink();
+    
     final stages = ['Lead', 'Prospect', 'Customer', 'Repeat Customer'];
-    final currentStage = 'Prospect';
-    final currentIndex = stages.indexOf(currentStage);
+    final currentStage = _contact!.stage.displayName;
+    final currentIndex = stages.indexWhere((s) => s == currentStage);
+    final displayIndex = currentIndex >= 0 ? currentIndex : 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,7 +400,7 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
             borderRadius: BorderRadius.circular(4),
           ),
           child: FractionallySizedBox(
-            widthFactor: (currentIndex + 1) / stages.length,
+            widthFactor: (displayIndex + 1) / stages.length,
             child: Container(
               decoration: BoxDecoration(
                 color: const Color(SwiftleadTokens.primaryTeal),
@@ -293,7 +421,9 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
   }
 
   Widget _buildScoreIndicator() {
-    const score = 75;
+    if (_contact == null) return const SizedBox.shrink();
+    
+    final score = _contact!.score;
     final classification = score >= 80 ? 'Hot' : (score >= 60 ? 'Warm' : 'Cold');
     final color = score >= 80 
         ? const Color(SwiftleadTokens.errorRed)
@@ -364,13 +494,25 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: SwiftleadTokens.spaceM),
-              _InfoRow(label: 'Email', value: 'john.smith@example.com'),
+              if (_contact!.email != null) ...[
+                _InfoRow(label: 'Email', value: _contact!.email!),
+                const SizedBox(height: SwiftleadTokens.spaceS),
+              ],
+              if (_contact!.phone != null) ...[
+                _InfoRow(label: 'Phone', value: _contact!.phone!),
+                const SizedBox(height: SwiftleadTokens.spaceS),
+              ],
+              if (_contact!.company != null) ...[
+                _InfoRow(label: 'Company', value: _contact!.company!),
+                const SizedBox(height: SwiftleadTokens.spaceS),
+              ],
+              if (_contact!.source != null) ...[
+                _InfoRow(label: 'Source', value: _contact!.source!),
+                const SizedBox(height: SwiftleadTokens.spaceS),
+              ],
+              _InfoRow(label: 'Stage', value: _contact!.stage.displayName),
               const SizedBox(height: SwiftleadTokens.spaceS),
-              _InfoRow(label: 'Phone', value: '+44 20 1234 5678'),
-              const SizedBox(height: SwiftleadTokens.spaceS),
-              _InfoRow(label: 'Address', value: '123 Main St, London'),
-              const SizedBox(height: SwiftleadTokens.spaceS),
-              _InfoRow(label: 'Source', value: 'Website'),
+              _InfoRow(label: 'Tags', value: _contact!.tags.isEmpty ? 'None' : _contact!.tags.join(', ')),
             ],
           ),
         ),

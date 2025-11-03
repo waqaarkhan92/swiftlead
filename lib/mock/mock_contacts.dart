@@ -4,6 +4,9 @@ import '../models/contact.dart';
 /// Mock Contacts Repository
 /// Provides realistic mock contact data for preview mode
 class MockContacts {
+  // Track blocked contact IDs
+  static final Set<String> _blockedContactIds = {};
+  
   static final List<Contact> _contacts = [
     Contact(
       id: '1',
@@ -121,6 +124,36 @@ class MockContacts {
     }
     logMockOperation('Contact count by stage: $counts');
     return counts;
+  }
+
+  /// Block contact (prevent messages and hide threads)
+  static Future<bool> blockContact(String contactId) async {
+    await simulateDelay();
+    final contact = _contacts.where((c) => c.id == contactId).firstOrNull;
+    if (contact != null) {
+      _blockedContactIds.add(contactId);
+      logMockOperation('Blocked contact: ${contact.name}');
+      // In real implementation, this would update the database
+      return true;
+    }
+    return false;
+  }
+
+  /// Unblock contact
+  static Future<bool> unblockContact(String contactId) async {
+    await simulateDelay();
+    final contact = _contacts.where((c) => c.id == contactId).firstOrNull;
+    if (contact != null) {
+      _blockedContactIds.remove(contactId);
+      logMockOperation('Unblocked contact: ${contact.name}');
+      return true;
+    }
+    return false;
+  }
+
+  /// Check if contact is blocked
+  static bool isContactBlocked(String contactId) {
+    return _blockedContactIds.contains(contactId);
   }
 }
 

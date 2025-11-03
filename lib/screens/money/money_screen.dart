@@ -13,6 +13,8 @@ import '../../widgets/forms/payment_request_modal.dart';
 import 'invoice_detail_screen.dart';
 import 'create_edit_invoice_screen.dart';
 import 'payment_detail_screen.dart';
+import 'money_search_screen.dart';
+import '../../widgets/forms/job_export_sheet.dart';
 import '../../config/mock_config.dart';
 import '../../mock/mock_repository.dart';
 import '../main_navigation.dart' as main_nav;
@@ -144,11 +146,34 @@ class _MoneyScreenState extends State<MoneyScreen> {
           // Export button
           IconButton(
             icon: const Icon(Icons.download_outlined),
-            onPressed: () {},
+            onPressed: () {
+              // Use job export sheet as template - in real app would have money export sheet
+              // For now, show a placeholder
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Export Data'),
+                  content: const Text('Export functionality coming soon'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('OK'),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.search_outlined),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MoneySearchScreen(),
+                ),
+              );
+            },
           ),
           // Add menu
           PopupMenuButton<String>(

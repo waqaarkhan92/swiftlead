@@ -45,17 +45,21 @@ class InternalNotesModal {
               // Notes List
               Expanded(
                 child: notes.isEmpty
-                    ? EmptyStateCard(
-                        title: 'No notes yet',
-                        description: 'Add internal notes that only your team can see.',
-                        icon: Icons.note_outlined,
-                        actionLabel: 'Add First Note',
-                        onAction: () {
-                          // Focus note input
-                        },
+                    ? SingleChildScrollView(
+                        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                        child: EmptyStateCard(
+                          title: 'No notes yet',
+                          description: 'Add internal notes that only your team can see.',
+                          icon: Icons.note_outlined,
+                          actionLabel: 'Add First Note',
+                          onAction: () {
+                            // Focus note input
+                          },
+                        ),
                       )
                     : ListView(
                         padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                        shrinkWrap: false,
                         children: [
                           ...notes.map((note) => Padding(
                             padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
@@ -82,6 +86,7 @@ class InternalNotesModal {
 
               // Add Note Section
               Container(
+                constraints: const BoxConstraints(),
                 padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
                 decoration: BoxDecoration(
                   color: Theme.of(context).scaffoldBackgroundColor,
@@ -94,6 +99,7 @@ class InternalNotesModal {
                   ),
                 ),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
                       controller: noteController,

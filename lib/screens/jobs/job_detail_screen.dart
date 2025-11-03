@@ -16,6 +16,9 @@ import '../../widgets/global/confirmation_dialog.dart';
 import '../../widgets/global/toast.dart';
 import '../../widgets/global/progress_bar.dart';
 import '../../theme/tokens.dart';
+import '../../models/job.dart';
+import '../../mock/mock_repository.dart';
+import '../../config/mock_config.dart';
 import 'create_edit_job_screen.dart';
 import '../quotes/create_edit_quote_screen.dart';
 import '../money/create_edit_invoice_screen.dart';
@@ -40,16 +43,92 @@ class JobDetailScreen extends StatefulWidget {
 class _JobDetailScreenState extends State<JobDetailScreen> {
   int _selectedTabIndex = 0;
   final List<String> _tabs = ['Timeline', 'Details', 'Notes', 'Messages', 'Media'];
-  double _progress = 0.75; // 75% complete
+  Job? _job;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadJob();
+  }
+
+  String _getInitials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.isEmpty) return '';
+    if (parts.length == 1) return parts[0][0].toUpperCase();
+    return '${parts[0][0]}${parts[parts.length - 1][0]}'.toUpperCase();
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'N/A';
+    final now = DateTime.now();
+    final difference = now.difference(date);
+    if (difference.inDays == 0) return 'Today';
+    if (difference.inDays == 1) return 'Yesterday';
+    if (difference.inDays < 7) return '${difference.inDays} days ago';
+    if (difference.inDays < 30) return '${(difference.inDays / 7).floor()} weeks ago';
+    return '${(difference.inDays / 30).floor()} months ago';
+  }
+
+  String _formatDaysUntil(DateTime? date) {
+    if (date == null) return 'N/A';
+    final now = DateTime.now();
+    final difference = date.difference(now);
+    if (difference.inDays == 0) return 'Today';
+    if (difference.inDays == 1) return 'Tomorrow';
+    if (difference.inDays > 0) return '${difference.inDays} days';
+    return 'Overdue';
+  }
+
+  Future<void> _loadJob() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      if (kUseMockData) {
+        final job = await MockJobs.fetchById(widget.jobId);
+        if (mounted) {
+          setState(() {
+            _job = job;
+            _isLoading = false;
+            if (job == null) {
+              _error = 'Job not found';
+            }
+          });
+        }
+      } else {
+        // TODO: Load from live backend
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _error = 'Backend not implemented';
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Error loading job: ${e.toString()}';
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   void _handleCreateQuoteFromJob() {
+    if (_job == null) return;
+    
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => CreateEditQuoteScreen(
           initialData: {
-            'clientName': 'John Smith', // Would come from job data
-            'notes': 'Quote for ${widget.jobTitle}',
+            'clientName': _job!.contactName,
+            'contactId': _job!.contactId,
+            'notes': 'Quote for ${_job!.title}',
             'taxRate': 20.0,
           },
         ),
@@ -64,11 +143,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   void _handleMessageClient() {
+    if (_job == null) return;
+    
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => InboxThreadScreen(
-          contactName: 'John Smith', // Would come from job data
+          contactName: _job!.contactName,
+          contactId: _job!.contactId,
           channel: 'SMS',
         ),
       ),
@@ -101,11 +183,47 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        extendBody: true,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: FrostedAppBar(
+          title: 'Loading...',
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_error != null || _job == null) {
+      return Scaffold(
+        extendBody: true,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: FrostedAppBar(
+          title: 'Error',
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        body: Center(
+          child: EmptyStateCard(
+            title: _error ?? 'Job not found',
+            description: 'Unable to load job details',
+            icon: Icons.error_outline,
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
-        title: widget.jobTitle,
+        title: _job!.title,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -227,10 +345,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(24),
                 ),
-                child: const Center(
+                child: Center(
                   child: Text(
-                    'JS',
-                    style: TextStyle(
+                    _getInitials(_job!.contactName),
+                    style: const TextStyle(
                       color: Color(SwiftleadTokens.primaryTeal),
                       fontWeight: FontWeight.w600,
                     ),
@@ -243,13 +361,13 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'John Smith',
+                      _job!.contactName,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     Text(
-                      '+44 7700 900123',
+                      _job!.address,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -270,12 +388,13 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           // ServiceBadge
           Row(
             children: [
-              ProgressPill(status: 'In Progress'),
+              ProgressPill(status: _job!.status.displayName),
               const SizedBox(width: SwiftleadTokens.spaceS),
-              DateChip(
-                date: DateTime.now().add(const Duration(days: 5)),
-                isDue: true,
-              ),
+              if (_job!.scheduledDate != null)
+                DateChip(
+                  date: _job!.scheduledDate!,
+                  isDue: _job!.scheduledDate!.isBefore(DateTime.now()),
+                ),
             ],
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
@@ -292,7 +411,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
-                  value: _progress,
+                  value: _job!.status == JobStatus.completed ? 1.0 : (_job!.status == JobStatus.inProgress ? 0.75 : 0.25),
                   backgroundColor: Colors.black.withOpacity(0.1),
                   valueColor: const AlwaysStoppedAnimation<Color>(
                     Color(SwiftleadTokens.primaryTeal),
@@ -302,7 +421,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                '${(_progress * 100).toInt()}% Complete',
+                '${_job!.status == JobStatus.completed ? 100 : (_job!.status == JobStatus.inProgress ? 75 : 25)}% Complete',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -315,19 +434,19 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               Expanded(
                 child: _KeyMetricItem(
                   label: 'Value',
-                  value: '£450',
+                  value: '£${_job!.value.toStringAsFixed(2)}',
                 ),
               ),
               Expanded(
                 child: _KeyMetricItem(
                   label: 'Created',
-                  value: '2 days ago',
+                  value: _formatDate(_job!.createdAt),
                 ),
               ),
               Expanded(
                 child: _KeyMetricItem(
                   label: 'Due',
-                  value: '3 days',
+                  value: _formatDaysUntil(_job!.scheduledDate),
                 ),
               ),
             ],
