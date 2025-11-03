@@ -62,7 +62,7 @@
 | Add job icon handler | `lib/screens/jobs/jobs_screen.dart:141` | Wire to quick actions menu | ✅ |
 | Sort icon handler | `lib/screens/jobs/jobs_screen.dart:131` | Implement sort dropdown | ✅ |
 | Mark complete button | `lib/screens/jobs/job_detail_screen.dart:367` | Implement with confetti animation | ⬜ |
-| Duplicate job handler | `lib/screens/jobs/job_detail_screen.dart:140-157` | Implement duplication logic | ⬜ |
+| ~~Duplicate job handler~~ | ~~Removed - not needed~~ | ~~Removed per user request~~ | ❌ Cancelled |
 | Export callback | `lib/screens/jobs/job_detail_screen.dart:163` | Implement onExportComplete | ⬜ |
 
 ### Calendar Module
@@ -73,7 +73,7 @@
 | Prev month button | `lib/screens/calendar/calendar_screen.dart:171` | Navigate to previous month | ⬜ |
 | Next month button | `lib/screens/calendar/calendar_screen.dart:188` | Navigate to next month | ⬜ |
 | Day tap handler | `lib/screens/calendar/calendar_screen.dart:237` | Show day events | ⬜ |
-| Duplicate booking | `lib/screens/calendar/booking_detail_screen.dart:92-94` | Implement duplicate logic | ⬜ |
+| ~~Duplicate booking~~ | ~~Removed - not needed~~ | ~~Removed per user request~~ | ❌ Cancelled |
 
 ### Money Module
 
@@ -84,7 +84,7 @@
 | Search icon handler | `lib/screens/money/money_screen.dart:151` | Implement search | ✅ |
 | Add payment handler | `lib/screens/money/money_screen.dart:219-221` | Implement payment creation | ⬜ |
 | Send invoice handler | `lib/screens/money/invoice_detail_screen.dart:74-76` | Implement send logic | ⬜ |
-| Duplicate invoice | `lib/screens/money/invoice_detail_screen.dart:77-79` | Implement duplicate logic | ⬜ |
+| ~~Duplicate invoice~~ | ~~Removed - not needed~~ | ~~Removed per user request~~ | ❌ Cancelled |
 | Mark paid handler | `lib/screens/money/invoice_detail_screen.dart:80-82` | Implement mark paid logic | ⬜ |
 | Delete invoice | `lib/screens/money/invoice_detail_screen.dart:83-85` | Implement delete logic | ⬜ |
 
@@ -107,7 +107,7 @@
 | Item | Location | Action Required | Status |
 |------|----------|----------------|--------|
 | Pause campaign | `lib/screens/marketing/campaign_detail_screen.dart:63-65` | Implement pause logic | ⬜ |
-| Clone campaign | `lib/screens/marketing/campaign_detail_screen.dart:66-68` | Implement clone logic | ⬜ |
+| ~~Clone campaign~~ | ~~Removed - not needed~~ | ~~Removed per user request~~ | ❌ Cancelled |
 | Archive campaign | `lib/screens/marketing/campaign_detail_screen.dart:69-71` | Implement archive logic | ⬜ |
 | Delete campaign | `lib/screens/marketing/campaign_detail_screen.dart:72-74` | Implement delete logic | ⬜ |
 
@@ -303,7 +303,7 @@
 ---
 
 **Progress Summary:**
-- Phase 1 (Empty Handlers): 7/40+ complete (1 blocked - Jobs filter)
+- Phase 1 (Empty Handlers): 11/40+ complete (1 blocked - Jobs filter)
 - Phase 2 (Integration): 0/15+ complete  
 - Phase 3 (Partial): 0/60+ complete
 - Phase 4 (Missing): 0/50+ complete

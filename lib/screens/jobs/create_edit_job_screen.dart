@@ -116,6 +116,7 @@ class _CreateEditJobScreenState extends State<CreateEditJobScreen> {
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+          shrinkWrap: false,
           children: [
             // Info Banner
             InfoBanner(

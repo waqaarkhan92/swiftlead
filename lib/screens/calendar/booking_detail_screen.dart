@@ -9,6 +9,7 @@ import '../../widgets/forms/cancel_booking_modal.dart';
 import '../../widgets/forms/complete_booking_modal.dart';
 import '../../widgets/forms/booking_confirmation_sheet.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/global/toast.dart';
 import 'create_edit_booking_screen.dart';
 import '../../widgets/forms/on_my_way_sheet.dart';
 
@@ -89,15 +90,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     depositPaid: true,
                   );
                   break;
-                case 'duplicate':
-                  // Duplicate booking
-                  break;
               }
             },
             itemBuilder: (context) => [
               const PopupMenuItem(value: 'reschedule', child: Text('Reschedule')),
               const PopupMenuItem(value: 'cancel', child: Text('Cancel')),
-              const PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
             ],
           ),
         ],

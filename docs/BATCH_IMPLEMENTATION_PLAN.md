@@ -29,14 +29,14 @@ These are all the same pattern: `onPressed: () {}` → `onPressed: () { Navigato
 
 ---
 
-### **Batch Type B: Duplicate/Clone Handlers** (Low Risk)
+### **Batch Type B: Duplicate/Clone Handlers** ❌ **REMOVED - Not Needed**
 All follow the same pattern: Create copy of entity, navigate to edit screen
 
 **Examples:**
-- Duplicate job
-- Duplicate booking
-- Duplicate invoice
-- Clone campaign
+~~- Duplicate job~~ (Removed per user request)
+~~- Duplicate booking~~ (Removed per user request)
+~~- Duplicate invoice~~ (Removed per user request)
+~~- Clone campaign~~ (Removed per user request)
 
 **Risk Level:** 🟢 Low - Standard CRUD pattern
 **Testing:** Create one duplicate, verify it works
@@ -106,7 +106,7 @@ Mark as complete/paid/read/etc.
 
 ### Phase 1: Quick Win Batches (Days 1-2)
 1. **Batch A1:** All icon handlers (navigation) - ~15 items
-2. **Batch A2:** All duplicate handlers - ~6 items
+2. ~~**Batch A2:** All duplicate handlers - ~6 items~~ ❌ **REMOVED - Not Needed**
 3. **Batch A3:** All filter sheet handlers - ~8 items
 4. **Batch A4:** All simple navigation handlers - ~10 items
 

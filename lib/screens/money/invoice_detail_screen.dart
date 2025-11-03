@@ -74,9 +74,6 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
                 case 'send':
                   // Send invoice
                   break;
-                case 'duplicate':
-                  // Duplicate invoice
-                  break;
                 case 'mark_paid':
                   // Mark as paid
                   break;
@@ -88,7 +85,6 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
             itemBuilder: (context) => [
               const PopupMenuItem(value: 'send', child: Text('Send Invoice')),
               const PopupMenuItem(value: 'request_payment', child: Text('Request Payment')),
-              const PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
               const PopupMenuItem(value: 'mark_paid', child: Text('Mark as Paid')),
               const PopupMenuItem(value: 'delete', child: Text('Delete')),
             ],

@@ -91,12 +91,14 @@ class PrimaryButton extends StatelessWidget {
           ),
         ],
       ),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          minimumSize: Size(double.infinity, height),
-          padding: EdgeInsets.symmetric(vertical: verticalPadding),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            minimumSize: Size(double.infinity, height),
+            padding: EdgeInsets.symmetric(vertical: verticalPadding),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(SwiftleadTokens.radiusButton),
           ),
@@ -137,6 +139,7 @@ class PrimaryButton extends StatelessWidget {
                   ),
                 ],
               ),
+        ),
       ),
     );
   }

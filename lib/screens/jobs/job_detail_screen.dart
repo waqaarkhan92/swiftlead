@@ -167,6 +167,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   void _handleCallClient() async {
+    if (_job == null) return;
+    // TODO: Get phone number from contact
     final uri = Uri.parse('tel:+442012345678');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
@@ -180,6 +182,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -255,25 +258,6 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                     },
                   );
                   break;
-                case 'duplicate':
-                  SwiftleadConfirmationDialog.show(
-                    context: context,
-                    title: 'Duplicate Job',
-                    description: 'Create a copy of this job?',
-                    primaryActionLabel: 'Duplicate',
-                    secondaryActionLabel: 'Cancel',
-                    icon: Icons.copy,
-                  ).then((confirmed) {
-                    if (confirmed == true) {
-                      Toast.show(
-                        context,
-                        message: 'Job duplicated successfully',
-                        type: ToastType.success,
-                      );
-                      // Navigate to new job
-                    }
-                  });
-                  break;
                 case 'export':
                   JobExportSheet.show(
                     context: context,
@@ -306,7 +290,6 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             },
             itemBuilder: (context) => [
               const PopupMenuItem(value: 'assign', child: Text('Assign')),
-              const PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
               const PopupMenuItem(value: 'export', child: Text('Export')),
               const PopupMenuItem(value: 'delete', child: Text('Delete')),
             ],

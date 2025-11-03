@@ -29,6 +29,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   List<Booking> _allBookings = [];
   List<Booking> _todayBookings = [];
   DateTime _selectedDate = DateTime.now();
+  DateTime _currentMonth = DateTime.now();
 
   @override
   void initState() {
@@ -176,24 +177,35 @@ class _CalendarScreenState extends State<CalendarScreen> {
           children: [
             IconButton(
               icon: const Icon(Icons.chevron_left),
-              onPressed: () {},
+              onPressed: () {
+                setState(() {
+                  _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1);
+                });
+              },
             ),
             TextButton(
               onPressed: () {
-                // Jump to today
+                setState(() {
+                  _selectedDate = DateTime.now();
+                  _currentMonth = DateTime.now();
+                });
               },
               child: const Text('Today'),
             ),
-            const Text(
-              'November 2024',
-              style: TextStyle(
+            Text(
+              _formatMonthYear(_currentMonth),
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
             ),
             IconButton(
               icon: const Icon(Icons.chevron_right),
-              onPressed: () {},
+              onPressed: () {
+                setState(() {
+                  _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1);
+                });
+              },
             ),
           ],
         ),
@@ -243,7 +255,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
               
               return GestureDetector(
                 onTap: () {
-                  // Tap day to see all events
+                  setState(() {
+                    _selectedDate = DateTime(_currentMonth.year, _currentMonth.month, day);
+                  });
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -344,6 +358,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
       return bookingDate == todayDate && 
              booking.status == BookingStatus.confirmed;
     });
+  }
+
+  String _formatMonthYear(DateTime date) {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                     'July', 'August', 'September', 'October', 'November', 'December'];
+    return '${months[date.month - 1]} ${date.year}';
   }
 
   Widget _buildOnMyWayButton() {

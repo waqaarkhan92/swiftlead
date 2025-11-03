@@ -9,6 +9,7 @@ import '../../widgets/global/badge.dart';
 import '../../widgets/global/chip.dart';
 import '../../widgets/global/primary_button.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/global/toast.dart';
 import 'campaign_builder_screen.dart';
 
 /// Campaign Detail Screen - View campaign details and analytics
@@ -63,9 +64,6 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
                 case 'pause':
                   // Pause campaign
                   break;
-                case 'clone':
-                  // Clone campaign
-                  break;
                 case 'archive':
                   // Archive campaign
                   break;
@@ -76,7 +74,6 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
             },
             itemBuilder: (context) => [
               const PopupMenuItem(value: 'pause', child: Text('Pause')),
-              const PopupMenuItem(value: 'clone', child: Text('Clone')),
               const PopupMenuItem(value: 'archive', child: Text('Archive')),
               const PopupMenuItem(value: 'delete', child: Text('Delete')),
             ],

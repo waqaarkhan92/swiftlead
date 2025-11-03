@@ -36,27 +36,6 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
   double _total = 540.00;
   DateTime _validUntil = DateTime.now().add(const Duration(days: 5));
 
-  void _handleDuplicateQuote() async {
-    // Navigate to create/edit screen with duplicated data
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CreateEditQuoteScreen(
-          initialData: {
-            'clientName': 'John Smith',
-            'notes': 'Duplicated from ${widget.quoteNumber}',
-            'taxRate': 20.0,
-          },
-        ),
-      ),
-    ).then((_) {
-      Toast.show(
-        context,
-        message: 'Quote duplicated successfully',
-        type: ToastType.success,
-      );
-    });
-  }
 
   void _handleDeleteQuote() async {
     final confirmed = await SwiftleadConfirmationDialog.show(
@@ -120,9 +99,6 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
                     amount: _total,
                   );
                   break;
-                case 'duplicate':
-                  _handleDuplicateQuote();
-                  break;
                 case 'convert_job':
                   ConvertQuoteModal.show(
                     context: context,
@@ -148,7 +124,6 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
             },
             itemBuilder: (context) => [
               const PopupMenuItem(value: 'send', child: Text('Send Quote')),
-              const PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
               const PopupMenuItem(value: 'convert_job', child: Text('Convert to Job')),
               const PopupMenuItem(value: 'convert_invoice', child: Text('Convert to Invoice')),
               const PopupMenuItem(value: 'delete', child: Text('Delete')),

@@ -140,7 +140,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
           IconButton(
             icon: const Icon(Icons.date_range_outlined),
             onPressed: () {
-              // Date range picker opens
+              _showDateRangePicker(context);
             },
           ),
           // Export button
@@ -242,7 +242,18 @@ class _MoneyScreenState extends State<MoneyScreen> {
   }
 
   void _handleAddPayment() {
-    // Add payment functionality
+    // Show payment request modal to record a payment
+    PaymentRequestModal.show(
+      context: context,
+      onSendRequest: (amount, method) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Payment recorded'),
+            backgroundColor: Color(SwiftleadTokens.primaryTeal),
+          ),
+        );
+      },
+    );
   }
 
   void _handleAddInvoice() {
@@ -258,6 +269,22 @@ class _MoneyScreenState extends State<MoneyScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const CreateEditQuoteScreen()),
+    );
+  }
+
+  void _showDateRangePicker(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Date Range Filter'),
+        content: const Text('Date range picker coming soon'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 
