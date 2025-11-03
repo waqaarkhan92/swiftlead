@@ -28,14 +28,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
   String _selectedView = 'month'; // day | week | month
   List<Booking> _allBookings = [];
   List<Booking> _todayBookings = [];
-  DateTime _selectedDate = DateTime.now();
-  DateTime _currentMonth = DateTime.now();
-
+  late DateTime _selectedDate;
+  late DateTime _currentMonth;
+  
   @override
   void initState() {
     super.initState();
+    final now = DateTime.now();
+    _selectedDate = now;
+    _currentMonth = DateTime(now.year, now.month, 1);
     _loadBookings();
   }
+
 
   Future<void> _loadBookings() async {
     setState(() => _isLoading = true);
@@ -63,7 +67,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
             icon: const Icon(Icons.today_outlined),
             onPressed: () {
               setState(() {
-                _selectedDate = DateTime.now();
+                final now = DateTime.now();
+                _selectedDate = now;
+                _currentMonth = DateTime(now.year, now.month, 1);
               });
             },
           ),
@@ -179,15 +185,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
               icon: const Icon(Icons.chevron_left),
               onPressed: () {
                 setState(() {
-                  _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1);
+                  _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1, 1);
                 });
               },
             ),
             TextButton(
               onPressed: () {
                 setState(() {
-                  _selectedDate = DateTime.now();
-                  _currentMonth = DateTime.now();
+                  final now = DateTime.now();
+                  _selectedDate = now;
+                  _currentMonth = DateTime(now.year, now.month, 1);
                 });
               },
               child: const Text('Today'),
@@ -203,7 +210,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               icon: const Icon(Icons.chevron_right),
               onPressed: () {
                 setState(() {
-                  _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1);
+                  _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 1);
                 });
               },
             ),
@@ -214,6 +221,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Widget _buildCalendarWidget() {
+    // Calculate the first day of the month
+    final firstDayOfMonth = DateTime(_currentMonth.year, _currentMonth.month, 1);
+    // Get the weekday (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    final firstDayOfWeek = firstDayOfMonth.weekday % 7;
+    // Get the number of days in the current month
+    final daysInMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 0).day;
+    // Get today's date
+    final today = DateTime.now();
+    // Get selected date (only year and month and day matter)
+    final selectedDateOnly = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -249,18 +267,60 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             itemCount: 35, // 5 weeks
             itemBuilder: (context, index) {
-              final day = index + 1;
-              final isToday = day == DateTime.now().day;
-              final hasEvent = index % 5 == 0; // Example: some days have events
+              // Calculate which day this cell represents
+              int day;
+              bool isInCurrentMonth = false;
+              
+              if (index < firstDayOfWeek) {
+                // Days from previous month (show as empty/grey)
+                day = 0; // Empty cell
+              } else if (index < firstDayOfWeek + daysInMonth) {
+                // Days in current month
+                day = index - firstDayOfWeek + 1;
+                isInCurrentMonth = true;
+              } else {
+                // Days from next month (show as empty/grey)
+                day = 0; // Empty cell
+              }
+              
+              if (day == 0) {
+                // Empty cell (previous/next month)
+                return Container();
+              }
+              
+              // Create the date for this cell
+              final cellDate = DateTime(_currentMonth.year, _currentMonth.month, day);
+              final cellDateOnly = DateTime(cellDate.year, cellDate.month, cellDate.day);
+              
+              // Check if this is today
+              final isToday = cellDateOnly.year == today.year &&
+                  cellDateOnly.month == today.month &&
+                  cellDateOnly.day == today.day;
+              
+              // Check if this is selected
+              final isSelected = cellDateOnly.year == selectedDateOnly.year &&
+                  cellDateOnly.month == selectedDateOnly.month &&
+                  cellDateOnly.day == selectedDateOnly.day;
+              
+              // Check if this day has bookings
+              final hasEvent = _allBookings.any((booking) {
+                final bookingDate = booking.startTime;
+                return bookingDate.year == cellDate.year &&
+                    bookingDate.month == cellDate.month &&
+                    bookingDate.day == cellDate.day;
+              });
               
               return GestureDetector(
                 onTap: () {
                   setState(() {
-                    _selectedDate = DateTime(_currentMonth.year, _currentMonth.month, day);
+                    _selectedDate = cellDate;
                   });
                 },
                 child: Container(
                   decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1)
+                        : null,
                     border: isToday
                         ? Border.all(
                             color: const Color(SwiftleadTokens.primaryTeal),
@@ -275,12 +335,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       Text(
                         '$day',
                         style: TextStyle(
-                          color: isToday
+                          color: isToday || isSelected
                               ? const Color(SwiftleadTokens.primaryTeal)
-                              : Theme.of(context).textTheme.bodyLarge?.color,
-                          fontWeight: isToday ? FontWeight.w700 : FontWeight.normal,
+                              : (isInCurrentMonth
+                                  ? Theme.of(context).textTheme.bodyLarge?.color
+                                  : Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.3)),
+                          fontWeight: isToday || isSelected ? FontWeight.w700 : FontWeight.normal,
                         ),
                       ),
+                      if (hasEvent)
+                        const SizedBox(height: 2),
                       if (hasEvent)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
