@@ -8,6 +8,7 @@ import '../../widgets/components/job_card.dart';
 import '../../theme/tokens.dart';
 import '../../config/mock_config.dart';
 import '../../mock/mock_repository.dart';
+import '../main_navigation.dart' as main_nav;
 
 /// JobsScreen - Job management pipeline
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -85,6 +86,7 @@ class _JobsScreenState extends State<JobsScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
+        scaffoldKey: main_nav.MainNavigation.scaffoldKey,
         title: 'Jobs',
         actions: [
           Stack(
@@ -142,17 +144,6 @@ class _JobsScreenState extends State<JobsScreen> {
       body: _isLoading
           ? _buildLoadingState()
           : _buildContent(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // Quick actions: "From Quote", "From Scratch", "From Template"
-        },
-        backgroundColor: const Color(SwiftleadTokens.primaryTeal),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'New Job',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
     );
   }
 

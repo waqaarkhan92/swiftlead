@@ -17,8 +17,19 @@ void main() {
   runApp(const SwiftleadApp());
 }
 
-class SwiftleadApp extends StatelessWidget {
+class SwiftleadApp extends StatefulWidget {
   const SwiftleadApp({super.key});
+
+  @override
+  State<SwiftleadApp> createState() => _SwiftleadAppState();
+}
+
+class _SwiftleadAppState extends State<SwiftleadApp> {
+  ThemeMode _themeMode = ThemeMode.system;
+
+  void setThemeMode(ThemeMode mode) {
+    setState(() => _themeMode = mode);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +38,11 @@ class SwiftleadApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: SwiftleadTheme.lightTheme(),
       darkTheme: SwiftleadTheme.darkTheme(),
-      themeMode: ThemeMode.system,
-      home: const MainNavigation(),
+      themeMode: _themeMode,
+      home: MainNavigation(
+        onThemeChanged: setThemeMode,
+        currentThemeMode: _themeMode,
+      ),
     );
   }
 }

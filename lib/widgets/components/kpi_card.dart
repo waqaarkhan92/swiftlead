@@ -2,32 +2,36 @@ import 'package:flutter/material.dart';
 import '../../theme/tokens.dart';
 import '../global/frosted_container.dart';
 
-/// TrendTile - Metric card with sparkline and percentage change
-/// Exact specification from Screen_Layouts_v2.5.1
-class TrendTile extends StatelessWidget {
+/// KPICard - Large metric card with current value, trend arrow, vs previous period, sparkline
+/// Exact specification from UI_Inventory_v2.5.1
+class KPICard extends StatelessWidget {
   final String label;
   final String value;
   final String? trend;
+  final String? vsPreviousPeriod;
   final bool isPositive;
-  final List<double>? sparklineData; // Mini trend graph data
+  final List<double>? sparklineData;
   final String? tooltip;
+  final VoidCallback? onTap;
   
-  const TrendTile({
+  const KPICard({
     super.key,
     required this.label,
     required this.value,
     this.trend,
+    this.vsPreviousPeriod,
     this.isPositive = true,
     this.sparklineData,
     this.tooltip,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: onTap,
       onLongPress: tooltip != null
           ? () {
-              // Show tooltip on long-press
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(tooltip!),
@@ -38,30 +42,30 @@ class TrendTile extends StatelessWidget {
             }
           : null,
       child: FrostedContainer(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               label,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: Theme.of(context).textTheme.bodyMedium,
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Text(
               value,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+              style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
             if (sparklineData != null && sparklineData!.isNotEmpty) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
               SizedBox(
-                height: 20,
+                height: 40,
                 width: double.infinity,
                 child: CustomPaint(
                   painter: _SparklinePainter(
@@ -73,28 +77,42 @@ class TrendTile extends StatelessWidget {
                 ),
               ),
             ],
-            if (trend != null) ...[
-              const SizedBox(height: 4),
+            if (trend != null || vsPreviousPeriod != null) ...[
+              const SizedBox(height: 8),
               Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(
-                    isPositive ? Icons.trending_up : Icons.trending_down,
-                    size: 12,
-                    color: isPositive
-                        ? const Color(SwiftleadTokens.successGreen)
-                        : const Color(SwiftleadTokens.errorRed),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    trend!,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: isPositive
-                          ? const Color(SwiftleadTokens.successGreen)
-                          : const Color(SwiftleadTokens.errorRed),
-                      fontWeight: FontWeight.w600,
+                  if (trend != null)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isPositive ? Icons.trending_up : Icons.trending_down,
+                          size: 16,
+                          color: isPositive
+                              ? const Color(SwiftleadTokens.successGreen)
+                              : const Color(SwiftleadTokens.errorRed),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          trend!,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: isPositive
+                                    ? const Color(SwiftleadTokens.successGreen)
+                                    : const Color(SwiftleadTokens.errorRed),
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ],
                     ),
-                  ),
+                  if (vsPreviousPeriod != null)
+                    Text(
+                      'vs $vsPreviousPeriod',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
                 ],
               ),
             ],
@@ -121,7 +139,7 @@ class _SparklinePainter extends CustomPainter {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
+      ..strokeWidth = 2.5;
 
     final path = Path();
     final maxValue = data.reduce((a, b) => a > b ? a : b);

@@ -3,7 +3,6 @@ import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/components/chat_bubble.dart';
 import '../../widgets/components/date_separator.dart';
 import '../../widgets/components/message_composer_bar.dart';
-import '../../widgets/components/internal_notes_button.dart';
 import '../../widgets/components/channel_icon_badge.dart';
 import '../../widgets/forms/smart_reply_suggestions_sheet.dart';
 import '../../theme/tokens.dart';
@@ -58,6 +57,9 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
                 case 'search':
                   // Search in chat
                   break;
+                case 'internal_notes':
+                  // Show internal notes sheet
+                  break;
                 case 'mute':
                   // Mute
                   break;
@@ -87,6 +89,38 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
                     Icon(Icons.search, size: 18),
                     SizedBox(width: 8),
                     Text('Search in chat'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'internal_notes',
+                child: Row(
+                  children: [
+                    const Icon(Icons.note_add, size: 18),
+                    const SizedBox(width: 8),
+                    const Text('Internal Notes'),
+                    if (_noteCount > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(SwiftleadTokens.primaryTeal),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '$_noteCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -180,12 +214,6 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
             },
           ),
         ],
-      ),
-      floatingActionButton: InternalNotesButton(
-        noteCount: _noteCount,
-        onTap: () {
-          // Slides in from right when tapped
-        },
       ),
     );
   }

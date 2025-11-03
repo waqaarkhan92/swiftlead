@@ -5,14 +5,16 @@ import '../../theme/tokens.dart';
 /// Exact specification from Screen_Layouts_v2.5.1
 class QuickActionChip extends StatelessWidget {
   final String label;
-  final IconData icon;
+  final IconData? icon;
+  final String? customIcon;
   final VoidCallback? onTap;
   final String? tooltip;
   
   const QuickActionChip({
     super.key,
     required this.label,
-    required this.icon,
+    this.icon,
+    this.customIcon,
     this.onTap,
     this.tooltip,
   });
@@ -44,11 +46,20 @@ class QuickActionChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 18,
-              color: const Color(SwiftleadTokens.primaryTeal),
-            ),
+            customIcon != null
+                ? Text(
+                    customIcon!,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(SwiftleadTokens.primaryTeal),
+                    ),
+                  )
+                : Icon(
+                    icon,
+                    size: 18,
+                    color: const Color(SwiftleadTokens.primaryTeal),
+                  ),
             const SizedBox(width: 8),
             Text(
               label,

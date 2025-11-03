@@ -9,6 +9,7 @@ import '../../widgets/global/bottom_sheet.dart';
 import '../../theme/tokens.dart';
 import 'campaign_detail_screen.dart';
 import 'campaign_builder_screen.dart';
+import '../main_navigation.dart' as main_nav;
 
 /// Marketing Screen - Campaign list and management
 /// Exact specification from UI_Inventory_v2.5.1
@@ -37,6 +38,7 @@ class _MarketingScreenState extends State<MarketingScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
+        scaffoldKey: main_nav.MainNavigation.scaffoldKey,
         title: 'Marketing',
         actions: [
           IconButton(
@@ -52,11 +54,6 @@ class _MarketingScreenState extends State<MarketingScreen> {
       body: _isLoading
           ? _buildLoadingState()
           : _buildContent(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showCreateCampaignSheet(context),
-        backgroundColor: const Color(SwiftleadTokens.primaryTeal),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
     );
   }
 

@@ -11,6 +11,7 @@ import '../../theme/tokens.dart';
 import 'contact_detail_screen.dart';
 import 'contact_import_wizard_screen.dart';
 import 'contact_export_builder_screen.dart';
+import '../main_navigation.dart' as main_nav;
 
 /// Contacts Screen - Contact list view with search and filters
 /// Exact specification from UI_Inventory_v2.5.1
@@ -40,6 +41,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
+        scaffoldKey: main_nav.MainNavigation.scaffoldKey,
         title: 'Contacts',
         actions: [
           IconButton(
@@ -55,11 +57,6 @@ class _ContactsScreenState extends State<ContactsScreen> {
       body: _isLoading
           ? _buildLoadingState()
           : _buildContent(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddContactSheet(context),
-        backgroundColor: const Color(SwiftleadTokens.primaryTeal),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
     );
   }
 

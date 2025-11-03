@@ -3,12 +3,14 @@ import 'package:flutter/services.dart';
 import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/global/skeleton_loader.dart';
 import '../../widgets/components/trend_tile.dart';
+import '../../widgets/components/trend_line_chart.dart';
 import '../../widgets/components/quick_action_chip.dart';
 import '../../widgets/components/ai_insight_banner.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../theme/tokens.dart';
 import '../../config/mock_config.dart';
 import '../../mock/mock_repository.dart';
+import '../main_navigation.dart' as main_nav;
 
 /// HomeScreen - Dashboard hub
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -77,6 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
+        scaffoldKey: main_nav.MainNavigation.scaffoldKey,
         title: '${_getGreeting()}, Alex',
         profileIcon: IconButton(
           icon: Container(
@@ -106,11 +109,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return ListView(
       padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       children: [
-        // Metrics skeleton
+        // Metrics skeleton (2x2 grid)
         Row(
-          children: List.generate(4, (i) => Expanded(
+          children: List.generate(2, (i) => Expanded(
             child: Padding(
-              padding: EdgeInsets.only(right: i < 3 ? 8.0 : 0.0),
+              padding: EdgeInsets.only(right: i == 0 ? 8.0 : 0.0),
               child: SkeletonLoader(
                 width: double.infinity,
                 height: 120,
@@ -119,13 +122,18 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           )),
         ),
-        const SizedBox(height: SwiftleadTokens.spaceL),
-        
-        // Chart skeleton
-        SkeletonLoader(
-          width: double.infinity,
-          height: 200,
-          borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+        const SizedBox(height: SwiftleadTokens.spaceS),
+        Row(
+          children: List.generate(2, (i) => Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(right: i == 0 ? 8.0 : 0.0),
+              child: SkeletonLoader(
+                width: double.infinity,
+                height: 120,
+                borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+              ),
+            ),
+          )),
         ),
         const SizedBox(height: SwiftleadTokens.spaceL),
         
@@ -157,6 +165,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           )),
         ),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+        
+        // Chart skeleton
+        SkeletonLoader(
+          width: double.infinity,
+          height: 200,
+          borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+        ),
       ],
     );
   }
@@ -179,12 +195,12 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildMetricsRow(),
           const SizedBox(height: SwiftleadTokens.spaceL),
           
-          // ChartCard with interactive legend
-          _buildChartCard(),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-          
           // SmartTileGrid with badges
           _buildTileGrid(),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          
+          // ChartCard with interactive legend
+          _buildChartCard(),
           const SizedBox(height: SwiftleadTokens.spaceL),
           
           // QuickActionChipsRow
@@ -209,117 +225,126 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMetricsRow() {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: TrendTile(
-            label: 'Revenue',
-            value: '£${_totalRevenue.toStringAsFixed(0)}',
-            trend: '+12%',
-            isPositive: true,
-            sparklineData: [
-              _totalRevenue * 0.5,
-              _totalRevenue * 0.6,
-              _totalRevenue * 0.7,
-              _totalRevenue * 0.8,
-              _totalRevenue * 0.9,
-              _totalRevenue * 0.95,
-              _totalRevenue,
-            ],
-            tooltip: 'Total revenue from all paid invoices',
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: TrendTile(
+                label: 'Revenue',
+                value: '£${_totalRevenue.toStringAsFixed(0)}',
+                trend: '+12%',
+                isPositive: true,
+                sparklineData: [
+                  _totalRevenue * 0.5,
+                  _totalRevenue * 0.6,
+                  _totalRevenue * 0.7,
+                  _totalRevenue * 0.8,
+                  _totalRevenue * 0.9,
+                  _totalRevenue * 0.95,
+                  _totalRevenue,
+                ],
+                tooltip: 'Total revenue from all paid invoices',
+              ),
+            ),
+            const SizedBox(width: SwiftleadTokens.spaceS),
+            Expanded(
+              child: TrendTile(
+                label: 'Active Jobs',
+                value: '$_activeJobs',
+                trend: '+${(_activeJobs * 0.2).toInt()}',
+                isPositive: true,
+                sparklineData: [
+                  (_activeJobs * 0.6).toDouble(),
+                  (_activeJobs * 0.7).toDouble(),
+                  (_activeJobs * 0.8).toDouble(),
+                  (_activeJobs * 0.85).toDouble(),
+                  (_activeJobs * 0.9).toDouble(),
+                  (_activeJobs * 0.95).toDouble(),
+                  _activeJobs.toDouble(),
+                ],
+                tooltip: 'Jobs in progress or scheduled',
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: SwiftleadTokens.spaceS),
-        Expanded(
-          child: TrendTile(
-            label: 'Active Jobs',
-            value: '$_activeJobs',
-            trend: '+${(_activeJobs * 0.2).toInt()}',
-            isPositive: true,
-            sparklineData: [
-              (_activeJobs * 0.6).toDouble(),
-              (_activeJobs * 0.7).toDouble(),
-              (_activeJobs * 0.8).toDouble(),
-              (_activeJobs * 0.85).toDouble(),
-              (_activeJobs * 0.9).toDouble(),
-              (_activeJobs * 0.95).toDouble(),
-              _activeJobs.toDouble(),
-            ],
-            tooltip: 'Jobs in progress or scheduled',
-          ),
-        ),
-        const SizedBox(width: SwiftleadTokens.spaceS),
-        Expanded(
-          child: TrendTile(
-            label: 'Messages',
-            value: '$_unreadMessages',
-            trend: 'Unread',
-            isPositive: false,
-            sparklineData: [
-              (_unreadMessages * 0.2).toDouble(),
-              (_unreadMessages * 0.4).toDouble(),
-              (_unreadMessages * 0.6).toDouble(),
-              (_unreadMessages * 0.7).toDouble(),
-              (_unreadMessages * 0.8).toDouble(),
-              (_unreadMessages * 0.9).toDouble(),
-              _unreadMessages.toDouble(),
-            ],
-            tooltip: 'Unread messages across all channels',
-          ),
-        ),
-        const SizedBox(width: SwiftleadTokens.spaceS),
-        Expanded(
-          child: TrendTile(
-            label: 'Conversion',
-            value: '${_conversionRate.toInt()}%',
-            trend: '+5%',
-            isPositive: true,
-            sparklineData: [55, 58, 60, 62, 65, 66, 68],
-            tooltip: 'Quote to job conversion rate',
-          ),
+        const SizedBox(height: SwiftleadTokens.spaceS),
+        Row(
+          children: [
+            Expanded(
+              child: TrendTile(
+                label: 'Messages',
+                value: '$_unreadMessages',
+                trend: 'Unread',
+                isPositive: false,
+                sparklineData: [
+                  (_unreadMessages * 0.2).toDouble(),
+                  (_unreadMessages * 0.4).toDouble(),
+                  (_unreadMessages * 0.6).toDouble(),
+                  (_unreadMessages * 0.7).toDouble(),
+                  (_unreadMessages * 0.8).toDouble(),
+                  (_unreadMessages * 0.9).toDouble(),
+                  _unreadMessages.toDouble(),
+                ],
+                tooltip: 'Unread messages across all channels',
+              ),
+            ),
+            const SizedBox(width: SwiftleadTokens.spaceS),
+            Expanded(
+              child: TrendTile(
+                label: 'Conversion',
+                value: '${_conversionRate.toInt()}%',
+                trend: '+5%',
+                isPositive: true,
+                sparklineData: [55, 58, 60, 62, 65, 66, 68],
+                tooltip: 'Quote to job conversion rate',
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
   Widget _buildChartCard() {
-    return FrostedContainer(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Revenue Trend',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              // Period selector (7/30/90 days) - interactive legend
-              Row(
-                children: [
-                  _PeriodChip(label: '7D', isSelected: false),
-                  const SizedBox(width: 8),
-                  _PeriodChip(label: '30D', isSelected: true),
-                  const SizedBox(width: 8),
-                  _PeriodChip(label: '90D', isSelected: false),
-                ],
-              ),
-            ],
+    // Mock data for revenue trend with multiple periods
+    final periodData = {
+      '7D': [
+        ChartDataPoint(label: 'D1', value: 800),
+        ChartDataPoint(label: 'D2', value: 950),
+        ChartDataPoint(label: 'D3', value: 720),
+        ChartDataPoint(label: 'D4', value: 1050),
+        ChartDataPoint(label: 'D5', value: 920),
+        ChartDataPoint(label: 'D6', value: 1100),
+        ChartDataPoint(label: 'D7', value: 1250),
+      ],
+      '30D': [
+        ChartDataPoint(label: 'Week 1', value: 5000),
+        ChartDataPoint(label: 'Week 2', value: 6200),
+        ChartDataPoint(label: 'Week 3', value: 5800),
+        ChartDataPoint(label: 'Week 4', value: 7500),
+      ],
+      '90D': [
+        ChartDataPoint(label: 'Month 1', value: 22000),
+        ChartDataPoint(label: 'Month 2', value: 24800),
+        ChartDataPoint(label: 'Month 3', value: 28500),
+      ],
+    };
+
+    return TrendLineChart(
+      title: 'Revenue Trend',
+      dataPoints: periodData['30D']!,
+      periodData: periodData,
+      lineColor: const Color(SwiftleadTokens.successGreen),
+      yAxisLabel: '£',
+      onDataPointTap: (point) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Revenue: £${point.value.toInt()}'),
+            duration: const Duration(seconds: 1),
           ),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-          SizedBox(
-            height: 150,
-            child: Center(
-              child: Text(
-                'Chart will be implemented with fl_chart\n(Tap data points for breakdown, swipe for period change)',
-                style: Theme.of(context).textTheme.bodySmall,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -361,7 +386,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(width: SwiftleadTokens.spaceS),
             Expanded(
               child: _SmartTile(
-                icon: Icons.attach_money_outlined,
+                customIcon: '£',
                 label: 'Money',
                 badge: '£${_pendingPayments.toStringAsFixed(0)}',
                 preview: '£${_pendingPayments.toStringAsFixed(0)} in pending payments',
@@ -379,6 +404,12 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         children: [
           QuickActionChip(
+            label: 'On My Way',
+            icon: Icons.directions_car,
+            tooltip: 'Mark yourself as on the way',
+            onTap: () {},
+          ),
+          QuickActionChip(
             label: 'Add Job',
             icon: Icons.add,
             tooltip: 'Create a new job',
@@ -386,7 +417,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           QuickActionChip(
             label: 'Send Payment',
-            icon: Icons.attach_money,
+            customIcon: '£',
             tooltip: 'Request or send payment',
             onTap: () {},
           ),
@@ -470,55 +501,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
 enum _EventType { payment, job, message, booking, quote }
 
-class _PeriodChip extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  
-  const _PeriodChip({
-    required this.label,
-    this.isSelected = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {},
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? const Color(SwiftleadTokens.primaryTeal)
-                : Colors.transparent,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected
-                ? const Color(SwiftleadTokens.primaryTeal)
-                : Theme.of(context).textTheme.bodySmall?.color,
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _SmartTile extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final String? customIcon;
   final String label;
   final String? badge;
   final String? preview;
 
   const _SmartTile({
-    required this.icon,
+    this.icon,
+    this.customIcon,
     required this.label,
     this.badge,
     this.preview,
@@ -565,7 +557,16 @@ class _SmartTile extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(icon, color: Colors.white, size: 28),
+                customIcon != null
+                    ? Text(
+                        customIcon!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      )
+                    : Icon(icon, color: Colors.white, size: 28),
                 if (badge != null)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -615,7 +616,7 @@ class _ActivityFeedRow extends StatelessWidget {
   IconData _getIcon() {
     switch (eventType) {
       case _EventType.payment:
-        return Icons.attach_money;
+        return Icons.account_balance_wallet;
       case _EventType.job:
         return Icons.work;
       case _EventType.message:

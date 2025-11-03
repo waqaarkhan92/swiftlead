@@ -18,7 +18,11 @@ import '../theme/tokens.dart';
 /// Main Navigation - Bottom tab navigation with drawer
 /// Exact specification from Screen_Layouts_v2.5.1
 class MainNavigation extends StatefulWidget {
-  const MainNavigation({super.key});
+  final Function(ThemeMode) onThemeChanged;
+  final ThemeMode currentThemeMode;
+  
+  const MainNavigation({super.key, required this.onThemeChanged, required this.currentThemeMode});
+  static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
@@ -26,20 +30,35 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const InboxScreen(),
-    const JobsScreen(),
-    const CalendarScreen(),
-    const MoneyScreen(),
+  List<Widget> get _screens => [
+    HomeScreen(),
+    InboxScreen(),
+    JobsScreen(),
+    CalendarScreen(),
+    MoneyScreen(),
   ];
+  
+  // Mapping for drawer screens
+  Map<String, Widget> get _drawerScreenMap => {
+    'ai_hub': AIHubScreen(),
+    'contacts': ContactsScreen(),
+    'marketing': MarketingScreen(),
+    'reports': ReportsScreen(),
+    'settings': SettingsScreen(
+      onThemeChanged: widget.onThemeChanged,
+      currentThemeMode: widget.currentThemeMode,
+    ),
+    'support': SupportScreen(),
+    'legal': LegalScreen(),
+  };
+  
+  Widget? _drawerScreen;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
+      return Scaffold(
+      key: MainNavigation.scaffoldKey,
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       drawer: SwiftleadDrawer(
@@ -57,10 +76,7 @@ class _MainNavigationState extends State<MainNavigation> {
             isSelected: false,
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AIHubScreen()),
-              );
+              setState(() => _drawerScreen = _drawerScreenMap['ai_hub']);
             },
           ),
           DrawerItem(
@@ -69,10 +85,7 @@ class _MainNavigationState extends State<MainNavigation> {
             isSelected: false,
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ContactsScreen()),
-              );
+              setState(() => _drawerScreen = _drawerScreenMap['contacts']);
             },
           ),
           DrawerItem(
@@ -81,10 +94,7 @@ class _MainNavigationState extends State<MainNavigation> {
             isSelected: false,
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const MarketingScreen()),
-              );
+              setState(() => _drawerScreen = _drawerScreenMap['marketing']);
             },
           ),
           DrawerItem(
@@ -93,10 +103,7 @@ class _MainNavigationState extends State<MainNavigation> {
             isSelected: false,
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ReportsScreen()),
-              );
+              setState(() => _drawerScreen = _drawerScreenMap['reports']);
             },
           ),
           DrawerItem(
@@ -105,10 +112,7 @@ class _MainNavigationState extends State<MainNavigation> {
             isSelected: false,
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
+              setState(() => _drawerScreen = _drawerScreenMap['settings']);
             },
           ),
           DrawerItem(
@@ -118,10 +122,7 @@ class _MainNavigationState extends State<MainNavigation> {
             badge: '2',
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SupportScreen()),
-              );
+              setState(() => _drawerScreen = _drawerScreenMap['support']);
             },
           ),
           DrawerItem(
@@ -130,10 +131,7 @@ class _MainNavigationState extends State<MainNavigation> {
             isSelected: false,
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const LegalScreen()),
-              );
+              setState(() => _drawerScreen = _drawerScreenMap['legal']);
             },
           ),
         ],
@@ -178,11 +176,14 @@ class _MainNavigationState extends State<MainNavigation> {
       ),
       body: Stack(
         children: [
-          _screens[_currentIndex],
+          _drawerScreen ?? _screens[_currentIndex],
           FrostedBottomNavBar(
-            currentIndex: _currentIndex,
+            currentIndex: _drawerScreen != null ? -1 : _currentIndex,
             onTap: (index) {
-              setState(() => _currentIndex = index);
+              setState(() {
+                _currentIndex = index;
+                _drawerScreen = null; // Clear drawer screen when switching tabs
+              });
             },
             items: [
               NavItem(
@@ -207,8 +208,8 @@ class _MainNavigationState extends State<MainNavigation> {
                 label: 'Calendar',
               ),
               NavItem(
-                icon: Icons.attach_money_outlined,
-                activeIcon: Icons.attach_money,
+                customIcon: '£',
+                customActiveIcon: '£',
                 label: 'Money',
               ),
             ],

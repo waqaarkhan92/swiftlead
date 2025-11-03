@@ -76,7 +76,9 @@ class _MessageComposerBarState extends State<MessageComposerBar> {
                   ],
                 ),
               ),
+            // Action buttons row
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // AttachmentButton
                 IconButton(
@@ -111,6 +113,12 @@ class _MessageComposerBarState extends State<MessageComposerBar> {
                   },
                   tooltip: 'AI reply suggestions',
                 ),
+              ],
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceS),
+            // Text input row
+            Row(
+              children: [
                 Expanded(
                   child: TextField(
                     controller: widget.controller,

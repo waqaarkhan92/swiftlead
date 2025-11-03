@@ -10,6 +10,7 @@ import '../../theme/tokens.dart';
 import 'faq_management_screen.dart';
 import 'ai_activity_log_screen.dart';
 import 'ai_training_mode_screen.dart';
+import '../main_navigation.dart' as main_nav;
 
 /// AI Hub Screen - Central control for AI features
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -38,6 +39,7 @@ class _AIHubScreenState extends State<AIHubScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
+        scaffoldKey: main_nav.MainNavigation.scaffoldKey,
         title: 'AI Hub',
         actions: [
           IconButton(

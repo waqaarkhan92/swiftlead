@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../widgets/global/frosted_app_bar.dart';
+import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/skeleton_loader.dart';
 import '../../widgets/global/empty_state_card.dart';
+import '../../widgets/global/primary_button.dart';
 import '../../theme/tokens.dart';
 import 'create_edit_booking_screen.dart';
+import 'booking_detail_screen.dart';
 import '../../config/mock_config.dart';
 import '../../mock/mock_repository.dart';
 import '../../widgets/components/booking_card.dart';
+import '../../widgets/forms/on_my_way_sheet.dart';
+import '../main_navigation.dart' as main_nav;
 
 /// CalendarScreen - Bookings & Scheduling
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -49,20 +54,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
+        scaffoldKey: main_nav.MainNavigation.scaffoldKey,
         title: 'Calendar',
         actions: [
-          // View toggle (day/week/month)
-          SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: 'day', label: Text('Day')),
-              ButtonSegment(value: 'week', label: Text('Week')),
-              ButtonSegment(value: 'month', label: Text('Month')),
-            ],
-            selected: {_selectedView},
-            onSelectionChanged: (Set<String> newSelection) {
-              setState(() => _selectedView = newSelection.first);
-            },
-          ),
           IconButton(
             icon: const Icon(Icons.today_outlined),
             onPressed: () {
@@ -89,22 +83,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
       body: _isLoading
           ? _buildLoadingState()
           : _buildContent(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const CreateEditBookingScreen(),
-            ),
-          );
-        },
-        backgroundColor: const Color(SwiftleadTokens.primaryTeal),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Book Slot',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
     );
   }
 
@@ -156,6 +134,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
           _buildCalendarWidget(),
           const SizedBox(height: SwiftleadTokens.spaceL),
           
+          // On My Way Button - Quick action for heading to appointments
+          if (_hasConfirmedBookingsToday()) _buildOnMyWayButton(),
+          if (_hasConfirmedBookingsToday()) const SizedBox(height: SwiftleadTokens.spaceL),
+          
           // BookingList - Cards below calendar
           _buildBookingList(),
         ],
@@ -164,29 +146,46 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Widget _buildCalendarHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
       children: [
-        IconButton(
-          icon: const Icon(Icons.chevron_left),
-          onPressed: () {},
-        ),
-        TextButton(
-          onPressed: () {
-            // Jump to today
+        // View toggle (day/week/month)
+        SegmentedButton<String>(
+          segments: const [
+            ButtonSegment(value: 'day', label: Text('Day')),
+            ButtonSegment(value: 'week', label: Text('Week')),
+            ButtonSegment(value: 'month', label: Text('Month')),
+          ],
+          selected: {_selectedView},
+          onSelectionChanged: (Set<String> newSelection) {
+            setState(() => _selectedView = newSelection.first);
           },
-          child: const Text('Today'),
         ),
-        const Text(
-          'November 2024',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.chevron_right),
-          onPressed: () {},
+        const SizedBox(height: SwiftleadTokens.spaceM),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.chevron_left),
+              onPressed: () {},
+            ),
+            TextButton(
+              onPressed: () {
+                // Jump to today
+              },
+              child: const Text('Today'),
+            ),
+            const Text(
+              'November 2024',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.chevron_right),
+              onPressed: () {},
+            ),
+          ],
         ),
       ],
     );
@@ -284,12 +283,74 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Widget _buildBookingList() {
-    return EmptyStateCard(
-      title: 'No bookings scheduled',
-      description: 'Your calendar is clear. Start booking appointments.',
-      icon: Icons.calendar_today_outlined,
-      actionLabel: 'Book Appointment',
-      onAction: () {},
+    if (_allBookings.isEmpty) {
+      return EmptyStateCard(
+        title: 'No bookings scheduled',
+        description: 'Your calendar is clear. Start booking appointments.',
+        icon: Icons.calendar_today_outlined,
+        actionLabel: 'Book Appointment',
+        onAction: () {},
+      );
+    }
+
+    return Column(
+      children: List.generate(_allBookings.length, (index) {
+        final booking = _allBookings[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+          child: BookingCard(
+            bookingId: booking.id,
+            clientName: booking.contactName,
+            serviceName: booking.serviceType,
+            startTime: booking.startTime,
+            endTime: booking.endTime,
+            status: booking.status.name,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BookingDetailScreen(
+                    bookingId: booking.id,
+                    clientName: booking.contactName,
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      }),
+    );
+  }
+
+  bool _hasConfirmedBookingsToday() {
+    final today = DateTime.now();
+    return _allBookings.any((booking) {
+      final bookingDate = DateTime(
+        booking.startTime.year,
+        booking.startTime.month,
+        booking.startTime.day,
+      );
+      final todayDate = DateTime(today.year, today.month, today.day);
+      return bookingDate == todayDate && 
+             booking.status == BookingStatus.confirmed;
+    });
+  }
+
+  Widget _buildOnMyWayButton() {
+    return FrostedContainer(
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      child: PrimaryButton(
+        label: 'On My Way',
+        icon: Icons.directions_car,
+        onPressed: () {
+          OnMyWaySheet.show(
+            context: context,
+            onSendETA: (minutes) {
+              // Handle ETA sent
+            },
+          );
+        },
+      ),
     );
   }
 }

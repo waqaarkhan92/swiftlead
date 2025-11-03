@@ -27,7 +27,7 @@ class FrostedBottomNavBar extends StatelessWidget {
     return Positioned(
       left: 16,
       right: 16,
-      bottom: 16 + bottomPadding,
+      bottom: bottomPadding,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(SwiftleadTokens.radiusBottomNav),
         child: BackdropFilter(
@@ -36,8 +36,8 @@ class FrostedBottomNavBar extends StatelessWidget {
             sigmaY: SwiftleadTokens.blurBottomNav,
           ),
           child: Container(
-            height: 64,
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+            constraints: const BoxConstraints(minHeight: 64),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
             decoration: BoxDecoration(
               color: isLight
                   ? Colors.white.withOpacity(0.08)
@@ -76,25 +76,53 @@ class FrostedBottomNavBar extends StatelessWidget {
                           item.badgeCount != null && item.badgeCount! > 0
                               ? swiftlead_badge.Badge.count(
                                   count: item.badgeCount!,
-                                  child: Icon(
-                                    isActive ? item.activeIcon : item.icon,
-                                    color: isActive
-                                        ? const Color(SwiftleadTokens.primaryTeal)
-                                        : (isLight
-                                            ? Colors.black.withOpacity(0.45)
-                                            : Colors.white.withOpacity(0.5)),
-                                    size: 24,
-                                  ),
+                                  child: item.hasCustomIcon
+                                      ? Text(
+                                          isActive ? item.customActiveIcon! : item.customIcon!,
+                                          style: TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.w700,
+                                            height: 1.0,
+                                            color: isActive
+                                                ? const Color(SwiftleadTokens.primaryTeal)
+                                                : (isLight
+                                                    ? Colors.black.withOpacity(0.45)
+                                                    : Colors.white.withOpacity(0.5)),
+                                          ),
+                                        )
+                                      : Icon(
+                                          isActive ? item.activeIcon : item.icon,
+                                          color: isActive
+                                              ? const Color(SwiftleadTokens.primaryTeal)
+                                              : (isLight
+                                                  ? Colors.black.withOpacity(0.45)
+                                                  : Colors.white.withOpacity(0.5)),
+                                          size: 24,
+                                        ),
                                 )
-                              : Icon(
-                                  isActive ? item.activeIcon : item.icon,
-                                  color: isActive
-                                      ? const Color(SwiftleadTokens.primaryTeal)
-                                      : (isLight
-                                          ? Colors.black.withOpacity(0.45)
-                                          : Colors.white.withOpacity(0.5)),
-                                  size: 24,
-                                ),
+                              : item.hasCustomIcon
+                                  ? Text(
+                                      isActive ? item.customActiveIcon! : item.customIcon!,
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w700,
+                                        height: 1.0,
+                                        color: isActive
+                                            ? const Color(SwiftleadTokens.primaryTeal)
+                                            : (isLight
+                                                ? Colors.black.withOpacity(0.45)
+                                                : Colors.white.withOpacity(0.5)),
+                                      ),
+                                    )
+                                  : Icon(
+                                      isActive ? item.activeIcon : item.icon,
+                                      color: isActive
+                                          ? const Color(SwiftleadTokens.primaryTeal)
+                                          : (isLight
+                                              ? Colors.black.withOpacity(0.45)
+                                              : Colors.white.withOpacity(0.5)),
+                                      size: 24,
+                                    ),
                           if (isActive)
                             Container(
                               margin: const EdgeInsets.only(top: 4),
@@ -120,16 +148,23 @@ class FrostedBottomNavBar extends StatelessWidget {
 }
 
 class NavItem {
-  final IconData icon;
-  final IconData activeIcon;
+  final IconData? icon;
+  final IconData? activeIcon;
+  final String? customIcon;
+  final String? customActiveIcon;
   final String label;
   final int? badgeCount;
   
   NavItem({
-    required this.icon,
-    required this.activeIcon,
+    this.icon,
+    this.activeIcon,
+    this.customIcon,
+    this.customActiveIcon,
     required this.label,
     this.badgeCount,
   });
+  
+  bool get hasCustomIcon => customIcon != null;
+  bool get hasIcon => icon != null;
 }
 

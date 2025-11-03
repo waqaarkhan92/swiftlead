@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../theme/tokens.dart';
+import '../main_navigation.dart' as main_nav;
 
 /// Legal / Privacy Screen - Legal documents and privacy information
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -19,6 +20,7 @@ class _LegalScreenState extends State<LegalScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
+        scaffoldKey: main_nav.MainNavigation.scaffoldKey,
         title: 'Legal / Privacy',
         actions: [
           IconButton(

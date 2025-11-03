@@ -14,6 +14,7 @@ import '../../mock/mock_repository.dart';
 import '../../models/message.dart';
 import 'inbox_thread_screen.dart';
 import 'message_search_screen.dart';
+import '../main_navigation.dart' as main_nav;
 
 /// InboxScreen - Unified messaging hub
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -92,6 +93,7 @@ class _InboxScreenState extends State<InboxScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
+        scaffoldKey: main_nav.MainNavigation.scaffoldKey,
         title: 'Inbox',
         actions: [
           IconButton(
@@ -150,44 +152,6 @@ class _InboxScreenState extends State<InboxScreen> {
       body: _isLoading
           ? _buildLoadingState()
           : _buildContent(),
-      floatingActionButton: _buildFAB(),
-    );
-  }
-
-  Widget _buildFAB() {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        FloatingActionButton.extended(
-          onPressed: () {},
-          backgroundColor: const Color(SwiftleadTokens.primaryTeal),
-          icon: const Icon(Icons.add, color: Colors.white),
-          label: const Text(
-            'New Chat',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        if (_unreadCount >= 24)
-          Positioned(
-            right: -4,
-            top: -4,
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: const BoxDecoration(
-                color: Color(SwiftleadTokens.errorRed),
-                shape: BoxShape.circle,
-              ),
-              child: Text(
-                '+24',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-      ],
     );
   }
 

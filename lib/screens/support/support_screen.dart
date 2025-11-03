@@ -4,6 +4,7 @@ import '../../widgets/global/skeleton_loader.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/empty_state_card.dart';
 import '../../theme/tokens.dart';
+import '../main_navigation.dart' as main_nav;
 
 /// Support / Help Screen - Self-service help and support access
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -24,6 +25,7 @@ class _SupportScreenState extends State<SupportScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
+        scaffoldKey: main_nav.MainNavigation.scaffoldKey,
         title: 'Support & Help',
         actions: [
           IconButton(

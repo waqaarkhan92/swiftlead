@@ -6,11 +6,16 @@ import '../../widgets/global/empty_state_card.dart';
 import '../../widgets/global/chip.dart';
 import '../../theme/tokens.dart';
 import 'canned_responses_screen.dart';
+import '../notifications/notifications_screen.dart';
+import '../main_navigation.dart' as main_nav;
 
 /// Settings Screen - Organization configuration and preferences
 /// Exact specification from Screen_Layouts_v2.5.1 and UI_Inventory_v2.5.1
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final Function(ThemeMode) onThemeChanged;
+  final ThemeMode currentThemeMode;
+  
+  const SettingsScreen({super.key, required this.onThemeChanged, required this.currentThemeMode});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -18,6 +23,8 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _isLoading = false;
+  
+  ThemeMode get _themeMode => widget.currentThemeMode;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +32,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
+        scaffoldKey: main_nav.MainNavigation.scaffoldKey,
         title: 'Settings',
         actions: [
           IconButton(
@@ -185,7 +193,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _SettingsItem(
               icon: Icons.notifications_outlined,
               label: 'Notification Settings',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NotificationsScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.privacy_tip_outlined,
@@ -350,10 +365,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: Icons.palette_outlined,
               label: 'Theme',
               trailing: Text(
-                'Auto',
+                _getThemeModeLabel(_themeMode),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              onTap: () {},
+              onTap: () => _showThemeSelector(context),
             ),
             _SettingsItem(
               icon: Icons.color_lens_outlined,
@@ -508,6 +523,64 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: const Text('Clear Cache'),
           ),
         ],
+      ),
+    );
+  }
+
+  String _getThemeModeLabel(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+      case ThemeMode.system:
+        return 'Auto';
+    }
+  }
+
+  void _showThemeSelector(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Theme'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<ThemeMode>(
+              title: const Text('Auto (System)'),
+              value: ThemeMode.system,
+              groupValue: _themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  widget.onThemeChanged(value);
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            RadioListTile<ThemeMode>(
+              title: const Text('Light'),
+              value: ThemeMode.light,
+              groupValue: _themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  widget.onThemeChanged(value);
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            RadioListTile<ThemeMode>(
+              title: const Text('Dark'),
+              value: ThemeMode.dark,
+              groupValue: _themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  widget.onThemeChanged(value);
+                  Navigator.pop(context);
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

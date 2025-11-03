@@ -317,12 +317,6 @@ class _ServiceCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(width: SwiftleadTokens.spaceM),
-                Icon(
-                  Icons.attach_money,
-                  size: 16,
-                  color: Theme.of(context).textTheme.bodySmall?.color,
-                ),
-                const SizedBox(width: 4),
                 Text(
                   '£${service.price.toStringAsFixed(0)}',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(

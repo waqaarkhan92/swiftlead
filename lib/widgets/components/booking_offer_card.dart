@@ -144,12 +144,6 @@ class BookingOfferCard extends StatelessWidget {
             const SizedBox(height: SwiftleadTokens.spaceS),
             Row(
               children: [
-                const Icon(
-                  Icons.attach_money,
-                  size: 18,
-                  color: Color(SwiftleadTokens.primaryTeal),
-                ),
-                const SizedBox(width: SwiftleadTokens.spaceS),
                 Text(
                   '£${price!.toStringAsFixed(2)}',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(

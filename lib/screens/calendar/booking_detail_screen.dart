@@ -217,12 +217,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           const SizedBox(height: SwiftleadTokens.spaceS),
           Row(
             children: [
-              Icon(
-                Icons.attach_money,
-                size: 18,
-                color: Theme.of(context).textTheme.bodySmall?.color,
-              ),
-              const SizedBox(width: SwiftleadTokens.spaceS),
               Text(
                 '£450',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(

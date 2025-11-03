@@ -67,6 +67,7 @@ class BookingCard extends StatelessWidget {
       child: FrostedContainer(
         padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header Row
@@ -190,21 +191,28 @@ class BookingCard extends StatelessWidget {
             const SizedBox(height: SwiftleadTokens.spaceS),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                TextButton.icon(
-                  onPressed: onMessage,
-                  icon: const Icon(Icons.message, size: 18),
-                  label: const Text('Message'),
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed: onMessage,
+                    icon: const Icon(Icons.message, size: 18),
+                    label: const Text('Msg'),
+                  ),
                 ),
-                TextButton.icon(
-                  onPressed: onReschedule,
-                  icon: const Icon(Icons.schedule, size: 18),
-                  label: const Text('Reschedule'),
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed: onReschedule,
+                    icon: const Icon(Icons.schedule, size: 18),
+                    label: const Text('Move'),
+                  ),
                 ),
-                TextButton.icon(
-                  onPressed: onComplete,
-                  icon: const Icon(Icons.check, size: 18),
-                  label: const Text('Complete'),
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed: onComplete,
+                    icon: const Icon(Icons.check, size: 18),
+                    label: const Text('Done'),
+                  ),
                 ),
               ],
             ),

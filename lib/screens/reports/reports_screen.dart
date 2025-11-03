@@ -9,6 +9,7 @@ import '../../widgets/global/chip.dart';
 import '../../widgets/global/bottom_sheet.dart';
 import '../../widgets/global/primary_button.dart';
 import '../../theme/tokens.dart';
+import '../main_navigation.dart' as main_nav;
 
 /// Reports & Analytics Screen
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -38,6 +39,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
+        scaffoldKey: main_nav.MainNavigation.scaffoldKey,
         title: 'Reports & Analytics',
         actions: [
           // Custom Report Builder (v2.5.1)
@@ -82,17 +84,34 @@ class _ReportsScreenState extends State<ReportsScreen> {
           borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
         ),
         const SizedBox(height: SwiftleadTokens.spaceL),
-        Row(
-          children: List.generate(4, (i) => Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(right: i < 3 ? 8.0 : 0.0),
-              child: SkeletonLoader(
-                width: double.infinity,
-                height: 120,
-                borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-              ),
+        Column(
+          children: [
+            Row(
+              children: List.generate(2, (i) => Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(right: i < 1 ? 8.0 : 0.0),
+                  child: SkeletonLoader(
+                    width: double.infinity,
+                    height: 120,
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                  ),
+                ),
+              )),
             ),
-          )),
+            const SizedBox(height: SwiftleadTokens.spaceS),
+            Row(
+              children: List.generate(2, (i) => Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(right: i < 1 ? 8.0 : 0.0),
+                  child: SkeletonLoader(
+                    width: double.infinity,
+                    height: 120,
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                  ),
+                ),
+              )),
+            ),
+          ],
         ),
       ],
     );
@@ -297,50 +316,58 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _buildKPISummaryRow() {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: TrendTile(
-            label: 'Revenue',
-            value: '£12.4k',
-            trend: '+12%',
-            isPositive: true,
-            sparklineData: [8000, 9000, 10000, 11000, 12000, 12200, 12400],
-            tooltip: 'Total revenue this month',
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: TrendTile(
+                label: 'Revenue',
+                value: '£12.4k',
+                trend: '+12%',
+                isPositive: true,
+                sparklineData: [8000, 9000, 10000, 11000, 12000, 12200, 12400],
+                tooltip: 'Total revenue this month',
+              ),
+            ),
+            const SizedBox(width: SwiftleadTokens.spaceS),
+            Expanded(
+              child: TrendTile(
+                label: 'Jobs',
+                value: '42',
+                trend: '+8',
+                isPositive: true,
+                sparklineData: [30, 32, 35, 38, 40, 41, 42],
+                tooltip: 'Completed jobs',
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: SwiftleadTokens.spaceS),
-        Expanded(
-          child: TrendTile(
-            label: 'Jobs',
-            value: '42',
-            trend: '+8',
-            isPositive: true,
-            sparklineData: [30, 32, 35, 38, 40, 41, 42],
-            tooltip: 'Completed jobs',
-          ),
-        ),
-        const SizedBox(width: SwiftleadTokens.spaceS),
-        Expanded(
-          child: TrendTile(
-            label: 'Clients',
-            value: '156',
-            trend: '+12',
-            isPositive: true,
-            sparklineData: [140, 144, 148, 150, 152, 154, 156],
-            tooltip: 'Total clients',
-          ),
-        ),
-        const SizedBox(width: SwiftleadTokens.spaceS),
-        Expanded(
-          child: TrendTile(
-            label: 'Conversion',
-            value: '68%',
-            trend: '+5%',
-            isPositive: true,
-            sparklineData: [60, 62, 64, 65, 66, 67, 68],
-            tooltip: 'Inquiry to booking rate',
-          ),
+        const SizedBox(height: SwiftleadTokens.spaceS),
+        Row(
+          children: [
+            Expanded(
+              child: TrendTile(
+                label: 'Clients',
+                value: '156',
+                trend: '+12',
+                isPositive: true,
+                sparklineData: [140, 144, 148, 150, 152, 154, 156],
+                tooltip: 'Total clients',
+              ),
+            ),
+            const SizedBox(width: SwiftleadTokens.spaceS),
+            Expanded(
+              child: TrendTile(
+                label: 'Conversion',
+                value: '68%',
+                trend: '+5%',
+                isPositive: true,
+                sparklineData: [60, 62, 64, 65, 66, 67, 68],
+                tooltip: 'Inquiry to booking rate',
+              ),
+            ),
+          ],
         ),
       ],
     );

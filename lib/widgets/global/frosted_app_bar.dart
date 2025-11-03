@@ -13,6 +13,7 @@ class FrostedAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool automaticallyImplyLeading;
   final Widget? profileIcon;
   final int? notificationBadgeCount;
+  final GlobalKey<ScaffoldState>? scaffoldKey;
   
   const FrostedAppBar({
     super.key,
@@ -24,6 +25,7 @@ class FrostedAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.automaticallyImplyLeading = true,
     this.profileIcon,
     this.notificationBadgeCount,
+    this.scaffoldKey,
   });
 
   @override
@@ -59,7 +61,9 @@ class FrostedAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ? Builder(
                     builder: (context) => IconButton(
                       icon: const Icon(Icons.menu),
-                      onPressed: () => Scaffold.of(context).openDrawer(),
+                      onPressed: scaffoldKey != null 
+                          ? () => scaffoldKey!.currentState?.openDrawer()
+                          : () => Scaffold.of(context).openDrawer(),
                     ),
                   )
                 : null),
