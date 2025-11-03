@@ -40,6 +40,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
   final List<String> _filters = ['All', 'Paid', 'Pending', 'Overdue', 'Refunded'];
   String _selectedQuoteFilter = 'All';
   final List<String> _quoteFilters = ['All', 'Draft', 'Sent', 'Viewed', 'Accepted', 'Declined', 'Expired'];
+  String _selectedPeriod = '30D'; // For dashboard chart
 
   // Financial data from mock
   double _totalRevenue = 0;
@@ -787,7 +788,22 @@ class _MoneyScreenState extends State<MoneyScreen> {
                   _QuickActionButton(
                     icon: Icons.remove_circle_outline,
                     label: 'Add Expense',
-                    onPressed: () {},
+                    onPressed: () {
+                      // Show expense form - placeholder for now
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Add Expense'),
+                          content: const Text('Expense tracking coming soon. For now, you can add expenses when creating invoices.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -913,13 +929,17 @@ class _MoneyScreenState extends State<MoneyScreen> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: ['7D', '30D', '90D', '1Y', 'All'].map((period) {
-                final isSelected = period == '30D';
+                final isSelected = period == _selectedPeriod;
                 return Padding(
                   padding: const EdgeInsets.only(right: SwiftleadTokens.spaceS),
                   child: SwiftleadChip(
                     label: period,
                     isSelected: isSelected,
-                    onTap: () {},
+                    onTap: () {
+                      setState(() {
+                        _selectedPeriod = period;
+                      });
+                    },
                   ),
                 );
               }).toList(),

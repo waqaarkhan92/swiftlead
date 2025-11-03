@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../theme/tokens.dart';
+import '../../screens/notifications/notifications_screen.dart';
 
 /// FrostedAppBar - Premium glass app bar
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -77,7 +78,14 @@ class FrostedAppBar extends StatelessWidget implements PreferredSizeWidget {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.notifications_outlined),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const NotificationsScreen(),
+                          ),
+                        );
+                      },
                     ),
                     Positioned(
                       right: 8,

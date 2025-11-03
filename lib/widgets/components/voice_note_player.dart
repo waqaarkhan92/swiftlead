@@ -153,7 +153,59 @@ class _VoiceNotePlayerState extends State<VoiceNotePlayer>
                   ? Colors.white.withOpacity(0.7)
                   : Theme.of(context).textTheme.bodySmall?.color,
             ),
-            onPressed: () {},
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                builder: (context) => Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardTheme.color,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                  ),
+                  child: SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.forward_outlined),
+                          title: const Text('Forward'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            // TODO: Implement forward functionality
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.save_outlined),
+                          title: const Text('Save'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            // TODO: Implement save functionality
+                          },
+                        ),
+                        ListTile(
+                          leading: Icon(
+                            Icons.delete_outline,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          title: Text(
+                            'Delete',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.pop(context);
+                            // TODO: Implement delete functionality
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),

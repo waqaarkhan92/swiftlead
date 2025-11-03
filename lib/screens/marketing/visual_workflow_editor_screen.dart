@@ -25,6 +25,15 @@ class _VisualWorkflowEditorScreenState extends State<VisualWorkflowEditorScreen>
   final List<_WorkflowNode> _nodes = [];
   final List<_WorkflowConnection> _connections = [];
   bool _isSaving = false;
+  double _zoomLevel = 1.0;
+  
+  // Undo/Redo history
+  final List<_WorkflowState> _history = [];
+  int _historyIndex = -1;
+  
+  static const double _minZoom = 0.5;
+  static const double _maxZoom = 3.0;
+  static const double _zoomStep = 0.25;
 
   @override
   void initState() {
@@ -91,12 +100,12 @@ class _VisualWorkflowEditorScreenState extends State<VisualWorkflowEditorScreen>
         children: [
           IconButton(
             icon: const Icon(Icons.zoom_in),
-            onPressed: () {},
+            onPressed: _zoomLevel >= _maxZoom ? null : _zoomIn,
             tooltip: 'Zoom In',
           ),
           IconButton(
             icon: const Icon(Icons.zoom_out),
-            onPressed: () {},
+            onPressed: _zoomLevel <= _minZoom ? null : _zoomOut,
             tooltip: 'Zoom Out',
           ),
           const SizedBox(width: SwiftleadTokens.spaceS),
@@ -104,12 +113,12 @@ class _VisualWorkflowEditorScreenState extends State<VisualWorkflowEditorScreen>
           const SizedBox(width: SwiftleadTokens.spaceS),
           IconButton(
             icon: const Icon(Icons.undo),
-            onPressed: () {},
+            onPressed: _historyIndex < 0 ? null : _undo,
             tooltip: 'Undo',
           ),
           IconButton(
             icon: const Icon(Icons.redo),
-            onPressed: () {},
+            onPressed: _historyIndex >= _history.length - 1 ? null : _redo,
             tooltip: 'Redo',
           ),
           const Spacer(),
@@ -135,23 +144,26 @@ class _VisualWorkflowEditorScreenState extends State<VisualWorkflowEditorScreen>
           color: Theme.of(context).dividerColor,
         ),
       ),
-      child: Stack(
-        children: [
-          // Grid background
-          CustomPaint(
-            painter: _GridPainter(),
-            size: Size.infinite,
-          ),
-          
-          // Nodes
-          ..._nodes.map((node) => _buildNode(node)),
-          
-          // Connections
-          CustomPaint(
-            painter: _ConnectionPainter(_connections),
-            size: Size.infinite,
-          ),
-        ],
+      child: Transform.scale(
+        scale: _zoomLevel,
+        child: Stack(
+          children: [
+            // Grid background
+            CustomPaint(
+              painter: _GridPainter(),
+              size: Size.infinite,
+            ),
+            
+            // Nodes
+            ..._nodes.map((node) => _buildNode(node)),
+            
+            // Connections
+            CustomPaint(
+              painter: _ConnectionPainter(_connections),
+              size: Size.infinite,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -162,6 +174,7 @@ class _VisualWorkflowEditorScreenState extends State<VisualWorkflowEditorScreen>
       top: node.position.dy,
       child: GestureDetector(
         onPanUpdate: (details) {
+          _saveStateToHistory();
           setState(() {
             node.position += details.delta;
           });
@@ -195,6 +208,89 @@ class _VisualWorkflowEditorScreenState extends State<VisualWorkflowEditorScreen>
         ),
       ),
     );
+  }
+
+  void _zoomIn() {
+    setState(() {
+      _zoomLevel = (_zoomLevel + _zoomStep).clamp(_minZoom, _maxZoom);
+    });
+  }
+
+  void _zoomOut() {
+    setState(() {
+      _zoomLevel = (_zoomLevel - _zoomStep).clamp(_minZoom, _maxZoom);
+    });
+  }
+
+  void _saveStateToHistory() {
+    // Remove any states after current index (if we've undone)
+    if (_historyIndex < _history.length - 1) {
+      _history.removeRange(_historyIndex + 1, _history.length);
+    }
+    
+    // Save current state
+    _history.add(_WorkflowState(
+      nodes: _nodes.map((n) => _WorkflowNode(
+        id: n.id,
+        type: n.type,
+        position: n.position,
+        label: n.label,
+      )).toList(),
+      connections: _connections.map((c) => _WorkflowConnection(
+        fromNodeId: c.fromNodeId,
+        toNodeId: c.toNodeId,
+      )).toList(),
+    ));
+    
+    _historyIndex = _history.length - 1;
+    
+    // Limit history size
+    if (_history.length > 50) {
+      _history.removeAt(0);
+      _historyIndex--;
+    }
+  }
+
+  void _undo() {
+    if (_historyIndex > 0) {
+      setState(() {
+        _historyIndex--;
+        final state = _history[_historyIndex];
+        _nodes.clear();
+        _nodes.addAll(state.nodes.map((n) => _WorkflowNode(
+          id: n.id,
+          type: n.type,
+          position: n.position,
+          label: n.label,
+        )));
+        _connections.clear();
+        _connections.addAll(state.connections.map((c) => _WorkflowConnection(
+          fromNodeId: c.fromNodeId,
+          toNodeId: c.toNodeId,
+        )));
+      });
+    }
+  }
+
+  void _redo() {
+    if (_historyIndex < _history.length - 1) {
+      setState(() {
+        _historyIndex++;
+        final state = _history[_historyIndex];
+        _nodes.clear();
+        _nodes.addAll(state.nodes.map((n) => _WorkflowNode(
+          id: n.id,
+          type: n.type,
+          position: n.position,
+          label: n.label,
+        )));
+        _connections.clear();
+        _connections.addAll(state.connections.map((c) => _WorkflowConnection(
+          fromNodeId: c.fromNodeId,
+          toNodeId: c.toNodeId,
+        )));
+      });
+    }
   }
 
   Widget _buildNodePalette() {
@@ -390,6 +486,16 @@ enum _NodeType {
   wait,
   condition,
   end,
+}
+
+class _WorkflowState {
+  final List<_WorkflowNode> nodes;
+  final List<_WorkflowConnection> connections;
+
+  _WorkflowState({
+    required this.nodes,
+    required this.connections,
+  });
 }
 
 class _GridPainter extends CustomPainter {

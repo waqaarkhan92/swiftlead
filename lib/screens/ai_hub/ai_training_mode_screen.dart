@@ -17,9 +17,51 @@ class AITrainingModeScreen extends StatefulWidget {
   State<AITrainingModeScreen> createState() => _AITrainingModeScreenState();
 }
 
+class _TrainingExample {
+  final String id;
+  final String category;
+  final String input;
+  final String expectedOutput;
+
+  _TrainingExample({
+    required this.id,
+    required this.category,
+    required this.input,
+    required this.expectedOutput,
+  });
+}
+
 class _AITrainingModeScreenState extends State<AITrainingModeScreen> {
   bool _isLoading = false;
   bool _isTraining = false;
+  final List<_TrainingExample> _trainingExamples = [];
+  String _selectedCategory = 'Booking';
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with example data
+    _trainingExamples.addAll([
+      _TrainingExample(
+        id: '1',
+        category: 'Booking',
+        input: _getInputExample(0),
+        expectedOutput: _getOutputExample(0),
+      ),
+      _TrainingExample(
+        id: '2',
+        category: 'Pricing',
+        input: _getInputExample(1),
+        expectedOutput: _getOutputExample(1),
+      ),
+      _TrainingExample(
+        id: '3',
+        category: 'Hours',
+        input: _getInputExample(2),
+        expectedOutput: _getOutputExample(2),
+      ),
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,13 +133,33 @@ class _AITrainingModeScreenState extends State<AITrainingModeScreen> {
         const SizedBox(height: SwiftleadTokens.spaceM),
         
         // Example Cards
-        ...List.generate(3, (index) => Padding(
-          padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
-          child: _TrainingExampleCard(
-            category: ['Booking', 'Pricing', 'Hours'][index],
-            input: _getInputExample(index),
-            expectedOutput: _getOutputExample(index),
-          ),
+        if (_trainingExamples.isEmpty)
+          EmptyStateCard(
+            icon: Icons.school_outlined,
+            title: 'No Training Examples',
+            description: 'Add your first training example to help the AI learn your business.',
+            actionLabel: 'Add Example',
+            onAction: () => _showAddTrainingExampleSheet(context),
+          )
+        else
+          ..._trainingExamples.map((example) => Padding(
+            padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+            child: _TrainingExampleCard(
+              category: example.category,
+              input: example.input,
+              expectedOutput: example.expectedOutput,
+              onDelete: () {
+                setState(() {
+                  _trainingExamples.removeWhere((e) => e.id == example.id);
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Training example deleted'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+            ),
         )),
 
         const SizedBox(height: SwiftleadTokens.spaceL),
@@ -166,8 +228,12 @@ class _AITrainingModeScreenState extends State<AITrainingModeScreen> {
             children: ['Booking', 'Pricing', 'Hours', 'Services', 'Other'].map((category) {
               return SwiftleadChip(
                 label: category,
-                isSelected: category == 'Booking',
-                onTap: () {},
+                isSelected: category == _selectedCategory,
+                onTap: () {
+                  setState(() {
+                    _selectedCategory = category;
+                  });
+                },
               );
             }).toList(),
           ),
@@ -223,11 +289,13 @@ class _TrainingExampleCard extends StatelessWidget {
   final String category;
   final String input;
   final String expectedOutput;
+  final VoidCallback? onDelete;
 
   const _TrainingExampleCard({
     required this.category,
     required this.input,
     required this.expectedOutput,
+    this.onDelete,
   });
 
   @override
@@ -260,7 +328,7 @@ class _TrainingExampleCard extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline, size: 18),
-                onPressed: () {},
+                onPressed: onDelete,
               ),
             ],
           ),

@@ -179,9 +179,8 @@ class _AIHubScreenState extends State<AIHubScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // StatusIndicator: Active (green pulse) / Paused / Error
-              Flexible(
+              Expanded(
                 child: Row(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
                       width: 12,
@@ -206,6 +205,7 @@ class _AIHubScreenState extends State<AIHubScreen> {
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
               // QuickToggle: Pause/Resume AI
               Switch(
                 value: _isAIActive,

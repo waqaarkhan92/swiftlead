@@ -41,6 +41,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   String _automationSearchQuery = '';
   String? _automationFilterType;
   String _selectedDateRange = 'Last 30 days';
+  String _selectedExportFormat = 'PDF'; // For export sheet
   
   @override
   void initState() {
@@ -613,8 +614,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
             children: ['PDF', 'Excel', 'CSV'].map((format) {
               return SwiftleadChip(
                 label: format,
-                isSelected: format == 'PDF',
-                onTap: () {},
+                isSelected: format == _selectedExportFormat,
+                onTap: () {
+                  setState(() {
+                    _selectedExportFormat = format;
+                  });
+                },
               );
             }).toList(),
           ),
@@ -1055,7 +1060,15 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  // In a real app, would navigate to full automation history screen
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('All automation history is displayed below'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
                 child: const Text('View All'),
               ),
             ],

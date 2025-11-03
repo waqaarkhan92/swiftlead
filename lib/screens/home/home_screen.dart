@@ -12,6 +12,11 @@ import '../../config/mock_config.dart';
 import '../../mock/mock_repository.dart';
 import '../settings/settings_screen.dart';
 import '../main_navigation.dart' as main_nav;
+import '../../widgets/forms/on_my_way_sheet.dart';
+import '../jobs/create_edit_job_screen.dart';
+import '../money/money_screen.dart';
+import '../calendar/create_edit_booking_screen.dart';
+import '../ai_hub/ai_hub_screen.dart';
 
 /// HomeScreen - Dashboard hub
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -224,7 +229,16 @@ class _HomeScreenState extends State<HomeScreen> {
           if (_showAIBanner)
             AIInsightBanner(
               message: 'AI found 3 unconfirmed bookings — confirm now?',
-              onTap: () {},
+              onTap: () {
+                // Navigate to calendar to view unconfirmed bookings
+                // This would typically navigate to calendar with a filter for unconfirmed bookings
+                Navigator.pushNamed(context, '/calendar').then((_) {
+                  // After returning from calendar, dismiss banner if bookings are confirmed
+                  if (mounted) {
+                    setState(() => _showAIBanner = false);
+                  }
+                });
+              },
               onDismiss: () {
                 setState(() => _showAIBanner = false);
               },
@@ -420,31 +434,72 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'On My Way',
             icon: Icons.directions_car,
             tooltip: 'Mark yourself as on the way',
-            onTap: () {},
+            onTap: () {
+              OnMyWaySheet.show(
+                context: context,
+                onSendETA: (minutes) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('ETA sent: ${minutes} minutes'),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
+              );
+            },
           ),
           QuickActionChip(
             label: 'Add Job',
             icon: Icons.add,
             tooltip: 'Create a new job',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreateEditJobScreen(),
+                ),
+              );
+            },
           ),
           QuickActionChip(
             label: 'Send Payment',
             customIcon: '£',
             tooltip: 'Request or send payment',
-            onTap: () {},
+            onTap: () {
+              // Navigate to Money screen - user can create invoice/payment from there
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MoneyScreen(),
+                ),
+              );
+            },
           ),
           QuickActionChip(
             label: 'Book Slot',
             icon: Icons.calendar_today,
             tooltip: 'Schedule an appointment',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreateEditBookingScreen(),
+                ),
+              );
+            },
           ),
           QuickActionChip(
             label: 'AI Insights',
             icon: Icons.auto_awesome,
             tooltip: 'View AI-powered insights',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AIHubScreen(),
+                ),
+              );
+            },
           ),
         ],
       ),

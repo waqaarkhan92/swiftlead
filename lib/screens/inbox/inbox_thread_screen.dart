@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/components/chat_bubble.dart' as chat_bubble show ChatBubble, BubbleType, MessageStatus;
 import '../../widgets/components/date_separator.dart';
@@ -687,7 +688,13 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
                                 url: 'https://example.com',
                                 title: 'Example Website',
                                 description: 'This is an example link preview',
-                                onTap: () {},
+                                onTap: () async {
+                                  // Open link in browser
+                                  final uri = Uri.parse('https://example.com');
+                                  if (await canLaunchUrl(uri)) {
+                                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                  }
+                                },
                               ),
                             ),
                           ],

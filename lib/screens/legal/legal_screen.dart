@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../theme/tokens.dart';
@@ -25,7 +26,12 @@ class _LegalScreenState extends State<LegalScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.share_outlined),
-            onPressed: () {},
+            onPressed: () {
+              Share.share(
+                'Check out Swiftlead\'s Legal & Privacy information: https://swiftlead.co/legal',
+                subject: 'Swiftlead Legal & Privacy',
+              );
+            },
           ),
         ],
       ),

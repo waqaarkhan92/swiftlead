@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/global/frosted_app_bar.dart';
+import '../../widgets/global/toast.dart';
 import '../../widgets/global/skeleton_loader.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../theme/tokens.dart';
@@ -23,6 +25,12 @@ import 'app_preferences_screen.dart';
 import 'invoice_customization_screen.dart';
 import 'subscription_billing_screen.dart';
 import 'custom_fields_manager_screen.dart';
+import '../../widgets/forms/business_hours_editor_sheet.dart';
+import '../calendar/service_catalog_screen.dart';
+import '../calendar/service_editor_screen.dart';
+import '../ai_hub/ai_configuration_screen.dart';
+import '../ai_hub/faq_management_screen.dart';
+import '../legal/legal_screen.dart';
 
 /// Settings Screen - Organization configuration and preferences
 /// Exact specification from Screen_Layouts_v2.5.1 and UI_Inventory_v2.5.1
@@ -251,7 +259,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _SettingsItem(
               icon: Icons.email_outlined,
               label: 'Email Preferences',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const EmailConfigurationScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.notifications_outlined,
@@ -268,7 +283,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _SettingsItem(
               icon: Icons.privacy_tip_outlined,
               label: 'Privacy Settings',
-              onTap: () {},
+              onTap: () {
+                // Navigate to security settings for privacy options
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SecuritySettingsScreen(),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -315,17 +338,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _SettingsItem(
               icon: Icons.access_time_outlined,
               label: 'Business Hours',
-              onTap: () {},
+              onTap: () async {
+                final hours = await BusinessHoursEditorSheet.show(
+                  context: context,
+                  currentHours: 'Mon-Fri, 9:00-17:00',
+                );
+                if (hours != null && mounted) {
+                  Toast.show(
+                    context,
+                    message: 'Business hours updated',
+                    type: ToastType.success,
+                  );
+                }
+              },
             ),
             _SettingsItem(
               icon: Icons.construction_outlined,
               label: 'Services & Pricing',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ServiceCatalogScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.receipt_outlined,
               label: 'Tax Settings',
-              onTap: () {},
+              onTap: () {
+                // Show tax settings dialog - placeholder for now
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Tax Settings'),
+                    content: const Text('Tax settings configuration coming soon. You can set tax rates when creating invoices.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -420,23 +477,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _SettingsItem(
               icon: Icons.auto_awesome,
               label: 'AI Receptionist Settings',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AIConfigurationScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.record_voice_over_outlined,
               label: 'Tone & Language',
-              onTap: () {},
+              onTap: () {
+                // Navigate to AI Configuration screen (tone is configured there)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AIConfigurationScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.reply_outlined,
               label: 'Auto-Response Rules',
-              onTap: () {},
+              onTap: () {
+                // Navigate to AI Configuration screen (auto-response rules are there)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AIConfigurationScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.help_outline,
               label: 'FAQ Management',
               onTap: () {
-                // Navigate to FAQ Management in AI Hub
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FAQManagementScreen(),
+                  ),
+                );
               },
             ),
             _SettingsItem(
@@ -484,7 +569,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _SettingsItem(
               icon: Icons.bedtime_outlined,
               label: 'Do Not Disturb Schedule',
-              onTap: () {},
+              onTap: () {
+                // Show DND schedule editor - placeholder for now
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Do Not Disturb Schedule'),
+                    content: const Text('DND schedule configuration coming soon. This will allow you to set quiet hours for notifications.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -504,7 +604,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _SettingsItem(
               icon: Icons.color_lens_outlined,
               label: 'Accent Color',
-              onTap: () {},
+              onTap: () {
+                // Show accent color picker - placeholder for now
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Accent Color'),
+                    content: const Text('Accent color customization coming soon. The app currently uses the default Swiftlead theme colors.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.view_compact_outlined,
@@ -513,7 +628,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 'Comfortable',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              onTap: () {},
+              onTap: () {
+                // Show density selector - placeholder for now
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Display Density'),
+                    content: const Text('Display density customization coming soon. Choose between Compact, Comfortable, and Spacious layouts.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.language_outlined,
@@ -576,12 +706,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _SettingsItem(
               icon: Icons.privacy_tip_outlined,
               label: 'Privacy Policy',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LegalScreen(),
+                  ),
+                );
+              },
             ),
             _SettingsItem(
               icon: Icons.description_outlined,
               label: 'Terms of Service',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LegalScreen(),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -690,7 +834,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: SwiftleadTokens.spaceS),
           TextButton(
-            onPressed: () {},
+            onPressed: () => _showClearCacheConfirmation(context),
             child: const Text('Clear Cache'),
           ),
         ],
@@ -754,6 +898,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
+  }
+
+  void _showClearCacheConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear Cache?'),
+        content: const Text(
+          'This will clear all locally cached data. You may need to sign in again. This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _clearCache();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(SwiftleadTokens.primaryTeal),
+            ),
+            child: const Text('Clear Cache'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _clearCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      
+      if (mounted) {
+        Toast.show(
+          context,
+          message: 'Cache cleared successfully',
+          type: ToastType.success,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Toast.show(
+          context,
+          message: 'Failed to clear cache: $e',
+          type: ToastType.error,
+        );
+      }
+    }
   }
 
   void _showDeleteConfirmation(BuildContext context) {

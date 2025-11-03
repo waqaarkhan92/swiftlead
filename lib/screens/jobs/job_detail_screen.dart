@@ -770,7 +770,44 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.more_vert, size: 18),
-                    onPressed: () {},
+                    onPressed: () {
+                      // Show options menu for timeline event
+                      showModalBottomSheet(
+                        context: context,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardTheme.color,
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(20),
+                            ),
+                          ),
+                          child: SafeArea(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ListTile(
+                                  leading: const Icon(Icons.edit_outlined),
+                                  title: const Text('Edit Note'),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    // TODO: Open edit note sheet
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.delete_outline),
+                                  title: const Text('Delete Note'),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    // TODO: Delete note
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

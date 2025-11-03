@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/primary_button.dart';
@@ -13,6 +14,7 @@ import '../../widgets/global/toast.dart';
 import 'create_edit_booking_screen.dart';
 import '../../widgets/forms/on_my_way_sheet.dart';
 import 'reminder_settings_screen.dart';
+import '../inbox/inbox_screen.dart';
 
 /// BookingDetailScreen - Comprehensive booking view
 /// Exact specification from UI_Inventory_v2.5.1 and Screen_Layouts_v2.5.1
@@ -296,11 +298,44 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.phone),
-                onPressed: () {},
+                onPressed: () async {
+                  final phoneNumber = '+44 7700 900123';
+                  final uri = Uri.parse('tel:$phoneNumber');
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri);
+                  } else {
+                    if (mounted) {
+                      Toast.show(
+                        context,
+                        message: 'Could not launch phone dialer',
+                        type: ToastType.error,
+                      );
+                    }
+                  }
+                },
               ),
               IconButton(
                 icon: const Icon(Icons.message),
-                onPressed: () {},
+                onPressed: () {
+                  // Navigate to inbox and filter by contact name
+                  // In a real app, would find thread by contact ID/name
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const InboxScreen(),
+                    ),
+                  );
+                  // Show a toast to indicate which contact to look for
+                  Future.delayed(const Duration(milliseconds: 300), () {
+                    if (mounted) {
+                      Toast.show(
+                        context,
+                        message: 'Navigate to conversation with ${widget.clientName}',
+                        type: ToastType.info,
+                      );
+                    }
+                  });
+                },
               ),
             ],
           ),
