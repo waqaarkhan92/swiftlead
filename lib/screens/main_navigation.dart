@@ -8,6 +8,7 @@ import 'calendar/calendar_screen.dart';
 import 'money/money_screen.dart';
 import 'ai_hub/ai_hub_screen.dart';
 import 'reports/reports_screen.dart';
+import 'reviews/reviews_screen.dart';
 import 'settings/settings_screen.dart';
 import 'support/support_screen.dart';
 import 'legal/legal_screen.dart';
@@ -18,10 +19,14 @@ import '../theme/tokens.dart';
 /// Main Navigation - Bottom tab navigation with drawer
 /// Exact specification from Screen_Layouts_v2.5.1
 class MainNavigation extends StatefulWidget {
-  final Function(ThemeMode) onThemeChanged;
+  final Function(ThemeMode)? onThemeChanged;
   final ThemeMode currentThemeMode;
   
-  const MainNavigation({super.key, required this.onThemeChanged, required this.currentThemeMode});
+  const MainNavigation({
+    super.key,
+    this.onThemeChanged,
+    this.currentThemeMode = ThemeMode.system,
+  });
   static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -45,8 +50,9 @@ class _MainNavigationState extends State<MainNavigation> {
     'contacts': ContactsScreen(),
     'marketing': MarketingScreen(),
     'reports': ReportsScreen(),
+    'reviews': ReviewsScreen(),
     'settings': SettingsScreen(
-      onThemeChanged: widget.onThemeChanged,
+      onThemeChanged: widget.onThemeChanged ?? (_) {},
       currentThemeMode: widget.currentThemeMode,
     ),
     'support': SupportScreen(),
@@ -104,6 +110,15 @@ class _MainNavigationState extends State<MainNavigation> {
             onTap: () {
               Navigator.pop(context);
               setState(() => _drawerScreen = _drawerScreenMap['reports']);
+            },
+          ),
+          DrawerItem(
+            icon: Icons.star_outline,
+            label: 'Reviews',
+            isSelected: false,
+            onTap: () {
+              Navigator.pop(context);
+              setState(() => _drawerScreen = _drawerScreenMap['reviews']);
             },
           ),
           DrawerItem(

@@ -7,9 +7,9 @@ import '../../widgets/components/trend_tile.dart';
 import '../../widgets/components/segmented_control.dart';
 import '../../widgets/global/chip.dart';
 import '../../theme/tokens.dart';
-import '../quotes/quotes_screen.dart';
 import '../quotes/create_edit_quote_screen.dart';
 import '../quotes/quote_detail_screen.dart';
+import '../../widgets/forms/payment_request_modal.dart';
 import 'invoice_detail_screen.dart';
 import 'create_edit_invoice_screen.dart';
 import 'payment_detail_screen.dart';
@@ -68,6 +68,24 @@ class _MoneyScreenState extends State<MoneyScreen> {
     if (mounted) {
       setState(() => _isLoading = false);
     }
+  }
+
+  void _handleSendInvoiceFromDashboard() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CreateEditInvoiceScreen(),
+      ),
+    );
+  }
+
+  void _handleRequestPaymentFromDashboard() {
+    PaymentRequestModal.show(
+      context: context,
+      onSendRequest: (amount, method) {
+        // Handle payment request sent
+      },
+    );
   }
 
   void _applyInvoiceFilter() {
@@ -136,6 +154,15 @@ class _MoneyScreenState extends State<MoneyScreen> {
           PopupMenuButton<String>(
             icon: const Icon(Icons.add),
             onSelected: (value) {
+              if (value == 'request_payment') {
+                PaymentRequestModal.show(
+                  context: context,
+                  onSendRequest: (amount, method) {
+                    // Handle payment request sent
+                  },
+                );
+                return;
+              }
               switch (value) {
                 case 'payment':
                   _handleAddPayment();
@@ -590,12 +617,12 @@ class _MoneyScreenState extends State<MoneyScreen> {
                   _QuickActionButton(
                     icon: Icons.send,
                     label: 'Send Invoice',
-                    onPressed: () {},
+                    onPressed: _handleSendInvoiceFromDashboard,
                   ),
                   _QuickActionButton(
                     icon: Icons.request_quote,
                     label: 'Request Payment',
-                    onPressed: () {},
+                    onPressed: _handleRequestPaymentFromDashboard,
                   ),
                   _QuickActionButton(
                     icon: Icons.remove_circle_outline,

@@ -60,7 +60,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
           IconButton(
             icon: const Icon(Icons.today_outlined),
             onPressed: () {
-              // "Today" button jumps to current date
+              setState(() {
+                _selectedDate = DateTime.now();
+              });
             },
           ),
           IconButton(

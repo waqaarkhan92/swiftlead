@@ -62,6 +62,15 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
             icon: const Icon(Icons.more_vert),
             onSelected: (value) {
               switch (value) {
+                case 'request_payment':
+                  PaymentRequestModal.show(
+                    context: context,
+                    clientName: 'John Smith', // Would get from invoice data
+                    onSendRequest: (amount, method) {
+                      // Handle payment request sent
+                    },
+                  );
+                  break;
                 case 'send':
                   // Send invoice
                   break;
@@ -78,6 +87,7 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
             },
             itemBuilder: (context) => [
               const PopupMenuItem(value: 'send', child: Text('Send Invoice')),
+              const PopupMenuItem(value: 'request_payment', child: Text('Request Payment')),
               const PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
               const PopupMenuItem(value: 'mark_paid', child: Text('Mark as Paid')),
               const PopupMenuItem(value: 'delete', child: Text('Delete')),

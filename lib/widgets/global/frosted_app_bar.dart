@@ -6,6 +6,7 @@ import '../../theme/tokens.dart';
 /// Exact specification from Screen_Layouts_v2.5.1
 class FrostedAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
+  final Widget? titleWidget;
   final Widget? leading;
   final List<Widget>? actions;
   final Widget? flexibleSpace;
@@ -18,6 +19,7 @@ class FrostedAppBar extends StatelessWidget implements PreferredSizeWidget {
   const FrostedAppBar({
     super.key,
     this.title,
+    this.titleWidget,
     this.leading,
     this.actions,
     this.flexibleSpace,
@@ -56,7 +58,7 @@ class FrostedAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
           child: AppBar(
-            title: title != null ? Text(title!) : null,
+            title: titleWidget ?? (title != null ? Text(title!) : null),
             leading: leading ?? (automaticallyImplyLeading
                 ? Builder(
                     builder: (context) => IconButton(

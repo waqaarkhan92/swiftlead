@@ -10,6 +10,7 @@ import '../../widgets/global/frosted_container.dart';
 import '../../theme/tokens.dart';
 import '../../config/mock_config.dart';
 import '../../mock/mock_repository.dart';
+import '../settings/settings_screen.dart';
 import '../main_navigation.dart' as main_nav;
 
 /// HomeScreen - Dashboard hub
@@ -73,6 +74,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return 'Good evening';
   }
 
+  void _handleProfileTap() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SettingsScreen(
+          onThemeChanged: (_) {},
+          currentThemeMode: ThemeMode.system,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Color(SwiftleadTokens.primaryTeal),
             ),
           ),
-          onPressed: () {},
+          onPressed: _handleProfileTap,
         ),
         notificationBadgeCount: 3,
       ),

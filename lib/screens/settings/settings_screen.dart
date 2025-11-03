@@ -7,6 +7,7 @@ import '../../widgets/global/chip.dart';
 import '../../theme/tokens.dart';
 import 'canned_responses_screen.dart';
 import '../notifications/notifications_screen.dart';
+import '../support/support_screen.dart';
 import '../main_navigation.dart' as main_nav;
 
 /// Settings Screen - Organization configuration and preferences
@@ -26,6 +27,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   
   ThemeMode get _themeMode => widget.currentThemeMode;
 
+  void _handleHelpTap() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const SupportScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +47,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.help_outline),
-            onPressed: () {},
+            onPressed: _handleHelpTap,
           ),
         ],
       ),

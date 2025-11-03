@@ -4,6 +4,8 @@
 
 *Enhanced v2.5.1 — UX improvements, widget optimization, and micro-interactions applied 2025-11-02.*
 
+> **📝 Document Updates Note:** This document has been updated to reflect the actual implementation. The Drawer Menu section (§1050) now includes **Contacts**, **Marketing**, and **Reviews** in addition to the originally specified items (AI Hub, Reports & Analytics, Settings, Support & Help, Legal / Privacy). These updates align the specification with the current application implementation.
+
 > **v2.5.1 Enhancement Note:** Added comprehensive state handling (empty/loading/error), improved micro-interactions, skeleton loaders, tooltips, contextual help, progress indicators, and optimized widget usage across all screens. Enhanced responsive behavior and accessibility.
 
 Complete visual specification for screen layouts, component hierarchies, and interaction patterns.
@@ -1057,7 +1059,10 @@ Complete visual specification for screen layouts, component hierarchies, and int
   - Close button (X icon)
 - **Navigation Items:** Vertical list with icons
   - AI Hub (with status indicator)
+  - Contacts
+  - Marketing
   - Reports & Analytics
+  - Reviews
   - Settings
   - Support & Help (with unread badge)
   - Legal / Privacy

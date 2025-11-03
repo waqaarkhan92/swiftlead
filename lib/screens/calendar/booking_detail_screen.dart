@@ -345,22 +345,49 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               Container(
                 width: 12,
                 height: 12,
-                decoration: const BoxDecoration(
-                  color: Color(SwiftleadTokens.successGreen),
+                decoration: BoxDecoration(
+                  color: _status == 'Confirmed' || _status == 'Pending'
+                      ? const Color(SwiftleadTokens.successGreen)
+                      : Colors.grey,
                   shape: BoxShape.circle,
                 ),
               ),
               const SizedBox(width: SwiftleadTokens.spaceS),
               Text(
-                'Confirmed by client',
+                _status == 'Confirmed' ? 'Confirmed by client' : 'Pending confirmation',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
           ),
-          const SizedBox(height: SwiftleadTokens.spaceS),
-          Text(
-            'Client confirmed on ${_formatDate(DateTime.now().subtract(const Duration(days: 1)))}',
-            style: Theme.of(context).textTheme.bodySmall,
+          if (_status == 'Confirmed') ...[
+            const SizedBox(height: SwiftleadTokens.spaceS),
+            Text(
+              'Client confirmed on ${_formatDate(DateTime.now().subtract(const Duration(days: 1)))}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          PrimaryButton(
+            label: _status == 'Confirmed' ? 'Resend Confirmation' : 'Confirm Booking',
+            onPressed: () {
+              BookingConfirmationSheet.show(
+                context: context,
+                bookingId: widget.bookingId,
+                clientName: widget.clientName,
+                bookingTime: _bookingTime,
+                serviceName: 'Kitchen Sink Repair',
+                currentStatus: _status.toLowerCase(),
+                onConfirmed: (confirmed, sendNotification) {
+                  if (confirmed && _status != 'Confirmed') {
+                    setState(() {
+                      _status = 'Confirmed';
+                    });
+                  }
+                },
+              );
+            },
+            icon: _status == 'Confirmed' ? Icons.send : Icons.check_circle,
+            size: ButtonSize.small,
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
           Row(

@@ -43,6 +43,8 @@ class _SwiftleadAppState extends State<SwiftleadApp> {
         onThemeChanged: setThemeMode,
         currentThemeMode: _themeMode,
       ),
+      // TODO: Show OnboardingScreen on first launch
+      // Check onboarding_sessions.completed_at to determine if user needs onboarding
     );
   }
 }

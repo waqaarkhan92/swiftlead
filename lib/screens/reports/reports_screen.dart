@@ -12,6 +12,8 @@ import '../../widgets/components/team_performance_card.dart';
 import '../../widgets/components/data_table.dart';
 import '../../widgets/components/channel_performance_chart.dart';
 import '../../widgets/components/response_times_chart.dart';
+import '../../widgets/components/ai_insight_card.dart';
+import '../../widgets/components/automation_stats_card.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/chip.dart';
 import '../../widgets/global/bottom_sheet.dart';
@@ -32,6 +34,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
   bool _isLoading = true;
   int _selectedReportType = 0;
   final List<String> _reportTypes = ['Overview', 'Revenue', 'Jobs', 'Clients', 'AI Performance', 'Team'];
+  String _automationSearchQuery = '';
+  String? _automationFilterType;
+  String _selectedDateRange = 'Last 30 days';
   
   @override
   void initState() {
@@ -48,7 +53,19 @@ class _ReportsScreenState extends State<ReportsScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
         scaffoldKey: main_nav.MainNavigation.scaffoldKey,
-        title: 'Reports & Analytics',
+        titleWidget: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Reports & Analytics'),
+            Text(
+              _selectedDateRange,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontSize: 11,
+                  ),
+            ),
+          ],
+        ),
         actions: [
           // Custom Report Builder (v2.5.1)
           IconButton(
@@ -346,6 +363,52 @@ class _ReportsScreenState extends State<ReportsScreen> {
       children: [
         _buildKPISummaryRow(),
         const SizedBox(height: SwiftleadTokens.spaceL),
+        
+        // AI Insights Cards
+        AIInsightCard(
+          title: 'Revenue Spike Detected',
+          description: 'Your revenue increased by 23% this week compared to last. This is likely due to increased booking conversion rates.',
+          type: InsightType.trend,
+          confidence: 0.92,
+          actionSuggestions: [
+            'Review conversion rates for this week',
+            'Analyze which channels drove the most bookings',
+            'Consider increasing ad spend on top-performing channels',
+          ],
+          onTap: () {
+            // Navigate to detailed analysis
+          },
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceM),
+        
+        AIInsightCard(
+          title: 'Response Time Anomaly',
+          description: 'Average response time for WhatsApp messages increased to 28 minutes (normally 12 minutes). This may impact customer satisfaction.',
+          type: InsightType.anomaly,
+          confidence: 0.85,
+          actionSuggestions: [
+            'Check if team members are available',
+            'Enable auto-reply for WhatsApp',
+            'Review message queue for bottlenecks',
+          ],
+          onTap: () {
+            // Navigate to response times analysis
+          },
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceM),
+        
+        // Automation Stats Card
+        AutomationStatsCard(
+          actionsCompleted: 342,
+          timeSavedHours: 24.5,
+          successRate: 94,
+          costSaved: 850.0,
+          onTap: () {
+            // Navigate to automation details
+          },
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+        
         _buildAutomationHistory(),
       ],
     );
@@ -467,8 +530,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
           ...['Last 7 days', 'Last 30 days', 'Last 90 days', 'This month', 'Last month', 'Custom'].map((range) {
             return ListTile(
               title: Text(range),
-              trailing: range == 'Last 30 days' ? const Icon(Icons.check, color: Color(SwiftleadTokens.primaryTeal)) : null,
+              trailing: range == _selectedDateRange ? const Icon(Icons.check, color: Color(SwiftleadTokens.primaryTeal)) : null,
               onTap: () {
+                setState(() {
+                  _selectedDateRange = range;
+                });
                 Navigator.pop(context);
                 // Apply date range
               },
@@ -627,18 +693,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
         ),
         const SizedBox(height: SwiftleadTokens.spaceM),
         
-        // Jobs Pipeline - Conversion Funnel
-        ConversionFunnelChart(
-          stages: [
-            FunnelStage(label: 'Inquiries', value: 100),
-            FunnelStage(label: 'Quotes', value: 75),
-            FunnelStage(label: 'Bookings', value: 50),
-            FunnelStage(label: 'Completed', value: 42),
-          ],
-          onStageTap: () {},
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceM),
-        
         // Row of two charts - stacked vertically on small screens
         LayoutBuilder(
           builder: (context, constraints) {
@@ -707,6 +761,21 @@ class _ReportsScreenState extends State<ReportsScreen> {
             ResponseTimeData(channel: 'Email', averageMinutes: 45.2, color: const Color(SwiftleadTokens.warningYellow)),
             ResponseTimeData(channel: 'Instagram', averageMinutes: 22.1, color: Colors.purple),
           ],
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceM),
+        
+        // Conversion Rates Funnel Chart
+        ConversionFunnelChart(
+          stages: [
+            FunnelStage(label: 'Inquiries', value: 150),
+            FunnelStage(label: 'Quotes Sent', value: 120),
+            FunnelStage(label: 'Bookings', value: 85),
+            FunnelStage(label: 'Completed', value: 72),
+            FunnelStage(label: 'Paid', value: 68),
+          ],
+          onStageTap: () {
+            // Chart drill-down could be added here
+          },
         ),
       ],
     );
@@ -903,8 +972,30 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _buildAutomationHistory() {
+    // Mock automation history data
+    final allAutomationHistory = [
+      {'timestamp': DateTime.now().subtract(const Duration(hours: 2)), 'action': 'Auto-reply', 'outcome': 'Successful', 'conversationId': 'conv_1'},
+      {'timestamp': DateTime.now().subtract(const Duration(hours: 4)), 'action': 'Booking Offer', 'outcome': 'Booked', 'conversationId': 'conv_2'},
+      {'timestamp': DateTime.now().subtract(const Duration(hours: 6)), 'action': 'Quote Chase', 'outcome': 'Sent', 'conversationId': 'conv_3'},
+      {'timestamp': DateTime.now().subtract(const Duration(hours: 8)), 'action': 'Review Request', 'outcome': 'Delivered', 'conversationId': 'conv_4'},
+      {'timestamp': DateTime.now().subtract(const Duration(hours: 10)), 'action': 'Smart Reply', 'outcome': 'Accepted', 'conversationId': 'conv_5'},
+      {'timestamp': DateTime.now().subtract(const Duration(hours: 12)), 'action': 'Auto-reply', 'outcome': 'Failed', 'conversationId': 'conv_6'},
+    ];
+
+    // Filter automation history
+    final filteredHistory = allAutomationHistory.where((item) {
+      final matchesSearch = _automationSearchQuery.isEmpty || 
+          item['action']!.toString().toLowerCase().contains(_automationSearchQuery.toLowerCase()) ||
+          item['outcome']!.toString().toLowerCase().contains(_automationSearchQuery.toLowerCase());
+      
+      final matchesFilter = _automationFilterType == null || 
+          item['action']!.toString() == _automationFilterType;
+      
+      return matchesSearch && matchesFilter;
+    }).toList();
+
     return FrostedContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -922,14 +1013,86 @@ class _ReportsScreenState extends State<ReportsScreen> {
             ],
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
-          ...List.generate(5, (index) => Padding(
-            padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
-            child: _AutomationHistoryRow(
-              timestamp: DateTime.now().subtract(Duration(hours: index * 2)),
-              action: ['Auto-reply', 'Booking Offer', 'Quote Chase', 'Review Request', 'Smart Reply'][index],
-              outcome: ['Successful', 'Booked', 'Sent', 'Delivered', 'Accepted'][index],
+          
+          // Search and Filter
+          TextField(
+            decoration: InputDecoration(
+              hintText: 'Search automation history...',
+              prefixIcon: const Icon(Icons.search, size: 20),
+              suffixIcon: _automationSearchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, size: 18),
+                      onPressed: () {
+                        setState(() => _automationSearchQuery = '');
+                      },
+                    )
+                  : null,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             ),
-          )),
+            onChanged: (value) {
+              setState(() => _automationSearchQuery = value);
+            },
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
+          Wrap(
+            spacing: SwiftleadTokens.spaceS,
+            children: [
+              SwiftleadChip(
+                label: 'All',
+                isSelected: _automationFilterType == null,
+                onTap: () {
+                  setState(() => _automationFilterType = null);
+                },
+              ),
+              ...['Auto-reply', 'Booking Offer', 'Quote Chase', 'Review Request', 'Smart Reply'].map((type) {
+                return SwiftleadChip(
+                  label: type,
+                  isSelected: _automationFilterType == type,
+                  onTap: () {
+                    setState(() => _automationFilterType = type);
+                  },
+                );
+              }),
+            ],
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          
+          // Automation History List
+          if (filteredHistory.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(SwiftleadTokens.spaceXL),
+                child: Text(
+                  'No automation history found',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                      ),
+                ),
+              ),
+            )
+          else
+            ...filteredHistory.map((item) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+                child: _AutomationHistoryRow(
+                  timestamp: item['timestamp'] as DateTime,
+                  action: item['action'] as String,
+                  outcome: item['outcome'] as String,
+                  onTap: () {
+                    // Navigate to conversation
+                    final conversationId = item['conversationId'] as String;
+                    // Navigator.push(...) - would navigate to conversation detail
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Navigate to conversation: $conversationId'),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                  },
+                ),
+              );
+            }),
         ],
       ),
     );
@@ -979,11 +1142,13 @@ class _AutomationHistoryRow extends StatelessWidget {
   final DateTime timestamp;
   final String action;
   final String outcome;
+  final VoidCallback? onTap;
 
   const _AutomationHistoryRow({
     required this.timestamp,
     required this.action,
     required this.outcome,
+    this.onTap,
   });
 
   String _formatTime(DateTime date) {
@@ -1000,45 +1165,52 @@ class _AutomationHistoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                action,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    action,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    _formatTime(timestamp),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(SwiftleadTokens.successGreen).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                outcome,
+                style: const TextStyle(
+                  color: Color(SwiftleadTokens.successGreen),
+                  fontSize: 11,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              Text(
-                _formatTime(timestamp),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 4,
-          ),
-          decoration: BoxDecoration(
-            color: const Color(SwiftleadTokens.successGreen).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            outcome,
-            style: const TextStyle(
-              color: Color(SwiftleadTokens.successGreen),
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

@@ -8,6 +8,7 @@ import '../../widgets/global/primary_button.dart';
 import '../../widgets/components/refund_progress.dart';
 import '../../widgets/components/payment_link_button.dart';
 import '../../widgets/forms/refund_modal.dart';
+import '../../widgets/forms/payment_request_modal.dart';
 import '../../theme/tokens.dart';
 
 /// Payment Detail Screen - View payment details and process refunds
@@ -48,6 +49,34 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              if (value == 'request_payment') {
+                PaymentRequestModal.show(
+                  context: context,
+                  clientName: 'John Smith', // Would get from payment data
+                  onSendRequest: (amount, method) {
+                    // Handle payment request sent
+                  },
+                );
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'request_payment',
+                child: Row(
+                  children: [
+                    Icon(Icons.request_quote, size: 20),
+                    SizedBox(width: SwiftleadTokens.spaceS),
+                    Text('Request Payment'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: _isLoading
           ? _buildLoadingState()

@@ -9,6 +9,8 @@ import '../../widgets/global/toast.dart';
 import 'package:flutter/services.dart';
 import '../../theme/tokens.dart';
 import '../calendar/service_catalog_screen.dart';
+import '../../widgets/forms/deposit_request_sheet.dart';
+import '../../widgets/forms/booking_offer_sheet.dart';
 
 /// Create/Edit Booking Form - Create or edit a booking
 /// Exact specification from UI_Inventory_v2.5.1
@@ -358,11 +360,50 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
             ),
             if (_requiresDeposit && _depositAmount != null) ...[
               const SizedBox(height: SwiftleadTokens.spaceS),
-              Text(
-                'Deposit Amount: £${_depositAmount!.toStringAsFixed(2)}',
-                style: Theme.of(context).textTheme.bodyMedium,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Deposit Amount: £${_depositAmount!.toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      DepositRequestSheet.show(
+                        context: context,
+                        jobTitle: widget.bookingId != null ? 'Booking' : _selectedServiceName,
+                        jobAmount: _price,
+                        onSend: (amount, dueDate, message) {
+                          setState(() {
+                            _depositAmount = amount;
+                          });
+                        },
+                      );
+                    },
+                    icon: const Icon(Icons.edit, size: 18),
+                    label: const Text('Configure'),
+                  ),
+                ],
               ),
             ],
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Send Booking Offer Button
+            OutlinedButton.icon(
+              onPressed: () {
+                BookingOfferSheet.show(
+                  context: context,
+                  onSendOffer: (timeSlot, service) {
+                    // Handle booking offer sent
+                  },
+                );
+              },
+              icon: const Icon(Icons.send),
+              label: const Text('Send Booking Offer'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 52),
+              ),
+            ),
             const SizedBox(height: SwiftleadTokens.spaceM),
 
             // Recurring Toggle

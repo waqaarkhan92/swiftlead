@@ -46,6 +46,7 @@ class SwiftleadDataTable extends StatefulWidget {
   final bool showLoadMore;
   final VoidCallback? onLoadMore;
   final VoidCallback? onExport;
+  final Function(int columnIndex, SortDirection direction, List<DataTableRow> rows)? sortComparator;
 
   const SwiftleadDataTable({
     super.key,
@@ -56,6 +57,7 @@ class SwiftleadDataTable extends StatefulWidget {
     this.showLoadMore = true,
     this.onLoadMore,
     this.onExport,
+    this.sortComparator,
   });
 
   @override
@@ -92,9 +94,52 @@ class _SwiftleadDataTableState extends State<SwiftleadDataTable> {
   }
 
   List<DataTableRow> _sortRows(List<DataTableRow> rows) {
-    // For now, return unsorted as we'd need to know data types
-    // In production, this would sort based on column data type
-    return rows;
+    if (_sortedColumnIndex == null || _sortDirection == SortDirection.none) {
+      return rows;
+    }
+
+    // Use custom sort comparator if provided
+    if (widget.sortComparator != null) {
+      return widget.sortComparator!(_sortedColumnIndex!, _sortDirection, List.from(rows));
+    }
+
+    // Default sorting: Extract text from first cell and sort alphabetically
+    // This is a basic implementation - for production, use sortComparator
+    final sorted = List<DataTableRow>.from(rows);
+    sorted.sort((a, b) {
+      if (a.cells.isEmpty || b.cells.isEmpty || _sortedColumnIndex! >= a.cells.length || _sortedColumnIndex! >= b.cells.length) {
+        return 0;
+      }
+
+      final aWidget = a.cells[_sortedColumnIndex!];
+      final bWidget = b.cells[_sortedColumnIndex!];
+
+      // Extract text from Text widgets
+      String aText = '';
+      String bText = '';
+
+      if (aWidget is Text) {
+        aText = aWidget.data ?? '';
+      }
+      if (bWidget is Text) {
+        bText = bWidget.data ?? '';
+      }
+
+      // Try to parse as numbers
+      final aNum = double.tryParse(aText.replaceAll(RegExp(r'[£,\s]'), ''));
+      final bNum = double.tryParse(bText.replaceAll(RegExp(r'[£,\s]'), ''));
+      
+      if (aNum != null && bNum != null) {
+        final comparison = aNum.compareTo(bNum);
+        return _sortDirection == SortDirection.ascending ? comparison : -comparison;
+      }
+
+      // String comparison
+      final comparison = aText.compareTo(bText);
+      return _sortDirection == SortDirection.ascending ? comparison : -comparison;
+    });
+
+    return sorted;
   }
 
   void _onColumnTap(int columnIndex) {

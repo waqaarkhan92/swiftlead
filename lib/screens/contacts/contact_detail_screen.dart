@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/badge.dart';
 import '../../widgets/global/chip.dart';
+import '../../widgets/global/toast.dart';
 import '../../theme/tokens.dart';
+import '../quotes/create_edit_quote_screen.dart';
+import '../inbox/inbox_thread_screen.dart';
+import '../jobs/create_edit_job_screen.dart';
 
 /// Contact Detail Screen - Comprehensive contact view
 /// Exact specification from UI_Inventory_v2.5.1
@@ -21,6 +26,81 @@ class ContactDetailScreen extends StatefulWidget {
 
 class _ContactDetailScreenState extends State<ContactDetailScreen> {
   int _selectedTab = 0;
+
+  void _handleCreateQuoteFromContact() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CreateEditQuoteScreen(
+          initialData: {
+            'clientName': 'John Smith', // Would come from contact data
+            'taxRate': 20.0,
+          },
+        ),
+      ),
+    ).then((_) {
+      Toast.show(
+        context,
+        message: 'Quote created for contact',
+        type: ToastType.success,
+      );
+    });
+  }
+
+  void _handleMessageContact() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => InboxThreadScreen(
+          contactName: 'John Smith', // Would come from contact data
+          channel: 'SMS',
+        ),
+      ),
+    );
+  }
+
+  void _handleCreateJobFromContact() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateEditJobScreen(
+          initialData: {
+            'clientName': 'John Smith', // Would come from contact data
+          },
+        ),
+      ),
+    );
+  }
+
+  void _handleCallContact() async {
+    final uri = Uri.parse('tel:+442012345678');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if (mounted) {
+        Toast.show(
+          context,
+          message: 'Cannot make phone call',
+          type: ToastType.error,
+        );
+      }
+    }
+  }
+
+  void _handleEmailContact() async {
+    final uri = Uri.parse('mailto:john.smith@example.com');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if (mounted) {
+        Toast.show(
+          context,
+          message: 'Cannot open email',
+          type: ToastType.error,
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -141,22 +221,27 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
               _QuickActionButton(
                 icon: Icons.phone,
                 label: 'Call',
-                onTap: () {},
+                onTap: _handleCallContact,
               ),
               _QuickActionButton(
                 icon: Icons.message,
                 label: 'Message',
-                onTap: () {},
+                onTap: _handleMessageContact,
               ),
               _QuickActionButton(
                 icon: Icons.email,
                 label: 'Email',
-                onTap: () {},
+                onTap: _handleEmailContact,
               ),
               _QuickActionButton(
                 icon: Icons.work_outline,
                 label: 'Create Job',
-                onTap: () {},
+                onTap: _handleCreateJobFromContact,
+              ),
+              _QuickActionButton(
+                icon: Icons.description,
+                label: 'Create Quote',
+                onTap: _handleCreateQuoteFromContact,
               ),
             ],
           ),

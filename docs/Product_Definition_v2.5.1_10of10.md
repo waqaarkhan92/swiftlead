@@ -4,6 +4,8 @@
 
 *Enhanced v2.5.1 — UX improvements, feature enhancements, and interaction patterns applied 2025-11-02.*
 
+> **📝 Document Updates Note:** This document has been updated to reflect the actual implementation. The Drawer / Secondary Navigation section (§21) now includes **Contacts**, **Marketing**, and **Reviews** in addition to the originally specified items (AI Hub, Reports & Analytics, Settings, Support & Help, Legal / Privacy). These updates align the specification with the current application implementation.
+
 > **v2.5.1 Enhancement Note:** Added comprehensive state handling (loading/empty/error), micro-interactions, smart suggestions, batch actions, keyboard shortcuts, offline support, accessibility enhancements, and improved data visualization across all modules. Synchronized with enhanced screen layouts and UI inventory.
 
 > **v2.5 Integration Note:** Document synchronized with premium layout component suite.  
@@ -20,7 +22,10 @@
 
 ### Drawer / Secondary Navigation
 - **AI Hub** — AI tools and configuration
+- **Contacts** — Contact and customer relationship management
+- **Marketing** — Marketing campaigns and automation
 - **Reports & Analytics** — Advanced analytics and reporting
+- **Reviews** — Review management and reputation tracking
 - **Settings** — Organisation configuration and preferences
 - **Support & Help** — Help documentation and support
 - **Legal / Privacy** — Legal information and privacy settings

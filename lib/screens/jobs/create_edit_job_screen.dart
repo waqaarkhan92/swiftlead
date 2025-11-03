@@ -6,6 +6,7 @@ import '../../widgets/global/info_banner.dart';
 import '../../widgets/global/chip.dart';
 import '../../widgets/global/progress_bar.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/forms/deposit_request_sheet.dart';
 
 /// Create/Edit Job Form - Create or edit a job
 /// Exact specification from UI_Inventory_v2.5.1
@@ -284,6 +285,28 @@ class _CreateEditJobScreenState extends State<CreateEditJobScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
                 ),
+                suffixIcon: _valueController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.payments),
+                        tooltip: 'Request Deposit',
+                        onPressed: () {
+                          final jobValue = double.tryParse(_valueController.text) ?? 0.0;
+                          if (jobValue > 0) {
+                            DepositRequestSheet.show(
+                              context: context,
+                              jobId: widget.jobId,
+                              jobTitle: _titleController.text.isNotEmpty
+                                  ? _titleController.text
+                                  : 'Job',
+                              jobAmount: jobValue,
+                              onSend: (amount, dueDate, message) {
+                                // Handle deposit request sent
+                              },
+                            );
+                          }
+                        },
+                      )
+                    : null,
               ),
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),

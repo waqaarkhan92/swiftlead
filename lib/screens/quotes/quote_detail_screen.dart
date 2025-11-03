@@ -5,8 +5,10 @@ import '../../widgets/global/primary_button.dart';
 import '../../widgets/global/badge.dart';
 import '../../widgets/global/chip.dart';
 import '../../widgets/global/bottom_sheet.dart';
+import '../../widgets/global/confirmation_dialog.dart';
 import '../../widgets/forms/send_quote_sheet.dart';
 import '../../widgets/forms/convert_quote_modal.dart';
+import '../../widgets/global/toast.dart';
 import '../../theme/tokens.dart';
 import 'create_edit_quote_screen.dart';
 
@@ -33,6 +35,52 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
   double _tax = 90.00;
   double _total = 540.00;
   DateTime _validUntil = DateTime.now().add(const Duration(days: 5));
+
+  void _handleDuplicateQuote() async {
+    // Navigate to create/edit screen with duplicated data
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateEditQuoteScreen(
+          initialData: {
+            'clientName': 'John Smith',
+            'notes': 'Duplicated from ${widget.quoteNumber}',
+            'taxRate': 20.0,
+          },
+        ),
+      ),
+    ).then((_) {
+      Toast.show(
+        context,
+        message: 'Quote duplicated successfully',
+        type: ToastType.success,
+      );
+    });
+  }
+
+  void _handleDeleteQuote() async {
+    final confirmed = await SwiftleadConfirmationDialog.show(
+      context: context,
+      title: 'Delete Quote',
+      description: 'Are you sure you want to delete ${widget.quoteNumber}? This action cannot be undone.',
+      isDestructive: true,
+      icon: Icons.delete_outline,
+    );
+
+    if (confirmed == true) {
+      // Delete the quote
+      Toast.show(
+        context,
+        message: 'Quote ${widget.quoteNumber} deleted',
+        type: ToastType.success,
+      );
+      
+      // Navigate back to quotes list
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +121,7 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
                   );
                   break;
                 case 'duplicate':
-                  // Duplicate quote
+                  _handleDuplicateQuote();
                   break;
                 case 'convert_job':
                   ConvertQuoteModal.show(
@@ -94,7 +142,7 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
                   );
                   break;
                 case 'delete':
-                  // Delete quote
+                  _handleDeleteQuote();
                   break;
               }
             },

@@ -48,6 +48,51 @@ class _ContactsScreenState extends State<ContactsScreen> {
             icon: const Icon(Icons.filter_list_outlined),
             onPressed: () => _showFilterSheet(context),
           ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              switch (value) {
+                case 'import':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ContactImportWizardScreen(),
+                    ),
+                  );
+                  break;
+                case 'export':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ContactExportBuilderScreen(),
+                    ),
+                  );
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'import',
+                child: Row(
+                  children: [
+                    Icon(Icons.upload_file, size: 20),
+                    SizedBox(width: SwiftleadTokens.spaceS),
+                    Text('Import Contacts'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'export',
+                child: Row(
+                  children: [
+                    Icon(Icons.download, size: 20),
+                    SizedBox(width: SwiftleadTokens.spaceS),
+                    Text('Export Contacts'),
+                  ],
+                ),
+              ),
+            ],
+          ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () => _showAddContactSheet(context),

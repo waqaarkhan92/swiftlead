@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/components/progress_pill.dart';
 import '../../widgets/components/date_chip.dart';
@@ -16,6 +17,9 @@ import '../../widgets/global/toast.dart';
 import '../../widgets/global/progress_bar.dart';
 import '../../theme/tokens.dart';
 import 'create_edit_job_screen.dart';
+import '../quotes/create_edit_quote_screen.dart';
+import '../money/create_edit_invoice_screen.dart';
+import '../inbox/inbox_thread_screen.dart';
 
 /// JobDetailScreen - Comprehensive job view
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -37,6 +41,63 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   int _selectedTabIndex = 0;
   final List<String> _tabs = ['Timeline', 'Details', 'Notes', 'Messages', 'Media'];
   double _progress = 0.75; // 75% complete
+
+  void _handleCreateQuoteFromJob() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateEditQuoteScreen(
+          initialData: {
+            'clientName': 'John Smith', // Would come from job data
+            'notes': 'Quote for ${widget.jobTitle}',
+            'taxRate': 20.0,
+          },
+        ),
+      ),
+    ).then((_) {
+      Toast.show(
+        context,
+        message: 'Quote created from job',
+        type: ToastType.success,
+      );
+    });
+  }
+
+  void _handleMessageClient() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => InboxThreadScreen(
+          contactName: 'John Smith', // Would come from job data
+          channel: 'SMS',
+        ),
+      ),
+    );
+  }
+
+  void _handleSendInvoiceFromJob() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CreateEditInvoiceScreen(),
+      ),
+    );
+  }
+
+  void _handleCallClient() async {
+    final uri = Uri.parse('tel:+442012345678');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if (mounted) {
+        Toast.show(
+          context,
+          message: 'Cannot make phone call',
+          type: ToastType.error,
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -196,11 +257,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.phone),
-                onPressed: () {},
+                onPressed: _handleCallClient,
               ),
               IconButton(
                 icon: const Icon(Icons.message),
-                onPressed: () {},
+                onPressed: _handleMessageClient,
               ),
             ],
           ),
@@ -287,17 +348,17 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         runSpacing: SwiftleadTokens.spaceS,
         children: [
           OutlinedButton.icon(
-            onPressed: () {},
+            onPressed: _handleMessageClient,
             icon: const Icon(Icons.message),
             label: const Text('Message Client'),
           ),
           OutlinedButton.icon(
-            onPressed: () {},
+            onPressed: _handleCreateQuoteFromJob,
             icon: const Icon(Icons.request_quote),
             label: const Text('Send Quote'),
           ),
           OutlinedButton.icon(
-            onPressed: () {},
+            onPressed: _handleSendInvoiceFromJob,
             icon: const Icon(Icons.receipt),
             label: const Text('Send Invoice'),
           ),

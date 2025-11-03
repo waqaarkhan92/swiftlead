@@ -5,7 +5,9 @@ import '../../widgets/components/date_separator.dart';
 import '../../widgets/components/message_composer_bar.dart';
 import '../../widgets/components/channel_icon_badge.dart';
 import '../../widgets/forms/smart_reply_suggestions_sheet.dart';
+import '../../widgets/global/toast.dart';
 import '../../theme/tokens.dart';
+import '../quotes/create_edit_quote_screen.dart';
 
 /// InboxThreadScreen - Conversation thread view
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -27,6 +29,27 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
   final TextEditingController _messageController = TextEditingController();
   bool _isTyping = false;
   int _noteCount = 3;
+
+  void _handleCreateQuoteFromInbox() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateEditQuoteScreen(
+          initialData: {
+            'clientName': 'John Smith', // Would come from thread data
+            'notes': 'Quote from ${widget.channel} conversation',
+            'taxRate': 20.0,
+          },
+        ),
+      ),
+    ).then((_) {
+      Toast.show(
+        context,
+        message: 'Quote created from conversation',
+        type: ToastType.success,
+      );
+    });
+  }
 
   @override
   void dispose() {
@@ -202,7 +225,7 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
               _messageController.clear();
             },
             onAttachment: () {},
-            onPayment: () {},
+            onPayment: _handleCreateQuoteFromInbox,
             onAIReply: () {
               SmartReplySuggestionsSheet.show(
                 context: context,
