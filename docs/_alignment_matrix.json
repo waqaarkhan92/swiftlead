@@ -1,0 +1,3555 @@
+[
+  {
+    "name": "Home Dashboard Screen",
+    "module": "home",
+    "category": "screen",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/screens/home/home_screen.dart",
+      "lib/widgets/home/metrics_row.dart",
+      "lib/widgets/home/chart_card.dart",
+      "lib/widgets/home/smart_tile_grid.dart",
+      "lib/widgets/home/activity_feed.dart",
+      "lib/widgets/home/ai_insight_banner.dart"
+    ],
+    "actualFiles": [
+      "lib/screens/home/home_screen.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 70%. Reasons: file_match:lib/screens/home/home_screen.dart, name_sim:0.69",
+    "matchScore": 70
+  },
+  {
+    "name": "Inbox List View Screen",
+    "module": "inbox",
+    "category": "screen",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/screens/inbox/inbox_list_screen.dart",
+      "lib/widgets/inbox/chat_list_view.dart",
+      "lib/widgets/inbox/channel_filter_chips.dart",
+      "lib/widgets/inbox/chat_bubble.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Conversation Thread View Screen",
+    "module": "inbox",
+    "category": "screen",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/screens/inbox/conversation_thread_screen.dart",
+      "lib/widgets/inbox/chat_bubble_inbound.dart",
+      "lib/widgets/inbox/chat_bubble_outbound.dart",
+      "lib/widgets/inbox/message_composer_bar.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Jobs List View Screen",
+    "module": "jobs",
+    "category": "screen",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/screens/jobs/jobs_list_screen.dart",
+      "lib/widgets/jobs/job_card.dart",
+      "lib/widgets/jobs/progress_pill.dart",
+      "lib/widgets/jobs/filter_sheet.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Job Detail View Screen",
+    "module": "jobs",
+    "category": "screen",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/screens/jobs/job_detail_screen.dart",
+      "lib/widgets/jobs/job_summary_card.dart",
+      "lib/widgets/jobs/job_timeline.dart",
+      "lib/widgets/jobs/job_media_gallery.dart"
+    ],
+    "actualFiles": [
+      "lib/screens/jobs/job_detail_screen.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 76%. Reasons: file_match:lib/screens/jobs/job_detail_screen.dart, name_sim:0.88",
+    "matchScore": 76
+  },
+  {
+    "name": "Calendar Grid View Screen",
+    "module": "calendar",
+    "category": "screen",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/screens/calendar/calendar_screen.dart",
+      "lib/widgets/calendar/calendar_widget.dart",
+      "lib/widgets/calendar/booking_card.dart",
+      "lib/widgets/calendar/time_slot_picker.dart"
+    ],
+    "actualFiles": [
+      "lib/screens/calendar/calendar_screen.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 73%. Reasons: file_match:lib/screens/calendar/calendar_screen.dart, name_sim:0.78",
+    "matchScore": 73
+  },
+  {
+    "name": "Money Dashboard Screen",
+    "module": "money",
+    "category": "screen",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/screens/money/money_dashboard_screen.dart",
+      "lib/widgets/money/balance_card.dart",
+      "lib/widgets/money/revenue_chart.dart",
+      "lib/widgets/money/payment_tile.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "AI Receptionist Configuration Screen",
+    "module": "ai_hub",
+    "category": "screen",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/screens/ai/ai_config_screen.dart",
+      "lib/widgets/ai/ai_receptionist_thread.dart",
+      "lib/widgets/ai/ai_performance_chart.dart",
+      "lib/widgets/ai/faq_card.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Reports & Analytics Dashboard",
+    "module": "reports",
+    "category": "screen",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/screens/reports/analytics_dashboard_screen.dart",
+      "lib/widgets/reports/kpi_card.dart",
+      "lib/widgets/reports/conversion_funnel_chart.dart",
+      "lib/widgets/reports/trend_line_chart.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Settings Home Screen",
+    "module": "settings",
+    "category": "screen",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/screens/settings/settings_home_screen.dart",
+      "lib/widgets/settings/settings_section.dart",
+      "lib/widgets/settings/settings_row.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Contact List View Screen",
+    "module": "contacts",
+    "category": "screen",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/screens/contacts/contact_list_screen.dart",
+      "lib/widgets/contacts/contact_card.dart",
+      "lib/widgets/contacts/stage_progress_bar.dart",
+      "lib/widgets/contacts/score_indicator.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Contact Detail View Screen",
+    "module": "contacts",
+    "category": "screen",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/screens/contacts/contact_detail_screen.dart",
+      "lib/widgets/contacts/contact_profile_card.dart",
+      "lib/widgets/contacts/timeline_view.dart"
+    ],
+    "actualFiles": [
+      "lib/screens/contacts/contact_detail_screen.dart"
+    ],
+    "priority": "secondary",
+    "notes": "Match confidence: 77%. Reasons: file_match:lib/screens/contacts/contact_detail_screen.dart, name_sim:0.90",
+    "matchScore": 77
+  },
+  {
+    "name": "Campaign List Screen",
+    "module": "marketing",
+    "category": "screen",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/screens/marketing/campaign_list_screen.dart",
+      "lib/widgets/marketing/campaign_card.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Campaign Builder Screen",
+    "module": "marketing",
+    "category": "screen",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/screens/marketing/campaign_builder_screen.dart",
+      "lib/widgets/marketing/email_composer.dart",
+      "lib/widgets/marketing/sms_composer.dart",
+      "lib/widgets/marketing/audience_selector.dart"
+    ],
+    "actualFiles": [
+      "lib/screens/marketing/campaign_builder_screen.dart"
+    ],
+    "priority": "secondary",
+    "notes": "Match confidence: 80%. Reasons: file_match:lib/screens/marketing/campaign_builder_screen.dart, name_sim:1.00",
+    "matchScore": 80
+  },
+  {
+    "name": "Campaign Analytics Screen",
+    "module": "marketing",
+    "category": "screen",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/screens/marketing/campaign_analytics_screen.dart",
+      "lib/widgets/marketing/metrics_grid.dart",
+      "lib/widgets/marketing/link_heatmap.dart",
+      "lib/widgets/marketing/conversion_funnel.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "FrostedContainer",
+    "module": "theme",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/theme/frosted_container.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "SkeletonLoader",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/skeleton_loader.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/skeleton_loader.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 80%. Reasons: file_match:lib/widgets/global/skeleton_loader.dart, name_sim:1.00",
+    "matchScore": 80
+  },
+  {
+    "name": "Toast / Snackbar",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/toast.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/toast.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 50%. Reasons: file_match:lib/widgets/global/toast.dart",
+    "matchScore": 50
+  },
+  {
+    "name": "Badge",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/badge.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/badge.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 80%. Reasons: file_match:lib/widgets/global/badge.dart, name_sim:1.00",
+    "matchScore": 80
+  },
+  {
+    "name": "Chip",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/chip.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/chip.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 50%. Reasons: file_match:lib/widgets/global/chip.dart",
+    "matchScore": 50
+  },
+  {
+    "name": "Tooltip",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/tooltip.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/tooltip.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 68%. Reasons: file_match:lib/widgets/global/tooltip.dart, name_sim:0.61",
+    "matchScore": 68
+  },
+  {
+    "name": "EmptyStateCard",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/empty_state_card.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/empty_state_card.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 80%. Reasons: file_match:lib/widgets/global/empty_state_card.dart, name_sim:1.00",
+    "matchScore": 80
+  },
+  {
+    "name": "ErrorStateCard",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/error_state_card.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/error_state_card.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 80%. Reasons: file_match:lib/widgets/global/error_state_card.dart, name_sim:1.00",
+    "matchScore": 80
+  },
+  {
+    "name": "PullToRefresh",
+    "module": "theme",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/pull_to_refresh.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "SwipeAction",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/swipe_action.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/swipe_action.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 75%. Reasons: file_match:lib/widgets/global/swipe_action.dart, name_sim:0.85",
+    "matchScore": 75
+  },
+  {
+    "name": "ConfirmationDialog",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/confirmation_dialog.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/confirmation_dialog.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 74%. Reasons: file_match:lib/widgets/global/confirmation_dialog.dart, name_sim:0.80",
+    "matchScore": 74
+  },
+  {
+    "name": "BottomSheet",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/bottom_sheet.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/bottom_sheet.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 71%. Reasons: file_match:lib/widgets/global/bottom_sheet.dart, name_sim:0.71",
+    "matchScore": 71
+  },
+  {
+    "name": "ContextMenu",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/context_menu.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/context_menu.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 75%. Reasons: file_match:lib/widgets/global/context_menu.dart, name_sim:0.85",
+    "matchScore": 75
+  },
+  {
+    "name": "SearchBar",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/search_bar.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/search_bar.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 70%. Reasons: file_match:lib/widgets/global/search_bar.dart, name_sim:0.67",
+    "matchScore": 70
+  },
+  {
+    "name": "SegmentedControl",
+    "module": "theme",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/segmented_control.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "ProgressBar",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/progress_bar.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/progress_bar.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 71%. Reasons: file_match:lib/widgets/global/progress_bar.dart, name_sim:0.71",
+    "matchScore": 71
+  },
+  {
+    "name": "LoadingSpinner",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/loading_spinner.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/loading_spinner.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 80%. Reasons: file_match:lib/widgets/global/loading_spinner.dart, name_sim:1.00",
+    "matchScore": 80
+  },
+  {
+    "name": "Avatar",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/avatar.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/avatar.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 50%. Reasons: file_match:lib/widgets/global/avatar.dart",
+    "matchScore": 50
+  },
+  {
+    "name": "FAB (Floating Action Button)",
+    "module": "theme",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/fab.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "InfoBanner",
+    "module": "theme",
+    "category": "component",
+    "status": "implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/global/info_banner.dart"
+    ],
+    "actualFiles": [
+      "lib/widgets/global/info_banner.dart"
+    ],
+    "priority": "core",
+    "notes": "Match confidence: 80%. Reasons: file_match:lib/widgets/global/info_banner.dart, name_sim:1.00",
+    "matchScore": 80
+  },
+  {
+    "name": "ChatBubble",
+    "module": "inbox",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/inbox/chat_bubble.dart",
+      "lib/widgets/inbox/chat_bubble_inbound.dart",
+      "lib/widgets/inbox/chat_bubble_outbound.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "MessageComposerBar",
+    "module": "inbox",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/inbox/message_composer_bar.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "ChannelIconBadge",
+    "module": "inbox",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/inbox/channel_icon_badge.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "TypingIndicator",
+    "module": "inbox",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/inbox/typing_indicator.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "ReadReceiptIcon",
+    "module": "inbox",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/inbox/read_receipt_icon.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "VoiceNotePlayer",
+    "module": "inbox",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/inbox/voice_note_player.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "LinkPreviewCard",
+    "module": "inbox",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/inbox/link_preview_card.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "JobCard",
+    "module": "jobs",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/jobs/job_card.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "ProgressPill",
+    "module": "jobs",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/jobs/progress_pill.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "JobTimelineRow",
+    "module": "jobs",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/jobs/job_timeline_row.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "StatusChip",
+    "module": "jobs",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/jobs/status_chip.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "CalendarWidget",
+    "module": "calendar",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/calendar/calendar_widget.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "BookingCard",
+    "module": "calendar",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/calendar/booking_card.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "TimeSlotPicker",
+    "module": "calendar",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/calendar/time_slot_picker.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "BalanceCard",
+    "module": "money",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/money/balance_card.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "RevenueChart",
+    "module": "money",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/money/revenue_chart.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "PaymentTile",
+    "module": "money",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/money/payment_tile.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "InvoiceCard",
+    "module": "money",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/money/invoice_card.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "PaymentStatusBadge",
+    "module": "money",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/money/payment_status_badge.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "AIReceptionistThread",
+    "module": "ai_hub",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/ai/ai_receptionist_thread.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "AIPerformanceChart",
+    "module": "ai_hub",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/ai/ai_performance_chart.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "FAQCard",
+    "module": "ai_hub",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/ai/faq_card.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "ContactCard",
+    "module": "contacts",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/contacts/contact_card.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "ContactProfileCard",
+    "module": "contacts",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/contacts/contact_profile_card.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "StageProgressBar",
+    "module": "contacts",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/contacts/stage_progress_bar.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "ScoreIndicator",
+    "module": "contacts",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/contacts/score_indicator.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "ScoreBreakdownCard",
+    "module": "contacts",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/contacts/score_breakdown_card.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "TimelineView",
+    "module": "contacts",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/contacts/timeline_view.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "CampaignCard",
+    "module": "marketing",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/marketing/campaign_card.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "EmailComposer",
+    "module": "marketing",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/marketing/email_composer.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "SMSComposer",
+    "module": "marketing",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/marketing/sms_composer.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "AudienceSelector",
+    "module": "marketing",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/marketing/audience_selector.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "LinkHeatmap",
+    "module": "marketing",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/marketing/link_heatmap.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "ConversionFunnel",
+    "module": "marketing",
+    "category": "component",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/widgets/marketing/conversion_funnel.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Create Job Flow",
+    "module": "jobs",
+    "category": "flow",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/flows/create_job_flow.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Send Invoice Flow",
+    "module": "money",
+    "category": "flow",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/flows/send_invoice_flow.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Book Appointment Flow",
+    "module": "calendar",
+    "category": "flow",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/flows/book_appointment_flow.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "AI Receptionist Setup Flow",
+    "module": "ai_hub",
+    "category": "flow",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/flows/ai_setup_flow.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Request Review Flow",
+    "module": "jobs",
+    "category": "flow",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/flows/request_review_flow.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Primary Teal Color",
+    "module": "theme",
+    "category": "theme_token",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/theme/color_tokens.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Secondary Accent Color",
+    "module": "theme",
+    "category": "theme_token",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/theme/color_tokens.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Background Gradient",
+    "module": "theme",
+    "category": "theme_token",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/theme/gradient_tokens.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Surface Opacity",
+    "module": "theme",
+    "category": "theme_token",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/theme/surface_tokens.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Blur Strength",
+    "module": "theme",
+    "category": "theme_token",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/theme/blur_tokens.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Border Radius",
+    "module": "theme",
+    "category": "theme_token",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/theme/radius_tokens.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Shadow",
+    "module": "theme",
+    "category": "theme_token",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/theme/shadow_tokens.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "SF Pro Display/Text Typography",
+    "module": "theme",
+    "category": "theme_token",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/theme/typography_tokens.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Transition Duration",
+    "module": "theme",
+    "category": "theme_token",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/theme/motion_tokens.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Haptic Feedback Levels",
+    "module": "theme",
+    "category": "theme_token",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/theme/haptic_tokens.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Omni-Inbox Unified Messaging",
+    "module": "inbox",
+    "category": "feature",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/features/inbox/omni_inbox_feature.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "AI Receptionist Auto-Reply",
+    "module": "ai_hub",
+    "category": "feature",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/features/ai/ai_receptionist_feature.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Job Lifecycle Management",
+    "module": "jobs",
+    "category": "feature",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/features/jobs/job_management_feature.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Calendar & Booking System",
+    "module": "calendar",
+    "category": "feature",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/features/calendar/booking_feature.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Invoicing & Payment Processing",
+    "module": "money",
+    "category": "feature",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/features/money/invoicing_feature.dart"
+    ],
+    "actualFiles": [],
+    "priority": "core",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Contact & CRM Management",
+    "module": "contacts",
+    "category": "feature",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/features/contacts/crm_feature.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Marketing Campaign Builder",
+    "module": "marketing",
+    "category": "feature",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/features/marketing/campaign_feature.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "Reports & Analytics Dashboard",
+    "module": "reports",
+    "category": "feature",
+    "status": "not_implemented",
+    "source": "spec",
+    "expectedFiles": [
+      "lib/features/reports/analytics_feature.dart"
+    ],
+    "actualFiles": [],
+    "priority": "secondary",
+    "notes": "No matching implementation found in codebase"
+  },
+  {
+    "name": "SwiftleadApp component",
+    "module": "",
+    "category": "core",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/main.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: core"
+  },
+  {
+    "name": "Mock Configuration for Swiftlead",
+    "module": "",
+    "category": "core",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/config/mock_config.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: core"
+  },
+  {
+    "name": "Central Mock Repository",
+    "module": "",
+    "category": "mock",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/mock/mock_repository.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: mock"
+  },
+  {
+    "name": "Mock Payments & Invoices Repository",
+    "module": "",
+    "category": "mock",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/mock/mock_payments.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: mock"
+  },
+  {
+    "name": "Mock Contacts Repository",
+    "module": "",
+    "category": "mock",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/mock/mock_contacts.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: mock"
+  },
+  {
+    "name": "Mock Jobs Repository",
+    "module": "",
+    "category": "mock",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/mock/mock_jobs.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: mock"
+  },
+  {
+    "name": "Mock Messages Repository",
+    "module": "",
+    "category": "mock",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/mock/mock_messages.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: mock"
+  },
+  {
+    "name": "Mock Bookings Repository",
+    "module": "",
+    "category": "mock",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/mock/mock_bookings.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: mock"
+  },
+  {
+    "name": "App-wide constants",
+    "module": "",
+    "category": "util",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/utils/constants.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: util"
+  },
+  {
+    "name": "",
+    "module": "",
+    "category": "model",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/models/contact.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: model"
+  },
+  {
+    "name": "",
+    "module": "",
+    "category": "model",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/models/message.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: model"
+  },
+  {
+    "name": "",
+    "module": "",
+    "category": "model",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/models/payment.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: model"
+  },
+  {
+    "name": "",
+    "module": "",
+    "category": "model",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/models/booking.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: model"
+  },
+  {
+    "name": "",
+    "module": "",
+    "category": "model",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/models/job.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: model"
+  },
+  {
+    "name": "Main Navigation - Bottom tab navigation with drawer",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/main_navigation.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Email Configuration Screen",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/settings/email_configuration_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Twilio Configuration Screen",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/settings/twilio_configuration_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Google Calendar Setup Screen",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/settings/google_calendar_setup_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Settings Screen - Organization configuration and preferences",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/settings/settings_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Organization Profile Screen",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/settings/organization_profile_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "CannedResponsesScreen - Quick reply templates management",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/settings/canned_responses_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Team Management Screen",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/settings/team_management_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Meta Business Setup Screen",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/settings/meta_business_setup_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Stripe Connection Screen",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/settings/stripe_connection_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Create/Edit Booking Form - Create or edit a booking",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/calendar/create_edit_booking_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "BookingDetailScreen - Comprehensive booking view",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/calendar/booking_detail_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Service Catalog Screen - Browse and select services for bookings",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/calendar/service_catalog_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "MessageSearchScreen - Full-text search for messages",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/inbox/message_search_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "InboxScreen - Unified messaging hub",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/inbox/inbox_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "InboxThreadScreen - Conversation thread view",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/inbox/inbox_thread_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Create/Edit Quote Form - Create or edit a quote",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/quotes/create_edit_quote_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "QuoteDetailScreen - Comprehensive quote view",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/quotes/quote_detail_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Contacts Screen - Contact list view with search and filters",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/contacts/contacts_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Contact Import Wizard - Multi-step import process",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/contacts/contact_import_wizard_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Contact Export Builder - Configure and generate contact exports",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/contacts/contact_export_builder_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "FAQ Management Screen - Manage AI FAQs",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/ai_hub/faq_management_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "AI Hub Screen - Central control for AI features",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/ai_hub/ai_hub_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "AI Activity Log Screen - View all AI interactions",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/ai_hub/ai_activity_log_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "AI Training Mode Screen - Add training examples to improve AI",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/ai_hub/ai_training_mode_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Support / Help Screen - Self-service help and support access",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/support/support_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "MoneyScreen - Payments & Finance",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/money/money_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "InvoiceDetailScreen - Comprehensive invoice view",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/money/invoice_detail_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Create/Edit Invoice Form - Create or edit an invoice",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/money/create_edit_invoice_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Payment Detail Screen - View payment details and process refunds",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/money/payment_detail_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Campaign Detail Screen - View campaign details and analytics",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/marketing/campaign_detail_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Marketing Screen - Campaign list and management",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/marketing/marketing_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "JobsScreen - Job management pipeline",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/jobs/jobs_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Create/Edit Job Form - Create or edit a job",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/jobs/create_edit_job_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Legal / Privacy Screen - Legal documents and privacy information",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/legal/legal_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Notifications Screen - Notification preferences and center",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/notifications/notifications_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Onboarding Screen - Multi-step setup wizard",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/onboarding/onboarding_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Reports & Analytics Screen",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/reports/reports_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "NPS Survey View - Net Promoter Score tracking",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/reviews/nps_survey_view.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Review Response Form - Respond to reviews on Google, Facebook, Yelp",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/reviews/review_response_form.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Reviews Screen - Review management and reputation tracking",
+    "module": "",
+    "category": "screen",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/screens/reviews/reviews_screen.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: screen"
+  },
+  {
+    "name": "Swiftlead Theme System v2.5.1",
+    "module": "",
+    "category": "theme",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/theme/swiftlead_theme.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: theme"
+  },
+  {
+    "name": "Swiftlead Design Tokens v2.5.1",
+    "module": "",
+    "category": "theme",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/theme/tokens.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: theme"
+  },
+  {
+    "name": "Supabase Service - Backend integration",
+    "module": "",
+    "category": "service",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/services/supabase_service.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: service"
+  },
+  {
+    "name": "ReviewRequestSheet - Request review from client",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/review_request_sheet.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "Convert Quote Modal - Convert quote to job or invoice",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/convert_quote_modal.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "Job Export Sheet - Export jobs to file",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/job_export_sheet.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "Job Assignment Sheet - Assign job to team member",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/job_assignment_sheet.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "OnMyWaySheet - Share ETA with client",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/on_my_way_sheet.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "Complete Booking Modal - Mark booking as complete",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/complete_booking_modal.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "Cancel Booking Modal - Cancel a booking with refund options",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/cancel_booking_modal.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "RefundModal - Process refund for payment",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/refund_modal.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "Send Quote Sheet - Send quote via SMS/Email/WhatsApp",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/send_quote_sheet.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "PaymentRequestModal - Request payment from client",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/payment_request_modal.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "Booking Confirmation Sheet - Confirm booking and send confirmation",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/booking_confirmation_sheet.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "Smart Reply Suggestions Sheet - Shows AI-generated reply options",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/smart_reply_suggestions_sheet.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "RescheduleSheet - Reschedule a booking",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/reschedule_sheet.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "BookingOfferSheet - Send booking offer with time slots",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/booking_offer_sheet.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "PaymentLinkSheet - Create and share payment link for invoice",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/payment_link_sheet.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "DepositRequestSheet - Request deposit for job/booking",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/deposit_request_sheet.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "Media Upload Sheet - Upload media files for jobs/bookings",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/forms/media_upload_sheet.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "TimeSlotPicker - Visual time slot selector with availability shading",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/time_slot_picker.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "PaymentStatusBadge - Color-coded badge (paid/pending/overdue/refunded) with icon",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/payment_status_badge.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "Internal Notes Modal - Create and read internal team notes for conversations",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/internal_notes_modal.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "QuickActionChip - Action chip with tooltip",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/quick_action_chip.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "CampaignCard - Campaign list item",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/campaign_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ResponseTimeData - Data point for response times",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/response_times_chart.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "DNDScheduleEditor - Time range + days selector",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/dnd_schedule_editor.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "TrendLineChart - Interactive line chart",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/trend_line_chart.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "TonePreviewCard - Shows sample responses in each tone style",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/tone_preview_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "StageProgressBar - Visual stage progression",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/stage_progress_bar.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ReactionPicker - Emoji reaction overlay on long-press message",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/reaction_picker.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "SMSComposer - SMS text editor with counter",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/sms_composer.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "NotificationCard - Single notification item",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/notification_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "AIPerformanceChart - Multi-series chart showing AI performance over time",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/ai_performance_chart.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ChannelPerformanceData - Data point for channel performance",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/channel_performance_chart.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "LearningProgressBar - Progress bar showing AI training progress and improvement over time",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/learning_progress_bar.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "AutomationStatsCard - Shows automation activity and time saved",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/automation_stats_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "VoiceNotePlayer - Inline audio player with waveform visualization",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/voice_note_player.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "AIReceptionistThread - Chat interface simulating AI conversations",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/ai_receptionist_thread.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "SettingsSection - Grouped settings with header, dividers, and item rows",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/settings_section.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ScoreBreakdownCard - Detailed score breakdown",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/score_breakdown_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "SubscriptionCard - Card showing plan details, usage, renewal date, upgrade options",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/subscription_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "SegmentedControl - Tab-like toggle between views",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/segmented_control.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "TeamMemberAvatar - Avatar with availability indicator and tap to filter",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/team_member_avatar.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "TeamMemberCard - Card with avatar, name, role, permissions, edit/remove actions",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/team_member_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ChaseHistoryTimeline - Timeline of payment reminder attempts",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/chase_history_timeline.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "AIStatusIndicator - Real-time indicator showing AI active/learning/error status",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/ai_status_indicator.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "LeadSourcePieChart - Donut chart with breakdown by source",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/lead_source_pie_chart.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "SettingsRow - Individual setting with label, description, control (toggle, select, button)",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/settings_row.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ScoreIndicator - Lead score badge with color coding",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/score_indicator.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "DateSeparator - Date divider in chat thread",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/date_separator.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "RecurringScheduleCard - Shows recurring invoice schedule",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/recurring_schedule_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "LinkPreviewCard - Rich preview of URLs sent in messages",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/link_preview_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ConflictWarningCard - Warning card showing conflicting bookings with resolve options",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/conflict_warning_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "Message Detail Sheet - Detailed message information",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/message_detail_sheet.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ChatTitleRow - Conversation list item",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/chat_title_row.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "PinnedChatRow - Fixed row at top with pin icon and quick unpin action",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/pinned_chat_row.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "CalendarWidget - Month/week grid with event dots, color-coded by status, drag-to-create, pinch-to-zo...",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/calendar_widget.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "DataTableColumn - Column definition for DataTable",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/data_table.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "TeamPerformanceCard - Team member performance display",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/team_performance_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "TypingIndicator - Animated dots showing contact is typing",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/typing_indicator.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "DepositBadge - Shows deposit status (required/paid/pending) with amount",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/deposit_badge.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "IntegrationCard - Card showing integration logo, status, connect/disconnect button",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/integration_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ETACountdown - Live countdown timer showing estimated arrival",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/eta_countdown.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "AIInsightBanner - Dismissible contextual AI suggestions",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/ai_insight_banner.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ConversionFunnelChart - Visual funnel showing drop-off at each stage",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/conversion_funnel_chart.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "OnMyWayButton - Large CTA button with GPS icon and ETA display",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/on_my_way_button.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "TaxCalculator - Live tax calculation display with breakdown tooltip",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/tax_calculator.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "FAQCard - Expandable FAQ card with question, answer, edit/delete, usage stats",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/faq_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "MessageComposerBar - Bottom sticky input with all buttons",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/message_composer_bar.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ChannelIconBadge - Channel logo with tooltip",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/channel_icon_badge.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "JobCard - Rich information card with all components",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/job_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ConfidenceIndicator - Visual gauge showing AI confidence level (0-100%)",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/confidence_indicator.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "PaymentTile - Transaction row with client, amount, status, date + tap to expand",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/payment_tile.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "GoalProgressRing - Circular progress indicator",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/goal_progress_ring.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "RecurrencePatternPicker - Visual picker for daily/weekly/monthly patterns with preview",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/recurrence_pattern_picker.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "CampaignTypeSelector - Choose campaign type",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/campaign_type_selector.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "EmailComposer - Rich email editor",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/email_composer.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "InvoiceCard - Invoice summary with client, items, total, status + quick actions",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/invoice_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "DigestScheduleSelector - Time and day pickers",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/digest_schedule_selector.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "MediaThumbnail - Public component extracted from JobDetailScreen",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/media_thumbnail.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ReadReceiptIcon - Check marks (single/double) showing delivery and read status",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/read_receipt_icon.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "SmartReplyChip - Chip containing suggested reply text with tap to use",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/smart_reply_chip.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ServiceTile - Service card with name, duration, price, color indicator + tap to edit",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/service_tile.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "KPICard - Large metric card with current value, trend arrow, vs previous period, sparkline",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/kpi_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "LineItemRow - Invoice line item with description, quantity, rate, amount + inline edit",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/line_item_row.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "UnreadBadge - Numeric count on conversation rows and tab icons",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/unread_badge.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "TemplateCard - Template preview card",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/template_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "AI Insight Type",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/ai_insight_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "InternalNotesButton - Floating button for team notes",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/internal_notes_button.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ContactProfileCard - Header with photo, name, key details",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/contact_profile_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "RefundProgress - Shows refund processing status",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/refund_progress.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "BookingCard - Card with client, service, time, status + quick actions",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/booking_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "BalanceCard - Large card showing current balance, pending, and received amounts",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/balance_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ContactCard - List item showing contact summary",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/contact_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ReminderToggle - Toggle switches for different reminder timings",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/reminder_toggle.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "AI Summary Card - AI-generated conversation summary",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/ai_summary_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ChatBubble - Message bubble component",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/chat_bubble.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "PaymentLinkButton - Component for generating/copying payment links",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/payment_link_button.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "TrendTile - Metric card with sparkline and percentage change",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/trend_tile.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "BusinessHoursGrid - Visual weekly schedule with time blocks",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/business_hours_grid.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "DateChip - Date display chip for jobs/bookings",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/date_chip.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "CallTranscriptRow - Expandable row with call duration, transcription, and AI summary",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/call_transcript_row.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ProgressPill - Status indicator showing job progress",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/progress_pill.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "ConfirmationStatusIndicator - Color-coded indicator (pending/confirmed/completed/cancelled)",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/confirmation_status_indicator.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "EscalationBadge - Badge showing when AI escalated to human with reason",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/escalation_badge.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "PreferenceGrid - Type \u00d7 Channel grid of toggles",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/preference_grid.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "Media Preview Modal - Full-screen media viewer",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/media_preview_modal.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "TimelineView - Chronological activity feed",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/timeline_view.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "AudienceSelector - Select target segments",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/audience_selector.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "BookingOfferCard - Card showing AI-suggested booking offer",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/booking_offer_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "StripeStatusCard - Card showing Stripe account status, balance, recent activity",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/components/stripe_status_card.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "FrostedContainer - Premium glass effect component",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/global/frosted_container.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "Primary Button - Canonical implementation from Theme_and_Design_System_v2.5.1",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/global/primary_button.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "HapticFeedback - Physical touch feedback utility",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/global/haptic_feedback.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "FrostedBottomNavBar - Premium floating navigation capsule",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/global/frosted_bottom_nav_bar.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "DrawerMenu - Premium glass drawer navigation",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/global/drawer.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  },
+  {
+    "name": "FrostedAppBar - Premium glass app bar",
+    "module": "",
+    "category": "widget",
+    "status": "untracked",
+    "source": "code",
+    "expectedFiles": [],
+    "actualFiles": [
+      "lib/widgets/global/frosted_app_bar.dart"
+    ],
+    "priority": "unknown",
+    "notes": "Code exists but not documented in specification. Categories: widget"
+  }
+]
