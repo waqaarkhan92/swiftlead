@@ -45,8 +45,9 @@ class _LeadSourcePieChartState extends State<LeadSourcePieChart> {
           
           // Pie chart
           SizedBox(
-            height: 250,
+            height: 200,
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   flex: 2,
@@ -67,7 +68,7 @@ class _LeadSourcePieChartState extends State<LeadSourcePieChart> {
                       ),
                       borderData: FlBorderData(show: false),
                       sectionsSpace: 2,
-                      centerSpaceRadius: 60,
+                      centerSpaceRadius: 50,
                       sections: _buildSections(total),
                     ),
                   ),
@@ -75,67 +76,77 @@ class _LeadSourcePieChartState extends State<LeadSourcePieChart> {
                 const SizedBox(width: SwiftleadTokens.spaceM),
                 Expanded(
                   flex: 1,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: widget.sources.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final source = entry.value;
-                      final isSelected = _touchedIndex == index;
-                      final percentage = (source.value / total) * 100;
-                      
-                      return GestureDetector(
-                        onTap: () => widget.onSourceTap?.call(source),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(
-                            vertical: 4,
-                          ),
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: isSelected 
-                                ? source.color.withOpacity(0.2)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-                            border: isSelected 
-                                ? Border.all(color: source.color)
-                                : null,
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 12,
-                                height: 12,
-                                decoration: BoxDecoration(
-                                  color: source.color,
-                                  shape: BoxShape.circle,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: widget.sources.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final source = entry.value;
+                        final isSelected = _touchedIndex == index;
+                        final percentage = (source.value / total) * 100;
+                        
+                        return GestureDetector(
+                          onTap: () => widget.onSourceTap?.call(source),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                              vertical: 3,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected 
+                                  ? source.color.withOpacity(0.2)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                              border: isSelected 
+                                  ? Border.all(color: source.color)
+                                  : null,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: BoxDecoration(
+                                    color: source.color,
+                                    shape: BoxShape.circle,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: SwiftleadTokens.spaceS),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      source.label,
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        source.label,
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
                                       ),
-                                    ),
-                                    Text(
-                                      '${percentage.toStringAsFixed(1)}%',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: Colors.grey.shade600,
+                                      Text(
+                                        '${percentage.toStringAsFixed(1)}%',
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          color: Colors.grey.shade600,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    }).toList(),
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ),
               ],
