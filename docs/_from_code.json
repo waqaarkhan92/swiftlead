@@ -1,0 +1,2350 @@
+[
+  {
+    "file": "main.dart",
+    "category": "core",
+    "classNames": [
+      "SwiftleadApp"
+    ],
+    "hasTODO": true,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "SwiftleadApp component"
+  },
+  {
+    "file": "config/mock_config.dart",
+    "category": "core",
+    "classNames": [
+      "MockConfig"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Mock Configuration for Swiftlead"
+  },
+  {
+    "file": "mock/mock_repository.dart",
+    "category": "mock",
+    "classNames": [
+      "MockRepository"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Central Mock Repository"
+  },
+  {
+    "file": "mock/mock_payments.dart",
+    "category": "mock",
+    "classNames": [
+      "MockPayments",
+      "Invoice",
+      "InvoiceItem",
+      "Payment",
+      "RevenueStats"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Mock Payments & Invoices Repository"
+  },
+  {
+    "file": "mock/mock_contacts.dart",
+    "category": "mock",
+    "classNames": [
+      "MockContacts",
+      "Contact"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Mock Contacts Repository"
+  },
+  {
+    "file": "mock/mock_jobs.dart",
+    "category": "mock",
+    "classNames": [
+      "MockJobs",
+      "Job"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Mock Jobs Repository"
+  },
+  {
+    "file": "mock/mock_messages.dart",
+    "category": "mock",
+    "classNames": [
+      "MockMessages",
+      "MessageThread",
+      "Message"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Mock Messages Repository"
+  },
+  {
+    "file": "mock/mock_bookings.dart",
+    "category": "mock",
+    "classNames": [
+      "MockBookings",
+      "Booking"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Mock Bookings Repository"
+  },
+  {
+    "file": "utils/constants.dart",
+    "category": "util",
+    "classNames": [
+      "AppConstants"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "App-wide constants"
+  },
+  {
+    "file": "models/contact.dart",
+    "category": "model",
+    "classNames": [],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": ""
+  },
+  {
+    "file": "models/message.dart",
+    "category": "model",
+    "classNames": [],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": ""
+  },
+  {
+    "file": "models/payment.dart",
+    "category": "model",
+    "classNames": [],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": ""
+  },
+  {
+    "file": "models/booking.dart",
+    "category": "model",
+    "classNames": [],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": ""
+  },
+  {
+    "file": "models/job.dart",
+    "category": "model",
+    "classNames": [],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": ""
+  },
+  {
+    "file": "screens/main_navigation.dart",
+    "category": "screen",
+    "classNames": [
+      "MainNavigation"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Main Navigation - Bottom tab navigation with drawer"
+  },
+  {
+    "file": "screens/settings/email_configuration_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "EmailConfigurationScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "Email Configuration Screen"
+  },
+  {
+    "file": "screens/settings/twilio_configuration_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "TwilioConfigurationScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "Twilio Configuration Screen"
+  },
+  {
+    "file": "screens/settings/google_calendar_setup_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "GoogleCalendarSetupScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "Google Calendar Setup Screen"
+  },
+  {
+    "file": "screens/settings/settings_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "SettingsScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": false,
+    "description": "Settings Screen - Organization configuration and preferences"
+  },
+  {
+    "file": "screens/settings/organization_profile_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "OrganizationProfileScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "Organization Profile Screen"
+  },
+  {
+    "file": "screens/settings/canned_responses_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "CannedResponsesScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "CannedResponsesScreen - Quick reply templates management"
+  },
+  {
+    "file": "screens/settings/team_management_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "TeamManagementScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Team Management Screen"
+  },
+  {
+    "file": "screens/settings/meta_business_setup_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "MetaBusinessSetupScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "Meta Business Setup Screen"
+  },
+  {
+    "file": "screens/settings/stripe_connection_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "StripeConnectionScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "Stripe Connection Screen"
+  },
+  {
+    "file": "screens/home/home_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "HomeScreen"
+    ],
+    "hasTODO": true,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "HomeScreen - Dashboard hub"
+  },
+  {
+    "file": "screens/calendar/create_edit_booking_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "CreateEditBookingScreen"
+    ],
+    "hasTODO": true,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Create/Edit Booking Form - Create or edit a booking"
+  },
+  {
+    "file": "screens/calendar/booking_detail_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "BookingDetailScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "BookingDetailScreen - Comprehensive booking view"
+  },
+  {
+    "file": "screens/calendar/calendar_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "CalendarScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "CalendarScreen - Bookings & Scheduling"
+  },
+  {
+    "file": "screens/calendar/service_catalog_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "ServiceCatalogScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Service Catalog Screen - Browse and select services for bookings"
+  },
+  {
+    "file": "screens/inbox/message_search_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "MessageSearchScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "MessageSearchScreen - Full-text search for messages"
+  },
+  {
+    "file": "screens/inbox/inbox_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "InboxScreen"
+    ],
+    "hasTODO": true,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "InboxScreen - Unified messaging hub"
+  },
+  {
+    "file": "screens/inbox/inbox_thread_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "InboxThreadScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": false,
+    "description": "InboxThreadScreen - Conversation thread view"
+  },
+  {
+    "file": "screens/quotes/create_edit_quote_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "CreateEditQuoteScreen"
+    ],
+    "hasTODO": true,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Create/Edit Quote Form - Create or edit a quote"
+  },
+  {
+    "file": "screens/quotes/quote_detail_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "QuoteDetailScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": false,
+    "description": "QuoteDetailScreen - Comprehensive quote view"
+  },
+  {
+    "file": "screens/contacts/contacts_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "ContactsScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Contacts Screen - Contact list view with search and filters"
+  },
+  {
+    "file": "screens/contacts/contact_detail_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "ContactDetailScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Contact Detail Screen - Comprehensive contact view"
+  },
+  {
+    "file": "screens/contacts/contact_import_wizard_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "ContactImportWizardScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Contact Import Wizard - Multi-step import process"
+  },
+  {
+    "file": "screens/contacts/contact_export_builder_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "ContactExportBuilderScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Contact Export Builder - Configure and generate contact exports"
+  },
+  {
+    "file": "screens/ai_hub/faq_management_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "FAQManagementScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": false,
+    "description": "FAQ Management Screen - Manage AI FAQs"
+  },
+  {
+    "file": "screens/ai_hub/ai_hub_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "AIHubScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "AI Hub Screen - Central control for AI features"
+  },
+  {
+    "file": "screens/ai_hub/ai_activity_log_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "AIActivityLogScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "AI Activity Log Screen - View all AI interactions"
+  },
+  {
+    "file": "screens/ai_hub/ai_training_mode_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "AITrainingModeScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "AI Training Mode Screen - Add training examples to improve AI"
+  },
+  {
+    "file": "screens/support/support_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "SupportScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "Support / Help Screen - Self-service help and support access"
+  },
+  {
+    "file": "screens/money/money_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "MoneyScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "MoneyScreen - Payments & Finance"
+  },
+  {
+    "file": "screens/money/invoice_detail_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "InvoiceDetailScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": false,
+    "description": "InvoiceDetailScreen - Comprehensive invoice view"
+  },
+  {
+    "file": "screens/money/create_edit_invoice_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "CreateEditInvoiceScreen"
+    ],
+    "hasTODO": true,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Create/Edit Invoice Form - Create or edit an invoice"
+  },
+  {
+    "file": "screens/money/payment_detail_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "PaymentDetailScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Payment Detail Screen - View payment details and process refunds"
+  },
+  {
+    "file": "screens/marketing/campaign_detail_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "CampaignDetailScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Campaign Detail Screen - View campaign details and analytics"
+  },
+  {
+    "file": "screens/marketing/marketing_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "MarketingScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Marketing Screen - Campaign list and management"
+  },
+  {
+    "file": "screens/marketing/campaign_builder_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "CampaignBuilderScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Campaign Builder Screen - Multi-step campaign creation wizard"
+  },
+  {
+    "file": "screens/jobs/jobs_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "JobsScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "JobsScreen - Job management pipeline"
+  },
+  {
+    "file": "screens/jobs/job_detail_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "JobDetailScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "JobDetailScreen - Comprehensive job view"
+  },
+  {
+    "file": "screens/jobs/create_edit_job_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "CreateEditJobScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Create/Edit Job Form - Create or edit a job"
+  },
+  {
+    "file": "screens/legal/legal_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "LegalScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": false,
+    "description": "Legal / Privacy Screen - Legal documents and privacy information"
+  },
+  {
+    "file": "screens/notifications/notifications_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "NotificationsScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Notifications Screen - Notification preferences and center"
+  },
+  {
+    "file": "screens/onboarding/onboarding_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "OnboardingScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Onboarding Screen - Multi-step setup wizard"
+  },
+  {
+    "file": "screens/reports/reports_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "ReportsScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Reports & Analytics Screen"
+  },
+  {
+    "file": "screens/reviews/nps_survey_view.dart",
+    "category": "screen",
+    "classNames": [
+      "NpsSurveyView"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "NPS Survey View - Net Promoter Score tracking"
+  },
+  {
+    "file": "screens/reviews/review_response_form.dart",
+    "category": "screen",
+    "classNames": [
+      "ReviewResponseForm"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Review Response Form - Respond to reviews on Google, Facebook, Yelp"
+  },
+  {
+    "file": "screens/reviews/reviews_screen.dart",
+    "category": "screen",
+    "classNames": [
+      "ReviewsScreen"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Reviews Screen - Review management and reputation tracking"
+  },
+  {
+    "file": "theme/swiftlead_theme.dart",
+    "category": "theme",
+    "classNames": [
+      "SwiftleadTheme"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Swiftlead Theme System v2.5.1"
+  },
+  {
+    "file": "theme/tokens.dart",
+    "category": "theme",
+    "classNames": [
+      "SwiftleadTokens"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Swiftlead Design Tokens v2.5.1"
+  },
+  {
+    "file": "services/supabase_service.dart",
+    "category": "service",
+    "classNames": [
+      "SupabaseService"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Supabase Service - Backend integration"
+  },
+  {
+    "file": "widgets/forms/review_request_sheet.dart",
+    "category": "widget",
+    "classNames": [
+      "ReviewRequestSheet"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "ReviewRequestSheet - Request review from client"
+  },
+  {
+    "file": "widgets/forms/convert_quote_modal.dart",
+    "category": "widget",
+    "classNames": [
+      "ConvertQuoteModal"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Convert Quote Modal - Convert quote to job or invoice"
+  },
+  {
+    "file": "widgets/forms/job_export_sheet.dart",
+    "category": "widget",
+    "classNames": [
+      "JobExportSheet"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Job Export Sheet - Export jobs to file"
+  },
+  {
+    "file": "widgets/forms/job_assignment_sheet.dart",
+    "category": "widget",
+    "classNames": [
+      "JobAssignmentSheet"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Job Assignment Sheet - Assign job to team member"
+  },
+  {
+    "file": "widgets/forms/on_my_way_sheet.dart",
+    "category": "widget",
+    "classNames": [
+      "OnMyWaySheet"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "OnMyWaySheet - Share ETA with client"
+  },
+  {
+    "file": "widgets/forms/complete_booking_modal.dart",
+    "category": "widget",
+    "classNames": [
+      "CompleteBookingModal"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Complete Booking Modal - Mark booking as complete"
+  },
+  {
+    "file": "widgets/forms/cancel_booking_modal.dart",
+    "category": "widget",
+    "classNames": [
+      "CancelBookingModal"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Cancel Booking Modal - Cancel a booking with refund options"
+  },
+  {
+    "file": "widgets/forms/refund_modal.dart",
+    "category": "widget",
+    "classNames": [
+      "RefundModal"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "RefundModal - Process refund for payment"
+  },
+  {
+    "file": "widgets/forms/send_quote_sheet.dart",
+    "category": "widget",
+    "classNames": [
+      "SendQuoteSheet"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Send Quote Sheet - Send quote via SMS/Email/WhatsApp"
+  },
+  {
+    "file": "widgets/forms/payment_request_modal.dart",
+    "category": "widget",
+    "classNames": [
+      "PaymentRequestModal"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "PaymentRequestModal - Request payment from client"
+  },
+  {
+    "file": "widgets/forms/booking_confirmation_sheet.dart",
+    "category": "widget",
+    "classNames": [
+      "BookingConfirmationSheet"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Booking Confirmation Sheet - Confirm booking and send confirmation"
+  },
+  {
+    "file": "widgets/forms/smart_reply_suggestions_sheet.dart",
+    "category": "widget",
+    "classNames": [
+      "SmartReplySuggestionsSheet"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Smart Reply Suggestions Sheet - Shows AI-generated reply options"
+  },
+  {
+    "file": "widgets/forms/reschedule_sheet.dart",
+    "category": "widget",
+    "classNames": [
+      "RescheduleSheet"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "RescheduleSheet - Reschedule a booking"
+  },
+  {
+    "file": "widgets/forms/booking_offer_sheet.dart",
+    "category": "widget",
+    "classNames": [
+      "BookingOfferSheet"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "BookingOfferSheet - Send booking offer with time slots"
+  },
+  {
+    "file": "widgets/forms/payment_link_sheet.dart",
+    "category": "widget",
+    "classNames": [
+      "PaymentLinkSheet"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "PaymentLinkSheet - Create and share payment link for invoice"
+  },
+  {
+    "file": "widgets/forms/deposit_request_sheet.dart",
+    "category": "widget",
+    "classNames": [
+      "DepositRequestSheet"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "DepositRequestSheet - Request deposit for job/booking"
+  },
+  {
+    "file": "widgets/forms/media_upload_sheet.dart",
+    "category": "widget",
+    "classNames": [
+      "MediaUploadSheet"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "Media Upload Sheet - Upload media files for jobs/bookings"
+  },
+  {
+    "file": "widgets/components/time_slot_picker.dart",
+    "category": "widget",
+    "classNames": [
+      "TimeSlotPicker",
+      "TimeSlot"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "TimeSlotPicker - Visual time slot selector with availability shading"
+  },
+  {
+    "file": "widgets/components/payment_status_badge.dart",
+    "category": "widget",
+    "classNames": [
+      "PaymentStatusBadge"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "PaymentStatusBadge - Color-coded badge (paid/pending/overdue/refunded) with icon"
+  },
+  {
+    "file": "widgets/components/internal_notes_modal.dart",
+    "category": "widget",
+    "classNames": [
+      "InternalNotesModal",
+      "InternalNote"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "Internal Notes Modal - Create and read internal team notes for conversations"
+  },
+  {
+    "file": "widgets/components/quick_action_chip.dart",
+    "category": "widget",
+    "classNames": [
+      "QuickActionChip"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "QuickActionChip - Action chip with tooltip"
+  },
+  {
+    "file": "widgets/components/campaign_card.dart",
+    "category": "widget",
+    "classNames": [
+      "CampaignCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "CampaignCard - Campaign list item"
+  },
+  {
+    "file": "widgets/components/response_times_chart.dart",
+    "category": "widget",
+    "classNames": [
+      "ResponseTimeData",
+      "ResponseTimesChart"
+    ],
+    "hasTODO": true,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ResponseTimeData - Data point for response times"
+  },
+  {
+    "file": "widgets/components/dnd_schedule_editor.dart",
+    "category": "widget",
+    "classNames": [
+      "DNDScheduleEditor"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "DNDScheduleEditor - Time range + days selector"
+  },
+  {
+    "file": "widgets/components/trend_line_chart.dart",
+    "category": "widget",
+    "classNames": [
+      "TrendLineChart",
+      "ChartDataPoint"
+    ],
+    "hasTODO": true,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "TrendLineChart - Interactive line chart"
+  },
+  {
+    "file": "widgets/components/tone_preview_card.dart",
+    "category": "widget",
+    "classNames": [
+      "TonePreviewCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "TonePreviewCard - Shows sample responses in each tone style"
+  },
+  {
+    "file": "widgets/components/stage_progress_bar.dart",
+    "category": "widget",
+    "classNames": [
+      "StageProgressBar"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "StageProgressBar - Visual stage progression"
+  },
+  {
+    "file": "widgets/components/reaction_picker.dart",
+    "category": "widget",
+    "classNames": [
+      "ReactionPicker"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": false,
+    "description": "ReactionPicker - Emoji reaction overlay on long-press message"
+  },
+  {
+    "file": "widgets/components/sms_composer.dart",
+    "category": "widget",
+    "classNames": [
+      "SMSComposer"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "SMSComposer - SMS text editor with counter"
+  },
+  {
+    "file": "widgets/components/notification_card.dart",
+    "category": "widget",
+    "classNames": [
+      "NotificationCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "NotificationCard - Single notification item"
+  },
+  {
+    "file": "widgets/components/ai_performance_chart.dart",
+    "category": "widget",
+    "classNames": [
+      "AIPerformanceChart"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "AIPerformanceChart - Multi-series chart showing AI performance over time"
+  },
+  {
+    "file": "widgets/components/channel_performance_chart.dart",
+    "category": "widget",
+    "classNames": [
+      "ChannelPerformanceData",
+      "ChannelPerformanceChart"
+    ],
+    "hasTODO": true,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ChannelPerformanceData - Data point for channel performance"
+  },
+  {
+    "file": "widgets/components/learning_progress_bar.dart",
+    "category": "widget",
+    "classNames": [
+      "LearningProgressBar"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "LearningProgressBar - Progress bar showing AI training progress and improvement over time"
+  },
+  {
+    "file": "widgets/components/automation_stats_card.dart",
+    "category": "widget",
+    "classNames": [
+      "AutomationStatsCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "AutomationStatsCard - Shows automation activity and time saved"
+  },
+  {
+    "file": "widgets/components/voice_note_player.dart",
+    "category": "widget",
+    "classNames": [
+      "VoiceNotePlayer"
+    ],
+    "hasTODO": true,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "VoiceNotePlayer - Inline audio player with waveform visualization"
+  },
+  {
+    "file": "widgets/components/ai_receptionist_thread.dart",
+    "category": "widget",
+    "classNames": [
+      "AIReceptionistThread"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "AIReceptionistThread - Chat interface simulating AI conversations"
+  },
+  {
+    "file": "widgets/components/settings_section.dart",
+    "category": "widget",
+    "classNames": [
+      "SettingsSection"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "SettingsSection - Grouped settings with header, dividers, and item rows"
+  },
+  {
+    "file": "widgets/components/score_breakdown_card.dart",
+    "category": "widget",
+    "classNames": [
+      "ScoreBreakdownCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ScoreBreakdownCard - Detailed score breakdown"
+  },
+  {
+    "file": "widgets/components/subscription_card.dart",
+    "category": "widget",
+    "classNames": [
+      "SubscriptionCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "SubscriptionCard - Card showing plan details, usage, renewal date, upgrade options"
+  },
+  {
+    "file": "widgets/components/segmented_control.dart",
+    "category": "widget",
+    "classNames": [
+      "SegmentedControl"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "SegmentedControl - Tab-like toggle between views"
+  },
+  {
+    "file": "widgets/components/team_member_avatar.dart",
+    "category": "widget",
+    "classNames": [
+      "TeamMemberAvatar"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "TeamMemberAvatar - Avatar with availability indicator and tap to filter"
+  },
+  {
+    "file": "widgets/components/team_member_card.dart",
+    "category": "widget",
+    "classNames": [
+      "TeamMemberCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "TeamMemberCard - Card with avatar, name, role, permissions, edit/remove actions"
+  },
+  {
+    "file": "widgets/components/chase_history_timeline.dart",
+    "category": "widget",
+    "classNames": [
+      "ChaseHistoryTimeline",
+      "ChaseRecord"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ChaseHistoryTimeline - Timeline of payment reminder attempts"
+  },
+  {
+    "file": "widgets/components/ai_status_indicator.dart",
+    "category": "widget",
+    "classNames": [
+      "AIStatusIndicator"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "AIStatusIndicator - Real-time indicator showing AI active/learning/error status"
+  },
+  {
+    "file": "widgets/components/lead_source_pie_chart.dart",
+    "category": "widget",
+    "classNames": [
+      "LeadSourcePieChart",
+      "LeadSourceData"
+    ],
+    "hasTODO": true,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "LeadSourcePieChart - Donut chart with breakdown by source"
+  },
+  {
+    "file": "widgets/components/settings_row.dart",
+    "category": "widget",
+    "classNames": [
+      "SettingsRow"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "SettingsRow - Individual setting with label, description, control (toggle, select, button)"
+  },
+  {
+    "file": "widgets/components/score_indicator.dart",
+    "category": "widget",
+    "classNames": [
+      "ScoreIndicator"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ScoreIndicator - Lead score badge with color coding"
+  },
+  {
+    "file": "widgets/components/date_separator.dart",
+    "category": "widget",
+    "classNames": [
+      "DateSeparator"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "DateSeparator - Date divider in chat thread"
+  },
+  {
+    "file": "widgets/components/recurring_schedule_card.dart",
+    "category": "widget",
+    "classNames": [
+      "RecurringScheduleCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "RecurringScheduleCard - Shows recurring invoice schedule"
+  },
+  {
+    "file": "widgets/components/link_preview_card.dart",
+    "category": "widget",
+    "classNames": [
+      "LinkPreviewCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "LinkPreviewCard - Rich preview of URLs sent in messages"
+  },
+  {
+    "file": "widgets/components/conflict_warning_card.dart",
+    "category": "widget",
+    "classNames": [
+      "ConflictWarningCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ConflictWarningCard - Warning card showing conflicting bookings with resolve options"
+  },
+  {
+    "file": "widgets/components/message_detail_sheet.dart",
+    "category": "widget",
+    "classNames": [
+      "MessageDetailSheet"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Message Detail Sheet - Detailed message information"
+  },
+  {
+    "file": "widgets/components/chat_title_row.dart",
+    "category": "widget",
+    "classNames": [
+      "ChatTitleRow"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ChatTitleRow - Conversation list item"
+  },
+  {
+    "file": "widgets/components/pinned_chat_row.dart",
+    "category": "widget",
+    "classNames": [
+      "PinnedChatRow"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "PinnedChatRow - Fixed row at top with pin icon and quick unpin action"
+  },
+  {
+    "file": "widgets/components/calendar_widget.dart",
+    "category": "widget",
+    "classNames": [
+      "CalendarWidget",
+      "CalendarEvent"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "CalendarWidget - Month/week grid with event dots, color-coded by status, drag-to-create, pinch-to-zo..."
+  },
+  {
+    "file": "widgets/components/data_table.dart",
+    "category": "widget",
+    "classNames": [
+      "DataTableColumn",
+      "DataTableRow",
+      "SwiftleadDataTable"
+    ],
+    "hasTODO": true,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "DataTableColumn - Column definition for DataTable"
+  },
+  {
+    "file": "widgets/components/team_performance_card.dart",
+    "category": "widget",
+    "classNames": [
+      "TeamPerformanceCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "TeamPerformanceCard - Team member performance display"
+  },
+  {
+    "file": "widgets/components/typing_indicator.dart",
+    "category": "widget",
+    "classNames": [
+      "TypingIndicator"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "TypingIndicator - Animated dots showing contact is typing"
+  },
+  {
+    "file": "widgets/components/deposit_badge.dart",
+    "category": "widget",
+    "classNames": [
+      "DepositBadge"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "DepositBadge - Shows deposit status (required/paid/pending) with amount"
+  },
+  {
+    "file": "widgets/components/integration_card.dart",
+    "category": "widget",
+    "classNames": [
+      "IntegrationCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "IntegrationCard - Card showing integration logo, status, connect/disconnect button"
+  },
+  {
+    "file": "widgets/components/eta_countdown.dart",
+    "category": "widget",
+    "classNames": [
+      "ETACountdown"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "ETACountdown - Live countdown timer showing estimated arrival"
+  },
+  {
+    "file": "widgets/components/ai_insight_banner.dart",
+    "category": "widget",
+    "classNames": [
+      "AIInsightBanner"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "AIInsightBanner - Dismissible contextual AI suggestions"
+  },
+  {
+    "file": "widgets/components/conversion_funnel_chart.dart",
+    "category": "widget",
+    "classNames": [
+      "ConversionFunnelChart",
+      "FunnelStage"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ConversionFunnelChart - Visual funnel showing drop-off at each stage"
+  },
+  {
+    "file": "widgets/components/on_my_way_button.dart",
+    "category": "widget",
+    "classNames": [
+      "OnMyWayButton"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "OnMyWayButton - Large CTA button with GPS icon and ETA display"
+  },
+  {
+    "file": "widgets/components/tax_calculator.dart",
+    "category": "widget",
+    "classNames": [
+      "TaxCalculator"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "TaxCalculator - Live tax calculation display with breakdown tooltip"
+  },
+  {
+    "file": "widgets/components/faq_card.dart",
+    "category": "widget",
+    "classNames": [
+      "FAQCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "FAQCard - Expandable FAQ card with question, answer, edit/delete, usage stats"
+  },
+  {
+    "file": "widgets/components/message_composer_bar.dart",
+    "category": "widget",
+    "classNames": [
+      "MessageComposerBar"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "MessageComposerBar - Bottom sticky input with all buttons"
+  },
+  {
+    "file": "widgets/components/channel_icon_badge.dart",
+    "category": "widget",
+    "classNames": [
+      "ChannelIconBadge"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ChannelIconBadge - Channel logo with tooltip"
+  },
+  {
+    "file": "widgets/components/job_card.dart",
+    "category": "widget",
+    "classNames": [
+      "JobCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "JobCard - Rich information card with all components"
+  },
+  {
+    "file": "widgets/components/confidence_indicator.dart",
+    "category": "widget",
+    "classNames": [
+      "ConfidenceIndicator"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ConfidenceIndicator - Visual gauge showing AI confidence level (0-100%)"
+  },
+  {
+    "file": "widgets/components/payment_tile.dart",
+    "category": "widget",
+    "classNames": [
+      "PaymentTile"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "PaymentTile - Transaction row with client, amount, status, date + tap to expand"
+  },
+  {
+    "file": "widgets/components/goal_progress_ring.dart",
+    "category": "widget",
+    "classNames": [
+      "GoalProgressRing"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "GoalProgressRing - Circular progress indicator"
+  },
+  {
+    "file": "widgets/components/recurrence_pattern_picker.dart",
+    "category": "widget",
+    "classNames": [
+      "RecurrencePatternPicker",
+      "RecurrencePattern"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "RecurrencePatternPicker - Visual picker for daily/weekly/monthly patterns with preview"
+  },
+  {
+    "file": "widgets/components/campaign_type_selector.dart",
+    "category": "widget",
+    "classNames": [
+      "CampaignTypeSelector"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "CampaignTypeSelector - Choose campaign type"
+  },
+  {
+    "file": "widgets/components/email_composer.dart",
+    "category": "widget",
+    "classNames": [
+      "EmailComposer",
+      "EmailTemplate"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "EmailComposer - Rich email editor"
+  },
+  {
+    "file": "widgets/components/invoice_card.dart",
+    "category": "widget",
+    "classNames": [
+      "InvoiceCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "InvoiceCard - Invoice summary with client, items, total, status + quick actions"
+  },
+  {
+    "file": "widgets/components/digest_schedule_selector.dart",
+    "category": "widget",
+    "classNames": [
+      "DigestScheduleSelector"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "DigestScheduleSelector - Time and day pickers"
+  },
+  {
+    "file": "widgets/components/media_thumbnail.dart",
+    "category": "widget",
+    "classNames": [
+      "MediaThumbnail"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "MediaThumbnail - Public component extracted from JobDetailScreen"
+  },
+  {
+    "file": "widgets/components/read_receipt_icon.dart",
+    "category": "widget",
+    "classNames": [
+      "ReadReceiptIcon"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ReadReceiptIcon - Check marks (single/double) showing delivery and read status"
+  },
+  {
+    "file": "widgets/components/smart_reply_chip.dart",
+    "category": "widget",
+    "classNames": [
+      "SmartReplyChip"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "SmartReplyChip - Chip containing suggested reply text with tap to use"
+  },
+  {
+    "file": "widgets/components/service_tile.dart",
+    "category": "widget",
+    "classNames": [
+      "ServiceTile"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ServiceTile - Service card with name, duration, price, color indicator + tap to edit"
+  },
+  {
+    "file": "widgets/components/kpi_card.dart",
+    "category": "widget",
+    "classNames": [
+      "KPICard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "KPICard - Large metric card with current value, trend arrow, vs previous period, sparkline"
+  },
+  {
+    "file": "widgets/components/line_item_row.dart",
+    "category": "widget",
+    "classNames": [
+      "LineItemRow"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "LineItemRow - Invoice line item with description, quantity, rate, amount + inline edit"
+  },
+  {
+    "file": "widgets/components/unread_badge.dart",
+    "category": "widget",
+    "classNames": [
+      "UnreadBadge"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "UnreadBadge - Numeric count on conversation rows and tab icons"
+  },
+  {
+    "file": "widgets/components/template_card.dart",
+    "category": "widget",
+    "classNames": [
+      "TemplateCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "TemplateCard - Template preview card"
+  },
+  {
+    "file": "widgets/components/ai_insight_card.dart",
+    "category": "widget",
+    "classNames": [
+      "AIInsightCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "AI Insight Type"
+  },
+  {
+    "file": "widgets/components/internal_notes_button.dart",
+    "category": "widget",
+    "classNames": [
+      "InternalNotesButton"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "InternalNotesButton - Floating button for team notes"
+  },
+  {
+    "file": "widgets/components/contact_profile_card.dart",
+    "category": "widget",
+    "classNames": [
+      "ContactProfileCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ContactProfileCard - Header with photo, name, key details"
+  },
+  {
+    "file": "widgets/components/refund_progress.dart",
+    "category": "widget",
+    "classNames": [
+      "RefundProgress"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "RefundProgress - Shows refund processing status"
+  },
+  {
+    "file": "widgets/components/booking_card.dart",
+    "category": "widget",
+    "classNames": [
+      "BookingCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "BookingCard - Card with client, service, time, status + quick actions"
+  },
+  {
+    "file": "widgets/components/balance_card.dart",
+    "category": "widget",
+    "classNames": [
+      "BalanceCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "BalanceCard - Large card showing current balance, pending, and received amounts"
+  },
+  {
+    "file": "widgets/components/contact_card.dart",
+    "category": "widget",
+    "classNames": [
+      "ContactCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ContactCard - List item showing contact summary"
+  },
+  {
+    "file": "widgets/components/reminder_toggle.dart",
+    "category": "widget",
+    "classNames": [
+      "ReminderToggle"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ReminderToggle - Toggle switches for different reminder timings"
+  },
+  {
+    "file": "widgets/components/ai_summary_card.dart",
+    "category": "widget",
+    "classNames": [
+      "AISummaryCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "AI Summary Card - AI-generated conversation summary"
+  },
+  {
+    "file": "widgets/components/chat_bubble.dart",
+    "category": "widget",
+    "classNames": [
+      "ChatBubble"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ChatBubble - Message bubble component"
+  },
+  {
+    "file": "widgets/components/payment_link_button.dart",
+    "category": "widget",
+    "classNames": [
+      "PaymentLinkButton"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "PaymentLinkButton - Component for generating/copying payment links"
+  },
+  {
+    "file": "widgets/components/trend_tile.dart",
+    "category": "widget",
+    "classNames": [
+      "TrendTile"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "TrendTile - Metric card with sparkline and percentage change"
+  },
+  {
+    "file": "widgets/components/business_hours_grid.dart",
+    "category": "widget",
+    "classNames": [
+      "BusinessHoursGrid"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "BusinessHoursGrid - Visual weekly schedule with time blocks"
+  },
+  {
+    "file": "widgets/components/date_chip.dart",
+    "category": "widget",
+    "classNames": [
+      "DateChip"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "DateChip - Date display chip for jobs/bookings"
+  },
+  {
+    "file": "widgets/components/call_transcript_row.dart",
+    "category": "widget",
+    "classNames": [
+      "CallTranscriptRow"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "CallTranscriptRow - Expandable row with call duration, transcription, and AI summary"
+  },
+  {
+    "file": "widgets/components/progress_pill.dart",
+    "category": "widget",
+    "classNames": [
+      "ProgressPill"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ProgressPill - Status indicator showing job progress"
+  },
+  {
+    "file": "widgets/components/confirmation_status_indicator.dart",
+    "category": "widget",
+    "classNames": [
+      "ConfirmationStatusIndicator"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ConfirmationStatusIndicator - Color-coded indicator (pending/confirmed/completed/cancelled)"
+  },
+  {
+    "file": "widgets/components/escalation_badge.dart",
+    "category": "widget",
+    "classNames": [
+      "EscalationBadge"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "EscalationBadge - Badge showing when AI escalated to human with reason"
+  },
+  {
+    "file": "widgets/components/preference_grid.dart",
+    "category": "widget",
+    "classNames": [
+      "PreferenceGrid"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "PreferenceGrid - Type × Channel grid of toggles"
+  },
+  {
+    "file": "widgets/components/media_preview_modal.dart",
+    "category": "widget",
+    "classNames": [
+      "MediaPreviewModal"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": false,
+    "description": "Media Preview Modal - Full-screen media viewer"
+  },
+  {
+    "file": "widgets/components/timeline_view.dart",
+    "category": "widget",
+    "classNames": [
+      "TimelineActivity",
+      "TimelineView"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "TimelineView - Chronological activity feed"
+  },
+  {
+    "file": "widgets/components/audience_selector.dart",
+    "category": "widget",
+    "classNames": [
+      "AudienceSegment",
+      "AudienceSelector"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "AudienceSelector - Select target segments"
+  },
+  {
+    "file": "widgets/components/booking_offer_card.dart",
+    "category": "widget",
+    "classNames": [
+      "BookingOfferCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "BookingOfferCard - Card showing AI-suggested booking offer"
+  },
+  {
+    "file": "widgets/components/stripe_status_card.dart",
+    "category": "widget",
+    "classNames": [
+      "StripeStatusCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "StripeStatusCard - Card showing Stripe account status, balance, recent activity"
+  },
+  {
+    "file": "widgets/global/frosted_container.dart",
+    "category": "widget",
+    "classNames": [
+      "FrostedContainer"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "FrostedContainer - Premium glass effect component"
+  },
+  {
+    "file": "widgets/global/progress_bar.dart",
+    "category": "widget",
+    "classNames": [
+      "SwiftleadProgressBar"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ProgressBar - Linear progress indicator"
+  },
+  {
+    "file": "widgets/global/search_bar.dart",
+    "category": "widget",
+    "classNames": [
+      "SwiftleadSearchBar"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": true,
+    "description": "SearchBar - Global search input with auto-complete"
+  },
+  {
+    "file": "widgets/global/primary_button.dart",
+    "category": "widget",
+    "classNames": [
+      "PrimaryButton"
+    ],
+    "hasTODO": true,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Primary Button - Canonical implementation from Theme_and_Design_System_v2.5.1"
+  },
+  {
+    "file": "widgets/global/badge.dart",
+    "category": "widget",
+    "classNames": [
+      "SwiftleadBadge",
+      "Badge"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Badge Component - Multiple variants as specified in UI_Inventory_v2.5.1"
+  },
+  {
+    "file": "widgets/global/haptic_feedback.dart",
+    "category": "widget",
+    "classNames": [
+      "HapticFeedback"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "HapticFeedback - Physical touch feedback utility"
+  },
+  {
+    "file": "widgets/global/skeleton_loader.dart",
+    "category": "widget",
+    "classNames": [
+      "SkeletonLoader",
+      "SkeletonCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "SkeletonLoader - Loading placeholder with shimmer animation"
+  },
+  {
+    "file": "widgets/global/swipe_action.dart",
+    "category": "widget",
+    "classNames": [
+      "SwiftleadSwipeAction",
+      "SwipeActionItem"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "SwipeAction - Quick actions via swipe gesture"
+  },
+  {
+    "file": "widgets/global/avatar.dart",
+    "category": "widget",
+    "classNames": [
+      "SwiftleadAvatar"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Avatar - User/contact profile image"
+  },
+  {
+    "file": "widgets/global/frosted_bottom_nav_bar.dart",
+    "category": "widget",
+    "classNames": [
+      "FrostedBottomNavBar",
+      "NavItem"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "FrostedBottomNavBar - Premium floating navigation capsule"
+  },
+  {
+    "file": "widgets/global/empty_state_card.dart",
+    "category": "widget",
+    "classNames": [
+      "EmptyStateCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "EmptyStateCard - Empty state placeholder with CTA"
+  },
+  {
+    "file": "widgets/global/context_menu.dart",
+    "category": "widget",
+    "classNames": [
+      "SwiftleadContextMenu",
+      "ContextMenuItem"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": true,
+    "usesSetState": true,
+    "description": "ContextMenu / Long-Press Menu"
+  },
+  {
+    "file": "widgets/global/info_banner.dart",
+    "category": "widget",
+    "classNames": [
+      "InfoBanner"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "InfoBanner - Contextual information strip"
+  },
+  {
+    "file": "widgets/global/chip.dart",
+    "category": "widget",
+    "classNames": [
+      "SwiftleadChip"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Chip Component - Filter/selectable chips"
+  },
+  {
+    "file": "widgets/global/tooltip.dart",
+    "category": "widget",
+    "classNames": [
+      "SwiftleadTooltip"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": false,
+    "description": "Tooltip - Contextual help on hover/long-press"
+  },
+  {
+    "file": "widgets/global/bottom_sheet.dart",
+    "category": "widget",
+    "classNames": [
+      "SwiftleadBottomSheet"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "BottomSheet / Modal Sheet"
+  },
+  {
+    "file": "widgets/global/error_state_card.dart",
+    "category": "widget",
+    "classNames": [
+      "ErrorStateCard"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "ErrorStateCard - Error display with retry action"
+  },
+  {
+    "file": "widgets/global/drawer.dart",
+    "category": "widget",
+    "classNames": [
+      "SwiftleadDrawer",
+      "DrawerItem"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": true,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "DrawerMenu - Premium glass drawer navigation"
+  },
+  {
+    "file": "widgets/global/frosted_app_bar.dart",
+    "category": "widget",
+    "classNames": [
+      "FrostedAppBar"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "FrostedAppBar - Premium glass app bar"
+  },
+  {
+    "file": "widgets/global/confirmation_dialog.dart",
+    "category": "widget",
+    "classNames": [
+      "SwiftleadConfirmationDialog"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": true,
+    "usesSetState": false,
+    "description": "ConfirmationDialog - Action confirmation modal"
+  },
+  {
+    "file": "widgets/global/loading_spinner.dart",
+    "category": "widget",
+    "classNames": [
+      "LoadingSpinner"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "LoadingSpinner - Inline progress indicator"
+  },
+  {
+    "file": "widgets/global/toast.dart",
+    "category": "widget",
+    "classNames": [
+      "Toast"
+    ],
+    "hasTODO": false,
+    "hasOnTapHandlers": false,
+    "usesNavigator": false,
+    "usesSetState": false,
+    "description": "Toast Notification - Brief feedback messages"
+  }
+]
