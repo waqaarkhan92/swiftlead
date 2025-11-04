@@ -80,9 +80,59 @@ class MediaUploadSheet {
               ListTile(
                 leading: const Icon(Icons.insert_drive_file),
                 title: const Text('Choose Document'),
+                subtitle: const Text('PDF, Word, Excel, etc.'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  // Open file picker
+                onTap: () async {
+                  // Open file picker for documents
+                  // Note: Requires file_picker package (already in pubspec.yaml)
+                  // Implementation: await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt'])
+                  setState(() {
+                    isUploading = true;
+                  });
+                  // Simulate document upload
+                  Future.forEach<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], (i) async {
+                    await Future.delayed(const Duration(milliseconds: 100));
+                    setState(() {
+                      uploadProgress = i / 10;
+                    });
+                  }).then((_) {
+                    Navigator.pop(context);
+                    onUploadComplete?.call();
+                    Toast.show(
+                      context,
+                      message: 'Document uploaded successfully',
+                      type: ToastType.success,
+                    );
+                  });
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.mic),
+                title: const Text('Record Voice Note'),
+                subtitle: const Text('Record audio message'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () async {
+                  // Open voice recorder
+                  // Note: Would require audio recording package like record or flutter_sound
+                  // Implementation: Start recording, show waveform, stop/save
+                  setState(() {
+                    isUploading = true;
+                  });
+                  // Simulate voice note upload
+                  Future.forEach<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], (i) async {
+                    await Future.delayed(const Duration(milliseconds: 100));
+                    setState(() {
+                      uploadProgress = i / 10;
+                    });
+                  }).then((_) {
+                    Navigator.pop(context);
+                    onUploadComplete?.call();
+                    Toast.show(
+                      context,
+                      message: 'Voice note uploaded successfully',
+                      type: ToastType.success,
+                    );
+                  });
                 },
               ),
             ],

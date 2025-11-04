@@ -18,6 +18,8 @@ class MessageComposerBar extends StatefulWidget {
   final VoidCallback? onSend;
   final VoidCallback? onAttachment;
   final VoidCallback? onPayment;
+  final VoidCallback? onCreateJob;
+  final VoidCallback? onAIExtractJob;
   final VoidCallback? onAIReply;
   final bool isTyping;
   final bool isSending;
@@ -31,6 +33,8 @@ class MessageComposerBar extends StatefulWidget {
     this.onSend,
     this.onAttachment,
     this.onPayment,
+    this.onCreateJob,
+    this.onAIExtractJob,
     this.onAIReply,
     this.isTyping = false,
     this.isSending = false,
@@ -106,6 +110,20 @@ class _MessageComposerBarState extends State<MessageComposerBar> {
                   onPressed: widget.onPayment,
                   tooltip: 'Request payment',
                 ),
+                // CreateJobButton
+                if (widget.onCreateJob != null)
+                  IconButton(
+                    icon: const Icon(Icons.work_outline),
+                    onPressed: widget.onCreateJob,
+                    tooltip: 'Create job',
+                  ),
+                // AI Extract Job Button
+                if (widget.onAIExtractJob != null)
+                  IconButton(
+                    icon: const Icon(Icons.auto_awesome_outlined),
+                    onPressed: widget.onAIExtractJob,
+                    tooltip: 'AI extract job details',
+                  ),
                 // TemplateButton (Quick Reply Templates)
                 IconButton(
                   icon: const Icon(Icons.description_outlined),

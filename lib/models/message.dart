@@ -5,4 +5,7 @@ export '../mock/mock_messages.dart' show
   MessageThread,
   MessageChannel,
   MessageChannelExtension,
-  MessageStatus;
+  MessageStatus,
+  MissedCall,
+  LeadSource;
+export '../widgets/components/priority_badge.dart' show ThreadPriority;

@@ -3,18 +3,18 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/primary_button.dart';
-import '../../widgets/global/badge.dart';
-import '../../widgets/global/chip.dart';
 import '../../widgets/forms/reschedule_sheet.dart';
 import '../../widgets/forms/cancel_booking_modal.dart';
 import '../../widgets/forms/complete_booking_modal.dart';
 import '../../widgets/forms/booking_confirmation_sheet.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/global/toast.dart';
+import '../../widgets/global/info_banner.dart';
 import 'create_edit_booking_screen.dart';
 import '../../widgets/forms/on_my_way_sheet.dart';
 import 'reminder_settings_screen.dart';
 import '../inbox/inbox_screen.dart';
+import '../jobs/create_edit_job_screen.dart';
 
 /// BookingDetailScreen - Comprehensive booking view
 /// Exact specification from UI_Inventory_v2.5.1 and Screen_Layouts_v2.5.1
@@ -37,6 +37,57 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   String _status = 'Confirmed';
   DateTime _bookingTime = DateTime.now().add(const Duration(days: 2, hours: 3));
   bool _onMyWay = false;
+
+  void _handleCreateJobFromBooking() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateEditJobScreen(
+          initialData: {
+            'clientName': widget.clientName,
+            'notes': 'Job created from booking: ${widget.bookingId}',
+            'scheduledDate': _bookingTime,
+          },
+        ),
+      ),
+    ).then((_) {
+      Toast.show(
+        context,
+        message: 'Job created from booking',
+        type: ToastType.success,
+      );
+    });
+  }
+
+  void _handleMarkNoShow() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Mark as No-Show'),
+        content: const Text('Are you sure you want to mark this booking as a no-show?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _status = 'No Show';
+              });
+              Navigator.pop(context);
+              Toast.show(
+                context,
+                message: 'Booking marked as no-show',
+                type: ToastType.success,
+              );
+            },
+            child: const Text('Mark No-Show'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +119,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             icon: const Icon(Icons.more_vert),
             onSelected: (value) {
               switch (value) {
+                case 'create_job':
+                  _handleCreateJobFromBooking();
+                  break;
+                case 'mark_no_show':
+                  _handleMarkNoShow();
+                  break;
                 case 'reminder_settings':
                   Navigator.push(
                     context,
@@ -104,6 +161,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               }
             },
             itemBuilder: (context) => [
+              const PopupMenuItem(value: 'create_job', child: Text('Create Job')),
+              const PopupMenuDivider(),
+              if (_status.toLowerCase() == 'confirmed' || _status.toLowerCase() == 'pending')
+                const PopupMenuItem(value: 'mark_no_show', child: Text('Mark as No-Show')),
+              const PopupMenuDivider(),
               const PopupMenuItem(value: 'reminder_settings', child: Text('Reminder Settings')),
               const PopupMenuDivider(),
               const PopupMenuItem(value: 'reschedule', child: Text('Reschedule')),
@@ -139,6 +201,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         _buildServiceDetails(),
         const SizedBox(height: SwiftleadTokens.spaceL),
 
+        // Weather Forecast (for outdoor jobs)
+        _buildWeatherForecast(),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+
         // StatusAndConfirmation
         _buildStatusCard(),
         const SizedBox(height: SwiftleadTokens.spaceL),
@@ -150,6 +216,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         // Booking Notes
         _buildBookingNotes(),
         const SizedBox(height: SwiftleadTokens.spaceL),
+
+        // Cancellation Policy
+        _buildCancellationPolicy(),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+
+        // No-Show Tracking (if marked as no-show)
+        if (_status == 'No Show') _buildNoShowTracking(),
+        if (_status == 'No Show') const SizedBox(height: SwiftleadTokens.spaceL),
 
         // OnMyWayButton (if applicable)
         if (!_onMyWay && _status == 'Confirmed') _buildOnMyWayButton(),
@@ -380,6 +454,93 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     );
   }
 
+  Widget _buildWeatherForecast() {
+    // Mock: Check if service is outdoor (e.g., roofing, landscaping)
+    // In production, this would check service category and only show for outdoor services
+    // For now, show weather for all services (mock)
+    final mockWeather = {
+      'condition': 'Partly Cloudy',
+      'temperature': 18,
+      'icon': Icons.wb_cloudy,
+      'precipitation': 10,
+      'wind': 15,
+    };
+
+    return FrostedContainer(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Weather Forecast',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              Icon(
+                mockWeather['icon'] as IconData,
+                color: const Color(SwiftleadTokens.primaryTeal),
+              ),
+            ],
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Column(
+                children: [
+                  Text(
+                    '${mockWeather['temperature']}°C',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: const Color(SwiftleadTokens.primaryTeal),
+                    ),
+                  ),
+                  Text(
+                    mockWeather['condition'] as String,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.water_drop, size: 16, color: Color(SwiftleadTokens.primaryTeal)),
+                      const SizedBox(width: SwiftleadTokens.spaceXS),
+                      Text(
+                        '${mockWeather['precipitation']}% chance',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: SwiftleadTokens.spaceXS),
+                  Row(
+                    children: [
+                      const Icon(Icons.air, size: 16, color: Color(SwiftleadTokens.primaryTeal)),
+                      const SizedBox(width: SwiftleadTokens.spaceXS),
+                      Text(
+                        '${mockWeather['wind']} km/h wind',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          InfoBanner(
+            message: 'Weather forecast for ${_formatDate(_bookingTime)}. Consider rescheduling if conditions are unfavorable.',
+            type: InfoBannerType.info,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStatusCard() {
     return FrostedContainer(
       padding: const EdgeInsets.all(20),
@@ -418,27 +579,49 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             ),
           ],
           const SizedBox(height: SwiftleadTokens.spaceM),
-          PrimaryButton(
-            label: _status == 'Confirmed' ? 'Resend Confirmation' : 'Confirm Booking',
-            onPressed: () {
-              BookingConfirmationSheet.show(
-                context: context,
-                bookingId: widget.bookingId,
-                clientName: widget.clientName,
-                bookingTime: _bookingTime,
-                serviceName: 'Kitchen Sink Repair',
-                currentStatus: _status.toLowerCase(),
-                onConfirmed: (confirmed, sendNotification) {
-                  if (confirmed && _status != 'Confirmed') {
-                    setState(() {
-                      _status = 'Confirmed';
-                    });
-                  }
+          Row(
+            children: [
+              Expanded(
+                child: PrimaryButton(
+                  label: _status == 'Confirmed' ? 'Resend Confirmation' : 'Confirm Booking',
+                  onPressed: () {
+                    BookingConfirmationSheet.show(
+                      context: context,
+                      bookingId: widget.bookingId,
+                      clientName: widget.clientName,
+                      bookingTime: _bookingTime,
+                      serviceName: 'Kitchen Sink Repair',
+                      currentStatus: _status.toLowerCase(),
+                      onConfirmed: (confirmed, sendNotification) {
+                        if (confirmed && _status != 'Confirmed') {
+                          setState(() {
+                            _status = 'Confirmed';
+                          });
+                        }
+                      },
+                    );
+                  },
+                  icon: _status == 'Confirmed' ? Icons.send : Icons.check_circle,
+                  size: ButtonSize.small,
+                ),
+              ),
+              const SizedBox(width: SwiftleadTokens.spaceS),
+              OutlinedButton.icon(
+                onPressed: () {
+                  // Generate and share calendar invite (.ics)
+                  Toast.show(
+                    context,
+                    message: 'Calendar invite (.ics) generated and attached to confirmation email',
+                    type: ToastType.success,
+                  );
                 },
-              );
-            },
-            icon: _status == 'Confirmed' ? Icons.send : Icons.check_circle,
-            size: ButtonSize.small,
+                icon: const Icon(Icons.calendar_today, size: 18),
+                label: const Text('Add to Calendar'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
           Row(
@@ -653,6 +836,211 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           Text(
             'Client mentioned that the sink is leaking and making strange noises. Please bring extra washers and check the water pressure.',
             style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCancellationPolicy() {
+    return FrostedContainer(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                color: const Color(SwiftleadTokens.primaryTeal),
+                size: 20,
+              ),
+              const SizedBox(width: SwiftleadTokens.spaceS),
+              Text(
+                'Cancellation Policy',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ],
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          Text(
+            'Cancellations must be made at least 24 hours before the appointment. Cancellations made less than 24 hours in advance may be subject to a cancellation fee.',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
+          TextButton(
+            onPressed: () {
+              // Show full cancellation policy
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Cancellation Policy'),
+                  content: const Text(
+                    'Full cancellation policy details:\n\n'
+                    '• Cancellations made 48+ hours in advance: No charge\n'
+                    '• Cancellations made 24-48 hours in advance: 25% fee\n'
+                    '• Cancellations made less than 24 hours in advance: 50% fee\n'
+                    '• No-shows: Full charge\n\n'
+                    'This policy is sent to clients in booking confirmation emails.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close'),
+                    ),
+                  ],
+                ),
+              );
+            },
+            child: const Text('View Full Policy'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoShowTracking() {
+    // Mock no-show data
+    final noShowRate = 15.0; // 15% no-show rate for this client
+    final isHighRisk = noShowRate > 10.0;
+    final totalBookings = 20;
+    final noShowCount = 3;
+
+    return FrostedContainer(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: const Color(SwiftleadTokens.errorRed),
+                    size: 24,
+                  ),
+                  const SizedBox(width: SwiftleadTokens.spaceS),
+                  Text(
+                    'No-Show Tracking',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                ],
+              ),
+              if (isHighRisk)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SwiftleadTokens.spaceS,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(SwiftleadTokens.errorRed).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'High-Risk Client',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: const Color(SwiftleadTokens.errorRed),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'No-Show Rate',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    Text(
+                      '$noShowRate%',
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: const Color(SwiftleadTokens.errorRed),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Total Bookings',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    Text(
+                      '$totalBookings',
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'No-Shows',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    Text(
+                      '$noShowCount',
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: const Color(SwiftleadTokens.errorRed),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    // Send automated follow-up message
+                    Toast.show(
+                      context,
+                      message: 'Follow-up message sent to client',
+                      type: ToastType.success,
+                    );
+                  },
+                  icon: const Icon(Icons.message, size: 18),
+                  label: const Text('Send Follow-Up'),
+                ),
+              ),
+              const SizedBox(width: SwiftleadTokens.spaceS),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    // Create no-show fee invoice
+                    Toast.show(
+                      context,
+                      message: 'Navigate to invoice creation with no-show fee',
+                      type: ToastType.info,
+                    );
+                    // In real app, would navigate to invoice screen with pre-filled no-show fee
+                  },
+                  icon: const Icon(Icons.receipt, size: 18),
+                  label: const Text('Invoice Fee'),
+                ),
+              ),
+            ],
           ),
         ],
       ),

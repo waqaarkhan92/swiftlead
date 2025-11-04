@@ -40,7 +40,7 @@ Complete visual specification for screen layouts, component hierarchies, and int
 
 ### 1. HomeScreen (Revolut × Swiftlead Dashboard)
 
-**Purpose:** Data-rich, welcoming, and interactive hub with real-time updates and smart insights.
+**Purpose:** Data-rich, welcoming, and interactive hub with real-time updates and smart insights. (Note: Real-time updates deferred until backend is wired. Current implementation uses pull-based approach.)
 
 **Sections (Top → Bottom):**
 
@@ -202,8 +202,15 @@ Complete visual specification for screen layouts, component hierarchies, and int
    - Overflow menu: View contact, Search in chat, Mute, Archive, Block
    - Subtitle shows "Last seen 5m ago" or "Typing..."
 2. **ChatThreadView** → Chronological message list
+   - **MissedCallNotification:** Inline missed call notification displayed chronologically with messages
+     - Shows missed call timestamp, phone number
+     - "Call Back" button (opens phone dialer)
+     - "Text Back" button (sends branded text-back message if not already sent)
+     - Shows "Text-back sent" badge if automated text-back was sent
+     - Orange-themed card with phone icon
    - **ChatBubble (Inbound):** Left-aligned, avatar (optional), timestamp, read receipt
    - **ChatBubble (Outbound):** Right-aligned, teal gradient, sending/sent/failed status
+   - **MediaThumbnail (if message has attachment):** Attachment thumbnail displayed above message bubble, tap to open MediaPreviewModal for full-screen viewing
    - **DateSeparator:** "Today", "Yesterday", specific date for older
    - **LinkPreviewCard:** Rich preview for URLs
    - **VoiceNotePlayer:** Inline audio with waveform
@@ -230,16 +237,30 @@ Complete visual specification for screen layouts, component hierarchies, and int
 | Empty | "Start conversation" illustration | Suggested responses (e.g., "Hi [Name]!") | Shows templates and quick replies |
 | Sending | Progress indicator on message | None | Shows sending status, allows retry on failure |
 | Error | "Failed to send" on message bubble | "Try Again" | Allows manual retry with offline queue |
-| Offline | "You're offline" banner | "Dismiss" | Messages queued, sent when online |
+| Offline | "You're offline" banner with queued count | Tap to view details | Messages queued, sent when online. Shows "X messages queued" badge |
 
 **Enhancements (v2.5.1):**
+- **Conversation Preview:** Long-press conversation in inbox list to preview without opening full thread
+  - Shows contact info, recent messages (last 3), unread count, channel badge
+  - Quick actions: Open conversation, View contact, Archive, Pin/Unpin
+  - Opens in 3/4 height bottom sheet with frosted glass effect
+- **Priority Inbox:** AI-determined priority (High/Medium/Low) displayed as colored badge next to contact name
+  - High priority: Red badge with upward arrow
+  - Medium priority: Yellow badge with horizontal line
+  - Low priority: Blue badge with downward arrow
+  - Sorting: Pinned → Priority (High → Medium → Low) → Unread → Recent
+  - Filter by priority in filter sheet (All/High/Medium/Low)
+  - Filter by lead source in filter sheet (All/Google Ads/Facebook Ads/Website/Referral/Direct) - Note: Lead Source represents marketing attribution (where the lead came from), distinct from message channel (communication platform)
 - **Smart Reply Suggestions:** AI suggests 3 quick replies based on context
-- **Scheduled Messages:** Long-press send for schedule option
+- **Scheduled Messages:** 
+  - **Quick Schedule:** Long-press send button in message composer opens bottom sheet (`ScheduleMessageSheet`) to set date/time
+  - **Manage Scheduled:** Full screen (`ScheduledMessagesScreen`) accessible from inbox header to view, edit, cancel, or delete all scheduled messages
+  - Shows pending/sent/cancelled status, scheduled time, and allows editing or cancellation
 - **Message Reactions:** Tap-hold to add emoji reaction
-- **Voice Input:** Hold mic button to record voice note with amplitude visualization
-- **Media Compression:** Images auto-compressed with quality toggle
-- **Search in Thread:** Find specific messages or media
-- **Export Thread:** Download as PDF or text file
+  - **Voice Input:** Hold mic button to record voice note with amplitude visualization
+  - **Search in Thread:** Find specific messages or media
+  - **Create Job:** Work icon button in MessageComposerBar opens job creation form with pre-filled client details
+  - **AI Extract Job:** AI Extract button in MessageComposerBar extracts job details from conversation and pre-fills job form
 
 ---
 
@@ -249,12 +270,17 @@ Complete visual specification for screen layouts, component hierarchies, and int
 
 **Sections:**
 
-1. **FrostedAppBar** → filter icon (with active count), sort dropdown, search icon, add job button
+1. **FrostedAppBar** → filter icon (with active count), sort dropdown, search icon, view mode toggle (List/Kanban), add job button
 2. **PipelineTabs** → SegmentedControl with counts
    - All (24) | Active (18) | Completed (6) | Cancelled (0)
    - Badge shows count per status
    - Smooth slide transition between tabs
-3. **JobCardList** → Card grid with rich information
+3. **View Mode Toggle** → SegmentedControl (List | Kanban)
+   - List view: Standard card grid
+   - Kanban view: Columns grouped by status (Proposed → Scheduled → In Progress → Completed → Cancelled)
+   - Drag-and-drop jobs between columns to change status
+   - Column headers show job count badges
+4. **JobCardList** → Card grid with rich information (List view)
    - **JobCard:** Contains:
      - **ClientAvatar** with name
      - **JobTitle** and **ServiceType** badge
@@ -275,6 +301,7 @@ Complete visual specification for screen layouts, component hierarchies, and int
    - "Apply Filters" button with count
 5. **FloatingActionButton** → "+ New Job" with extended label
    - Quick actions on long-press: "From Quote", "From Scratch", "From Template"
+   - Also accessible from: Inbox thread (Create Job button), Booking detail (Create Job menu option)
 
 **Components Used:**
 - JobCard (rich information card)
@@ -310,7 +337,12 @@ Complete visual specification for screen layouts, component hierarchies, and int
    - "Request Review" (if completed)
    - "Mark Complete" (primary CTA)
    - Icons + labels, responsive wrapping
-4. **JobTabView** → Horizontal tabs
+4. **JobTabView** → Primary tabs + More dropdown
+   - **Primary Tabs (3):** Timeline, Details, Notes
+     - Displayed as horizontal SegmentedControl
+   - **More Menu:** Messages, Media, Chasers
+     - Dropdown menu button next to primary tabs
+     - Shows checkmark when a More option is selected
    - **Timeline Tab:** Chronological activity feed
      - Status changes with timestamps
      - Messages linked to job
@@ -325,15 +357,25 @@ Complete visual specification for screen layouts, component hierarchies, and int
      - Custom fields
      - Internal notes (team only)
      - Attachments and files
-   - **Messages Tab:** Linked conversation thread
+   - **Notes Tab:** Team collaboration notes
+     - Add notes with @mentions
+     - Shows note author and timestamp
+     - Edit/delete own notes
+     - Notifications on @mention
+   - **Messages Tab:** (Accessible via More menu)
+     - Linked conversation thread
      - Shows relevant messages
      - Quick reply inline
      - Link new messages
-   - **Media Tab:** Photo gallery
+   - **Media Tab:** (Accessible via More menu)
+     - Photo gallery
      - Before/after sections
      - Tap to fullscreen with swipe
      - Add photos with camera/library
      - Captions and timestamps
+   - **Chasers Tab:** (Accessible via More menu)
+     - Quote chaser log
+     - Follow-up reminders
 5. **InternalNotesSection** → Team collaboration
    - Add notes with @mentions
    - Shows note author and timestamp
@@ -369,7 +411,7 @@ Complete visual specification for screen layouts, component hierarchies, and int
 
 ### 4. CalendarScreen (Bookings & Scheduling)
 
-**Purpose:** Visual calendar with drag-drop scheduling and smart availability.
+**Purpose:** Visual calendar with smart availability and booking management.
 
 **Sections:**
 
@@ -383,9 +425,9 @@ Complete visual specification for screen layouts, component hierarchies, and int
 3. **CalendarWidget** → Interactive calendar grid
    - **DayCell:** Shows date + event dots (up to 3, then "+2" indicator)
    - **EventDot:** Color-coded by status (confirmed, pending, cancelled)
+   - **JobDot:** Scheduled jobs displayed alongside bookings (different dot style/color)
    - **CurrentDayHighlight:** Teal ring around today
-   - **EventPreview:** Tap day to see all events
-   - **DragDrop (Web):** Drag events to reschedule
+   - **EventPreview:** Tap day to see all events (bookings + scheduled jobs)
    - **MultiSelect:** Long-press to select multiple days
    - **Availability Overlay:** Shows available/blocked times
 4. **BookingList** → Cards below calendar (or right sidebar on tablet/web)
@@ -401,6 +443,9 @@ Complete visual specification for screen layouts, component hierarchies, and int
    - Swipe right to mark complete
    - Swipe left to cancel
    - Tap to view full details
+   - **JobCard:** Scheduled jobs displayed alongside bookings (tap to navigate to JobDetailScreen)
+     - Shows job title, client name, scheduled date/time, status badge
+     - Different styling from BookingCard for visual distinction
 5. **TeamCalendarToggle** → Show all team calendars
    - Checkbox per team member
    - Color-coded events per member
@@ -419,26 +464,31 @@ Complete visual specification for screen layouts, component hierarchies, and int
 - Badge (event count)
 - SwipeAction (complete/cancel)
 - ContextMenu (long-press)
-- DragDropTarget (web rescheduling)
 
 **Enhancements (v2.5.1):**
 - **Smart Availability:** AI suggests best time slots based on history
 - **Recurring Bookings:** Create repeating patterns (daily, weekly, monthly)
-- **Buffer Time:** Auto-add travel/prep time between bookings
 - **Conflict Detection:** Warns of double-bookings with resolution options
-- **Two-Way Sync:** Google Calendar and Apple Calendar bidirectional sync
+- **Two-Way Sync (Requires Backend):** Google Calendar and Apple Calendar bidirectional sync - backend integration needed
 - **Client Self-Booking:** Generate booking links for clients
 - **Reminder Customization:** Custom timing per booking (T-24h, T-2h, T-30m)
 - **Availability Rules:** Set working hours, breaks, and blocked days
 - **Color Coding:** Custom colors per service type or client
 - **Keyboard Shortcuts (Web):** Arrow keys navigate, `B` = New booking, `T` = Today
-- **Drag to Reschedule:** Click-drag events to new time slots (web/tablet)
 - **Multi-Day Events:** Support for multi-day jobs
+- **Booking Templates:** `BookingTemplatesScreen` - Save/load common booking scenarios for quick creation (✅ Implemented)
+- **Booking Analytics:** `BookingAnalyticsScreen` - Dashboard with booking sources, conversion rates, and peak times charts (✅ Implemented)
+- **Capacity Optimization:** `CapacityOptimizationScreen` - Utilization visualization with optimization suggestions (✅ Implemented)
+- **Resource Management:** `ResourceManagementScreen` - Track equipment/room availability and status (✅ Implemented)
+- **Weather Integration:** Weather forecast displayed in `BookingDetailScreen` for outdoor jobs (✅ Implemented)
+- **Swipe Booking:** Swipe right to complete, swipe left to cancel booking on `BookingCard` (✅ Implemented)
+- **Pinch-to-Zoom:** Pinch gesture on calendar switches between week ↔ day view (✅ Implemented)
+- **Buffer Time Management:** Visual indicators showing travel/buffer time between appointments in booking list, adjustable buffer (0-60min) in booking form with auto-conflict detection (✅ Implemented)
+- **Quick Reschedule (Drag-and-Drop):** Drag booking cards in day view calendar to reschedule to new time slot with confirmation dialog (✅ Implemented)
 
 **Behaviour Notes:**
 - Calendar view persists across sessions
 - Events use color saturation for status (bright = confirmed, muted = pending)
-- Drag-drop provides visual feedback with ghost preview
 - Today button scrolls with smooth animation
 - Pull-to-refresh syncs calendar integrations
 
@@ -450,6 +500,113 @@ Complete visual specification for screen layouts, component hierarchies, and int
 | Empty Month | "No bookings this month" | "Add First Booking" | Shows tutorial for new users |
 | Sync Error | "Calendar sync failed" banner | "Retry Sync" | Retry syncs only failed calendars |
 | Conflict Warning | "Double booking detected!" modal | "Resolve" / "Keep Both" | Shows conflicting events, suggests resolution |
+
+---
+
+### 4.1 BookingTemplatesScreen (v2.5.1 Enhancement)
+
+**Purpose:** Manage saved booking templates for quick booking creation.
+
+**Sections:**
+1. **FrostedAppBar** → Title "Booking Templates", Add Template button
+2. **TemplateList** → List of template cards
+   - Each card shows: Template name, service name, duration, price, deposit info
+   - Actions: Use Template, Edit, Delete (via PopupMenuButton)
+   - Empty state: "No templates yet" with CTA to create
+3. **TemplateCard** → Contains:
+   - Template name and service type
+   - Duration and price chips
+   - Deposit indicator (if applicable)
+   - Notes (if any)
+   - "Use Template" button
+
+**Navigation:** Calendar → Templates icon OR Create Booking → "Use Booking Template" button
+
+---
+
+### 4.2 BookingAnalyticsScreen (v2.5.1 Enhancement)
+
+**Purpose:** Analytics dashboard for booking sources, conversion rates, and peak times.
+
+**Sections:**
+1. **FrostedAppBar** → Title "Booking Analytics", Period selector (Week/Month/Quarter/Year)
+2. **SummaryCards** → 4 cards showing:
+   - Total Bookings
+   - Conversion Rate
+   - Peak Time
+   - Average Value
+3. **Booking Sources Chart** → Pie chart showing distribution by source (Google Ads, Facebook, Website, etc.)
+4. **Conversion Rates** → Bar chart/list showing conversion rates by source with percentage bars
+5. **Peak Times Chart** → Bar chart showing booking frequency by hour
+
+**Components:** fl_chart (PieChart, BarChart), SummaryCards, FrostedContainer
+
+---
+
+### 4.3 CapacityOptimizationScreen (v2.5.1 Enhancement)
+
+**Purpose:** Visualize schedule utilization and receive optimization suggestions.
+
+**Sections:**
+1. **FrostedAppBar** → Title "Capacity Optimization", Period selector (Week/Month)
+2. **Overall Utilization** → Circular progress indicator showing average utilization percentage
+3. **Daily Utilization Chart** → Bar chart showing utilization by day of week with color coding:
+   - Green: Optimal (50-90%)
+   - Yellow: Underutilized (<50%)
+   - Red: Overbooked (>90%)
+4. **Optimization Suggestions** → List of suggestion cards with:
+   - Title and description
+   - Priority badge (High/Medium)
+   - Impact level
+
+**Components:** fl_chart (BarChart), CircularProgressIndicator, UtilizationSuggestionCard, InfoBanner
+
+---
+
+### 4.4 ResourceManagementScreen (v2.5.1 Enhancement)
+
+**Purpose:** Track equipment and room availability.
+
+**Sections:**
+1. **FrostedAppBar** → Title "Resource Management", Add Resource button
+2. **Category Filter** → SegmentedButton (All/Equipment/Rooms)
+3. **ResourceList** → List of resource cards
+   - Each card shows: Resource name, category icon, status badge
+   - Current booking info (if in use)
+   - Maintenance notes (if in maintenance)
+   - Actions: Edit, Delete (via PopupMenuButton)
+4. **ResourceCard** → Contains:
+   - Resource name and category icon
+   - Status badge (Available/In Use/Maintenance)
+   - Current booking name (if in use)
+   - Maintenance notes (if applicable)
+
+**Status Badges:**
+- Available: Green with check icon
+- In Use: Yellow with event icon
+- Maintenance: Red with build icon
+
+**Navigation:** Calendar → Resource Management icon
+
+---
+
+### 4.5 BookingDetailScreen Enhancements (v2.5.1)
+
+**Weather Forecast Section:**
+- Displayed after Service Details section
+- Shows: Temperature, condition icon, precipitation chance, wind speed
+- InfoBanner with date-specific forecast and rescheduling suggestion
+- Only shown for outdoor services (mock implementation shows for all)
+
+**Swipe Actions on BookingCard:**
+- Swipe right: Mark as completed (visual feedback with green check icon)
+- Swipe left: Cancel booking (with confirmation dialog)
+- Visual feedback during swipe with colored backgrounds
+
+**Pinch-to-Zoom on Calendar:**
+- Pinch out (scale > 1.2): Switch from week to day view
+- Pinch in (scale < 0.8): Switch from day to week view
+- GestureDetector with onScaleUpdate handler
 
 ---
 
@@ -602,16 +759,18 @@ Complete visual specification for screen layouts, component hierarchies, and int
 - InfoBanner (status messages)
 
 **Enhancements (v2.5.1):**
-- **Conversation Examples:** Preview how AI handles common scenarios
-- **A/B Testing:** Test different AI tones and measure performance
-- **Custom Responses:** Override AI responses for specific keywords
-- **Escalation Rules:** Smart handover based on sentiment or complexity
+- **Custom Responses:** Override AI responses for specific keywords (Note: Backend verification needed once backend is wired)
+- **Escalation Rules:** Smart handover based on sentiment or complexity (Note: Backend verification needed once backend is wired)
 - **Voice Integration:** AI handles voice call transcriptions
-- **Multi-Language:** Detect and respond in client's language
-- **Learning Dashboard:** Shows what AI is learning from conversations
-- **Confidence Scoring:** AI reports confidence level per response
-- **Manual Override:** Take control mid-conversation
-- **Response Templates:** Library of proven AI responses
+- **Multi-Language:** Detect and respond in client's language (Note: Backend verification needed once backend is wired)
+- **Confidence Scoring:** AI reports confidence level per response (Note: Backend verification needed once backend is wired)
+- **Booking Assistance:** Configure AI to offer available time slots automatically (Note: Backend verification needed once backend is wired)
+- **Lead Qualification:** Configure information to collect before handover (Note: Backend verification needed once backend is wired)
+- **Smart Handover:** Configure handover triggers (Note: Backend verification needed once backend is wired)
+- **Response Delay:** Configure delay before AI responds (Note: Backend verification needed once backend is wired)
+- **Fallback Responses:** Configure message when AI is uncertain (Note: Backend verification needed once backend is wired)
+- **Two-Way Confirmations:** Handle YES/NO responses automatically (Note: Backend verification needed once backend is wired)
+- **Context Retention:** AI remembers previous conversations (Note: Backend verification needed once backend is wired)
 
 **Behaviour Notes:**
 - Simulates AI receptionist chat with animated typing indicator (3 dots)
@@ -955,7 +1114,7 @@ Complete visual specification for screen layouts, component hierarchies, and int
 | Name | Sections | Enhancements (v2.5.1) |
 |------|----------|-----------------------|
 | **OnMyWaySheet** | FrostedHeader, MapPreview (with live location), ETASelector (15/30/45/60 min), NotesField (optional message), ConfirmButton ("Send ETA") | Real-time traffic updates, Tap map to open in Maps app, "Share Live Location" toggle, Custom ETA input, Auto-stop sharing after arrival |
-| **BookingOfferSheet** | AvailabilityGrid (visual time slot selector), ServicePicker, DurationSelector, PricePreview, NotesField, ConfirmButton ("Send Booking Offer") | Smart suggestions based on client history, Conflict warnings, Buffer time display, Deposit requirement toggle, Customizable message template |
+| **BookingOfferSheet** | AvailabilityGrid (visual time slot selector), ServicePicker, DurationSelector, PricePreview, NotesField, ConfirmButton ("Send Booking Offer") | Smart suggestions based on client history, Conflict warnings, Deposit requirement toggle, Customizable message template |
 | **RescheduleSheet** | CurrentBookingCard (shows original details), CalendarWidget (with conflict detection), TimeSlotPicker (available times only), ReasonField (optional), ClientNotification toggle, ConfirmButton ("Reschedule") | Suggests best alternative times, Shows impact (e.g., "This creates 30min gap"), Auto-notifies client option, Batch reschedule for recurring |
 | **PaymentRequestModal** | ClientSelector (if multiple), AmountField (with currency), DescriptionField, DueDatePicker, PaymentMethodChips (Stripe link/Cash/Bank transfer), MessagePreview (editable), SendButton ("Send Request") | Smart amount suggestions from recent jobs, Invoice attachment option, Partial payment support, Recurring payment setup, Payment plan builder |
 | **DepositRequestSheet** | JobLink (selected job), DepositAmount (% or fixed), DueDatePicker, PaymentLinkToggle (auto-generate), MessagePreview, SendButton ("Request Deposit") | Suggested deposit % by job type, Balance due display, Multiple payment method support, Auto-link to booking confirmation |
@@ -1283,7 +1442,7 @@ All screens must implement these states for consistency and resilience:
 
 **Purpose:** Complete keyboard navigation support for power users and accessibility.
 
-### Global Shortcuts (Available on All Screens)
+### Global Shortcuts (Available on All Screens) — *🔮 Future Feature (Web-only, Planned for Post-v2.5.1)*
 
 | Shortcut | Action | Notes |
 |----------|--------|-------|
@@ -1316,8 +1475,6 @@ All screens must implement these states for consistency and resilience:
 | `Enter` | Open selected conversation |
 | `A` | Archive selected conversation |
 | `P` | Pin/unpin conversation |
-| `S` | Snooze conversation |
-| `F` | Flag for follow-up |
 | `X` | Select conversation (batch mode) |
 | `Ctrl/Cmd + Enter` | Send message |
 | `1-5` | Apply channel filter (All/SMS/WhatsApp/IG/FB) |
@@ -1398,11 +1555,6 @@ All screens must implement these states for consistency and resilience:
 | **Long Press** | Select conversation (batch mode) | No |
 | **Pull Down** | Refresh messages | No |
 | **Swipe Down** in thread | Load older messages | No |
-
-**Swipe Customization Options:**
-- User can configure swipe right/left actions in Settings
-- Options: Archive, Delete, Pin, Snooze, Flag, Mark Read/Unread
-- Default: Right=Archive, Left=Delete
 
 #### Jobs List
 | Gesture | Action |

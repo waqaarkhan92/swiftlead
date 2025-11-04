@@ -78,15 +78,13 @@ No extra tiers, no upsells — everything included.
 **Core Capabilities:**
 - **Unified Message View:** Single interface displaying all SMS, WhatsApp, Facebook Messenger, Instagram Direct, and **Email (IMAP/SMTP)** messages in chronological order
 - **Message Threading:** Automatic grouping of messages by contact, maintaining conversation history across all channels
-- **Real-time Updates:** Live message delivery with push notifications and in-app badges
+- **Real-time Updates:** Live message delivery with push notifications and in-app badges (Note: Deferred until backend is wired. Current implementation uses pull-based approach with `_loadMessages()` which is acceptable for MVP.)
 - **Internal Notes & @Mentions:**
   - Add private notes to conversations visible only to team members
   - @mention team members to notify them of important conversations
   - Notes include timestamps and author information
 - **Message Management:**
   - **Pinning:** Pin important conversations to top of inbox
-  - **Snooze:** Temporarily hide conversations and resurface at set time/date
-  - **Follow-up Flags:** Mark conversations for later follow-up with custom reminders
   - **Archive:** Move inactive conversations to archive (with undo)
   - **Batch Actions:** Select multiple conversations for bulk actions
 - **AI Message Summarisation:** Automatically summarises long conversation threads into key points and action items
@@ -98,36 +96,41 @@ No extra tiers, no upsells — everything included.
 - **Link Previews:** Rich previews of URLs shared in messages with thumbnail and metadata
 - **Search & Filters:** Full-text search across all messages with filters by contact, date, channel, read status, and lead source
 - **Advanced Filters:** Combine filters (e.g., "Unread WhatsApp messages from this week")
-- **Lead Source Tagging:** Automatically tag messages with source (SMS / Meta / Email / Web / Ad) for attribution tracking
+- **Lead Source Tagging:** Automatically tag messages with marketing attribution source (Google Ads / Facebook Ads / Website / Referral / Direct) for attribution tracking. Note: Lead Source is distinct from message channel - it represents where the lead originally came from, not the communication platform used.
 - **Typing Indicators:** Display real-time typing status where supported by platform APIs
 - **Read Receipts:** Visual confirmation of message delivery and read status (where supported)
 - **Missed-Call Integration:** Display missed call notifications inline with messaging threads
 - **Message Actions:** Reply, forward, mark as read/unread, archive, delete, assign to team members, and convert to quote/job
 - **Scheduled Messages:** Schedule messages to send at specific times
+  - Quick scheduling: Bottom sheet when composing messages (long-press send button)
+  - Management: Full screen (`ScheduledMessagesScreen`) to view, edit, cancel, or delete all scheduled messages
 - **Message Reactions:** Add emoji reactions to messages (where supported)
 
 **🆕 v2.5.1 Enhancements:**
 - **Smart Sorting:** Pinned → Unread → Recent → Archived with customizable order
 - **Conversation Preview:** Long-press conversation for quick preview without opening
-- **Export Conversations:** Download conversation as PDF or text file
 - **Search in Thread:** Find specific messages or media within a conversation
-- **Media Compression:** Automatic image compression with quality toggle
 - **Offline Queue:** Messages queued when offline, sent automatically when connection restored
-- **Keyboard Shortcuts (Web):** `G I` = Inbox, `C` = Compose, `/` = Search, `A` = Archive, `P` = Pin
-- **Swipe Customization:** Configure left/right swipe actions per preference
-- **Notification Grouping:** Group notifications by conversation to reduce clutter
+  - Offline banner shows queue status and count
+  - Messages persist across app restarts
+  - Automatic retry with exponential backoff (max 3 retries)
+  - Queue processes automatically when connection restored
 - **Priority Inbox:** AI identifies important conversations and highlights them
+- **Notification Grouping:** Group message notifications by conversation thread to reduce clutter (e.g., "3 new messages from John Smith")
+
+**🔮 Future Features (Planned for Post-v2.5.1):**
+- **Keyboard Shortcuts (Web):** Gmail-style keyboard navigation for web version (`G I` = Inbox, `C` = Compose, `/` = Search, `A` = Archive, `P` = Pin)
+- **Drag-Select (Web/Tablet):** Drag to select multiple conversations for batch operations (web and tablet devices only)
 
 **Interactions:**
 - Tap message to expand and view full conversation thread
-- Swipe actions for quick reply, archive, pin, or delete (customizable)
-- Long-press for additional options (forward, assign, add note, flag, snooze, batch select)
+- Swipe actions for quick reply, archive, pin, or delete
+- Long-press for additional options (forward, assign, add note, batch select)
 - Pull-to-refresh to sync latest messages
 - Scroll to load message history (infinite scroll with virtualization)
 - Filter by lead source, channel, or assigned team member
 - Search across all conversations with instant results and highlighted matches
 - Tap-hold message bubble for reactions or context menu
-- Drag-select multiple conversations for batch operations (web/tablet)
 
 **UI Enhancements:** ChatBubble and MessageComposerBar enable WhatsApp-style threads. Skeleton loaders for smooth loading. Toast notifications for actions. Badge counts on filters.
 
@@ -140,8 +143,8 @@ No extra tiers, no upsells — everything included.
 - **Instant Auto-Reply:** Automatically responds to missed calls, texts, or messages within seconds
 - **Branded Missed Call Text-Back:** Sends professional follow-up message after missed calls with direct link to book appointment or reply
 - **Smart FAQs:** AI-powered responses to frequently asked questions learned from business profile and historical conversations
-- **Booking Assistance:** Automatically offers available time slots based on calendar availability when booking inquiries are detected
-- **Lead Qualification:** Collects essential information (name, service needed, postcode/address) before human handover
+- **Booking Assistance:** Automatically offers available time slots based on calendar availability when booking inquiries are detected (Note: Backend verification needed once backend is wired)
+- **Lead Qualification:** Collects essential information (name, service needed, postcode/address) before human handover (Note: Backend verification needed once backend is wired)
 - **After-Hours Handling:** Provides automated responses outside business hours with clear expectation of response time next morning
 - **AI Tone Customisation:** Configure AI responses to match brand voice:
   - **Formal:** Professional, business-like tone
@@ -153,27 +156,22 @@ No extra tiers, no upsells — everything included.
   - AI-generated summary of call content with key points extracted
   - Transcripts and summaries saved to client record and Inbox
   - Sentiment analysis and action items highlighted
-- **Two-Way Confirmations:** Automatically handles YES/NO confirmation responses from clients:
+- **Two-Way Confirmations:** Automatically handles YES/NO confirmation responses from clients (Note: Backend verification needed once backend is wired):
   - Parses confirmation responses and updates booking status
   - Sends follow-up messages based on response
   - Recognizes intent variations (e.g., "Yes!", "Sounds good", "Ok")
-- **Smart Handover:** Seamlessly transfers qualified leads to human team members with full context and conversation history
+- **Smart Handover:** Seamlessly transfers qualified leads to human team members with full context and conversation history (Note: Backend verification needed once backend is wired)
 - **Interaction Logging:** Records all AI interactions in the Inbox for transparency and follow-up
-- **Multi-Language Support:** Detects client language and responds appropriately
-- **Confidence Scoring:** AI reports confidence level per response for quality monitoring
+- **Multi-Language Support:** Detects client language and responds appropriately (Note: Backend verification needed once backend is wired)
+- **Confidence Scoring:** AI reports confidence level per response for quality monitoring (Note: Backend verification needed once backend is wired)
 
 **🆕 v2.5.1 Enhancements:**
-- **Conversation Examples:** Preview how AI handles common scenarios before going live
-- **A/B Testing:** Test different AI tones and measure performance metrics
-- **Custom Response Override:** Set specific responses for particular keywords or phrases
-- **Escalation Rules:** Smart handover based on sentiment, complexity, or keywords
-- **Learning Dashboard:** Shows what AI is learning from conversations over time
-- **Manual Override:** Take control of conversation mid-stream when needed
-- **Response Templates Library:** Curated library of proven AI response patterns
+- **Custom Response Override:** Set specific responses for particular keywords or phrases (Note: Backend verification needed once backend is wired)
+- **Escalation Rules:** Smart handover based on sentiment, complexity, or keywords (Note: Backend verification needed once backend is wired)
 - **AI Performance Analytics:** Track response time, qualification rate, booking conversion
 - **Test Mode:** Test AI responses in sandbox before enabling for real customers
-- **Fallback Responses:** Graceful handling when AI is uncertain
-- **Context Retention:** AI remembers previous conversations with same contact
+- **Fallback Responses:** Graceful handling when AI is uncertain (Note: Backend verification needed once backend is wired)
+- **Context Retention:** AI remembers previous conversations with same contact (Note: Backend verification needed once backend is wired)
 
 **Automations:**
 - Trigger on missed call → send branded text-back within 30 seconds
@@ -218,58 +216,29 @@ No extra tiers, no upsells — everything included.
   - Take photos directly in-app
   - Before/after comparison slider
   - Organize photos by category
-  - Annotate photos with markup tools
   - Time-stamped and GPS-tagged
   - Attach to invoice for transparency
-- **Time Tracking:**
-  - Start/stop timer per job
-  - Manual time entry
-  - Team member tracking
-  - Billable vs non-billable hours
-  - Automatic invoice line item generation
-- **Parts & Materials:**
-  - Add parts used with quantity and cost
-  - Quick add from inventory
-  - Supplier tracking
-  - Markup calculation
-  - Receipt photos
+- **Parts & Materials:** *(Removed - not needed)*
 - **Job Notes & Comments:**
   - Rich text notes per job
   - Team collaboration comments
   - @mention team members
   - Client-visible vs internal notes
   - Activity timeline
-- **Recurring Jobs:**
-  - Define recurrence pattern (weekly, monthly, quarterly, annually)
-  - Auto-generate jobs in advance
-  - Manage series or individual instances
-  - Client notification automation
 - **Job Templates:**
   - Pre-defined job configurations for common services
-  - Include checklist, standard pricing, materials
+  - Include standard pricing
   - Quick job creation from template
-- **Quality Checklists:**
-  - Create custom checklists per job type
-  - Check off items as completed
-  - Require photo evidence per item
-  - Client sign-off on completion
+- **Quality Checklists:** *(Removed - not needed)*
 - **Job Assignment & Dispatch:**
   - Assign to team members
-  - Send dispatch notifications
   - Driving directions integration
-  - Team member location tracking
-  - Workload balancing view
 
 **🆕 v2.5.1 Enhancements:**
-- **Smart Job Suggestions:** AI suggests related services based on job history
-- **Job Dependencies:** Link jobs that must be completed in sequence
-- **Batch Operations:** Update status, reassign, or reschedule multiple jobs
+- **Smart Job Suggestions:** AI suggests related services based on job history (Note: Backend verification needed once backend is wired)
 - **Quick Actions:** Swipe gestures for common operations
-- **Job Cloning:** Duplicate job with all details for repeat work
-- **Voice-to-Job:** Create job via voice command with AI transcription
-- **Urgency Detection:** AI flags urgent jobs based on keywords
 - **Risk Alerts:** Warn about scheduling conflicts or overdue jobs
-- **Job Analytics:** Track completion time, profitability, team performance
+- **Job Analytics:** Track completion time, profitability, team performance (Note: Backend verification needed once backend is wired)
 - **Export Job Report:** Generate PDF job summary with photos and details
 
 **Interactions:**
@@ -284,7 +253,7 @@ No extra tiers, no upsells — everything included.
 - Long-press for batch selection
 - Pull-to-refresh to sync latest updates
 
-**UI Components:** JobCard, JobStatusPipeline, JobTimeline, JobChecklist, PhotoGallery, TimerWidget, RecurrenceSelector, AssignmentPicker
+**UI Components:** JobCard, JobStatusPipeline, JobTimeline, PhotoGallery, TimerWidget, RecurrenceSelector, AssignmentPicker
 
 ---
 
@@ -295,20 +264,11 @@ No extra tiers, no upsells — everything included.
 - **Unified Calendar View:**
   - Day / Week / Month views
   - Color-coded by job type or team member
-  - Drag-and-drop rescheduling
   - Multi-resource scheduling (team members / equipment)
-- **Online Booking Portal:**
-  - Shareable booking link (yourcompany.swiftlead.app/book)
-  - Customizable booking form
-  - Real-time availability display
-  - Service selection with duration and pricing
-  - Instant confirmation
-  - Embedded on client's website via iframe
 - **Availability Rules:**
   - Business hours per day
   - Team member specific hours
   - Blocked time / time off
-  - Buffer time between bookings
   - Travel time calculation
   - Service-specific availability
 - **Booking Management:**
@@ -317,7 +277,7 @@ No extra tiers, no upsells — everything included.
   - Reminder automation (24h before, 1h before)
   - Client self-reschedule/cancel option (with notice period)
   - Waitlist for fully booked slots
-- **Calendar Sync:**
+- **Calendar Sync:** *(Requires backend integration)*
   - Two-way sync with Google Calendar
   - Two-way sync with Apple Calendar (CalDAV)
   - Two-way sync with Outlook Calendar
@@ -340,10 +300,6 @@ No extra tiers, no upsells — everything included.
   - Assign bookings to specific team members
   - Round-robin auto-assignment
   - Skill-based assignment
-  - Workload balancing
-- **Recurring Bookings:**
-  - Weekly / Monthly / Custom patterns
-  - Auto-generate series
   - Client manages own recurring bookings
   - Pause or cancel series
 - **No-Show Tracking:**
@@ -357,21 +313,21 @@ No extra tiers, no upsells — everything included.
 - **Smart Availability:** AI suggests optimal time slots based on preferences
 - **Capacity Optimization:** Visualize utilization and suggest improvements
 - **Booking Templates:** Pre-configure common booking scenarios
-- **Quick Reschedule:** Drag-drop to new time with automatic notifications
 - **Conflict Resolution:** Smart suggestions when double-booking detected
-- **Buffer Management:** Auto-calculate travel/prep time between appointments
 - **Group Bookings:** Handle multi-person appointments (classes, consultations)
 - **Resource Management:** Track equipment/room availability
 - **Booking Analytics:** Track booking sources, conversion rates, peak times
 - **Weather Integration:** Display weather forecast for outdoor jobs
+- **Buffer Time Management:** Auto-calculate travel/prep time between appointments with visual indicators and adjustable buffer settings
+- **Quick Reschedule:** Drag-and-drop booking cards to reschedule to new time slots with automatic notifications
 
 **Interactions:**
 - Tap date to view day details
 - Tap booking to view/edit
-- Drag booking to reschedule
 - Long-press for quick actions (call, message, directions, cancel)
 - Swipe booking for quick status change
 - Pinch-to-zoom calendar view
+- Drag-and-drop booking to reschedule (day view)
 - Filter by team member, service type, or status
 - Color code by category
 
@@ -386,7 +342,7 @@ No extra tiers, no upsells — everything included.
 - **Quote Builder:**
   - Line-item editor with description, quantity, unit price
   - Add service categories
-  - Materials and labor separation
+  - Labor tracking
   - Subtotal, tax, total calculation
   - Discount application (% or fixed amount)
   - Expiry date
@@ -477,7 +433,7 @@ No extra tiers, no upsells — everything included.
 - **Invoice Details:**
   - Professional branded design
   - Line items from job/quote
-  - Labor, materials, fees
+  - Labor, fees
   - Tax calculation (VAT, sales tax)
   - Discounts and adjustments
   - Payment terms (Due on receipt / Net 7/15/30)
@@ -780,9 +736,6 @@ Unified view of ALL interactions:
 - Monitor per-contact progression
 - Edit for future sends (existing continue old version)
 
-### A/B Testing
-- Test subject lines
-- Test content/copy
 - Test send times
 - Test sender name
 - Define traffic split (50/50 or custom)
@@ -937,7 +890,6 @@ Pre-built templates:
 **Smart DND:**
 - Auto-detect timezone
 - Suggest schedule from usage patterns
-- Temporary snooze (1h, 3h, until evening)
 
 ### Rich Notifications
 **Interactive Push:**
@@ -1113,14 +1065,24 @@ Pre-built templates:
 
 **Core Capabilities:**
 - **AI Receptionist Configuration:**
-  - Enable/disable auto-reply per channel
+  - Enable/disable auto-reply (Note: Backend verification needed once backend is wired)
   - Configure tone (Formal / Friendly / Concise / Custom)
-  - Set response delay (instant / 30s / 1min)
+  - Set response delay (instant / 30s / 1min) (Note: Backend verification needed once backend is wired)
   - Customize greeting messages
-  - Define escalation rules
+  - Define escalation rules (Note: Backend verification needed once backend is wired)
   - Business hours configuration
   - FAQ management
   - Test AI responses
+  - Configure booking assistance (Note: Backend verification needed once backend is wired)
+  - Configure lead qualification (Note: Backend verification needed once backend is wired)
+  - Configure smart handover (Note: Backend verification needed once backend is wired)
+  - Configure response delay (Note: Backend verification needed once backend is wired)
+  - Configure confidence threshold (Note: Backend verification needed once backend is wired)
+  - Configure fallback responses (Note: Backend verification needed once backend is wired)
+  - Configure multi-language support (Note: Backend verification needed once backend is wired)
+  - Configure custom response overrides (Note: Backend verification needed once backend is wired)
+  - Enable two-way confirmations (Note: Backend verification needed once backend is wired)
+  - Enable context retention (Note: Backend verification needed once backend is wired)
 - **AI Quote Assistant:**
   - Enable/disable smart pricing
   - Configure pricing rules
@@ -1152,9 +1114,8 @@ Pre-built templates:
   - Conversion rates (AI → human → booking)
 
 **🆕 v2.5.1 Enhancements:**
-- **A/B Testing:** Test different AI configurations
-- **Conversation Simulator:** Preview AI responses before enabling
-- **Custom Training:** Upload conversation examples to improve AI
+- **Conversation Simulator:** Preview AI responses before enabling (Test Mode)
+- **Custom Training:** Upload conversation examples to improve AI (Test Mode)
 - **Confidence Thresholds:** Set minimum confidence before AI responds
 - **Fallback Rules:** Define what happens when AI is uncertain
 - **Multi-Language:** Configure AI responses per language
@@ -1639,6 +1600,8 @@ Future<void> signInWithEmail(String email, String password) async {
 ```
 
 ### Real-Time Subscription Pattern
+
+**Note:** This pattern will be implemented once the backend is wired. Current MVP uses pull-based approach.
 
 ```dart
 // Subscribe to real-time message updates

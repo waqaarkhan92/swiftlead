@@ -1,7 +1,7 @@
 import '../config/mock_config.dart';
 import '../models/message.dart';
 import '../models/scheduled_message.dart';
-import 'mock_contacts.dart';
+import '../widgets/components/priority_badge.dart';
 
 /// Mock Messages Repository
 /// Provides realistic mock message and thread data for Inbox preview
@@ -17,7 +17,71 @@ class MockMessages {
       unreadCount: 0,
       isPinned: true,
       status: MessageStatus.delivered,
+      priority: ThreadPriority.high,
+      leadSource: LeadSource.googleAds,
       messages: [
+        // Older messages (for pagination testing)
+        Message(
+          id: 'm1_old1',
+          threadId: '1',
+          contactId: '1',
+          content: 'Hello, I saw your ad online.',
+          timestamp: DateTime.now().subtract(const Duration(days: 3, hours: 2)),
+          isInbound: true,
+          channel: MessageChannel.sms,
+          status: MessageStatus.delivered,
+        ),
+        Message(
+          id: 'm1_old2',
+          threadId: '1',
+          contactId: '1',
+          content: 'Thanks for reaching out! How can I help?',
+          timestamp: DateTime.now().subtract(const Duration(days: 3, hours: 1)),
+          isInbound: false,
+          channel: MessageChannel.sms,
+          status: MessageStatus.delivered,
+        ),
+        Message(
+          id: 'm1_old3',
+          threadId: '1',
+          contactId: '1',
+          content: 'I need a plumber for my kitchen sink.',
+          timestamp: DateTime.now().subtract(const Duration(days: 2, hours: 10)),
+          isInbound: true,
+          channel: MessageChannel.sms,
+          status: MessageStatus.delivered,
+        ),
+        Message(
+          id: 'm1_old4',
+          threadId: '1',
+          contactId: '1',
+          content: 'I can help with that. What\'s the issue?',
+          timestamp: DateTime.now().subtract(const Duration(days: 2, hours: 9)),
+          isInbound: false,
+          channel: MessageChannel.sms,
+          status: MessageStatus.delivered,
+        ),
+        Message(
+          id: 'm1_old5',
+          threadId: '1',
+          contactId: '1',
+          content: 'It\'s leaking under the sink.',
+          timestamp: DateTime.now().subtract(const Duration(days: 2, hours: 8)),
+          isInbound: true,
+          channel: MessageChannel.sms,
+          status: MessageStatus.delivered,
+        ),
+        Message(
+          id: 'm1_old6',
+          threadId: '1',
+          contactId: '1',
+          content: 'I\'ll come by tomorrow to take a look.',
+          timestamp: DateTime.now().subtract(const Duration(days: 2, hours: 7)),
+          isInbound: false,
+          channel: MessageChannel.sms,
+          status: MessageStatus.delivered,
+        ),
+        // Recent messages
         Message(
           id: 'm1',
           threadId: '1',
@@ -32,11 +96,13 @@ class MockMessages {
           id: 'm2',
           threadId: '1',
           contactId: '1',
-          content: 'I can come take a look tomorrow at 2pm. Does that work for you?',
+          content: 'I can come take a look tomorrow at 2pm. Does that work for you? Here\'s a photo of a similar issue I fixed last week.',
           timestamp: DateTime.now().subtract(const Duration(hours: 4)),
           isInbound: false,
           channel: MessageChannel.sms,
           status: MessageStatus.delivered,
+          hasAttachment: true,
+          attachmentUrl: 'https://picsum.photos/800/600?random=2',
         ),
         Message(
           id: 'm3',
@@ -60,6 +126,8 @@ class MockMessages {
       unreadCount: 2,
       isPinned: false,
       status: MessageStatus.delivered,
+      priority: ThreadPriority.medium,
+      leadSource: LeadSource.website,
       messages: [
         Message(
           id: 'm4',
@@ -93,6 +161,8 @@ class MockMessages {
       unreadCount: 0,
       isPinned: false,
       status: MessageStatus.delivered,
+      priority: ThreadPriority.low,
+      leadSource: LeadSource.referral,
       messages: [
         Message(
           id: 'm6',
@@ -114,6 +184,7 @@ class MockMessages {
           channel: MessageChannel.email,
           status: MessageStatus.delivered,
           hasAttachment: true,
+          attachmentUrl: 'https://picsum.photos/800/600?random=1',
         ),
         Message(
           id: 'm8',
@@ -137,6 +208,8 @@ class MockMessages {
       unreadCount: 1,
       isPinned: false,
       status: MessageStatus.delivered,
+      priority: ThreadPriority.medium,
+      leadSource: LeadSource.facebookAds,
       messages: [
         Message(
           id: 'm9',
@@ -170,6 +243,8 @@ class MockMessages {
       unreadCount: 0,
       isPinned: true,
       status: MessageStatus.delivered,
+      priority: ThreadPriority.high,
+      leadSource: LeadSource.direct,
       messages: [
         Message(
           id: 'm11',
@@ -211,6 +286,30 @@ class MockMessages {
   static final Set<String> _archivedThreadIds = {};
   // Track pinned thread IDs
   static final Set<String> _pinnedThreadIds = {'1', '5'}; // Initialize with existing pinned threads
+  
+  // Mock missed calls data
+  static final List<MissedCall> _missedCalls = [
+    MissedCall(
+      id: 'mc1',
+      threadId: '1',
+      contactId: '1',
+      contactName: 'John Smith',
+      phoneNumber: '+44 7700 900123',
+      timestamp: DateTime.now().subtract(const Duration(minutes: 15)),
+      textBackSent: true,
+      textBackSentAt: DateTime.now().subtract(const Duration(minutes: 14, seconds: 30)),
+      textBackMessageId: 'm2',
+    ),
+    MissedCall(
+      id: 'mc2',
+      threadId: '2',
+      contactId: '2',
+      contactName: 'Sarah Williams',
+      phoneNumber: '+44 7700 900456',
+      timestamp: DateTime.now().subtract(const Duration(hours: 2, minutes: 30)),
+      textBackSent: false,
+    ),
+  ];
 
   /// Fetch all message threads (excluding archived and blocked)
   static Future<List<MessageThread>> fetchAllThreads() async {
@@ -232,6 +331,48 @@ class MockMessages {
     final thread = _threads.where((t) => t.id == id).firstOrNull;
     logMockOperation('Fetched thread: ${thread?.contactName ?? "Not found"}');
     return thread;
+  }
+
+  /// Fetch messages for a thread with pagination
+  /// Returns messages sorted by timestamp (oldest first) for easier pagination
+  /// [limit] - number of messages to fetch
+  /// [beforeTimestamp] - fetch messages before this timestamp (for loading older messages)
+  static Future<List<Message>> fetchMessagesForThread({
+    required String threadId,
+    int limit = 20,
+    DateTime? beforeTimestamp,
+  }) async {
+    await simulateDelay();
+    final thread = _threads.where((t) => t.id == threadId).firstOrNull;
+    if (thread == null) {
+      logMockOperation('Thread not found: $threadId');
+      return [];
+    }
+
+    // Get all messages for the thread, sorted by timestamp (oldest first)
+    List<Message> allMessages = List.from(thread.messages);
+    allMessages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+    // Filter by beforeTimestamp if provided (for pagination)
+    if (beforeTimestamp != null) {
+      allMessages = allMessages.where((m) => m.timestamp.isBefore(beforeTimestamp)).toList();
+    }
+
+    // Take the last [limit] messages (most recent in the filtered set)
+    // This simulates loading older messages when scrolling up
+    final startIndex = allMessages.length > limit ? allMessages.length - limit : 0;
+    final paginatedMessages = allMessages.sublist(startIndex);
+
+    logMockOperation('Fetched ${paginatedMessages.length} messages for thread: $threadId (limit: $limit, before: ${beforeTimestamp?.toIso8601String() ?? "none"})');
+    return paginatedMessages;
+  }
+
+  /// Get total message count for a thread
+  static Future<int> getMessageCountForThread(String threadId) async {
+    await simulateDelay();
+    final thread = _threads.where((t) => t.id == threadId).firstOrNull;
+    if (thread == null) return 0;
+    return thread.messages.length;
   }
 
   /// Filter threads by channel
@@ -451,6 +592,72 @@ class MockMessages {
   static Future<void> cancelScheduledMessage(String messageId) async {
     return MockMessagesScheduled.cancelScheduledMessage(messageId);
   }
+
+  /// Fetch missed calls for a thread
+  static Future<List<MissedCall>> fetchMissedCallsForThread(String threadId) async {
+    await simulateDelay();
+    final calls = _missedCalls.where((c) => c.threadId == threadId).toList();
+    logMockOperation('Fetched ${calls.length} missed calls for thread: $threadId');
+    return calls;
+  }
+
+  /// Fetch all missed calls
+  static Future<List<MissedCall>> fetchAllMissedCalls() async {
+    await simulateDelay();
+    logMockOperation('Fetched ${_missedCalls.length} missed calls');
+    return List.from(_missedCalls);
+  }
+
+  /// Record a missed call (called by webhook handler)
+  static Future<MissedCall> recordMissedCall({
+    required String threadId,
+    required String contactId,
+    required String contactName,
+    required String phoneNumber,
+  }) async {
+    await simulateDelay();
+    final missedCall = MissedCall(
+      id: 'mc_${DateTime.now().millisecondsSinceEpoch}',
+      threadId: threadId,
+      contactId: contactId,
+      contactName: contactName,
+      phoneNumber: phoneNumber,
+      timestamp: DateTime.now(),
+    );
+    _missedCalls.add(missedCall);
+    logMockOperation('Recorded missed call from $contactName');
+    return missedCall;
+  }
+
+  /// Mark text-back as sent for a missed call
+  static Future<void> markTextBackSent(String missedCallId, String messageId) async {
+    await simulateDelay();
+    final index = _missedCalls.indexWhere((c) => c.id == missedCallId);
+    if (index != -1) {
+      final existing = _missedCalls[index];
+      _missedCalls[index] = MissedCall(
+        id: existing.id,
+        threadId: existing.threadId,
+        contactId: existing.contactId,
+        contactName: existing.contactName,
+        phoneNumber: existing.phoneNumber,
+        timestamp: existing.timestamp,
+        textBackSent: true,
+        textBackSentAt: DateTime.now(),
+        textBackMessageId: messageId,
+      );
+      logMockOperation('Marked text-back sent for missed call: $missedCallId');
+    }
+  }
+}
+
+/// Lead Source enum - Marketing attribution sources (distinct from message channels)
+enum LeadSource {
+  googleAds,      // Google Ads campaigns
+  facebookAds,   // Facebook/Instagram Ads
+  website,       // Website form submissions
+  referral,      // Referrals from existing customers
+  direct,        // Direct contact (no specific source)
 }
 
 /// Message Thread model
@@ -465,6 +672,8 @@ class MessageThread {
   final bool isPinned;
   final MessageStatus status;
   final List<Message> messages;
+  final ThreadPriority? priority; // AI-determined priority (low/medium/high)
+  final LeadSource? leadSource; // Lead source for attribution tracking
 
   MessageThread({
     required this.id,
@@ -477,8 +686,11 @@ class MessageThread {
     required this.isPinned,
     required this.status,
     required this.messages,
+    this.priority,
+    this.leadSource,
   });
 }
+
 
 /// Message model
 class Message {
@@ -504,6 +716,31 @@ class Message {
     required this.status,
     this.hasAttachment = false,
     this.attachmentUrl,
+  });
+}
+
+/// Missed Call model
+class MissedCall {
+  final String id;
+  final String threadId;
+  final String contactId;
+  final String contactName;
+  final String phoneNumber;
+  final DateTime timestamp;
+  final bool textBackSent;
+  final DateTime? textBackSentAt;
+  final String? textBackMessageId;
+
+  MissedCall({
+    required this.id,
+    required this.threadId,
+    required this.contactId,
+    required this.contactName,
+    required this.phoneNumber,
+    required this.timestamp,
+    this.textBackSent = false,
+    this.textBackSentAt,
+    this.textBackMessageId,
   });
 }
 

@@ -12,7 +12,16 @@ class InboxFilterSheet {
     required BuildContext context,
     InboxFilters? initialFilters,
   }) async {
-    InboxFilters filters = initialFilters ?? InboxFilters();
+    // Create a mutable copy of filters to avoid modifying const sets
+    InboxFilters filters = InboxFilters(
+      statusFilters: initialFilters != null ? Set<String>.from(initialFilters.statusFilters) : null,
+      channelFilters: initialFilters != null ? Set<String>.from(initialFilters.channelFilters) : null,
+      priorityFilters: initialFilters != null ? Set<String>.from(initialFilters.priorityFilters) : null,
+      leadSourceFilters: initialFilters != null ? Set<String>.from(initialFilters.leadSourceFilters) : null,
+      dateRange: initialFilters?.dateRange ?? 'All Time',
+      customStartDate: initialFilters?.customStartDate,
+      customEndDate: initialFilters?.customEndDate,
+    );
     bool hasChanges = false;
 
     return await SwiftleadBottomSheet.show<InboxFilters>(
@@ -114,6 +123,50 @@ class InboxFilterSheet {
             ),
             const SizedBox(height: SwiftleadTokens.spaceL),
 
+            // Priority Filters
+            Text(
+              'Priority',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceS),
+            Wrap(
+              spacing: SwiftleadTokens.spaceS,
+              runSpacing: SwiftleadTokens.spaceS,
+              children: [
+                'All',
+                'High',
+                'Medium',
+                'Low',
+              ].map((priority) {
+                final isSelected = filters.priorityFilters.contains(priority);
+                return SwiftleadChip(
+                  label: priority,
+                  isSelected: isSelected,
+                  onTap: () {
+                    setState(() {
+                      hasChanges = true;
+                      if (priority == 'All') {
+                        filters.priorityFilters = {'All'};
+                      } else {
+                        filters.priorityFilters.remove('All');
+                        if (isSelected) {
+                          filters.priorityFilters.remove(priority);
+                          if (filters.priorityFilters.isEmpty) {
+                            filters.priorityFilters.add('All');
+                          }
+                        } else {
+                          filters.priorityFilters.add(priority);
+                        }
+                      }
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceL),
+
             // Date Range
             Text(
               'Date Range',
@@ -161,6 +214,60 @@ class InboxFilterSheet {
               ),
             const SizedBox(height: SwiftleadTokens.spaceL),
 
+            // Lead Source Filters (Marketing Attribution)
+            Text(
+              'Lead Source',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+              child: Text(
+                'Marketing attribution source (distinct from message channel)',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+                ),
+              ),
+            ),
+            Wrap(
+              spacing: SwiftleadTokens.spaceS,
+              runSpacing: SwiftleadTokens.spaceS,
+              children: [
+                'All',
+                'Google Ads',
+                'Facebook Ads',
+                'Website',
+                'Referral',
+                'Direct',
+              ].map((source) {
+                final isSelected = filters.leadSourceFilters.contains(source);
+                return SwiftleadChip(
+                  label: source,
+                  isSelected: isSelected,
+                  onTap: () {
+                    setState(() {
+                      hasChanges = true;
+                      if (source == 'All') {
+                        filters.leadSourceFilters = {'All'};
+                      } else {
+                        filters.leadSourceFilters.remove('All');
+                        if (isSelected) {
+                          filters.leadSourceFilters.remove(source);
+                          if (filters.leadSourceFilters.isEmpty) {
+                            filters.leadSourceFilters.add('All');
+                          }
+                        } else {
+                          filters.leadSourceFilters.add(source);
+                        }
+                      }
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceL),
+
             // Actions
             Row(
               children: [
@@ -169,7 +276,8 @@ class InboxFilterSheet {
                     onPressed: () {
                       setState(() {
                         hasChanges = true;
-                        filters = InboxFilters(); // Reset to defaults
+                        // Reset to defaults with mutable sets
+                        filters = InboxFilters();
                       });
                     },
                     child: const Text('Clear All'),
@@ -198,22 +306,31 @@ class InboxFilterSheet {
 class InboxFilters {
   Set<String> statusFilters;
   Set<String> channelFilters;
+  Set<String> priorityFilters;
+  Set<String> leadSourceFilters;
   String dateRange;
   DateTime? customStartDate;
   DateTime? customEndDate;
 
   InboxFilters({
-    this.statusFilters = const {'All'},
-    this.channelFilters = const {'All'},
+    Set<String>? statusFilters,
+    Set<String>? channelFilters,
+    Set<String>? priorityFilters,
+    Set<String>? leadSourceFilters,
     this.dateRange = 'All Time',
     this.customStartDate,
     this.customEndDate,
-  });
+  }) : statusFilters = statusFilters ?? {'All'},
+       channelFilters = channelFilters ?? {'All'},
+       priorityFilters = priorityFilters ?? {'All'},
+       leadSourceFilters = leadSourceFilters ?? {'All'};
 
   int get activeFilterCount {
     int count = 0;
     if (!statusFilters.contains('All')) count += statusFilters.length;
     if (!channelFilters.contains('All')) count += channelFilters.length;
+    if (!priorityFilters.contains('All')) count += priorityFilters.length;
+    if (!leadSourceFilters.contains('All')) count += leadSourceFilters.length;
     if (dateRange != 'All Time') count += 1;
     return count;
   }

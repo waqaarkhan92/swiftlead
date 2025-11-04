@@ -14,6 +14,8 @@ import '../../widgets/forms/booking_offer_sheet.dart';
 import '../../widgets/components/recurrence_pattern_picker.dart';
 import '../../widgets/components/conflict_warning_card.dart';
 import '../../widgets/forms/ai_availability_suggestions_sheet.dart';
+import '../../widgets/global/info_banner.dart';
+import 'booking_templates_screen.dart';
 
 /// Create/Edit Booking Form - Create or edit a booking
 /// Exact specification from UI_Inventory_v2.5.1
@@ -54,6 +56,12 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
   bool _hasConflict = false; // Track if booking time conflicts with existing booking
   String? _conflictingBookingTitle;
   DateTime? _conflictingTime;
+  String? _selectedTeamMember; // Team member assignment
+  List<String> _selectedGroupAttendees = []; // For group bookings (multi-person appointments)
+  bool _isGroupBooking = false; // Group booking toggle
+  bool _addToWaitlist = false; // Waitlist toggle
+  int _bufferTimeMinutes = 15; // Buffer time between bookings (default 15 minutes)
+  bool _showBufferTime = true; // Show buffer time indicators
 
   @override
   void initState() {
@@ -77,25 +85,41 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
     super.dispose();
   }
 
+  String _formatTimeWithBuffer() {
+    if (_selectedStartTime == null || _duration == null) return '';
+    final startMinutes = _selectedStartTime!.hour * 60 + _selectedStartTime!.minute;
+    final endMinutes = startMinutes + _duration! + _bufferTimeMinutes;
+    final endHour = (endMinutes ~/ 60) % 24;
+    final endMin = endMinutes % 60;
+    return '${endHour.toString().padLeft(2, '0')}:${endMin.toString().padLeft(2, '0')}';
+  }
+
   void _checkForConflicts() {
     // Mock conflict detection - in real app, this would check against existing bookings
-    if (_selectedDate != null && _selectedStartTime != null) {
-      final bookingTime = DateTime(
+    // Includes buffer time calculation
+    if (_selectedDate != null && _selectedStartTime != null && _duration != null) {
+      final bookingStartTime = DateTime(
         _selectedDate!.year,
         _selectedDate!.month,
         _selectedDate!.day,
         _selectedStartTime!.hour,
         _selectedStartTime!.minute,
       );
+      final bookingEndTime = bookingStartTime.add(Duration(minutes: _duration!));
+      final bookingEndWithBuffer = bookingEndTime.add(Duration(minutes: _bufferTimeMinutes));
       
       // Mock: Check if time conflicts (e.g., 10am-11am on same day)
+      // Also check if buffer time would overlap with next booking
       final now = DateTime.now();
       final mockConflictTime = DateTime(now.year, now.month, now.day + 1, 10, 0);
+      final mockConflictEnd = mockConflictTime.add(const Duration(hours: 1));
       
-      if (bookingTime.year == mockConflictTime.year &&
-          bookingTime.month == mockConflictTime.month &&
-          bookingTime.day == mockConflictTime.day &&
-          bookingTime.hour >= 9 && bookingTime.hour <= 11) {
+      // Check if booking overlaps or if buffer time would conflict
+      final hasOverlap = (bookingStartTime.isBefore(mockConflictEnd) && bookingEndWithBuffer.isAfter(mockConflictTime));
+      
+      if (hasOverlap && bookingStartTime.year == mockConflictTime.year &&
+          bookingStartTime.month == mockConflictTime.month &&
+          bookingStartTime.day == mockConflictTime.day) {
         setState(() {
           _hasConflict = true;
           _conflictingBookingTitle = 'Bathroom Renovation';
@@ -109,6 +133,94 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
         });
       }
     }
+  }
+
+  void _showTeamAssignmentSheet() {
+    // Simple team member selector
+    final teamMembers = ['Alex', 'Sam', 'Jordan', 'Taylor', 'Casey'];
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Select Team Member',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+            ...teamMembers.map((member) => ListTile(
+              title: Text(member),
+              leading: CircleAvatar(
+                child: Text(member[0]),
+              ),
+              selected: _selectedTeamMember == member,
+              onTap: () {
+                setState(() {
+                  _selectedTeamMember = _selectedTeamMember == member ? null : member;
+                });
+                Navigator.pop(context);
+              },
+            )),
+            if (_selectedTeamMember != null)
+              ListTile(
+                title: const Text('Unassign'),
+                leading: const Icon(Icons.clear),
+                onTap: () {
+                  setState(() {
+                    _selectedTeamMember = null;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSkillBasedAssignment() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Skill-Based Assignment'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Select required skills for this booking:'),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+            ...['Plumbing', 'Electrical', 'HVAC', 'Carpentry', 'General'].map((skill) {
+              return CheckboxListTile(
+                title: Text(skill),
+                value: false, // Would track selected skills
+                onChanged: (value) {
+                  // Handle skill selection
+                },
+              );
+            }),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Toast.show(
+                context,
+                message: 'Skill-based assignment enabled - will match team members with required skills',
+                type: ToastType.success,
+              );
+            },
+            child: const Text('Apply'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _saveBooking() async {
@@ -202,6 +314,25 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
               type: InfoBannerType.info,
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Use Template Button (only when creating new booking)
+            if (widget.bookingId == null)
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BookingTemplatesScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.event_note_outlined),
+                label: const Text('Use Booking Template'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+              ),
+            if (widget.bookingId == null) const SizedBox(height: SwiftleadTokens.spaceM),
 
             // Conflict Warning Card - Show if booking time conflicts
             if (_hasConflict && _conflictingBookingTitle != null && _conflictingTime != null && _selectedDate != null && _selectedStartTime != null)
@@ -379,6 +510,150 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                   minimumSize: const Size(double.infinity, 52),
                 ),
               ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+            ],
+
+            // Team Assignment
+            Text(
+              'Assign to Team Member',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceS),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      _showTeamAssignmentSheet();
+                    },
+                    icon: const Icon(Icons.person_outline),
+                    label: Text(
+                      _selectedTeamMember ?? 'Select Team Member',
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 52),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: SwiftleadTokens.spaceS),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert),
+                  onSelected: (value) {
+                    if (value == 'round_robin') {
+                      Toast.show(
+                        context,
+                        message: 'Round-robin assignment enabled - next booking will auto-assign',
+                        type: ToastType.info,
+                      );
+                    } else if (value == 'skill_based') {
+                      _showSkillBasedAssignment();
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'round_robin',
+                      child: Text('Round-Robin Assignment'),
+                    ),
+                    const PopupMenuItem(
+                      value: 'skill_based',
+                      child: Text('Skill-Based Assignment'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Group Booking Toggle
+            SwitchListTile(
+              title: const Text('Group Booking'),
+              subtitle: const Text('Multi-person appointment'),
+              value: _isGroupBooking,
+              onChanged: (value) {
+                setState(() {
+                  _isGroupBooking = value;
+                  if (!value) {
+                    _selectedGroupAttendees = [];
+                  }
+                });
+              },
+            ),
+            
+            // Group Attendees Selector (shown when group booking is enabled)
+            if (_isGroupBooking) ...[
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              Text(
+                'Additional Attendees',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              OutlinedButton.icon(
+                onPressed: () {
+                  final teamMembers = ['Alex', 'Sam', 'Jordan', 'Taylor', 'Casey'];
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) => StatefulBuilder(
+                      builder: (context, setModalState) => Container(
+                        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Select Attendees',
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                            const SizedBox(height: SwiftleadTokens.spaceM),
+                            ...teamMembers.map((member) => CheckboxListTile(
+                              title: Text(member),
+                              value: _selectedGroupAttendees.contains(member),
+                              onChanged: (checked) {
+                                setModalState(() {
+                                  if (checked == true) {
+                                    if (!_selectedGroupAttendees.contains(member)) {
+                                      _selectedGroupAttendees.add(member);
+                                    }
+                                  } else {
+                                    _selectedGroupAttendees.remove(member);
+                                  }
+                                });
+                                setState(() {}); // Update parent state
+                              },
+                            )),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.people_outline),
+                label: Text(
+                  _selectedGroupAttendees.isEmpty
+                      ? 'Select Attendees'
+                      : '${_selectedGroupAttendees.length} attendee${_selectedGroupAttendees.length > 1 ? 's' : ''} selected',
+                ),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 52),
+                ),
+              ),
+              if (_selectedGroupAttendees.isNotEmpty) ...[
+                const SizedBox(height: SwiftleadTokens.spaceS),
+                Wrap(
+                  spacing: SwiftleadTokens.spaceS,
+                  runSpacing: SwiftleadTokens.spaceS,
+                  children: _selectedGroupAttendees.map((attendee) => Chip(
+                    label: Text(attendee),
+                    onDeleted: () {
+                      setState(() {
+                        _selectedGroupAttendees.remove(attendee);
+                      });
+                    },
+                  )).toList(),
+                ),
+              ],
               const SizedBox(height: SwiftleadTokens.spaceM),
             ],
 
@@ -624,6 +899,126 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                 },
               ),
             ],
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Waitlist Toggle
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Add to Waitlist',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Add client to waitlist if slot is full',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                  Switch(
+                    value: _addToWaitlist,
+                    onChanged: (value) {
+                      setState(() {
+                        _addToWaitlist = value;
+                      });
+                    },
+                    activeTrackColor: const Color(SwiftleadTokens.primaryTeal),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Buffer Time Management
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Buffer Time',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Auto-calculate travel/prep time between appointments',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                      Switch(
+                        value: _showBufferTime,
+                        onChanged: (value) {
+                          setState(() {
+                            _showBufferTime = value;
+                          });
+                          _checkForConflicts();
+                        },
+                        activeTrackColor: const Color(SwiftleadTokens.primaryTeal),
+                      ),
+                    ],
+                  ),
+                  if (_showBufferTime) ...[
+                    const SizedBox(height: SwiftleadTokens.spaceM),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Buffer: ${_bufferTimeMinutes} minutes',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.remove_circle_outline),
+                          onPressed: _bufferTimeMinutes > 0
+                              ? () {
+                                  setState(() {
+                                    _bufferTimeMinutes = (_bufferTimeMinutes - 5).clamp(0, 60);
+                                  });
+                                  _checkForConflicts();
+                                }
+                              : null,
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add_circle_outline),
+                          onPressed: _bufferTimeMinutes < 60
+                              ? () {
+                                  setState(() {
+                                    _bufferTimeMinutes = (_bufferTimeMinutes + 5).clamp(0, 60);
+                                  });
+                                  _checkForConflicts();
+                                }
+                              : null,
+                        ),
+                      ],
+                    ),
+                    if (_duration != null && _selectedStartTime != null) ...[
+                      const SizedBox(height: SwiftleadTokens.spaceS),
+                      InfoBanner(
+                        message: 'Booking ends at ${_formatTimeWithBuffer()} (includes ${_bufferTimeMinutes}min buffer)',
+                        type: InfoBannerType.info,
+                      ),
+                    ],
+                  ],
+                ],
+              ),
+            ),
             const SizedBox(height: SwiftleadTokens.spaceM),
 
             // Notes

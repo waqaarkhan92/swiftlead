@@ -30,7 +30,9 @@ This document defines the complete backend architecture for Swiftlead, mapping a
 
 **`message_threads`** - Conversation grouping
 - **Keys:** id (uuid PK), org_id (FK), contact_id (FK nullable)
-- **Fields:** channel (enum), last_message_at (timestamptz), last_message_content (text), assigned_to (FK users), pinned (bool), snoozed_until (timestamptz), archived (bool), flagged_for_followup (bool), followup_date (date), lead_source (enum), unread_count (int), ai_summary (text), priority (enum: low/medium/high nullable) 🆕, custom_tags (text[] nullable) 🆕, last_activity_type (enum: message/call/status_change) 🆕, muted (bool default false) 🆕
+- **Fields:** channel (enum), last_message_at (timestamptz), last_message_content (text), assigned_to (FK users), pinned (bool), archived (bool), lead_source (enum: google_ads/facebook_ads/website/referral/direct), unread_count (int), ai_summary (text), priority (enum: low/medium/high nullable) 🆕, custom_tags (text[] nullable) 🆕, last_activity_type (enum: message/call/status_change) 🆕, muted (bool default false) 🆕
+- **Note:** `snoozed_until`, `flagged_for_followup`, `followup_date` fields exist in schema but are deprecated/unused
+- **Note:** `lead_source` is distinct from `channel` - it represents marketing attribution (where the lead originally came from), not the communication platform (SMS/WhatsApp/Email/etc.)
 - **Indexes:** (org_id, contact_id), (org_id, last_message_at DESC), (org_id, pinned, last_message_at DESC), 🆕 (org_id, priority, last_message_at DESC), 🆕 custom_tags GIN index
 
 **`message_notes`** - Internal team notes
@@ -55,13 +57,21 @@ This document defines the complete backend architecture for Swiftlead, mapping a
 - **Fields:** reaction (text), created_at (timestamptz), unique constraint on (message_id, user_id, reaction)
 - **Indexes:** (message_id, created_at)
 
+🆕 **`missed_calls`** - Missed call tracking and text-back automation
+- **Keys:** id (uuid PK), org_id (FK), thread_id (FK nullable), contact_id (FK nullable)
+- **Fields:** phone_number (text), contact_name (text), timestamp (timestamptz), text_back_sent (bool default false), text_back_sent_at (timestamptz nullable), text_back_message_id (uuid FK nullable), provider_call_id (text nullable)
+- **Indexes:** (org_id, thread_id, timestamp DESC), (org_id, timestamp DESC), (text_back_sent, timestamp) WHERE text_back_sent = false
+
 ### Edge Functions
 
 - **send-message** `{thread_id?, contact_id, channel, content, media_urls?}` → Creates message, calls Twilio/Meta/SMTP, increments usage
 - **sync-messages** `{org_id, channel?, since?}` → Polls providers, creates messages, auto-creates contacts
 - **process-webhook** `{provider_payload}` → Handles inbound webhooks, triggers AI auto-reply
+- **process-missed-call** `{phone_number, provider_call_id, contact_id?}` → Records missed call, finds or creates thread, triggers text-back automation if enabled
+- **send-text-back** `{missed_call_id}` → Sends branded text-back message for missed call, marks as sent
 - **ai-summarize-thread** `{thread_id}` → Calls OpenAI, stores summary
-- **mark-read-status** / **pin-thread** / **snooze-thread** / **flag-thread-followup** / **assign-thread** / **archive-thread** → Update thread metadata
+- **mark-read-status** / **pin-thread** / **assign-thread** / **archive-thread** → Update thread metadata
+- **Note:** `snooze-thread`, `flag-thread-followup` functions exist but are deprecated/unused
 
 ### CRUD Matrix
 | Action | Tables | Function | Auth |
@@ -74,7 +84,9 @@ This document defines the complete backend architecture for Swiftlead, mapping a
 
 ### Automations
 - **Real-time:** New message → AI auto-reply (if after hours), create contact (if unknown), push notification
-- **Cron:** Sync email (every 5 min), resurface snoozed threads (every 15 min)
+- **Real-time:** Missed call webhook → Record missed call, trigger text-back automation (if enabled)
+- **Cron:** Sync email (every 5 min)
+- **Cron:** Process missed call text-backs (every 30 seconds) → Send branded text-back messages for missed calls within 30 seconds
 
 ### External APIs
 - **Twilio:** SMS/WhatsApp send/receive, webhooks with HMAC SHA-256 signature
@@ -224,13 +236,23 @@ This document defines the complete backend architecture for Swiftlead, mapping a
 
 **`bookings`** - Appointments/jobs
 - **Keys:** id (uuid PK), org_id (FK), contact_id (FK), service_id (FK nullable), assigned_to (FK users nullable)
-- **Fields:** start_time (timestamptz), end_time (timestamptz), duration_minutes (int), status (pending/confirmed/in_progress/completed/cancelled/no_show), confirmation_status (not_sent/sent/confirmed/declined), title, description, location, recurring (bool), recurring_pattern_id (FK nullable), recurring_instance_of (FK bookings nullable), deposit_required (bool), deposit_amount, deposit_paid (bool), google_calendar_event_id, apple_calendar_event_id, notes
+- **Fields:** start_time (timestamptz), end_time (timestamptz), duration_minutes (int), status (pending/confirmed/in_progress/completed/cancelled/no_show), confirmation_status (not_sent/sent/confirmed/declined), title, description, location, recurring (bool), recurring_pattern_id (FK nullable), recurring_instance_of (FK bookings nullable), deposit_required (bool), deposit_amount, deposit_paid (bool), google_calendar_event_id (nullable - requires backend integration), apple_calendar_event_id (nullable - requires backend integration), notes, on_waitlist (bool default false), group_attendees (jsonb nullable - array of user IDs), assignment_method (enum: manual/round_robin/skill_based nullable)
 - **Extension fields (see "On My Way" subsection):** on_my_way_status (enum: not_sent/sent/arrived), live_location_url (text nullable), eta_minutes (int nullable)
 - **Indexes:** (org_id, start_time), (org_id, status, start_time), (contact_id), (assigned_to)
 
+**`blocked_time`** - Blocked time and time off management
+- **Keys:** id (uuid PK), org_id (FK), team_member_id (FK users nullable)
+- **Fields:** title, start_date (date), end_date (date), start_time (time nullable), end_time (time nullable), reason (text nullable), is_recurring (bool default false), recurring_pattern (jsonb nullable)
+- **Indexes:** (org_id, start_date, end_date), (team_member_id)
+
+**`no_show_tracking`** - Client no-show tracking
+- **Keys:** id (uuid PK), contact_id (FK), booking_id (FK nullable)
+- **Fields:** no_show_date (date), no_show_rate (decimal), total_bookings (int), no_show_count (int), is_high_risk (bool default false), last_follow_up_sent (timestamptz nullable), no_show_fee_invoiced (bool default false), invoice_id (FK nullable)
+- **Indexes:** (contact_id), (is_high_risk)
+
 **`services`** - Service catalog
 - **Keys:** id (uuid PK), org_id (FK)
-- **Fields:** name, description, duration_minutes, price, category, active (bool), requires_deposit (bool), deposit_amount
+- **Fields:** name, description, duration_minutes, price, category, active (bool), requires_deposit (bool), deposit_amount, travel_time_minutes (int nullable), service_specific_availability (bool default false), available_days (jsonb nullable - array of day names)
 
 **`recurring_patterns`** - Recurring series definitions
 - **Keys:** id (uuid PK), org_id (FK)
@@ -246,8 +268,11 @@ This document defines the complete backend architecture for Swiftlead, mapping a
 - **update-booking** / **cancel-booking** / **complete-booking** → Updates status, syncs calendars
 - **send-booking-confirmation** / **process-booking-confirmation-reply** → 2-way confirmation handling
 - **send-booking-reminder** → Automated reminders at T-24h, T-2h
-- **sync-google-calendar** → Two-way sync with Google Calendar API
-- **sync-apple-calendar** → Sync to iOS EventKit
+- **sync-google-calendar** → Two-way sync with Google Calendar API *(Requires backend integration)*
+- **sync-apple-calendar** → Sync to iOS EventKit *(Requires backend integration)*
+- **generate-calendar-invite** → Generate .ics file for booking confirmation
+- **send-follow-up-no-show** → Send automated follow-up message for no-show bookings
+- **create-no-show-invoice** → Create invoice with no-show fee
 - **process-recurring-instances** → Generate future instances from patterns
 - **ai-suggest-availability** → AI-powered optimal time suggestions
 

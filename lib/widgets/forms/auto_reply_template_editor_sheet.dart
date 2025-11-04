@@ -73,7 +73,7 @@ class _AutoReplyTemplateEditorSheetState extends State<AutoReplyTemplateEditorSh
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
           Text(
-            'Customize the message sent automatically after a missed call.',
+            'Customize the message sent automatically after a missed call. Note: Backend verification needed once backend is wired.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),

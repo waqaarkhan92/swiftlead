@@ -101,6 +101,11 @@ User opens Inbox → Browses messages → Filters by channel → Opens thread �
 - **VoiceNotePlayer** — Inline audio player with waveform visualization
 - **LinkPreviewCard** — Rich preview of URLs sent in messages
 - **ReactionPicker** — Emoji reaction overlay on long-press message
+- **MissedCallNotification** — Inline missed call notification with call back and text-back buttons, shows text-back sent status
+- **ConversationPreviewSheet** — Preview conversation without opening full thread, shows contact info, recent messages, and quick actions
+- **PriorityBadge** — Displays conversation priority (High/Medium/Low) with color-coded badge and icon, compact dot variant for list view
+- **GroupedNotificationCard** — Groups multiple message notifications by conversation thread, shows count badge, expandable to view individual notifications
+- **OfflineBanner** — Displays offline status and queued message count, shows warning color with cloud-off icon
 
 ### Interaction Enhancements (v2.5.1)
 - **Haptic Feedback:** Light haptic on swipe actions, medium on long-press, heavy on delete confirmation
@@ -167,15 +172,22 @@ User opens Jobs → Browses list or searches → Taps job → Views details → 
 
 | Screen/Surface | CRUD | Data Source | Navigation | State Screens | Components |
 |----------------|------|-------------|------------|---------------|------------|
-| **JobsListView** | Read | `jobs` WHERE `org_id` | Bottom nav → Jobs tab | Empty: "No jobs yet" + CTA "Create first job", Loading: Skeleton cards (3 rows), Error: "Failed to load jobs" + Retry, Pull-to-refresh enabled | SkeletonLoader, EmptyStateCard, PullToRefresh, Badge (job count per status) |
+| **JobsListView** | Read | `jobs` WHERE `org_id` | Bottom nav → Jobs tab | Empty: "No jobs yet" + CTA "Create first job", Loading: Skeleton cards (3 rows), Error: "Failed to load jobs" + Retry, Pull-to-refresh enabled | SkeletonLoader, EmptyStateCard, PullToRefresh, Badge (job count per status), SegmentedControl (view mode: List/Kanban toggle) |
+| **Jobs Kanban View** | Read | `jobs` WHERE `org_id` grouped by status | Jobs list → Toggle Kanban view | Empty: "No jobs in this status" + CTA, Loading: Skeleton columns, Error: Retry | Kanban board with status columns, DragDrop functionality, Badge (count per column) |
+| **Jobs Calendar View** | Read | `jobs` WHERE `start_time` in date range | Calendar screen → View scheduled jobs | Jobs displayed alongside bookings, Empty: "No jobs scheduled" + CTA, Loading: Skeleton calendar | CalendarWidget, JobCard (displayed in calendar), Badge (job count per day) |
 | **JobDetailView** | Read, Update | `jobs` by id + timeline | Jobs list → Tap job | Loading: Skeleton details, Updating: Progress bar, Updated: Success toast, Error: Retry | SkeletonLoader, Toast, ProgressBar, FAB (quick actions) |
-| **Create/Edit Job Form** | Create, Update | `create-job`, `update-job` | Jobs list → + button OR Detail → Edit | Saving: "Creating job..." + progress, Saved: Success toast + haptic, Validation errors: Inline error messages | ProgressBar, Toast, HapticFeedback, InfoBanner (form tips) |
-| **QuoteChaserLog** | Read | `quote_chasers` WHERE `job_id` | Job detail → Chasers tab | Empty: "No chasers scheduled" + InfoBanner "Auto-follow-ups help close deals", Loading: Skeleton | EmptyStateCard, InfoBanner, SkeletonLoader |
+| **Create/Edit Job Form** | Create, Update | `create-job`, `update-job` | Jobs list → + button OR Detail → Edit OR Inbox thread → Create Job button OR Booking detail → Create Job menu | Saving: "Creating job..." + progress, Saved: Success toast + haptic, Validation errors: Inline error messages | ProgressBar, Toast, HapticFeedback, InfoBanner (form tips) |
+| **Create Job from Inbox** | Create | `create-job` | Inbox thread → MessageComposerBar → Create Job button | Creating: Progress, Created: Success toast + navigate to job, Auto-imports client details from thread | MessageComposerBar (Create Job button), Toast, ProgressBar |
+| **Create Job from Booking** | Create | `create-job` | Booking detail → Overflow menu → Create Job | Creating: Progress, Created: Success toast + navigate to job, Auto-links calendar event | PopupMenuButton, Toast, ProgressBar |
+| **AI Extract Job from Message** | Create | `ai-summarize-job` function | Inbox thread → MessageComposerBar → AI Extract button | Extracting: "Extracting job details..." + progress, Extracted: Success toast + opens job form with pre-filled data | MessageComposerBar (AI Extract button), Toast, ProgressBar |
+| **QuoteChaserLog** | Read | `quote_chasers` WHERE `job_id` | Job detail → More menu → Chasers | Empty: "No chasers scheduled" + InfoBanner "Auto-follow-ups help close deals", Loading: Skeleton | EmptyStateCard, InfoBanner, SkeletonLoader |
 | **ReviewRequestSheet** | Create | `request-review` function | Job detail → Request review | Sending: "Sending request..." + progress, Sent: Success toast "Review request sent", Failed: Error toast + Retry | BottomSheet, ProgressBar, Toast, ConfirmationDialog |
 | **Job Status Update** | Update | `jobs.status` | Job detail → Status button | Updating: Progress, Updated: Success toast + confetti animation (on complete), Error: Retry | BottomSheet, SegmentedControl (status options), Toast, HapticFeedback |
-| **Job Timeline View** | Read | `job_timeline` WHERE `job_id` | Job detail → Timeline tab | Empty: "No activity yet", Loading: Skeleton timeline, Error: Retry | SkeletonLoader, EmptyStateCard, Avatar (team members), Badge (activity type) |
-| **Job Notes Editor** | Create, Read, Update | `job_notes` | Job detail → Notes tab | Empty: "Add a note" + CTA, Saving: Progress, Saved: Success toast | EmptyStateCard, Toast, Chip (@mentions) |
-| **Job Media Gallery** | Read | `job_media` WHERE `job_id` | Job detail → Media tab | Empty: "No media uploaded" + CTA "Add photos", Loading: Skeleton grid, Error: Retry | EmptyStateCard, SkeletonLoader, ProgressBar (uploads) |
+| **Job Timeline View** | Read | `job_timeline` WHERE `job_id` | Job detail → Timeline tab (primary) | Empty: "No activity yet", Loading: Skeleton timeline, Error: Retry | SkeletonLoader, EmptyStateCard, Avatar (team members), Badge (activity type) |
+| **Job Details View** | Read | `jobs` by id + custom fields | Job detail → Details tab (primary) | Loading: Skeleton details, Error: Retry | SkeletonLoader, EmptyStateCard |
+| **Job Notes Editor** | Create, Read, Update | `job_notes` | Job detail → Notes tab (primary) | Empty: "Add a note" + CTA, Saving: Progress, Saved: Success toast | EmptyStateCard, Toast, Chip (@mentions) |
+| **Job Messages View** | Read | `messages` WHERE `job_id` | Job detail → More menu → Messages | Empty: "No messages linked", Loading: Skeleton messages, Error: Retry | EmptyStateCard, SkeletonLoader |
+| **Job Media Gallery** | Read | `job_media` WHERE `job_id` | Job detail → More menu → Media | Empty: "No media uploaded" + CTA "Add photos", Loading: Skeleton grid, Error: Retry | EmptyStateCard, SkeletonLoader, ProgressBar (uploads) |
 | **Media Upload Sheet** | Create | `upload-job-media` function | Media gallery → + button | Uploading: Progress bar + percentage, Uploaded: Success toast, Failed: Error toast + Retry | BottomSheet, ProgressBar, Toast |
 | **Job Search & Filter** | Read | `jobs` WHERE filters | Jobs list → Search/Filter | Empty: "No matches found" + clear filters button, Loading: "Searching...", Error: Retry | SearchBar, BottomSheet (filters), Chip (active filters), EmptyStateCard |
 | **Convert Quote to Job** | Create | `convert-quote-to-job` function | Quote detail → Convert | Converting: Progress, Converted: Success toast + haptic, Error: Retry | ConfirmationDialog, ProgressBar, Toast, HapticFeedback |
@@ -191,7 +203,7 @@ User opens Jobs → Browses list or searches → Taps job → Views details → 
 - **StatusChip** — Color-coded chip showing current job status with icon
 - **JobMetricsCard** — Summary card showing job value, duration, profitability
 - **QuickActionButtons** — Floating buttons for common actions (Call, Message, Navigate)
-- **MediaThumbnail** — Grid item showing preview with tap to expand, long-press to delete
+- **MediaThumbnail** — Grid item showing preview with tap to expand, long-press to delete. Also used in InboxThreadScreen to display message attachments above ChatBubble (tap to open MediaPreviewModal)
 - **AssignmentAvatar** — Team member avatar with online status indicator
 - **NoteCard** — Note with author, timestamp, edit/delete options
 - **ChaseScheduleCard** — Automated follow-up schedule with edit options
@@ -236,6 +248,22 @@ User opens Calendar → Views schedule → Taps time slot → Creates booking �
 | **Reschedule Booking Modal** | Update | `bookings.start_time` | Booking detail → Reschedule | Rescheduling: Progress, Rescheduled: Success toast + confirmation sent, Client notified | BottomSheet, ProgressBar, Toast, ConfirmationDialog |
 | **Booking Conflicts Alert** | Read | Conflict detection | Creating/editing booking | Warning: "Time slot conflicts with [Booking Name]" + options to continue or adjust | InfoBanner, ConfirmationDialog |
 | **Multi-Day Booking** | Create | `bookings` with date range | Booking form → Multi-day toggle | Creating: Progress for each day, Created: Success toast with count | ProgressBar, Toast, Chip (date range) |
+| **BlockedTimeScreen** | Create, Read, Update, Delete | `blocked_time` | Calendar → Settings → Blocked Time OR Calendar → FAB → Block Time | Empty: "No blocked time" + CTA, Loading: Skeleton, Error: Retry | FrostedContainer, PrimaryButton, InfoBanner, Toast |
+| **Waitlist Toggle** | Create, Update | `bookings.on_waitlist` | Create/Edit Booking → Waitlist toggle | Toggled: Toast confirmation | Switch, Toast |
+| **Calendar Invite (.ics)** | Create | Edge function `generate-calendar-invite` | Booking Detail → Confirmation section → "Add to Calendar" button | Generating: Toast, Generated: Success toast + attached to email | OutlinedButton, Toast |
+| **Cancellation Policy** | Read | Settings/stored policy text | Booking Detail → Cancellation Policy section | View: Full policy dialog | FrostedContainer, TextButton, AlertDialog |
+| **Round-Robin Assignment** | Update | `bookings.assignment_method` | Create/Edit Booking → Team Assignment → More menu → Round-Robin | Enabled: Toast confirmation | PopupMenuButton, Toast |
+| **Skill-Based Assignment** | Update | `bookings.assignment_method` | Create/Edit Booking → Team Assignment → More menu → Skill-Based | Enabled: Dialog with skill selection, Toast confirmation | PopupMenuButton, AlertDialog, CheckboxListTile, Toast |
+| **No-Show Tracking** | Read, Update | `no_show_tracking` | Booking Detail → Shown when booking marked as no-show | Display: No-show rate, high-risk badge, follow-up button, invoice button | FrostedContainer, Badge, OutlinedButton, Toast |
+| **Travel Time** | Create, Update | `services.travel_time_minutes` | Service Editor → Travel Time field | Saved: Toast confirmation | TextFormField, Toast |
+| **Service-Specific Availability** | Create, Update | `services.service_specific_availability`, `services.available_days` | Service Editor → Service-Specific Availability toggle + day selection | Saved: Toast confirmation | Switch, FilterChip, Toast |
+| **BookingTemplatesScreen** | Create, Read, Update, Delete | Local storage / `booking_templates` table | Calendar → Templates icon OR Create Booking → Use Template button | Empty: "No templates" + CTA, List: Template cards with use/edit/delete | FrostedContainer, PrimaryButton, EmptyStateCard, PopupMenuButton, Toast |
+| **BookingAnalyticsScreen** | Read | `bookings`, aggregated analytics | Calendar → Analytics icon | Loading: Skeleton, Charts: Pie/Bar charts for sources, conversion, peak times | fl_chart, FrostedContainer, SummaryCards |
+| **CapacityOptimizationScreen** | Read | `bookings`, utilization calculations | Calendar → Capacity Optimization icon | Charts: Daily utilization bar chart, Suggestions: Optimization cards with priority | fl_chart, FrostedContainer, InfoBanner, UtilizationSuggestionCard |
+| **ResourceManagementScreen** | Create, Read, Update, Delete | `resources` table (equipment/rooms) | Calendar → Resource Management icon | Empty: "No resources" + CTA, List: Resource cards with status badges | FrostedContainer, SegmentedButton, StatusBadge, PopupMenuButton, Toast |
+| **Weather Forecast** | Read | Weather API (mock for now) | Booking Detail → Weather Forecast section | Display: Temperature, condition, precipitation, wind | FrostedContainer, Icon, InfoBanner |
+| **Swipe Booking Actions** | Update | `bookings.status` | BookingCard → Swipe right (complete) / Swipe left (cancel) | Swipe: Visual feedback with icon, Confirm: Dialog for cancel, Complete: Toast success | Dismissible, AlertDialog, Toast |
+| **Pinch-to-Zoom Calendar** | Read | Calendar view toggle | CalendarWidget → Pinch gesture | Pinch in: Switch to week view, Pinch out: Switch to day view | GestureDetector, Transform.scale |
 
 ### Components Used
 - **CalendarWidget** — Month/week grid with event dots, color-coded by status, drag-to-create, pinch-to-zoom
@@ -250,20 +278,31 @@ User opens Calendar → Views schedule → Taps time slot → Creates booking �
 - **TeamMemberAvatar** — Avatar with availability indicator and tap to filter
 - **ConflictWarningCard** — Warning card showing conflicting bookings with resolve options
 - **ETACountdown** — Live countdown timer showing estimated arrival
+- **BookingTemplateCard** — Template card with name, service, duration, price, and use button
+- **UtilizationChart** — Bar chart showing daily utilization percentages with color coding (green/yellow/red)
+- **OptimizationSuggestionCard** — Card displaying optimization suggestions with priority badges
+- **ResourceCard** — Equipment/room card with status badge, current booking info, and maintenance notes
+- **WeatherForecastCard** — Weather display with temperature, condition icon, precipitation, and wind speed
 
 ### Interaction Enhancements (v2.5.1)
 - **Drag-to-Create:** Drag across time slots to create new booking quickly
 - **Smart Scheduling:** AI suggests optimal booking times based on travel time, gaps, preferences
-- **Buffer Time:** Visual indicators showing travel/buffer time between bookings
 - **Recurring Preview:** Shows preview of all occurrences before creating recurring booking
-- **Quick Reschedule:** Drag booking to new slot to reschedule with confirmation
 - **Color Coding:** Services color-coded for visual schedule scanning
 - **Gesture Controls:** Pinch to zoom calendar, swipe to change weeks
 - **Availability Heatmap:** Visual heatmap showing busiest/quietest times
 - **One-Tap Actions:** Quick action buttons on booking cards (Call, Navigate, Message)
 - **GPS Integration:** "Navigate to client" button opens maps with address
 - **Offline Bookings:** Create bookings offline, sync when connected with indicator
-- **Booking Templates:** Save common booking types as templates for quick creation
+- **Booking Templates:** `BookingTemplatesScreen` - Save common booking types as templates for quick creation (✅ Implemented)
+- **Booking Analytics:** `BookingAnalyticsScreen` - Track booking sources, conversion rates, and peak times with charts (✅ Implemented)
+- **Capacity Optimization:** `CapacityOptimizationScreen` - Visualize utilization and receive optimization suggestions (✅ Implemented)
+- **Resource Management:** `ResourceManagementScreen` - Track equipment/room availability and status (✅ Implemented)
+- **Weather Integration:** Weather forecast displayed in `BookingDetailScreen` for outdoor jobs (✅ Implemented)
+- **Swipe Booking:** Swipe right to complete, swipe left to cancel booking (✅ Implemented in `BookingCard`)
+- **Pinch-to-Zoom Calendar:** Pinch gesture switches between week ↔ day view (✅ Implemented in `CalendarScreen`)
+- **Buffer Time Management:** Auto-calculate travel/prep time between appointments with visual indicators in booking list and adjustable buffer (0-60min) in booking form (✅ Implemented)
+- **Quick Reschedule (Drag-and-Drop):** Drag booking cards in day view to reschedule to new time slot with confirmation dialog (✅ Implemented)
 - **Multi-Select:** Long-press to select multiple bookings for bulk operations
 
 ---
@@ -401,9 +440,17 @@ User opens AI Hub → Configures AI settings → Tests AI responses → Views AI
 | **Booking Offer Simulator** | Read | `ai-suggest-booking-offers` function | AI Hub → Booking Offers | Loading: "Analyzing availability..." + progress, Loaded: Offer previews, Error: Retry | ProgressBar, Chip (time slots), InfoBanner (how it works) |
 | **Smart Reply Suggestions** | Read | `ai-suggest-replies` function | Message thread → AI button | Generating: "Generating replies..." + progress, Generated: Reply options, Error: Retry | BottomSheet, ProgressBar, Chip (reply options), Tooltip |
 | **AI Tone Configuration** | Update | `ai_config.tone` | AI Hub → Settings → Tone | Updating: Progress, Updated: Success toast, Preview available | BottomSheet, SegmentedControl (tone options), Toast, AIReceptionistThread (preview) |
-| **AI Learning Dashboard** | Read | `ai_learning_stats` function | AI Hub → Learning | Loading: Skeleton, Error: Retry | SkeletonLoader, Badge (learning progress), InfoBanner (training tips) |
-| **Escalation Rules** | Read, Update | `ai_escalation_rules` | AI Hub → Settings → Escalation | Loading: Skeleton, Saving: Progress, Saved: Success toast | SkeletonLoader, Toast, Chip (trigger conditions) |
-| **AI Confidence Threshold** | Update | `ai_config.confidence_threshold` | AI Hub → Settings | Updating: Progress, Updated: Success toast, Preview available | BottomSheet, SegmentedControl (threshold levels), Toast, InfoBanner |
+| **Escalation Rules** | Read, Update | `ai_escalation_rules` | AI Hub → Settings → Escalation | Loading: Skeleton, Saving: Progress, Saved: Success toast | SkeletonLoader, Toast, Chip (trigger conditions), EscalationRulesConfigSheet |
+| **AI Confidence Threshold** | Update | `ai_config.confidence_threshold` | AI Hub → Settings | Updating: Progress, Updated: Success toast, Preview available | BottomSheet, ConfidenceThresholdConfigSheet, Toast, InfoBanner |
+| **Booking Assistance Config** | Read, Update | `ai_config.booking_assistance_enabled` | AI Hub → Settings | Loading: Skeleton, Saving: Progress, Saved: Success toast | BookingAssistanceConfigSheet, Switch, Toast |
+| **Lead Qualification Config** | Read, Update | `ai_config.lead_qualification_enabled`, `lead_qualification_fields` | AI Hub → Settings | Loading: Skeleton, Saving: Progress, Saved: Success toast | LeadQualificationConfigSheet, Switch, Chip (field selection), Toast |
+| **Smart Handover Config** | Read, Update | `ai_config.smart_handover_enabled`, `handover_triggers` | AI Hub → Settings | Loading: Skeleton, Saving: Progress, Saved: Success toast | SmartHandoverConfigSheet, Switch, Chip (trigger selection), Toast |
+| **Response Delay Config** | Update | `ai_config.response_delay_seconds` | AI Hub → Settings | Updating: Progress, Updated: Success toast | ResponseDelayConfigSheet, Chip (delay options), Toast |
+| **Fallback Response Config** | Update | `ai_config.fallback_response` | AI Hub → Settings | Updating: Progress, Updated: Success toast | FallbackResponseConfigSheet, TextField, Toast |
+| **Multi-Language Config** | Update | `ai_config.supported_languages` | AI Hub → Settings | Updating: Progress, Updated: Success toast | MultiLanguageConfigSheet, Chip (language selection), Toast |
+| **Custom Response Override** | Create, Update, Delete | `ai_response_overrides` | AI Hub → Settings → Custom Responses | Saving: Progress, Saved: Success toast, Deleted: Confirmation | CustomResponseOverrideSheet, TextField, Toast |
+| **Two-Way Confirmations** | Update | `ai_config.two_way_confirmations_enabled` | AI Hub → Settings | Updating: Progress, Updated: Success toast | Switch, Toast |
+| **Context Retention** | Update | `ai_config.context_retention_enabled` | AI Hub → Settings | Updating: Progress, Updated: Success toast | Switch, Toast |
 
 ### Components Used
 - **AIReceptionistThread (Enhanced)** — Chat interface simulating AI conversations with realistic timing, typing indicators, message bubbles
@@ -426,7 +473,6 @@ User opens AI Hub → Configures AI settings → Tests AI responses → Views AI
 - **One-Click Training:** Convert any real interaction into training example with single tap
 - **Performance Trends:** Visual trends showing AI improvement over time
 - **Smart Suggestions:** AI suggests which FAQs to add based on common questions
-- **A/B Testing:** Test different AI tones or responses to see which performs better
 - **Escalation Analytics:** Understand why AI escalated conversations to human
 - **Feedback Loop:** Mark AI responses as good/bad to improve learning
 - **Context Preview:** See full conversation context when reviewing AI interactions

@@ -73,7 +73,7 @@ class _AfterHoursResponseEditorSheetState extends State<AfterHoursResponseEditor
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
           Text(
-            'This message will be sent automatically when someone contacts you outside business hours.',
+            'This message will be sent automatically when someone contacts you outside business hours. Note: Backend verification needed once backend is wired.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),

@@ -5,6 +5,7 @@ import '../../widgets/global/skeleton_loader.dart';
 import '../../widgets/global/empty_state_card.dart';
 import '../../widgets/components/segmented_control.dart';
 import '../../widgets/components/job_card.dart';
+import '../../widgets/global/badge.dart' show SwiftleadBadge, BadgeVariant, BadgeSize;
 import '../../theme/tokens.dart';
 import '../../config/mock_config.dart';
 import '../../mock/mock_repository.dart';
@@ -29,6 +30,7 @@ class _JobsScreenState extends State<JobsScreen> {
   bool _isLoading = true;
   int _selectedTabIndex = 0;
   final List<String> _tabs = ['All', 'Active', 'Completed', 'Cancelled'];
+  String _viewMode = 'list'; // 'list' or 'kanban'
   List<int> _tabCounts = [0, 0, 0, 0];
   int _activeFilters = 0;
   List<Job> _allJobs = [];
@@ -363,6 +365,16 @@ class _JobsScreenState extends State<JobsScreen> {
               );
             },
           ),
+          // View mode toggle (List/Kanban)
+          IconButton(
+            icon: Icon(_viewMode == 'list' ? Icons.view_module : Icons.view_list),
+            onPressed: () {
+              setState(() {
+                _viewMode = _viewMode == 'list' ? 'kanban' : 'list';
+              });
+            },
+            tooltip: _viewMode == 'list' ? 'Switch to Kanban' : 'Switch to List',
+          ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () async {
@@ -418,13 +430,13 @@ class _JobsScreenState extends State<JobsScreen> {
           ),
         ),
         
-        // JobCardList - Card grid with rich information
+        // JobCardList - Card grid with rich information OR Kanban board
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
               await _loadJobs();
             },
-            child: _buildJobList(),
+            child: _viewMode == 'kanban' ? _buildKanbanView() : _buildJobList(),
           ),
         ),
       ],
@@ -480,6 +492,90 @@ class _JobsScreenState extends State<JobsScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildKanbanView() {
+    // Group jobs by status
+    final quotedJobs = _filteredJobs.where((j) => j.status == JobStatus.quoted).toList();
+    final scheduledJobs = _filteredJobs.where((j) => j.status == JobStatus.scheduled).toList();
+    final inProgressJobs = _filteredJobs.where((j) => j.status == JobStatus.inProgress).toList();
+    final completedJobs = _filteredJobs.where((j) => j.status == JobStatus.completed).toList();
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildKanbanColumn('Quoted', quotedJobs),
+        _buildKanbanColumn('Scheduled', scheduledJobs),
+        _buildKanbanColumn('In Progress', inProgressJobs),
+        _buildKanbanColumn('Completed', completedJobs),
+      ],
+    );
+  }
+
+  Widget _buildKanbanColumn(String title, List<Job> jobs) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceS),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Column header
+            Padding(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Row(
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: SwiftleadTokens.spaceS),
+                  SwiftleadBadge(
+                    label: jobs.length.toString(),
+                    variant: BadgeVariant.secondary,
+                    size: BadgeSize.small,
+                  ),
+                ],
+              ),
+            ),
+            // Jobs in this column
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceS),
+                itemCount: jobs.length,
+                itemBuilder: (context, index) {
+                  final job = jobs[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+                    child: JobCard(
+                      jobTitle: job.title,
+                      clientName: job.contactName,
+                      serviceType: job.serviceType,
+                      status: job.status.displayName,
+                      dueDate: job.scheduledDate,
+                      price: job.value > 0 ? '£${job.value.toStringAsFixed(2)}' : null,
+                      teamMemberName: job.assignedTo,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => JobDetailScreen(
+                              jobId: job.id,
+                              jobTitle: job.title,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

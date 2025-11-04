@@ -7,7 +7,7 @@
 
 Complete mapping between Product Features → UI Surfaces → Backend Tables → Edge Functions
 
-> **v2.5.1 Enhancement Note:** Extended component mapping for new global widgets (Tooltip, Badge, Chip, SkeletonLoader, Toast, etc.), added scheduled messages, message reactions, smart reply suggestions, AI confidence tracking, job templates, custom fields, batch operations, offline sync queues, and enhanced analytics. All cross-references updated and synchronized across all documentation files.
+> **v2.5.1 Enhancement Note:** Extended component mapping for new global widgets (Tooltip, Badge, Chip, SkeletonLoader, Toast, etc.), added scheduled messages, message reactions, smart reply suggestions, AI confidence tracking, job templates, custom fields, offline sync queues, and enhanced analytics. All cross-references updated and synchronized across all documentation files.
 
 ---
 
@@ -49,18 +49,20 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 | **Smart reply suggestions** *(v2.5.1)* | Quick Reply Suggestion Chips | `ai_interactions.smart_replies` | `ai-suggest-replies` | OpenAI |
 | Message threading | Conversation Thread View | `message_threads` | Auto-grouping | N/A |
 | Internal notes & @mentions | Internal Notes Modal | `message_notes` | Direct CRUD | N/A |
-| Pin/snooze/flag | Message Actions Sheet, Swipe Actions | `message_threads` | `pin-thread`, `snooze-thread`, `flag-thread-followup` | N/A |
+| Pin | Message Actions Sheet, Swipe Actions | `message_threads` | `pin-thread` | N/A |
 | AI summarization | AI Summary Card | `message_threads.ai_summary`, `ai_interactions` | `ai-summarize-thread` | OpenAI |
 | **AI confidence tracking** *(v2.5.1)* | AI Summary Card (confidence badge) | `ai_interactions.confidence_score` | Updated by AI functions | OpenAI |
 | Quick replies | Quick Reply Templates Sheet | `quick_replies` | Direct CRUD | N/A |
 | Canned responses | Canned Responses Library | `canned_responses` | Direct CRUD | N/A |
 | Search & filters | Message Search Screen, Filter Sheet | `messages`, `message_threads` | Direct SQL with filters | N/A |
 | Lead source tagging | Inbox List View (badges) | `message_threads.lead_source` | Auto-tagged | N/A |
-| Media attachments | Media Preview Modal | `messages.media_urls` | Storage upload | Twilio, Meta, Email |
+| **Priority Inbox** *(v2.5.1)* | Inbox List View (PriorityBadge) | `message_threads.priority` | AI-determined | OpenAI |
+| **Missed Call Integration** *(v2.5.1)* | Inbox Thread View (MissedCallNotification) | `missed_calls` | `process-missed-call`, `send-text-back` | Twilio |
+| **Conversation Preview** *(v2.5.1)* | Inbox List View (long-press) | `message_threads`, `messages` | Direct read | N/A |
+| Media attachments | Media Preview Modal, MediaThumbnail (above ChatBubble) | `messages.media_urls`, `messages.hasAttachment`, `messages.attachmentUrl` | Storage upload | Twilio, Meta, Email |
 | Assign to team | Message Actions Sheet | `message_threads.assigned_to` | `assign-thread` | N/A |
 | Archive | Message Actions Sheet, Swipe Actions | `message_threads.archived` | `archive-thread` | N/A |
 | Read receipts | Thread View | `messages.read_status` | `mark-read-status` | Provider-dependent |
-| **Batch operations** *(v2.5.1)* | Multi-select mode with action bar | Various tables | `batch-archive`, `batch-delete`, `batch-assign` | N/A |
 | **Offline sync queue** *(v2.5.1)* | Offline Banner, Sync Status | `offline_sync_queue` | Client-side with background sync | N/A |
 
 ### Component Mappings
@@ -79,6 +81,11 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 | 1 | InboxThread | ReadReceiptIcon | `messages.read_status` | Check marks for read status |
 | 1 | InboxThread | MessageReactionBar *(v2.5.1)* | `message_reactions` | Inline reaction picker |
 | 1 | InboxThread | SmartReplySuggestions *(v2.5.1)* | `ai_interactions.smart_replies` | AI-suggested quick replies |
+| 1 | InboxThread | MediaThumbnail *(v2.5.1)* | `messages.hasAttachment`, `messages.attachmentUrl` | Attachment thumbnail above message bubble |
+| 1 | InboxThread | MissedCallNotification *(v2.5.1)* | `missed_calls` | Inline missed call notification |
+| 1 | InboxListView | PriorityBadge *(v2.5.1)* | `message_threads.priority` | Priority indicator (High/Medium/Low) |
+| 1 | InboxListView | ConversationPreviewSheet *(v2.5.1)* | `message_threads`, `messages` | Long-press preview sheet |
+| 1 | InboxThread | OfflineBanner *(v2.5.1)* | `offline_sync_queue` | Offline status and queued count |
 | 1 | ComposeSheet | Toast | N/A | Success/error feedback |
 | 1 | ComposeSheet | ScheduleButton *(v2.5.1)* | `scheduled_messages` | Schedule for later |
 | 1 | MessageSearch | SearchBar | Full-text search | Global search input |
@@ -97,8 +104,17 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 | **Smart reply suggestions** *(v2.5.1)* | AI Reply Suggestions | `ai_interactions.smart_replies` | `ai-suggest-replies` | OpenAI |
 | Missed call text-back | Call Transcript View | `call_transcriptions` | `send-missed-call-text` | Twilio |
 | FAQ responses | FAQ Management Screen | `ai_faqs` | `match-faq` | OpenAI (optional) |
-| Booking assistance | AI auto-reply inline | `ai_interactions` | `ai-auto-reply` (with booking logic) | OpenAI |
-| Lead qualification | AI auto-reply inline | `ai_interactions` | `ai-auto-reply` | OpenAI |
+| Booking assistance | BookingAssistanceConfigSheet | `ai_config.booking_assistance_enabled` | `update-ai-config` | OpenAI |
+| Lead qualification | LeadQualificationConfigSheet | `ai_config.lead_qualification_enabled`, `lead_qualification_fields` | `update-ai-config` | OpenAI |
+| Smart handover | SmartHandoverConfigSheet | `ai_config.smart_handover_enabled`, `handover_triggers` | `update-ai-config` | N/A |
+| Response delay | ResponseDelayConfigSheet | `ai_config.response_delay_seconds` | `update-ai-config` | N/A |
+| Confidence threshold | ConfidenceThresholdConfigSheet | `ai_config.min_confidence_threshold` | `update-ai-config` | N/A |
+| Fallback response | FallbackResponseConfigSheet | `ai_config.fallback_response` | `update-ai-config` | N/A |
+| Multi-language support | MultiLanguageConfigSheet | `ai_config.supported_languages` | `update-ai-config` | N/A |
+| Custom response override | CustomResponseOverrideSheet | `ai_response_overrides` | `create-response-override`, `update-response-override` | N/A |
+| Escalation rules | EscalationRulesConfigSheet | `ai_config.escalation_keywords`, `ai_interactions.escalation_reason` | `update-ai-config` | N/A |
+| Two-way confirmations | Toggle in AIConfigurationScreen | `ai_config.two_way_confirmations_enabled` | `update-ai-config` | N/A |
+| Context retention | Toggle in AIConfigurationScreen | `ai_config.context_retention_enabled`, `ai_interactions.context_retained` | `update-ai-config` | N/A |
 | Tone customization | AI Tone Selector Sheet | `ai_config.tone` | `update-ai-config` | N/A |
 | Call transcription | Call Transcript View | `call_transcriptions` | `ai-transcribe-call` | OpenAI Whisper |
 | Business hours config | Business Hours Editor | `ai_config.business_hours` | `update-ai-config` | N/A |
@@ -117,6 +133,17 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 | 2 | AIAnalyticsDashboard *(v2.5.1)* | Chart widgets | `ai_performance_metrics` | Trends, patterns, insights |
 | 2 | ToneSelector | SegmentedControl | `ai_config.tone` | Professional/Friendly/Casual |
 | 2 | CallTranscript | LoadingSpinner | N/A | "Transcribing..." |
+| 2 | AIConfiguration | BookingAssistanceConfigSheet | `ai_config.booking_assistance_enabled` | Booking assistance toggle and config |
+| 2 | AIConfiguration | LeadQualificationConfigSheet | `ai_config.lead_qualification_enabled` | Lead qualification fields selector |
+| 2 | AIConfiguration | SmartHandoverConfigSheet | `ai_config.smart_handover_enabled` | Handover trigger configuration |
+| 2 | AIConfiguration | ResponseDelayConfigSheet | `ai_config.response_delay_seconds` | Response delay selection |
+| 2 | AIConfiguration | ConfidenceThresholdConfigSheet | `ai_config.min_confidence_threshold` | Confidence threshold slider |
+| 2 | AIConfiguration | FallbackResponseConfigSheet | `ai_config.fallback_response` | Fallback message editor |
+| 2 | AIConfiguration | MultiLanguageConfigSheet | `ai_config.supported_languages` | Language selection chips |
+| 2 | AIConfiguration | CustomResponseOverrideSheet | `ai_response_overrides` | Keyword/response override editor |
+| 2 | AIConfiguration | EscalationRulesConfigSheet | `ai_config.escalation_keywords` | Escalation rule selector |
+| 2 | AIConfiguration | Switch (Two-Way Confirmations) | `ai_config.two_way_confirmations_enabled` | Toggle for YES/NO handling |
+| 2 | AIConfiguration | Switch (Context Retention) | `ai_config.context_retention_enabled` | Toggle for conversation memory |
 
 ---
 
@@ -125,6 +152,11 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 | Product Feature | UI Surfaces | Backend Tables | Edge Functions | External APIs |
 |-----------------|-------------|----------------|----------------|---------------|
 | Job list | JobsListView | `jobs` | Direct read, `create-job`, `update-job` | N/A |
+| **Job list - Kanban view** *(v2.5.1)* | Jobs Kanban View (toggle in JobsScreen) | `jobs` grouped by status | Direct read, `update-job` (status change) | N/A |
+| **Job list - Calendar view** *(v2.5.1)* | CalendarScreen (jobs displayed alongside bookings) | `jobs` WHERE `start_time` | Direct read | N/A |
+| **Job Creation - From Inbox** *(v2.5.1)* | MessageComposerBar (Create Job button), InboxThreadScreen | `jobs`, `message_threads` | `create-job` | N/A |
+| **Job Creation - From Booking** *(v2.5.1)* | BookingDetailScreen (Create Job menu option) | `jobs`, `bookings` | `create-job` | N/A |
+| **Job Creation - AI Extract** *(v2.5.1)* | MessageComposerBar (AI Extract button), InboxThreadScreen | `jobs`, `messages`, `message_threads` | `ai-summarize-job` | OpenAI |
 | **Job templates** *(v2.5.1)* | Job Template Selector | `job_templates` | `create-job-from-template` | N/A |
 | **Custom fields** *(v2.5.1)* | Job Detail Custom Fields Section | `custom_fields`, `custom_field_values` | Direct CRUD | N/A |
 | Job detail | JobDetailView | `jobs` by id + timeline | Direct read/update | N/A |
@@ -138,7 +170,6 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 | Link invoice to job | Link Invoice to Job | `invoices.job_id` | Direct update | N/A |
 | Job search & filter | Job Search & Filter | `jobs` WHERE filters | Direct read | N/A |
 | Job export | Job Export Sheet | `jobs` | `export-jobs` | N/A |
-| **Batch operations** *(v2.5.1)* | Multi-select action bar | `jobs` | `batch-update-status`, `batch-assign` | N/A |
 
 ### Component Mappings
 
@@ -169,13 +200,34 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 | 2-way confirmation | Booking Confirmation Sheet | `bookings.confirmation_status`, `booking_reminders` | `send-booking-confirmation`, `process-booking-confirmation-reply` | Twilio, Email |
 | Deposit tracking | Deposit Requirement Sheet | `bookings.deposit_required`, `deposit_paid` | Direct update | Stripe (if online) |
 | Reminders (T-24h, T-2h) | Reminder Settings Screen | `booking_reminders` | `send-booking-reminder` (cron) | Twilio, Email, OneSignal |
-| Google Calendar sync | Auto-sync | `bookings.google_calendar_event_id` | `sync-google-calendar` (cron + real-time) | Google Calendar API |
-| Apple Calendar sync | Auto-sync | `bookings.apple_calendar_event_id` | `sync-apple-calendar` | EventKit |
+| Google Calendar sync *(Requires Backend)* | Auto-sync | `bookings.google_calendar_event_id` | `sync-google-calendar` (cron + real-time) *(Requires backend integration)* | Google Calendar API |
+| Apple Calendar sync *(Requires Backend)* | Auto-sync | `bookings.apple_calendar_event_id` | `sync-apple-calendar` *(Requires backend integration)* | EventKit |
+| Blocked time/time off | BlockedTimeScreen | `blocked_time` | Direct CRUD | N/A |
+| Travel time calculation | ServiceEditorScreen | `services.travel_time_minutes` | Direct update | N/A |
+| Service-specific availability | ServiceEditorScreen | `services.service_specific_availability`, `services.available_days` | Direct update | N/A |
+| Waitlist | CreateEditBookingScreen | `bookings.on_waitlist` | Direct update | N/A |
+| Calendar invite (.ics) | BookingDetailScreen | Edge function | `generate-calendar-invite` | N/A |
+| Cancellation policy reminder | BookingDetailScreen | Settings/stored policy | Display only | N/A |
+| Round-robin assignment | CreateEditBookingScreen | `bookings.assignment_method` | Direct update | N/A |
+| Skill-based assignment | CreateEditBookingScreen | `bookings.assignment_method` | Direct update | N/A |
+| No-show rate tracking | BookingDetailScreen | `no_show_tracking` | Direct read/update | N/A |
+| Flag high-risk clients | BookingDetailScreen | `no_show_tracking.is_high_risk` | Auto-calculated | N/A |
+| Automated follow-up for no-shows | BookingDetailScreen | `no_show_tracking` | `send-follow-up-no-show` | Twilio, Email |
+| No-show fee invoicing | BookingDetailScreen | `no_show_tracking`, `invoices` | `create-no-show-invoice` | Stripe (if online) |
 | AI availability suggestions | AI Availability Suggestions View | Analyzed bookings | `ai-suggest-availability` | OpenAI |
 | Cancel booking | Cancel Booking Modal | `bookings.status` | `cancel-booking` | Google Calendar, EventKit |
 | Complete booking | Complete Booking Modal | `bookings.status` | `complete-booking` | N/A (triggers review request) |
 | One-tap 'On My Way' ETA messages | Job Detail Screen (CTA) | `bookings.on_my_way_status`, `eta_minutes` | `send-on-my-way`, `generate-live-eta`, `stop-location-sharing` | Google Maps / Apple Maps APIs |
 | **Batch reschedule** *(v2.5.1)* | Multi-select action bar | `bookings` | `batch-reschedule-bookings` | Google Calendar, EventKit |
+| **Booking Templates** *(v2.5.1)* | BookingTemplatesScreen, CreateEditBookingScreen | `booking_templates` (local storage / table) | Direct CRUD | N/A |
+| **Booking Analytics** *(v2.5.1)* | BookingAnalyticsScreen | `bookings` (aggregated) | Direct read (analytics queries) | N/A |
+| **Capacity Optimization** *(v2.5.1)* | CapacityOptimizationScreen | `bookings` (utilization calculations) | Direct read (utilization queries) | N/A |
+| **Resource Management** *(v2.5.1)* | ResourceManagementScreen | `resources` (equipment/rooms) | Direct CRUD | N/A |
+| **Weather Integration** *(v2.5.1)* | BookingDetailScreen | Weather API (mock for now) | Direct read | Weather API (future) |
+| **Swipe Booking Actions** *(v2.5.1)* | BookingCard | `bookings.status` | `update-booking` | N/A |
+| **Pinch-to-Zoom Calendar** *(v2.5.1)* | CalendarScreen | Calendar view toggle | Direct state update | N/A |
+| **Buffer Time Management** *(v2.5.1)* | CreateEditBookingScreen, CalendarScreen (booking list) | `bookings`, buffer time calculation | Direct update (conflict detection includes buffer) | N/A |
+| **Quick Reschedule (Drag-and-Drop)** *(v2.5.1)* | CalendarScreen (day view) | `bookings` | `update-booking` | N/A |
 
 ### Component Mappings
 
@@ -190,6 +242,20 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 | 4 | BookingReminders | SegmentedControl | `booking_reminders` | T-24h / T-2h toggle |
 | 4 | OnMyWay | ProgressBar | `eta_minutes` | ETA countdown |
 | 4 | OnMyWay | InfoBanner | N/A | Location sharing active notice |
+| 4 | BookingTemplatesScreen *(v2.5.1)* | EmptyStateCard | N/A | "No templates yet" |
+| 4 | BookingTemplatesScreen *(v2.5.1)* | FrostedContainer | `booking_templates` | Template card |
+| 4 | BookingAnalyticsScreen *(v2.5.1)* | fl_chart (PieChart) | `bookings` | Booking sources chart |
+| 4 | BookingAnalyticsScreen *(v2.5.1)* | fl_chart (BarChart) | `bookings` | Peak times chart |
+| 4 | CapacityOptimizationScreen *(v2.5.1)* | fl_chart (BarChart) | `bookings` | Daily utilization chart |
+| 4 | CapacityOptimizationScreen *(v2.5.1)* | CircularProgressIndicator | `bookings` | Overall utilization |
+| 4 | ResourceManagementScreen *(v2.5.1)* | SegmentedButton | N/A | Category filter (All/Equipment/Rooms) |
+| 4 | ResourceManagementScreen *(v2.5.1)* | StatusBadge | `resources.status` | Available/In Use/Maintenance |
+| 4 | BookingDetailScreen *(v2.5.1)* | WeatherForecastCard | Weather API | Temperature, condition, precipitation |
+| 4 | BookingCard *(v2.5.1)* | Dismissible | `bookings.status` | Swipe gestures for status change |
+| 4 | CalendarScreen *(v2.5.1)* | GestureDetector | Calendar view state | Pinch-to-zoom gesture |
+| 4 | CreateEditBookingScreen *(v2.5.1)* | InfoBanner, Switch, IconButton | Buffer time calculation | Buffer time toggle and adjustable minutes (0-60min) |
+| 4 | CalendarScreen *(v2.5.1)* | Draggable, DragTarget | `bookings` | Drag-and-drop rescheduling in day view |
+| 4 | CalendarScreen *(v2.5.1)* | Container (buffer indicator) | Buffer time calculation | Visual buffer time indicators between bookings in list |
 
 ---
 
@@ -345,7 +411,6 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 | Team calendar | Team Calendar View | `bookings` WHERE team | Direct read | N/A |
 | Workload view | Workload Dashboard | `jobs`, `bookings` aggregated by user | `calculate-team-workload` | N/A |
 | Performance tracking | Team Performance View | `team_performance_metrics` | `calculate-team-performance` (cron daily) | N/A |
-| Time tracking | Time Tracking View | `time_entries` | Direct CRUD | N/A |
 | **Enhanced analytics** *(v2.5.1)* | Team Analytics Dashboard | `team_performance_metrics`, `user_analytics` | `calculate-team-analytics` | N/A |
 
 ### Component Mappings
@@ -572,7 +637,6 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 | **Activity Feed** | Contact timelines, home | `activity_feed`, `contact_timeline` | Auto-populated via triggers | Unified activity tracking |
 | **Custom Fields** *(v2.5.1)* | Dynamic form sections | `custom_fields`, `custom_field_values` | Direct CRUD | Configurable entity fields |
 | **Templates** *(v2.5.1)* | Template selectors | `job_templates`, `quote_templates`, `invoice_templates`, `campaign_templates`, `workflow_templates` | Various create-from-template functions | Reusable content templates |
-| **Batch Operations** *(v2.5.1)* | Multi-select action bars | Various tables | `batch-*` functions | Bulk actions on multiple items |
 | **Analytics** *(v2.5.1)* | Dashboard widgets | `dashboard_metrics`, `kpi_trends`, various aggregations | Various calculate-* functions | Advanced metrics and insights |
 
 ---
@@ -599,7 +663,6 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 - Message reactions (emoji-style)
 - Smart reply suggestions (AI-powered)
 - Offline sync queue with status viewer
-- Batch operations (archive, delete, assign)
 
 ### AI & Intelligence
 - AI confidence tracking and scoring
@@ -610,7 +673,6 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 ### Data Management
 - Custom fields for jobs, contacts, and other entities
 - Template system (jobs, quotes, invoices, campaigns, workflows)
-- Batch operations across all modules
 - Contact segmentation builder
 
 ### Analytics & Reporting
@@ -702,7 +764,6 @@ All interactive elements meet WCAG AA standards with proper focus indicators, se
 2. **Template System**: Unified template architecture across jobs, quotes, invoices, campaigns, workflows
 3. **Custom Fields**: Flexible custom field system for extensibility
 4. **Enhanced Analytics**: Advanced metrics, KPIs, and AI-powered insights across all modules
-5. **Batch Operations**: Multi-select and bulk actions throughout the application
 6. **Offline Support**: Comprehensive offline sync queue system
 7. **Accessibility**: WCAG AA compliance with focus indicators, semantic labels, proper contrast
 8. **State Management**: Comprehensive loading, empty, and error states for all screens

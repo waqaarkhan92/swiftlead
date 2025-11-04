@@ -18,11 +18,20 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
   bool _remindersEnabled = true;
   bool _clientRemindersEnabled = true;
   bool _teamRemindersEnabled = true;
+  bool _includeInstructions = true; // Include preparation instructions in reminders
   
   // Client reminder times
   List<int> _clientReminderTimes = [24, 2]; // 24h and 2h before
   // Team reminder times
   List<int> _teamReminderTimes = [24, 2, 15]; // 24h, 2h, and 15min before
+  
+  final TextEditingController _instructionsController = TextEditingController();
+
+  @override
+  void dispose() {
+    _instructionsController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -235,12 +244,77 @@ class _ReminderSettingsScreenState extends State<ReminderSettingsScreen> {
             ),
             const SizedBox(height: SwiftleadTokens.spaceL),
 
+            // Instructions in Reminders
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Include Instructions',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Switch(
+                        value: _includeInstructions,
+                        onChanged: (value) {
+                          setState(() {
+                            _includeInstructions = value;
+                          });
+                        },
+                        activeTrackColor: const Color(SwiftleadTokens.primaryTeal),
+                      ),
+                    ],
+                  ),
+                  if (_includeInstructions) ...[
+                    const SizedBox(height: SwiftleadTokens.spaceM),
+                    Text(
+                      'Preparation Instructions',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: SwiftleadTokens.spaceS),
+                    TextField(
+                      controller: _instructionsController,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: 'Enter preparation instructions to include in reminders...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
             // Save Button
             PrimaryButton(
               label: 'Save Settings',
-              onPressed: () {
-                // TODO: Save reminder settings
-                Navigator.pop(context);
+              onPressed: () async {
+                // Simulate saving reminder settings (mock implementation)
+                // In production, this would save to API
+                await Future.delayed(const Duration(milliseconds: 500));
+                
+                if (mounted) {
+                  // Show success toast
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Reminder settings saved successfully'),
+                      backgroundColor: const Color(SwiftleadTokens.successGreen),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                  
+                  Navigator.pop(context);
+                }
               },
               icon: Icons.check,
             ),

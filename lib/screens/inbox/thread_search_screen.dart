@@ -33,6 +33,7 @@ class _ThreadSearchScreenState extends State<ThreadSearchScreen> {
   bool _isSearching = false;
   List<msg_model.Message> _searchResults = [];
   List<msg_model.Message> _allMessages = [];
+  String _currentQuery = '';
 
   @override
   void initState() {
@@ -69,6 +70,7 @@ class _ThreadSearchScreenState extends State<ThreadSearchScreen> {
       _searchResults = _allMessages.where((message) {
         return message.content.toLowerCase().contains(query.toLowerCase());
       }).toList();
+      _currentQuery = query; // Store query for highlighting
     });
   }
 
@@ -228,9 +230,8 @@ class _ThreadSearchScreenState extends State<ThreadSearchScreen> {
         
         items.add(Padding(
           padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
-          child: chat_bubble.ChatBubble(
-            message: message.content,
-            type: message.isInbound ? chat_bubble.BubbleType.inbound : chat_bubble.BubbleType.outbound,
+          child: _buildHighlightedMessageBubble(
+            message: message,
             timestamp: timestampStr,
             status: bubbleStatus,
           ),
@@ -241,6 +242,190 @@ class _ThreadSearchScreenState extends State<ThreadSearchScreen> {
     return ListView(
       padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       children: items,
+    );
+  }
+  
+  /// Build a message bubble with highlighted search matches
+  Widget _buildHighlightedMessageBubble({
+    required msg_model.Message message,
+    required String timestamp,
+    chat_bubble.MessageStatus? status,
+  }) {
+    final isOutbound = !message.isInbound;
+    final brightness = Theme.of(context).brightness;
+    
+    // Build highlighted text if there's a search query
+    Widget messageText;
+    if (_currentQuery.isNotEmpty) {
+      messageText = _buildHighlightedText(
+        text: message.content,
+        query: _currentQuery,
+        isOutbound: isOutbound,
+      );
+    } else {
+      messageText = Text(
+        message.content,
+        style: TextStyle(
+          color: isOutbound
+              ? Colors.white
+              : Theme.of(context).textTheme.bodyLarge?.color,
+          fontSize: 14,
+        ),
+      );
+    }
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SwiftleadTokens.spaceM,
+        vertical: SwiftleadTokens.spaceS,
+      ),
+      child: Row(
+        mainAxisAlignment: isOutbound
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                color: isOutbound
+                    ? const LinearGradient(
+                        colors: [
+                          Color(SwiftleadTokens.primaryTeal),
+                          Color(SwiftleadTokens.accentAqua),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ).colors.first
+                    : (brightness == Brightness.light
+                        ? Colors.black.withOpacity(0.08)
+                        : Colors.white.withOpacity(0.12)),
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(22),
+                  topRight: const Radius.circular(22),
+                  bottomLeft: Radius.circular(isOutbound ? 22 : 4),
+                  bottomRight: Radius.circular(isOutbound ? 4 : 22),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  messageText,
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        timestamp,
+                        style: TextStyle(
+                          color: isOutbound
+                              ? Colors.white.withOpacity(0.7)
+                              : Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+                          fontSize: 11,
+                        ),
+                      ),
+                      if (status != null && isOutbound) ...[
+                        const SizedBox(width: 4),
+                        Icon(
+                          status == chat_bubble.MessageStatus.read
+                              ? Icons.done_all
+                              : status == chat_bubble.MessageStatus.delivered
+                                  ? Icons.done_all
+                                  : Icons.done,
+                          size: 12,
+                          color: status == chat_bubble.MessageStatus.read
+                              ? Colors.blue
+                              : Colors.white.withOpacity(0.7),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  /// Build RichText with highlighted search matches
+  Widget _buildHighlightedText({
+    required String text,
+    required String query,
+    required bool isOutbound,
+  }) {
+    if (query.isEmpty) {
+      return Text(
+        text,
+        style: TextStyle(
+          color: isOutbound
+              ? Colors.white
+              : Theme.of(context).textTheme.bodyLarge?.color,
+          fontSize: 14,
+        ),
+      );
+    }
+    
+    final queryLower = query.toLowerCase();
+    final textLower = text.toLowerCase();
+    final spans = <TextSpan>[];
+    int lastIndex = 0;
+    
+    // Find all matches (case-insensitive)
+    int index = textLower.indexOf(queryLower, lastIndex);
+    while (index != -1) {
+      // Add text before match
+      if (index > lastIndex) {
+        spans.add(TextSpan(
+          text: text.substring(lastIndex, index),
+          style: TextStyle(
+            color: isOutbound
+                ? Colors.white
+                : Theme.of(context).textTheme.bodyLarge?.color,
+            fontSize: 14,
+          ),
+        ));
+      }
+      
+      // Add highlighted match
+      spans.add(TextSpan(
+        text: text.substring(index, index + query.length),
+        style: TextStyle(
+          color: isOutbound
+              ? Colors.white
+              : Theme.of(context).textTheme.bodyLarge?.color,
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          backgroundColor: isOutbound
+              ? Colors.white.withOpacity(0.3)
+              : const Color(SwiftleadTokens.warningYellow).withOpacity(0.4),
+        ),
+      ));
+      
+      lastIndex = index + query.length;
+      index = textLower.indexOf(queryLower, lastIndex);
+    }
+    
+    // Add remaining text
+    if (lastIndex < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(lastIndex),
+        style: TextStyle(
+          color: isOutbound
+              ? Colors.white
+              : Theme.of(context).textTheme.bodyLarge?.color,
+          fontSize: 14,
+        ),
+      ));
+    }
+    
+    return RichText(
+      text: TextSpan(children: spans),
     );
   }
 }

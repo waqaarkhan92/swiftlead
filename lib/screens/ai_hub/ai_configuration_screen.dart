@@ -6,6 +6,15 @@ import '../../widgets/forms/ai_tone_selector_sheet.dart';
 import '../../widgets/forms/business_hours_editor_sheet.dart';
 import '../../widgets/forms/auto_reply_template_editor_sheet.dart';
 import '../../widgets/forms/after_hours_response_editor_sheet.dart';
+import '../../widgets/forms/booking_assistance_config_sheet.dart';
+import '../../widgets/forms/lead_qualification_config_sheet.dart';
+import '../../widgets/forms/smart_handover_config_sheet.dart';
+import '../../widgets/forms/response_delay_config_sheet.dart';
+import '../../widgets/forms/fallback_response_config_sheet.dart';
+import '../../widgets/forms/multi_language_config_sheet.dart';
+import '../../widgets/forms/confidence_threshold_config_sheet.dart';
+import '../../widgets/forms/custom_response_override_sheet.dart';
+import '../../widgets/forms/escalation_rules_config_sheet.dart';
 import '../../widgets/components/ai_response_preview_sheet.dart';
 import '../../theme/tokens.dart';
 
@@ -23,8 +32,15 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
   bool _autoReplyEnabled = false;
   bool _sentimentAnalysisEnabled = true;
   bool _smartSuggestionsEnabled = true;
+  bool _bookingAssistanceEnabled = false;
+  bool _leadQualificationEnabled = false;
+  bool _smartHandoverEnabled = false;
+  bool _contextRetentionEnabled = true;
+  bool _twoWayConfirmationsEnabled = true;
   String _selectedTone = 'Professional';
   String _businessHours = 'Mon-Fri, 9:00-17:00';
+  int _responseDelaySeconds = 0;
+  double _confidenceThreshold = 0.7;
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +105,7 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
                         ),
                       ),
                       Text(
-                        'Automatically respond to messages',
+                        'Automatically respond to messages (Note: Backend verification needed once backend is wired)',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -348,6 +364,413 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
                     const Icon(Icons.chevron_right),
                   ],
                 ),
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Booking Assistance
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Booking Assistance',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          'AI offers available time slots automatically',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: _bookingAssistanceEnabled,
+                    onChanged: (value) {
+                      setState(() {
+                        _bookingAssistanceEnabled = value;
+                      });
+                      if (value) {
+                        BookingAssistanceConfigSheet.show(
+                          context: context,
+                          initialEnabled: value,
+                        );
+                      }
+                    },
+                    activeTrackColor: const Color(SwiftleadTokens.primaryTeal),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Lead Qualification
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Lead Qualification',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          'Collect info before handover',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: _leadQualificationEnabled,
+                    onChanged: (value) {
+                      setState(() {
+                        _leadQualificationEnabled = value;
+                      });
+                      LeadQualificationConfigSheet.show(
+                        context: context,
+                        initialEnabled: value,
+                      );
+                    },
+                    activeTrackColor: const Color(SwiftleadTokens.primaryTeal),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Smart Handover
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Smart Handover',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          'Transfer with full context',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: _smartHandoverEnabled,
+                    onChanged: (value) {
+                      setState(() {
+                        _smartHandoverEnabled = value;
+                      });
+                      SmartHandoverConfigSheet.show(
+                        context: context,
+                        initialEnabled: value,
+                      );
+                    },
+                    activeTrackColor: const Color(SwiftleadTokens.primaryTeal),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Response Delay
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: InkWell(
+                onTap: () async {
+                  final delay = await ResponseDelayConfigSheet.show(
+                    context: context,
+                    initialDelaySeconds: _responseDelaySeconds,
+                  );
+                  if (delay != null) {
+                    setState(() {
+                      _responseDelaySeconds = delay;
+                    });
+                  }
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Response Delay',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          _responseDelaySeconds == 0 
+                              ? 'Instant'
+                              : _responseDelaySeconds < 60
+                                  ? '${_responseDelaySeconds}s'
+                                  : '${_responseDelaySeconds ~/ 60}m',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Confidence Threshold
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: InkWell(
+                onTap: () async {
+                  final threshold = await ConfidenceThresholdConfigSheet.show(
+                    context: context,
+                    initialThreshold: _confidenceThreshold,
+                  );
+                  if (threshold != null) {
+                    setState(() {
+                      _confidenceThreshold = threshold;
+                    });
+                  }
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Confidence Threshold',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          '${(_confidenceThreshold * 100).toStringAsFixed(0)}% minimum',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Fallback Response
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: InkWell(
+                onTap: () async {
+                  await FallbackResponseConfigSheet.show(context: context);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Fallback Response',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          'When AI is uncertain',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Multi-Language Support
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: InkWell(
+                onTap: () async {
+                  await MultiLanguageConfigSheet.show(context: context);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Supported Languages',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          'Detect and respond in client language',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Custom Response Override
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: InkWell(
+                onTap: () async {
+                  await CustomResponseOverrideSheet.show(context: context);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Custom Response Override',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          'Set responses for keywords',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Escalation Rules
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: InkWell(
+                onTap: () async {
+                  await EscalationRulesConfigSheet.show(context: context);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Escalation Rules',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          'Configure handover triggers',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Two-Way Confirmations
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Two-Way Confirmations',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        'Handle YES/NO responses automatically',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                  Switch(
+                    value: _twoWayConfirmationsEnabled,
+                    onChanged: (value) {
+                      setState(() {
+                        _twoWayConfirmationsEnabled = value;
+                      });
+                    },
+                    activeTrackColor: const Color(SwiftleadTokens.primaryTeal),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Context Retention
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Context Retention',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        'AI remembers previous conversations',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                  Switch(
+                    value: _contextRetentionEnabled,
+                    onChanged: (value) {
+                      setState(() {
+                        _contextRetentionEnabled = value;
+                      });
+                    },
+                    activeTrackColor: const Color(SwiftleadTokens.primaryTeal),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),

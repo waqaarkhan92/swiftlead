@@ -23,6 +23,8 @@ import '../../widgets/global/context_menu.dart';
 import '../../widgets/components/internal_notes_modal.dart';
 import '../../widgets/forms/thread_assignment_sheet.dart';
 import '../../widgets/global/confirmation_dialog.dart';
+import '../../widgets/components/conversation_preview_sheet.dart';
+import '../../widgets/components/priority_badge.dart';
 import 'scheduled_messages_screen.dart';
 import '../main_navigation.dart' as main_nav;
 
@@ -98,12 +100,30 @@ class _InboxScreenState extends State<InboxScreen> {
       }
     }
 
-    // Sort: Pinned → Unread → Recent
+    // Sort: Pinned → Priority (High → Medium → Low) → Unread → Recent
     _filteredThreads.sort((a, b) {
+      // Pinned first
       if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
+      
+      // Then by priority (High → Medium → Low → null)
+      final priorityOrder = {
+        ThreadPriority.high: 0,
+        ThreadPriority.medium: 1,
+        ThreadPriority.low: 2,
+        null: 3,
+      };
+      final aPriorityOrder = priorityOrder[a.priority] ?? 3;
+      final bPriorityOrder = priorityOrder[b.priority] ?? 3;
+      if (aPriorityOrder != bPriorityOrder) {
+        return aPriorityOrder.compareTo(bPriorityOrder);
+      }
+      
+      // Then unread
       if (a.unreadCount > 0 != b.unreadCount > 0) {
         return a.unreadCount > 0 ? -1 : 1;
       }
+      
+      // Finally by recency
       return b.lastMessageTime.compareTo(a.lastMessageTime);
     });
   }
@@ -112,7 +132,7 @@ class _InboxScreenState extends State<InboxScreen> {
     _filteredThreads = List.from(_threads);
 
     // Channel filter
-    if (!filters.channelFilters.contains('All')) {
+    if (!filters.channelFilters.contains('All') && filters.channelFilters.isNotEmpty) {
       final channelMap = {
         'SMS': MessageChannel.sms,
         'WhatsApp': MessageChannel.whatsapp,
@@ -128,13 +148,17 @@ class _InboxScreenState extends State<InboxScreen> {
       }).toList();
     }
 
-    // Status filter
-    if (!filters.statusFilters.contains('All')) {
+    // Status filter - OR logic: show threads that match ANY selected status
+    if (!filters.statusFilters.contains('All') && filters.statusFilters.isNotEmpty) {
       _filteredThreads = _filteredThreads.where((thread) {
+        // Check if thread matches any of the selected status filters
         if (filters.statusFilters.contains('Unread') && thread.unreadCount > 0) return true;
         if (filters.statusFilters.contains('Read') && thread.unreadCount == 0) return true;
         if (filters.statusFilters.contains('Pinned') && thread.isPinned) return true;
-        // Archived would need to be tracked in the model
+        if (filters.statusFilters.contains('Archived')) {
+          // Check if archived (would need archived tracking in model)
+          // For now, skip archived filter
+        }
         return false;
       }).toList();
     }
@@ -149,7 +173,9 @@ class _InboxScreenState extends State<InboxScreen> {
           startDate = DateTime(now.year, now.month, now.day);
           break;
         case 'This Week':
-          startDate = now.subtract(Duration(days: now.weekday - 1));
+          // Start of current week (Monday)
+          final daysFromMonday = now.weekday - 1;
+          startDate = DateTime(now.year, now.month, now.day).subtract(Duration(days: daysFromMonday));
           break;
         case 'This Month':
           startDate = DateTime(now.year, now.month, 1);
@@ -168,12 +194,62 @@ class _InboxScreenState extends State<InboxScreen> {
       }
     }
 
-    // Sort: Pinned → Unread → Recent
+    // Priority filter - OR logic: show threads that match ANY selected priority
+    if (!filters.priorityFilters.contains('All') && filters.priorityFilters.isNotEmpty) {
+      _filteredThreads = _filteredThreads.where((thread) {
+        if (thread.priority == null) return false;
+        final priorityName = thread.priority!.name.substring(0, 1).toUpperCase() + 
+                           thread.priority!.name.substring(1);
+        return filters.priorityFilters.contains(priorityName);
+      }).toList();
+    }
+
+    // Lead Source filter (Marketing Attribution) - OR logic
+    if (!filters.leadSourceFilters.contains('All') && filters.leadSourceFilters.isNotEmpty) {
+      // Map filter strings to LeadSource enum values
+      final filterToLeadSource = {
+        'Google Ads': LeadSource.googleAds,
+        'Facebook Ads': LeadSource.facebookAds,
+        'Website': LeadSource.website,
+        'Referral': LeadSource.referral,
+        'Direct': LeadSource.direct,
+      };
+      
+      final selectedSources = filters.leadSourceFilters
+          .where((f) => filterToLeadSource.containsKey(f))
+          .map((f) => filterToLeadSource[f]!)
+          .toSet();
+      
+      _filteredThreads = _filteredThreads.where((thread) {
+        if (thread.leadSource == null) return false;
+        return selectedSources.contains(thread.leadSource);
+      }).toList();
+    }
+
+    // Sort: Pinned → Priority (High → Medium → Low) → Unread → Recent
     _filteredThreads.sort((a, b) {
+      // Pinned first
       if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
+      
+      // Then by priority (High → Medium → Low → null)
+      final priorityOrder = {
+        ThreadPriority.high: 0,
+        ThreadPriority.medium: 1,
+        ThreadPriority.low: 2,
+        null: 3,
+      };
+      final aPriorityOrder = priorityOrder[a.priority] ?? 3;
+      final bPriorityOrder = priorityOrder[b.priority] ?? 3;
+      if (aPriorityOrder != bPriorityOrder) {
+        return aPriorityOrder.compareTo(bPriorityOrder);
+      }
+      
+      // Then unread
       if (a.unreadCount > 0 != b.unreadCount > 0) {
         return a.unreadCount > 0 ? -1 : 1;
       }
+      
+      // Finally by recency
       return b.lastMessageTime.compareTo(a.lastMessageTime);
     });
   }
@@ -214,7 +290,15 @@ class _InboxScreenState extends State<InboxScreen> {
                     setState(() {
                       _currentFilters = filters;
                       _activeFilters = filters.activeFilterCount;
+                      // Apply filters inside setState to ensure UI updates
                       _applyAdvancedFilters(filters);
+                    });
+                  } else {
+                    // User cancelled - clear filters
+                    setState(() {
+                      _currentFilters = null;
+                      _activeFilters = 0;
+                      _applyFilter(); // Reapply default filter
                     });
                   }
                 },
@@ -738,10 +822,49 @@ class _InboxScreenState extends State<InboxScreen> {
             onLongPress: () {
               HapticFeedback.mediumImpact();
               if (!_isBatchMode) {
-                // Enter batch mode
-                setState(() {
-                  _isBatchMode = true;
-                  _selectedThreadIds = {thread.id};
+                // Show conversation preview (v2.5.1 enhancement)
+                ConversationPreviewSheet.show(
+                  context: context,
+                  thread: thread,
+                ).then((action) {
+                  if (action != null && mounted) {
+                    switch (action) {
+                      case 'open':
+                        // Open full conversation
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => InboxThreadScreen(
+                              contactName: thread.contactName,
+                              channel: thread.channel.displayName,
+                              contactId: thread.contactId,
+                              threadId: thread.id,
+                            ),
+                          ),
+                        );
+                        break;
+                      case 'view_contact':
+                        // View contact detail
+                        // TODO: Navigate to contact detail
+                        break;
+                      case 'archive':
+                        if (kUseMockData) {
+                          MockMessages.archiveThread(thread.id);
+                        } else {
+                          // TODO: Call archive-thread edge function
+                        }
+                        _loadMessages();
+                        break;
+                      case 'toggle_pin':
+                        if (thread.isPinned) {
+                          MockMessages.unpinThread(thread.id);
+                        } else {
+                          MockMessages.pinThread(thread.id);
+                        }
+                        _loadMessages();
+                        break;
+                    }
+                  }
                 });
               } else {
                 // Toggle selection in batch mode
@@ -823,6 +946,13 @@ class _InboxScreenState extends State<InboxScreen> {
                                 size: 14,
                                 color: Color(SwiftleadTokens.primaryTeal),
                               ),
+                            if (thread.priority != null) ...[
+                              const SizedBox(width: SwiftleadTokens.spaceXS),
+                              PriorityBadge(
+                                priority: thread.priority,
+                                compact: true,
+                              ),
+                            ],
                             if (isMuted) ...[
                               const SizedBox(width: SwiftleadTokens.spaceXS),
                               const Icon(
@@ -895,6 +1025,54 @@ class _InboxScreenState extends State<InboxScreen> {
     final isUnread = thread.unreadCount > 0;
     
     final menuItems = [
+      ContextMenuItem(
+        icon: Icons.preview_outlined,
+        label: 'Preview',
+        onTap: () {
+          Navigator.pop(context); // Close context menu first
+          ConversationPreviewSheet.show(
+            context: context,
+            thread: thread,
+          ).then((action) {
+            if (action != null && mounted) {
+              switch (action) {
+                case 'open':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => InboxThreadScreen(
+                        contactName: thread.contactName,
+                        channel: thread.channel.displayName,
+                        contactId: thread.contactId,
+                        threadId: thread.id,
+                      ),
+                    ),
+                  );
+                  break;
+                case 'view_contact':
+                  // TODO: Navigate to contact detail
+                  break;
+                case 'archive':
+                  if (kUseMockData) {
+                    MockMessages.archiveThread(thread.id);
+                  } else {
+                    // TODO: Call archive-thread edge function
+                  }
+                  _loadMessages();
+                  break;
+                case 'toggle_pin':
+                  if (thread.isPinned) {
+                    MockMessages.unpinThread(thread.id);
+                  } else {
+                    MockMessages.pinThread(thread.id);
+                  }
+                  _loadMessages();
+                  break;
+              }
+            }
+          });
+        },
+      ),
       ContextMenuItem(
         icon: isUnread ? Icons.mark_email_read : Icons.mark_email_unread,
         label: isUnread ? 'Mark as Read' : 'Mark as Unread',

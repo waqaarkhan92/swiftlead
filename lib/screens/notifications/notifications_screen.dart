@@ -5,6 +5,8 @@ import '../../widgets/global/empty_state_card.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/chip.dart';
 import '../../widgets/components/preference_grid.dart';
+import '../../widgets/components/grouped_notification_card.dart'
+    show NotificationData, NotificationGrouping;
 import '../../theme/tokens.dart';
 
 /// Notifications Screen - Notification preferences and center
@@ -87,7 +89,61 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Widget _buildCenterTab() {
-    final hasNotifications = true; // Replace with actual data check
+    // Mock notifications data with threadId for grouping
+    final notifications = [
+      NotificationData(
+        id: 'n1',
+        title: 'New message from John',
+        message: 'John sent you a WhatsApp message',
+        timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
+        isUnread: true,
+        type: 'message',
+        channel: 'push',
+        threadId: '1', // Same threadId = will be grouped
+      ),
+      NotificationData(
+        id: 'n2',
+        title: 'New message from John',
+        message: 'John sent you another message',
+        timestamp: DateTime.now().subtract(const Duration(minutes: 3)),
+        isUnread: true,
+        type: 'message',
+        channel: 'push',
+        threadId: '1', // Same threadId = grouped with n1
+      ),
+      NotificationData(
+        id: 'n3',
+        title: 'New message from Sarah',
+        message: 'Sarah sent you a WhatsApp message',
+        timestamp: DateTime.now().subtract(const Duration(minutes: 10)),
+        isUnread: true,
+        type: 'message',
+        channel: 'push',
+        threadId: '2', // Different threadId = separate group
+      ),
+      NotificationData(
+        id: 'n4',
+        title: 'Payment received',
+        message: '£500 payment received for Job #1234',
+        timestamp: DateTime.now().subtract(const Duration(hours: 1)),
+        isUnread: false,
+        type: 'payment',
+        channel: 'push',
+        threadId: null, // Not a message = ungrouped
+      ),
+      NotificationData(
+        id: 'n5',
+        title: 'Job completed',
+        message: 'Kitchen repair completed successfully',
+        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
+        isUnread: false,
+        type: 'job',
+        channel: 'push',
+        threadId: null, // Not a message = ungrouped
+      ),
+    ];
+
+    final hasNotifications = notifications.isNotEmpty;
 
     if (!hasNotifications) {
       return EmptyStateCard(
@@ -97,17 +153,41 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       );
     }
 
+    // Get contact names from threadId (mock lookup)
+    String? getContactName(String threadId) {
+      // In real app, this would look up from MessageThread or Contacts
+      switch (threadId) {
+        case '1':
+          return 'John Smith';
+        case '2':
+          return 'Sarah Williams';
+        default:
+          return 'Unknown';
+      }
+    }
+
     return ListView(
       padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-      children: List.generate(5, (index) => Padding(
-        padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
-        child: _NotificationCard(
-          title: _getNotificationTitle(index),
-          message: _getNotificationMessage(index),
-          time: _getNotificationTime(index),
-          isUnread: index < 2,
-        ),
-      )),
+      children: NotificationGrouping.buildGroupedNotifications(
+        notifications: notifications,
+        context: context,
+        getContactName: getContactName,
+        onTap: () {
+          // Navigate to relevant screen
+        },
+        onMarkRead: (notificationId) {
+          // Mark notification as read
+          setState(() {
+            // Update notification state
+          });
+        },
+        onArchive: (notificationId) {
+          // Archive notification
+          setState(() {
+            // Remove notification
+          });
+        },
+      ),
     );
   }
 

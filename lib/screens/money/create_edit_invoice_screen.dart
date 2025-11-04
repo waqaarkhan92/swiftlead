@@ -46,6 +46,8 @@ class _CreateEditInvoiceScreenState extends State<CreateEditInvoiceScreen> {
   DateTime? _dueDate;
   DateTime? _issueDate;
   double _taxRate = 20.0;
+  bool _attachJobPhotos = false; // Attach job photos to invoice
+  String? _linkedJobId; // Track linked job for photo attachment
   List<_InvoiceLineItem> _lineItems = [
     _InvoiceLineItem(description: '', quantity: 1, rate: 0.0),
   ];
@@ -60,6 +62,8 @@ class _CreateEditInvoiceScreenState extends State<CreateEditInvoiceScreen> {
       _clientController.text = widget.initialData!['clientName'] ?? '';
       _notesController.text = widget.initialData!['notes'] ?? '';
       _taxRate = widget.initialData!['taxRate']?.toDouble() ?? 20.0;
+      _attachJobPhotos = widget.initialData!['attachJobPhotos'] ?? false;
+      _linkedJobId = widget.initialData!['jobId'];
     }
   }
 
@@ -334,6 +338,44 @@ class _CreateEditInvoiceScreenState extends State<CreateEditInvoiceScreen> {
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
 
+            // Attach Job Photos (if creating from job)
+            if (_linkedJobId != null) ...[
+              FrostedContainer(
+                padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Attach Job Photos',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            'Include job photos with invoice',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: _attachJobPhotos,
+                      onChanged: (value) {
+                        setState(() {
+                          _attachJobPhotos = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+            ],
+            
             // Notes
             TextFormField(
               controller: _notesController,

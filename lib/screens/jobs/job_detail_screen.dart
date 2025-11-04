@@ -4,6 +4,7 @@ import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/components/progress_pill.dart';
 import '../../widgets/components/date_chip.dart';
 import '../../widgets/components/media_thumbnail.dart';
+import '../../widgets/components/media_preview_modal.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/components/segmented_control.dart';
 import '../../widgets/global/primary_button.dart';
@@ -12,6 +13,7 @@ import '../../widgets/global/bottom_sheet.dart';
 import '../../widgets/forms/job_assignment_sheet.dart';
 import '../../widgets/forms/job_export_sheet.dart';
 import '../../widgets/forms/media_upload_sheet.dart';
+import '../../widgets/forms/custom_field_editor_sheet.dart';
 import '../../widgets/global/confirmation_dialog.dart';
 import '../../widgets/components/chase_history_timeline.dart';
 import '../../widgets/global/info_banner.dart';
@@ -46,10 +48,14 @@ class JobDetailScreen extends StatefulWidget {
 
 class _JobDetailScreenState extends State<JobDetailScreen> {
   int _selectedTabIndex = 0;
-  final List<String> _tabs = ['Timeline', 'Details', 'Notes', 'Messages', 'Media', 'Chasers'];
+  final List<String> _primaryTabs = ['Timeline', 'Details', 'Notes'];
+  final List<String> _moreOptions = ['Messages', 'Media', 'Chasers'];
+  String? _selectedMoreOption;
   Job? _job;
   bool _isLoading = true;
   String? _error;
+  // Custom fields state
+  final Map<String, String> _customFields = {};
 
   @override
   void initState() {
@@ -162,10 +168,20 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   void _handleSendInvoiceFromJob() {
+    // Navigate to invoice creation with job context
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const CreateEditInvoiceScreen(),
+        builder: (context) => CreateEditInvoiceScreen(
+          initialData: {
+            'clientName': _job?.contactName ?? '',
+            'jobId': widget.jobId,
+            'jobTitle': widget.jobTitle,
+            'attachJobPhotos': true, // Default to true when creating from job
+            'notes': 'Invoice for ${widget.jobTitle}',
+            'contactId': _job?.contactId,
+          },
+        ),
       ),
     );
   }
@@ -232,6 +248,48 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         );
       }
     }
+  }
+
+  void _handleNavigateToAddress() async {
+    if (_job == null || _job!.address.isEmpty) return;
+    
+    // Open Maps app with address
+    final encodedAddress = Uri.encodeComponent(_job!.address);
+    final uri = Uri.parse('https://maps.google.com/maps?q=$encodedAddress');
+    
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        Toast.show(
+          context,
+          message: 'Cannot open maps',
+          type: ToastType.error,
+        );
+      }
+    }
+  }
+
+  void _handleSyncToCalendar() async {
+    if (_job == null || _job!.scheduledDate == null) return;
+    
+    // Note: Would use calendar integration package (e.g., add_to_calendar) in production
+    // For now, show a toast and note about backend verification
+    Toast.show(
+      context,
+      message: 'Calendar sync requires calendar integration package',
+      type: ToastType.info,
+    );
+    
+    // Example implementation with add_to_calendar package:
+    // final event = Event(
+    //   title: _job!.title,
+    //   description: _job!.description ?? '',
+    //   location: _job!.address,
+    //   startDate: _job!.scheduledDate!,
+    //   endDate: _job!.scheduledDate!.add(Duration(hours: 2)),
+    // );
+    // await AddToCalendar.addEvent2Cal(event);
   }
 
 
@@ -304,8 +362,19 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   JobAssignmentSheet.show(
                     context: context,
                     jobId: widget.jobId,
+                    currentAssigneeId: _job?.assignedTo,
+                    allowMultiSelect: true,
                     onAssigned: (memberId, memberName) {
-                      // Handle assignment
+                      // Handle single assignment
+                      setState(() {
+                        // Update job with single assignee
+                      });
+                    },
+                    onMultiAssigned: (memberIds, memberNames) {
+                      // Handle multi-member assignment
+                      setState(() {
+                        // Update job with multiple assignees
+                      });
                     },
                   );
                   break;
@@ -354,7 +423,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       body: Column(
         children: [
           // Scrollable header section
-          Expanded(
+          Flexible(
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -382,6 +451,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       margin: const EdgeInsets.all(SwiftleadTokens.spaceM),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // ClientInfo
           Row(
@@ -429,6 +499,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 icon: const Icon(Icons.message),
                 onPressed: _handleMessageClient,
               ),
+              IconButton(
+                icon: const Icon(Icons.directions),
+                onPressed: _handleNavigateToAddress,
+                tooltip: 'Navigate to address',
+              ),
             ],
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
@@ -438,18 +513,32 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             children: [
               ProgressPill(status: _job!.status.displayName),
               const SizedBox(width: SwiftleadTokens.spaceS),
-              if (_job!.scheduledDate != null)
+              if (_job!.scheduledDate != null) ...[
                 DateChip(
                   date: _job!.scheduledDate!,
                   isDue: _job!.scheduledDate!.isBefore(DateTime.now()),
                 ),
+                const SizedBox(width: SwiftleadTokens.spaceS),
+                // Calendar Sync Button
+                IconButton(
+                  icon: const Icon(Icons.calendar_today, size: 18),
+                  onPressed: _handleSyncToCalendar,
+                  tooltip: 'Sync to calendar',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
           
+          // Risk Alerts - Scheduling Conflicts
+          if (_hasSchedulingConflict()) _buildConflictAlert(),
+          
           // ProgressBar
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 'Progress',
@@ -511,6 +600,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         vertical: SwiftleadTokens.spaceS,
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Wrap(
             spacing: SwiftleadTokens.spaceS,
@@ -545,37 +635,103 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   Widget _buildJobTabView() {
-    return Column(
-      children: [
-        // SegmentedControl for tabs
-        Padding(
-          padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-          child: SegmentedControl(
-            segments: _tabs,
-            selectedIndex: _selectedTabIndex,
-            onSelectionChanged: (index) {
-              setState(() => _selectedTabIndex = index);
-            },
+    return Expanded(
+      child: Column(
+        children: [
+          // Primary tabs + More dropdown
+          Padding(
+            padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+            child: Row(
+              children: [
+                // Primary tabs (Timeline, Details, Notes)
+                Expanded(
+                  child: SegmentedControl(
+                    segments: _primaryTabs,
+                    selectedIndex: _selectedTabIndex,
+                    onSelectionChanged: (index) {
+                      setState(() {
+                        _selectedTabIndex = index;
+                        _selectedMoreOption = null; // Clear more option when selecting primary tab
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: SwiftleadTokens.spaceS),
+                // More dropdown menu
+                PopupMenuButton<String>(
+                  icon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'More',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: _selectedMoreOption != null 
+                            ? const Color(SwiftleadTokens.primaryTeal)
+                            : null,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        _selectedMoreOption != null 
+                          ? Icons.arrow_drop_up 
+                          : Icons.arrow_drop_down,
+                        size: 20,
+                      ),
+                    ],
+                  ),
+                  onSelected: (value) {
+                    setState(() {
+                      _selectedMoreOption = value;
+                      // Map More options to indices for IndexedStack
+                      if (value == 'Messages') {
+                        _selectedTabIndex = 3;
+                      } else if (value == 'Media') {
+                        _selectedTabIndex = 4;
+                      } else if (value == 'Chasers') {
+                        _selectedTabIndex = 5;
+                      }
+                    });
+                  },
+                  itemBuilder: (context) => _moreOptions.map((option) {
+                    return PopupMenuItem(
+                      value: option,
+                      child: Row(
+                        children: [
+                          if (_selectedMoreOption == option)
+                            const Icon(
+                              Icons.check,
+                              size: 18,
+                              color: Color(SwiftleadTokens.primaryTeal),
+                            )
+                          else
+                            const SizedBox(width: 18),
+                          const SizedBox(width: SwiftleadTokens.spaceS),
+                          Text(option),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
           ),
-        ),
-        
-        // Tab content - Use IndexedStack with fixed height
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.5,
-          child: IndexedStack(
-            index: _selectedTabIndex,
-            children: [
-              _buildTimelineTab(),
-              _buildDetailsTab(),
-              _buildNotesTab(),
-              _buildMessagesTab(),
-              _buildMediaTab(),
-              _buildChasersTab(),
-            ],
+          
+          // Tab content - Use IndexedStack
+          Expanded(
+            child: IndexedStack(
+              index: _selectedTabIndex,
+              children: [
+                _buildTimelineTab(),
+                _buildDetailsTab(),
+                _buildNotesTab(),
+                _buildMessagesTab(),
+                _buildMediaTab(),
+                _buildChasersTab(),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 96), // Bottom padding for nav bar
-      ],
+        ],
+      ),
     );
   }
 
@@ -825,69 +981,219 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
   void _showAddNoteSheet(BuildContext context) {
     final TextEditingController noteController = TextEditingController();
+    bool isClientVisible = false;
+    final Set<String> mentionedUsers = <String>{};
     
     SwiftleadBottomSheet.show(
       context: context,
       title: 'Add Note',
       height: SheetHeight.half,
-      child: ListView(
-        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-        children: [
-          // Rich text formatting toolbar (basic)
-          Row(
+      child: StatefulBuilder(
+        builder: (context, setSheetState) => ListView(
+          padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+          children: [
+            // Visibility toggle
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Client-visible',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        isClientVisible 
+                            ? 'Client can see this note'
+                            : 'Internal team only',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: isClientVisible,
+                  onChanged: (value) {
+                    setSheetState(() {
+                      isClientVisible = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+            const Divider(),
+            const SizedBox(height: SwiftleadTokens.spaceS),
+            // Rich text formatting toolbar (Note: Requires flutter_quill package)
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.format_bold, size: 20),
+                  onPressed: () {
+                    Toast.show(
+                      context,
+                      message: 'Rich text formatting requires flutter_quill package',
+                      type: ToastType.info,
+                    );
+                  },
+                  tooltip: 'Bold (requires rich text editor)',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.format_italic, size: 20),
+                  onPressed: () {
+                    Toast.show(
+                      context,
+                      message: 'Rich text formatting requires flutter_quill package',
+                      type: ToastType.info,
+                    );
+                  },
+                  tooltip: 'Italic (requires rich text editor)',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.link, size: 20),
+                  onPressed: () {
+                    Toast.show(
+                      context,
+                      message: 'Link insertion requires flutter_quill package',
+                      type: ToastType.info,
+                    );
+                  },
+                  tooltip: 'Add Link (requires rich text editor)',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.alternate_email, size: 20),
+                  onPressed: () {
+                    // @Mention functionality
+                    _showMentionPicker(context, noteController, mentionedUsers, setSheetState);
+                  },
+                  tooltip: 'Mention',
+                ),
+              ],
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceS),
+            // Show mentioned users
+            if (mentionedUsers.isNotEmpty) ...[
+              Wrap(
+                spacing: SwiftleadTokens.spaceS,
+                runSpacing: SwiftleadTokens.spaceS,
+                children: mentionedUsers.map((user) {
+                  return Chip(
+                    label: Text('@$user'),
+                    avatar: const Icon(Icons.person, size: 16),
+                    onDeleted: () {
+                      setSheetState(() {
+                        mentionedUsers.remove(user);
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+            ],
+            TextField(
+              controller: noteController,
+              maxLines: 8,
+              decoration: InputDecoration(
+                hintText: 'Enter your note... Use @ to mention team members.',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                ),
+              ),
+              onChanged: (text) {
+                // Detect @ mentions in text
+                final mentionRegex = RegExp(r'@(\w+)');
+                final matches = mentionRegex.allMatches(text);
+                final newMentions = matches.map((m) => m.group(1)!).toSet();
+                if (newMentions != mentionedUsers) {
+                  setSheetState(() {
+                    mentionedUsers.clear();
+                    mentionedUsers.addAll(newMentions);
+                  });
+                }
+              },
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+            PrimaryButton(
+              label: 'Save Note',
+              onPressed: () {
+                // Save note with visibility and mentions
+                Navigator.pop(context);
+                setState(() {}); // Refresh to show new note
+                Toast.show(
+                  context,
+                  message: 'Note saved${isClientVisible ? ' (client-visible)' : ' (internal)'}',
+                  type: ToastType.success,
+                );
+              },
+              icon: Icons.save,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showMentionPicker(BuildContext context, TextEditingController controller, Set<String> mentionedUsers, StateSetter setSheetState) {
+    final teamMembers = ['Alex Johnson', 'Sarah Williams', 'Mike Davis', 'Emma Wilson'];
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
-                icon: const Icon(Icons.format_bold, size: 20),
-                onPressed: () {
-                  // TODO: Toggle bold formatting
-                },
-                tooltip: 'Bold',
+              Padding(
+                padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                child: Text(
+                  'Mention Team Member',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
-              IconButton(
-                icon: const Icon(Icons.format_italic, size: 20),
-                onPressed: () {
-                  // TODO: Toggle italic formatting
-                },
-                tooltip: 'Italic',
-              ),
-              IconButton(
-                icon: const Icon(Icons.link, size: 20),
-                onPressed: () {
-                  // TODO: Add link
-                },
-                tooltip: 'Add Link',
-              ),
-              IconButton(
-                icon: const Icon(Icons.alternate_email, size: 20),
-                onPressed: () {
-                  // TODO: Mention user (@username)
-                },
-                tooltip: 'Mention',
-              ),
+              const Divider(),
+              ...teamMembers.map((member) {
+                final username = member.split(' ').first.toLowerCase();
+                return ListTile(
+                  leading: CircleAvatar(
+                    child: Text(member[0]),
+                  ),
+                  title: Text(member),
+                  subtitle: Text('@$username'),
+                  onTap: () {
+                    final mention = '@$username ';
+                    final text = controller.text;
+                    final selection = controller.selection;
+                    
+                    // Insert mention at cursor position
+                    final newText = text.replaceRange(
+                      selection.start,
+                      selection.end,
+                      mention,
+                    );
+                    controller.text = newText;
+                    controller.selection = TextSelection.collapsed(
+                      offset: selection.start + mention.length,
+                    );
+                    
+                    mentionedUsers.add(username);
+                    setSheetState(() {});
+                    Navigator.pop(context);
+                  },
+                );
+              }).toList(),
             ],
           ),
-          const SizedBox(height: SwiftleadTokens.spaceS),
-          TextField(
-            controller: noteController,
-            maxLines: 8,
-            decoration: InputDecoration(
-              hintText: 'Enter your note... Use @ to mention team members.',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-              ),
-            ),
-          ),
-          const SizedBox(height: SwiftleadTokens.spaceM),
-          PrimaryButton(
-            label: 'Save Note',
-            onPressed: () {
-              // Save note
-              Navigator.pop(context);
-              setState(() {}); // Refresh to show new note
-            },
-            icon: Icons.save,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -900,6 +1206,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 'Service Details',
@@ -926,10 +1233,90 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 value: '£300',
               ),
               const Divider(),
-              _DetailRow(
-                label: 'Location',
-                value: '123 Main Street, London',
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: _DetailRow(
+                      label: 'Location',
+                      value: _job?.address ?? '123 Main Street, London',
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.map_outlined),
+                    onPressed: _handleNavigateToAddress,
+                    tooltip: 'Open in maps',
+                  ),
+                ],
               ),
+              // Map Preview (Inline)
+              if (_job?.address.isNotEmpty ?? false) ...[
+                const SizedBox(height: SwiftleadTokens.spaceS),
+                GestureDetector(
+                  onTap: _handleNavigateToAddress,
+                  child: Container(
+                    height: 150,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                      color: Colors.grey[200],
+                    ),
+                    child: Stack(
+                      children: [
+                        // Static map preview (using placeholder - would use Google Maps Static API in production)
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.map,
+                                size: 48,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: SwiftleadTokens.spaceS),
+                              Text(
+                                'Map Preview',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              Text(
+                                'Tap to open in Maps',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  fontSize: 10,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Note: In production, this would use Google Maps Static API
+                        // Example: https://maps.googleapis.com/maps/api/staticmap?center=${address}&zoom=15&size=400x150&key=API_KEY
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'Static Map',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -938,10 +1325,55 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Description',
-                style: Theme.of(context).textTheme.headlineSmall,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Description',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  // Rich Text Formatting Buttons (Note: Requires rich text editor package)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.format_bold, size: 18),
+                        onPressed: () {
+                          Toast.show(
+                            context,
+                            message: 'Rich text formatting requires flutter_quill package',
+                            type: ToastType.info,
+                          );
+                        },
+                        tooltip: 'Bold (requires rich text editor)',
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.format_italic, size: 18),
+                        onPressed: () {
+                          Toast.show(
+                            context,
+                            message: 'Rich text formatting requires flutter_quill package',
+                            type: ToastType.info,
+                          );
+                        },
+                        tooltip: 'Italic (requires rich text editor)',
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.link, size: 18),
+                        onPressed: () {
+                          Toast.show(
+                            context,
+                            message: 'Rich text formatting requires flutter_quill package',
+                            type: ToastType.info,
+                          );
+                        },
+                        tooltip: 'Add Link (requires rich text editor)',
+                      ),
+                    ],
+                  ),
+                ],
               ),
               const SizedBox(height: SwiftleadTokens.spaceM),
               Text(
@@ -957,6 +1389,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -967,29 +1400,69 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.add, size: 20),
-                    onPressed: () {
-                      // TODO: Add custom field
+                    onPressed: () async {
+                      final field = await CustomFieldEditorSheet.show(
+                        context: context,
+                      );
+                      if (field != null && mounted) {
+                        setState(() {
+                          // Add custom field to job
+                          _customFields[field['name'] ?? ''] = field['value'] ?? '';
+                        });
+                        Toast.show(
+                          context,
+                          message: 'Custom field added',
+                          type: ToastType.success,
+                        );
+                      }
                     },
                     tooltip: 'Add custom field',
                   ),
                 ],
               ),
               const SizedBox(height: SwiftleadTokens.spaceM),
-              // Example custom fields
-              _CustomFieldRow(
-                label: 'Property Type',
-                value: 'Residential',
-              ),
-              const Divider(),
-              _CustomFieldRow(
-                label: 'Warranty Period',
-                value: '12 months',
-              ),
-              const Divider(),
-              _CustomFieldRow(
-                label: 'License Required',
-                value: 'Yes',
-              ),
+              // Display custom fields
+              if (_customFields.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: SwiftleadTokens.spaceM),
+                  child: Text(
+                    'No custom fields added yet. Tap + to add one.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? Colors.black.withOpacity(0.6)
+                          : Colors.white.withOpacity(0.6),
+                    ),
+                  ),
+                )
+              else
+                ...(_customFields.entries.map((entry) {
+                  return Column(
+                    children: [
+                      _CustomFieldRow(
+                        label: entry.key,
+                        value: entry.value,
+                      ),
+                      if (entry.key != _customFields.keys.last) const Divider(),
+                    ],
+                  );
+                }).toList()),
+              // Show example fields if no custom fields exist (for demo)
+              if (_customFields.isEmpty) ...[
+                _CustomFieldRow(
+                  label: 'Property Type',
+                  value: 'Residential',
+                ),
+                const Divider(),
+                _CustomFieldRow(
+                  label: 'Warranty Period',
+                  value: '12 months',
+                ),
+                const Divider(),
+                _CustomFieldRow(
+                  label: 'License Required',
+                  value: 'Yes',
+                ),
+              ],
             ],
           ),
         ),
@@ -998,6 +1471,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 'Team Assignment',
@@ -1136,7 +1610,17 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           itemBuilder: (context, index) => MediaThumbnail(
             label: 'Before ${index + 1}',
             onTap: () {
-              // Open full screen gallery
+              // Show before/after comparison slider if both exist
+              if (index < 4) {
+                _showBeforeAfterSlider(context, index);
+              } else {
+                // Open full screen gallery
+                MediaPreviewModal.show(
+                  context: context,
+                  mediaUrl: 'https://picsum.photos/800/600?random=before$index',
+                  mediaType: 'image',
+                );
+              }
             },
           ),
         ),
@@ -1160,11 +1644,37 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             mainAxisSpacing: SwiftleadTokens.spaceS,
           ),
           itemCount: 5, // After photos
-          itemBuilder: (context, index) => MediaThumbnail(
-            label: 'After ${index + 1}',
-            onTap: () {
-              // Open full screen gallery
-            },
+          itemBuilder: (context, index) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              MediaThumbnail(
+                label: 'After ${index + 1}',
+                onTap: () {
+                  // Show before/after comparison slider if both exist
+                  if (index < 4) {
+                    _showBeforeAfterSlider(context, index);
+                  } else {
+                    // Open full screen gallery
+                    MediaPreviewModal.show(
+                      context: context,
+                      mediaUrl: 'https://picsum.photos/800/600?random=after$index',
+                      mediaType: 'image',
+                    );
+                  }
+                },
+              ),
+              // Show timestamp/GPS info
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  '${DateTime.now().subtract(Duration(days: index)).toString().substring(0, 16)} • GPS: 51.5074, -0.1278',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -1172,41 +1682,111 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   void _showMediaUploadSheet(BuildContext context) {
+    MediaUploadSheet.show(
+      context: context,
+      jobId: widget.jobId,
+      onUploadComplete: () {
+        setState(() {
+          // Refresh media list
+        });
+      },
+    );
+  }
+
+  void _showBeforeAfterSlider(BuildContext context, int photoIndex) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black87,
+      builder: (context) => _BeforeAfterSliderModal(
+        beforeImageUrl: 'https://picsum.photos/800/600?random=before$photoIndex',
+        afterImageUrl: 'https://picsum.photos/800/600?random=after$photoIndex',
+      ),
+    );
+  }
+
+  // Check for scheduling conflicts
+  bool _hasSchedulingConflict() {
+    if (_job == null || _job!.scheduledDate == null) return false;
+    
+    // Check if this job's scheduled time conflicts with other jobs
+    // In production, this would query the database for overlapping jobs
+    // For now, simulate a conflict check - show alert for demo purposes
+    final scheduledDate = _job!.scheduledDate!;
+    final now = DateTime.now();
+    
+    // Example: Flag if scheduled in the past (overdue)
+    if (scheduledDate.isBefore(now.subtract(const Duration(hours: 1)))) {
+      return true;
+    }
+    
+    // For demo: Show conflict if job is scheduled for today (to make it visible)
+    if (scheduledDate.day == now.day && scheduledDate.month == now.month && scheduledDate.year == now.year) {
+      return true; // Show conflict alert for demo
+    }
+    
+    // Example: Flag if scheduled too close to another job (within 30 minutes)
+    // In production: SELECT * FROM jobs WHERE assigned_to = ? AND scheduled_date BETWEEN ? AND ? AND id != ?
+    return false;
+  }
+
+  Widget _buildConflictAlert() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceM),
+      child: InfoBanner(
+        message: _job!.scheduledDate!.isBefore(DateTime.now())
+            ? 'This job is overdue. Scheduled date has passed.'
+            : 'Scheduling conflict detected. This job may overlap with another assignment.',
+        type: InfoBannerType.warning,
+        icon: Icons.warning_amber_rounded,
+        actionLabel: 'View Conflicts',
+        onTap: () {
+          // Show conflict details
+          _showConflictDetails();
+        },
+      ),
+    );
+  }
+
+  void _showConflictDetails() {
     SwiftleadBottomSheet.show(
       context: context,
-      title: 'Upload Media',
+      title: 'Scheduling Conflicts',
       height: SheetHeight.half,
       child: ListView(
         padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
         children: [
-          Text(
-            'Select media to upload:',
-            style: Theme.of(context).textTheme.bodyMedium,
+          InfoBanner(
+            message: 'This job may conflict with other scheduled work.',
+            type: InfoBannerType.warning,
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
-          ListTile(
-            leading: const Icon(Icons.photo_library),
-            title: const Text('Choose from Gallery'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // Open gallery picker
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.camera_alt),
-            title: const Text('Take Photo'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // Open camera
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.insert_drive_file),
-            title: const Text('Choose Document'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // Open file picker
-            },
+          // Example conflict entry
+          FrostedContainer(
+            padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Potential Conflict',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: SwiftleadTokens.spaceS),
+                Text(
+                  'Another job scheduled nearby: ${_job!.scheduledDate!.subtract(const Duration(hours: 1)).toString().substring(0, 16)}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: SwiftleadTokens.spaceS),
+                Text(
+                  'Note: Conflict detection requires backend verification once backend is wired.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontStyle: FontStyle.italic,
+                    color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -1686,6 +2266,118 @@ class _CustomFieldRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _BeforeAfterSliderModal extends StatefulWidget {
+  final String beforeImageUrl;
+  final String afterImageUrl;
+
+  const _BeforeAfterSliderModal({
+    required this.beforeImageUrl,
+    required this.afterImageUrl,
+  });
+
+  @override
+  State<_BeforeAfterSliderModal> createState() => _BeforeAfterSliderModalState();
+}
+
+class _BeforeAfterSliderModalState extends State<_BeforeAfterSliderModal> {
+  double _sliderPosition = 0.5; // 0.0 = before, 1.0 = after
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Colors.black.withOpacity(0.5),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          'Before / After Comparison',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      body: Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // After image (background)
+            Image.network(
+              widget.afterImageUrl,
+              fit: BoxFit.contain,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+            // Before image (clipped based on slider)
+            ClipRect(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                widthFactor: _sliderPosition,
+                child: Image.network(
+                  widget.beforeImageUrl,
+                  fit: BoxFit.contain,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+              ),
+            ),
+            // Slider control
+            Positioned(
+              bottom: 40,
+              left: 20,
+              right: 20,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SwiftleadTokens.spaceM,
+                  vertical: SwiftleadTokens.spaceS,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Before',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          'After',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Slider(
+                      value: _sliderPosition,
+                      min: 0.0,
+                      max: 1.0,
+                      activeColor: const Color(SwiftleadTokens.primaryTeal),
+                      onChanged: (value) {
+                        setState(() {
+                          _sliderPosition = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

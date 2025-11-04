@@ -18,6 +18,7 @@ class MockBookings {
       reminderSent: true,
       depositRequired: false,
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
+      assignedTo: 'Alex',
     ),
     Booking(
       id: '2',
@@ -32,6 +33,7 @@ class MockBookings {
       reminderSent: true,
       depositRequired: false,
       createdAt: DateTime.now().subtract(const Duration(days: 7)),
+      assignedTo: 'Sam',
     ),
     Booking(
       id: '3',
@@ -46,6 +48,7 @@ class MockBookings {
       reminderSent: false,
       depositRequired: false,
       createdAt: DateTime.now().subtract(const Duration(days: 2)),
+      assignedTo: 'Alex',
     ),
     Booking(
       id: '4',
@@ -61,6 +64,8 @@ class MockBookings {
       depositRequired: true,
       depositAmount: 100.0,
       createdAt: DateTime.now().subtract(const Duration(hours: 12)),
+      assignedTo: 'Sam',
+      groupAttendees: ['Alex', 'Sam'], // Group booking example
     ),
     Booking(
       id: '5',
@@ -75,6 +80,7 @@ class MockBookings {
       reminderSent: true,
       depositRequired: false,
       createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+      assignedTo: 'Alex',
     ),
     Booking(
       id: '6',
@@ -90,6 +96,7 @@ class MockBookings {
       depositRequired: false,
       createdAt: DateTime.now().subtract(const Duration(days: 10)),
       completedAt: DateTime.now().subtract(const Duration(days: 2, hours: 12)),
+      assignedTo: 'Sam',
     ),
   ];
 
@@ -172,6 +179,8 @@ class Booking {
   final double? depositAmount;
   final DateTime createdAt;
   final DateTime? completedAt;
+  final String? assignedTo; // Team member assignment
+  final List<String>? groupAttendees; // For group bookings (multi-person appointments)
 
   Booking({
     required this.id,
@@ -188,6 +197,8 @@ class Booking {
     this.depositAmount,
     required this.createdAt,
     this.completedAt,
+    this.assignedTo,
+    this.groupAttendees,
   });
 
   Duration get duration => endTime.difference(startTime);
