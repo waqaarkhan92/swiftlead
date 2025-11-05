@@ -41,6 +41,7 @@ class _CreateEditInvoiceScreenState extends State<CreateEditInvoiceScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _clientController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
+  final TextEditingController _paymentTermsController = TextEditingController();
   
   bool _isSaving = false;
   DateTime? _dueDate;
@@ -48,6 +49,8 @@ class _CreateEditInvoiceScreenState extends State<CreateEditInvoiceScreen> {
   double _taxRate = 20.0;
   bool _attachJobPhotos = false; // Attach job photos to invoice
   String? _linkedJobId; // Track linked job for photo attachment
+  double _laborHours = 0.0;
+  double _fees = 0.0;
   List<_InvoiceLineItem> _lineItems = [
     _InvoiceLineItem(description: '', quantity: 1, rate: 0.0),
   ];
@@ -71,6 +74,7 @@ class _CreateEditInvoiceScreenState extends State<CreateEditInvoiceScreen> {
   void dispose() {
     _clientController.dispose();
     _notesController.dispose();
+    _paymentTermsController.dispose();
     super.dispose();
   }
 
@@ -83,7 +87,10 @@ class _CreateEditInvoiceScreenState extends State<CreateEditInvoiceScreen> {
   }
 
   double get _total {
-    return _subtotal + _tax;
+    final laborCost = _laborHours * 50.0; // Assuming £50/hour rate
+    final subtotalWithLaborAndFees = _subtotal + _fees + laborCost;
+    final taxOnTotal = subtotalWithLaborAndFees * (_taxRate / 100);
+    return subtotalWithLaborAndFees + taxOnTotal;
   }
 
   Future<void> _saveInvoice() async {
@@ -320,12 +327,97 @@ class _CreateEditInvoiceScreenState extends State<CreateEditInvoiceScreen> {
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
 
+            // Labor & Fees
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Labor & Fees',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: SwiftleadTokens.spaceM),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Labor Hours',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: SwiftleadTokens.spaceXS),
+                            TextField(
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                hintText: '0.0',
+                                prefixText: 'Hours: ',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                                ),
+                                isDense: true,
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  _laborHours = double.tryParse(value) ?? 0.0;
+                                });
+                              },
+                              controller: TextEditingController(text: _laborHours.toStringAsFixed(1)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: SwiftleadTokens.spaceM),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Additional Fees',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: SwiftleadTokens.spaceXS),
+                            TextField(
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                hintText: '0.00',
+                                prefixText: '£',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                                ),
+                                isDense: true,
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  _fees = double.tryParse(value) ?? 0.0;
+                                });
+                              },
+                              controller: TextEditingController(text: _fees.toStringAsFixed(2)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
             // Totals Preview
             FrostedContainer(
               padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
               child: Column(
                 children: [
                   _TotalRow(label: 'Subtotal', amount: _subtotal),
+                  if (_fees > 0)
+                    _TotalRow(label: 'Additional Fees', amount: _fees),
+                  if (_laborHours > 0)
+                    _TotalRow(label: 'Labor (${_laborHours.toStringAsFixed(1)}h)', amount: _laborHours * 50.0), // Assuming £50/hour rate
                   _TotalRow(label: 'Tax (${_taxRate.toStringAsFixed(0)}%)', amount: _tax),
                   const Divider(),
                   _TotalRow(

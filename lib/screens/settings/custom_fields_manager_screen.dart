@@ -3,6 +3,10 @@ import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/global/skeleton_loader.dart';
 import '../../widgets/global/empty_state_card.dart';
 import '../../widgets/global/frosted_container.dart';
+import '../../widgets/global/bottom_sheet.dart';
+import '../../widgets/global/primary_button.dart';
+import '../../widgets/global/chip.dart';
+import '../../widgets/global/toast.dart';
 import '../../theme/tokens.dart';
 
 /// Custom Fields Manager Screen - Manage contact custom fields
@@ -297,16 +301,216 @@ class _CustomFieldsManagerScreenState extends State<CustomFieldsManagerScreen> {
   }
 
   Future<void> _showAddFieldSheet() async {
-    // TODO: Implement add field sheet
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Add field functionality coming soon')),
-    );
+    final result = await _showFieldEditorSheet();
+    if (result != null && mounted) {
+      setState(() {
+        _fields.add(CustomField(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          name: result['name'] as String,
+          type: result['type'] as CustomFieldType,
+          required: result['required'] as bool,
+          options: result['options'] as List<String>?,
+        ));
+      });
+      Toast.show(
+        context,
+        message: 'Custom field "${result['name']}" created',
+        type: ToastType.success,
+      );
+    }
   }
 
   Future<void> _editField(CustomField field) async {
-    // TODO: Implement edit field sheet
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Edit "${field.name}" functionality coming soon')),
+    final result = await _showFieldEditorSheet(initialField: field);
+    if (result != null && mounted) {
+      setState(() {
+        final index = _fields.indexWhere((f) => f.id == field.id);
+        if (index != -1) {
+          _fields[index] = CustomField(
+            id: field.id,
+            name: result['name'] as String,
+            type: result['type'] as CustomFieldType,
+            required: result['required'] as bool,
+            options: result['options'] as List<String>?,
+          );
+        }
+      });
+      Toast.show(
+        context,
+        message: 'Custom field "${result['name']}" updated',
+        type: ToastType.success,
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>?> _showFieldEditorSheet({CustomField? initialField}) async {
+    final nameController = TextEditingController(text: initialField?.name ?? '');
+    CustomFieldType selectedType = initialField?.type ?? CustomFieldType.text;
+    bool isRequired = initialField?.required ?? false;
+    final optionsController = TextEditingController(
+      text: initialField?.options?.join('\n') ?? '',
+    );
+    bool showOptionsField = initialField?.type == CustomFieldType.dropdown ||
+        selectedType == CustomFieldType.dropdown;
+
+    return await SwiftleadBottomSheet.show<Map<String, dynamic>?>(
+      context: context,
+      title: initialField == null ? 'Add Custom Field' : 'Edit Custom Field',
+      height: SheetHeight.threeQuarter,
+      child: StatefulBuilder(
+        builder: (context, setSheetState) => ListView(
+          padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+          children: [
+            // Field Name
+            TextFormField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'Field Name *',
+                hintText: 'e.g., Company Size, Annual Budget',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                ),
+              ),
+              autofocus: initialField == null,
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Field Type
+            Text(
+              'Field Type *',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceS),
+            Wrap(
+              spacing: SwiftleadTokens.spaceS,
+              runSpacing: SwiftleadTokens.spaceS,
+              children: CustomFieldType.values.map((type) {
+                return SwiftleadChip(
+                  label: _getFieldTypeLabel(type),
+                  isSelected: selectedType == type,
+                  onTap: () {
+                    setSheetState(() {
+                      selectedType = type;
+                      showOptionsField = type == CustomFieldType.dropdown;
+                      if (type != CustomFieldType.dropdown) {
+                        optionsController.clear();
+                      }
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+
+            // Options field (for dropdown type)
+            if (showOptionsField) ...[
+              Text(
+                'Dropdown Options *',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              Text(
+                'Enter one option per line',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              TextFormField(
+                controller: optionsController,
+                decoration: InputDecoration(
+                  labelText: 'Options',
+                  hintText: 'Option 1\nOption 2\nOption 3',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                  ),
+                  alignLabelWithHint: true,
+                ),
+                maxLines: 5,
+                minLines: 3,
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+            ],
+
+            // Required toggle
+            FrostedContainer(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Required Field',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'This field must be filled when creating contacts',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.grey,
+                            ),
+                      ),
+                    ],
+                  ),
+                  Switch(
+                    value: isRequired,
+                    onChanged: (value) {
+                      setSheetState(() {
+                        isRequired = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceL),
+
+            // Save Button
+            PrimaryButton(
+              label: initialField == null ? 'Create Field' : 'Save Changes',
+              onPressed: () {
+                if (nameController.text.trim().isEmpty) {
+                  Toast.show(
+                    context,
+                    message: 'Please enter a field name',
+                    type: ToastType.error,
+                  );
+                  return;
+                }
+                if (selectedType == CustomFieldType.dropdown &&
+                    optionsController.text.trim().isEmpty) {
+                  Toast.show(
+                    context,
+                    message: 'Please enter at least one option for dropdown fields',
+                    type: ToastType.error,
+                  );
+                  return;
+                }
+                final options = selectedType == CustomFieldType.dropdown
+                    ? optionsController.text
+                        .split('\n')
+                        .map((e) => e.trim())
+                        .where((e) => e.isNotEmpty)
+                        .toList()
+                    : null;
+                Navigator.pop(context, {
+                  'name': nameController.text.trim(),
+                  'type': selectedType,
+                  'required': isRequired,
+                  'options': options,
+                });
+              },
+              icon: Icons.save,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

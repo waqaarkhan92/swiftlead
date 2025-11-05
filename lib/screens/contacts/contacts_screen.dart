@@ -5,10 +5,8 @@ import '../../widgets/global/empty_state_card.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/search_bar.dart';
 import '../../widgets/global/chip.dart';
-import '../../widgets/global/bottom_sheet.dart';
 import '../../theme/tokens.dart';
 import '../../mock/mock_contacts.dart';
-import '../../models/contact.dart';
 import 'contact_detail_screen.dart';
 import 'contact_import_wizard_screen.dart';
 import 'contact_export_builder_screen.dart';
@@ -29,7 +27,6 @@ class ContactsScreen extends StatefulWidget {
 
 class _ContactsScreenState extends State<ContactsScreen> {
   bool _isLoading = true;
-  final TextEditingController _searchController = TextEditingController();
   String _selectedFilter = 'All';
   List<Contact> _contacts = [];
   List<Contact> _filteredContacts = [];
@@ -231,10 +228,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
                   child: _ContactCard(
-                    contactName: contact.name,
-                    contactEmail: contact.email ?? 'No email',
-                    stage: contact.stage.displayName,
-                    score: contact.score,
+                    contact: contact,
                     onTap: () {
                       Navigator.push(
                         context,
@@ -340,29 +334,14 @@ class _ContactsScreenState extends State<ContactsScreen> {
       }
     });
   }
-  
-  String _getStage(int index) {
-    final stages = ['Lead', 'Prospect', 'Customer', 'Repeat Customer'];
-    return stages[index % stages.length];
-  }
-
-  int _getScore(int index) {
-    return 60 + (index * 7) % 40; // 60-100 range
-  }
 }
 
 class _ContactCard extends StatelessWidget {
-  final String contactName;
-  final String contactEmail;
-  final String stage;
-  final int score;
+  final Contact contact;
   final VoidCallback onTap;
 
   const _ContactCard({
-    required this.contactName,
-    required this.contactEmail,
-    required this.stage,
-    required this.score,
+    required this.contact,
     required this.onTap,
   });
 
@@ -380,81 +359,148 @@ class _ContactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final classification = _getScoreClassification(score);
-    final scoreColor = _getScoreColor(score);
+    final classification = _getScoreClassification(contact.score);
+    final scoreColor = _getScoreColor(contact.score);
+    final isVIP = contact.tags.contains('VIP');
 
     return GestureDetector(
       onTap: onTap,
       child: FrostedContainer(
         padding: const EdgeInsets.all(16),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Avatar
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  contactName[0],
-                  style: TextStyle(
-                    color: const Color(SwiftleadTokens.primaryTeal),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: SwiftleadTokens.spaceM),
-            
-            // Contact Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    contactName,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    contactEmail,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-            
-            // Badges
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            Row(
               children: [
+                // Avatar
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
-                    color: scoreColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
+                    shape: BoxShape.circle,
                   ),
-                  child: Text(
-                    classification,
-                    style: TextStyle(
-                      color: scoreColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
+                  child: Center(
+                    child: Text(
+                      contact.name[0].toUpperCase(),
+                      style: const TextStyle(
+                        color: Color(SwiftleadTokens.primaryTeal),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  stage,
-                  style: Theme.of(context).textTheme.bodySmall,
+                const SizedBox(width: SwiftleadTokens.spaceM),
+                
+                // Contact Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              contact.name,
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (isVIP) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(SwiftleadTokens.warningYellow).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.star,
+                                    size: 12,
+                                    color: Color(SwiftleadTokens.warningYellow),
+                                  ),
+                                  SizedBox(width: 2),
+                                  Text(
+                                    'VIP',
+                                    style: TextStyle(
+                                      color: Color(SwiftleadTokens.warningYellow),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        contact.email ?? contact.phone ?? 'No contact info',
+                        style: Theme.of(context).textTheme.bodySmall,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (contact.tags.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Wrap(
+                          spacing: 4,
+                          runSpacing: 4,
+                          children: contact.tags.where((tag) => tag != 'VIP').take(2).map((tag) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                tag,
+                                style: const TextStyle(
+                                  color: Color(SwiftleadTokens.primaryTeal),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                
+                // Badges
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: scoreColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        classification,
+                        style: TextStyle(
+                          color: scoreColor,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      contact.stage.displayName,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
                 ),
               ],
             ),

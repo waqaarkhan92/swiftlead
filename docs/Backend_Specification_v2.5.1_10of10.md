@@ -13,9 +13,9 @@ This document defines the complete backend architecture for Swiftlead, mapping a
 ## Module Index
 
 1. Omni-Inbox | 2. AI Receptionist | 3. Jobs | 4. Bookings + Calendar Sync
-5. Quotes & Quote Chasers | 6. Invoices & Billing | 7. Payments (Stripe) | 8. Tasks & Reminders
-9. Reviews & Referrals | 10. Teams & Permissions | 11. Dashboard / Analytics | 12. Settings
-13. Notifications | 14. Adaptive Profession System | 15. Onboarding Flow | 16. Integrations
+5. Money (Quotes, Invoices & Billing) | 6. Payments (Stripe) | 7. Tasks & Reminders
+8. Reviews & Referrals | 9. Teams & Permissions | 10. Dashboard / Analytics | 11. Settings
+12. Notifications | 13. Adaptive Profession System | 14. Onboarding Flow | 15. Integrations | 16. Non-Functional
 
 ---
 
@@ -325,7 +325,9 @@ Reuses `bookings` table. Add optional fields:
 
 ---
 
-## 5. Quotes & Quote Chasers
+## 5. Money (Quotes, Invoices & Billing)
+
+### Quotes Section
 
 ### Tables
 
@@ -346,8 +348,7 @@ Reuses `bookings` table. Add optional fields:
 ### Edge Functions
 
 - **create-quote** / **ai-generate-quote** → Creates quote, AI generates line items from description
-- **send-quote** → Generates PDF, uploads to Storage, sends via SMS/email, schedules chasers
-- **accept-quote** / **decline-quote** → Updates status, cancels chasers
+- **send-quote** → Sends via SMS/email, schedules chasers (PDF generation removed)
 - **send-quote-chaser** → Automated follow-up at T+1, T+3, T+7 days
 - **convert-quote-to-invoice** / **convert-quote-to-booking** → Conversion workflows
 
@@ -355,8 +356,8 @@ Reuses `bookings` table. Add optional fields:
 | Action | Tables | Function | Auth |
 |--------|--------|----------|------|
 | Create | quotes, line_items | create-quote, ai-generate-quote | JWT + RLS |
-| Read | All | Direct select | JWT + RLS + Portal token |
-| Update | quotes, line_items | Direct update, accept/decline | JWT + RLS + Portal token |
+| Read | All | Direct select | JWT + RLS |
+| Update | quotes, line_items | Direct update | JWT + RLS |
 | Delete | quotes | Direct delete | JWT + RLS |
 | Automation | quote_chasers | send-quote-chaser (cron every 15min) | Service role |
 
@@ -369,7 +370,7 @@ Reuses `bookings` table. Add optional fields:
 
 ---
 
-## 6. Invoices & Billing
+### Invoices Section
 
 ### Tables
 
@@ -390,10 +391,10 @@ Reuses `bookings` table. Add optional fields:
 ### Edge Functions
 
 - **create-invoice** → Creates invoice with line items, calculates totals
-- **send-invoice** → Generates PDF, sends with payment link, schedules reminders
+- **send-invoice** → Sends with payment link, schedules reminders (PDF generation removed)
 - **mark-invoice-paid** → Updates status, cancels reminders, updates lifetime_value
 - **send-overdue-reminder** → Automated reminders at T+3, T+7, T+14 days
-- **cancel-invoice** / **generate-invoice-pdf** → Management functions
+- **cancel-invoice** → Management function
 - **get-revenue-breakdown** `{org_id, date_range}` → Revenue breakdown by category/period
   **Used by UI:** ChartCard (Money).
 
@@ -401,7 +402,7 @@ Reuses `bookings` table. Add optional fields:
 | Action | Tables | Function | Auth |
 |--------|--------|----------|------|
 | Create | invoices, line_items | create-invoice | JWT + RLS |
-| Read | All | Direct select | JWT + RLS + Portal token |
+| Read | All | Direct select | JWT + RLS |
 | Update | invoices, line_items | Direct update, mark-invoice-paid | JWT + RLS |
 | Delete | invoices (cancel) | cancel-invoice | JWT + RLS |
 | Automation | invoice_reminders | send-overdue-reminder (cron hourly) | Service role |
@@ -412,7 +413,7 @@ Reuses `bookings` table. Add optional fields:
 
 ---
 
-## 7. Payments (Stripe Integration)
+## 6. Payments (Stripe Integration)
 
 ### Tables
 
@@ -449,7 +450,7 @@ Reuses `bookings` table. Add optional fields:
 
 ---
 
-## 8. Tasks & Reminders
+## 7. Tasks & Reminders
 
 ### Tables
 
@@ -487,7 +488,7 @@ Reuses `bookings` table. Add optional fields:
 
 ---
 
-## 9. Reviews & Referrals
+## 8. Reviews & Referrals
 
 ### Tables
 
@@ -531,7 +532,7 @@ Reuses `bookings` table. Add optional fields:
 
 ---
 
-## 10. Teams & Permissions
+## 9. Teams & Permissions
 
 ### Tables
 
@@ -571,7 +572,7 @@ Reuses `bookings` table. Add optional fields:
 
 ---
 
-## 11. Dashboard / Analytics
+## 10. Dashboard / Analytics
 
 ### Tables
 
@@ -620,7 +621,7 @@ Reuses `bookings` table. Add optional fields:
 
 ---
 
-## 12. Settings
+## 11. Settings
 
 ### Tables
 
@@ -658,7 +659,7 @@ Reuses `bookings` table. Add optional fields:
 
 ---
 
-## 13. Notifications
+## 12. Notifications
 
 ### Tables
 
@@ -693,7 +694,7 @@ Reuses `bookings` table. Add optional fields:
 
 ---
 
-## 14. Adaptive Profession System
+## 13. Adaptive Profession System
 
 ### Tables
 
@@ -746,7 +747,7 @@ All profiles share the same theme accent and visual style. Only labels and visib
 
 ---
 
-## 15. Onboarding Flow
+## 14. Onboarding Flow
 
 ### Tables
 
@@ -782,7 +783,7 @@ All profiles share the same theme accent and visual style. Only labels and visib
 
 ---
 
-## 16. Integrations
+## 15. Integrations
 
 ### Tables
 
@@ -928,7 +929,7 @@ All profiles share the same theme accent and visual style. Only labels and visib
 
 ---
 
-## 17. Non-Functional / Accessibility (Supporting Infrastructure)
+## 16. Non-Functional / Accessibility (Supporting Infrastructure)
 
 ### Tables
 

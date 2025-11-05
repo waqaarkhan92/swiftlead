@@ -266,7 +266,11 @@ class _SegmentBuilderScreenState extends State<SegmentBuilderScreen> {
                       DropdownMenuItem(value: 'score', child: Text('Score')),
                       DropdownMenuItem(value: 'source', child: Text('Source')),
                       DropdownMenuItem(value: 'tags', child: Text('Tags')),
+                      DropdownMenuItem(value: 'company', child: Text('Company')),
+                      DropdownMenuItem(value: 'location', child: Text('Location')),
                       DropdownMenuItem(value: 'created', child: Text('Created Date')),
+                      DropdownMenuItem(value: 'last_contacted', child: Text('Last Contacted')),
+                      DropdownMenuItem(value: 'custom_field', child: Text('Custom Field')),
                     ],
                     onChanged: (value) {
                       setState(() {
@@ -288,12 +292,19 @@ class _SegmentBuilderScreenState extends State<SegmentBuilderScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    items: const [
-                      DropdownMenuItem(value: 'equals', child: Text('equals')),
-                      DropdownMenuItem(value: 'not_equals', child: Text('not equals')),
-                      DropdownMenuItem(value: 'contains', child: Text('contains')),
-                      DropdownMenuItem(value: 'greater_than', child: Text('greater than')),
-                      DropdownMenuItem(value: 'less_than', child: Text('less than')),
+                    items: [
+                      const DropdownMenuItem(value: 'equals', child: Text('equals')),
+                      const DropdownMenuItem(value: 'not_equals', child: Text('not equals')),
+                      const DropdownMenuItem(value: 'contains', child: Text('contains')),
+                      const DropdownMenuItem(value: 'not_contains', child: Text('not contains')),
+                      const DropdownMenuItem(value: 'greater_than', child: Text('greater than')),
+                      const DropdownMenuItem(value: 'less_than', child: Text('less than')),
+                      const DropdownMenuItem(value: 'greater_than_equal', child: Text('greater than or equal')),
+                      const DropdownMenuItem(value: 'less_than_equal', child: Text('less than or equal')),
+                      if (rule.field == 'created' || rule.field == 'last_contacted')
+                        const DropdownMenuItem(value: 'in_last', child: Text('in last')),
+                      if (rule.field == 'created' || rule.field == 'last_contacted')
+                        const DropdownMenuItem(value: 'not_in_last', child: Text('not in last')),
                     ],
                     onChanged: (value) {
                       setState(() {

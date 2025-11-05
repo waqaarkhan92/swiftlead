@@ -259,16 +259,18 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 
 ---
 
-## Module 5: Quotes & Quote Chasers
+## Module 5: Money (Quotes, Invoices & Billing)
+
+### Quotes Section
 
 | Product Feature | UI Surfaces | Backend Tables | Edge Functions | External APIs |
 |-----------------|-------------|----------------|----------------|---------------|
 | Create quote | Create/Edit Quote Form | `quotes`, `quote_line_items` | `create-quote` | N/A |
 | AI quote generation | AI Quote Assistant Modal | `quotes`, `quote_line_items` | `ai-generate-quote` | OpenAI |
-| **Quote templates** *(v2.5.1)* | Quote Template Selector | `quote_templates` | `create-quote-from-template` | N/A |
-| Send quote | Send Quote Sheet, Quote PDF Preview | `quotes`, `quote_chasers` | `send-quote`, `generate-pdf` | Twilio, SMTP |
+
+| Send quote | Send Quote Sheet | `quotes`, `quote_chasers` | `send-quote` | Twilio, SMTP |
 | Quote chasers (T+1/3/7) | Quote Chaser Status View | `quote_chasers` | `send-quote-chaser` (cron every 15min) | Twilio, SMTP |
-| Accept/decline quote | Accept/Decline Quote (Portal) | `quotes.status` | `accept-quote`, `decline-quote` | N/A |
+| ~~Accept/decline quote~~ | ~~REMOVED - Client Portal~~ | ~~Removed from scope~~ | ~~Removed~~ | ~~Removed~~ |
 | Convert to invoice | Convert Quote Modal | `quotes` → `invoices` | `convert-quote-to-invoice` | N/A |
 | Convert to booking | Convert Quote Modal | `quotes` → `bookings` | `convert-quote-to-booking` | N/A |
 | Quote validity | Quotes List View (status) | `quotes.valid_until`, `status` | Cron auto-expire | N/A |
@@ -284,17 +286,17 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 | 5 | QuoteForm | LoadingSpinner | N/A | AI generation progress |
 | 5 | QuoteTemplateSelector *(v2.5.1)* | BottomSheet | `quote_templates` | Template picker |
 | 5 | QuoteChaserStatus | ProgressBar | `quote_chasers` | Chaser timeline |
-| 5 | QuotePDFPreview | LoadingSpinner | N/A | Generating PDF |
+| 5 | ~~QuotePDFPreview~~ | ~~REMOVED~~ | ~~Removed from scope~~ | ~~PDF generation removed~~ |
 
 ---
 
-## Module 6: Invoices & Billing
+### Invoices Section
 
 | Product Feature | UI Surfaces | Backend Tables | Edge Functions | External APIs |
 |-----------------|-------------|----------------|----------------|---------------|
 | Create invoice | Create/Edit Invoice Form | `invoices`, `invoice_line_items` | `create-invoice` | N/A |
 | **Invoice templates** *(v2.5.1)* | Invoice Template Selector | `invoice_templates` | `create-invoice-from-template` | N/A |
-| Send invoice | Send Invoice Sheet, Invoice PDF Preview | `invoices`, `invoice_reminders` | `send-invoice`, `generate-invoice-pdf` | Twilio, SMTP, Stripe |
+| Send invoice | Send Invoice Sheet | `invoices`, `invoice_reminders` | `send-invoice` | Twilio, SMTP, Stripe |
 | Overdue reminders (T+3/7/14) | Overdue Reminders Status | `invoice_reminders` | `send-overdue-reminder` (cron hourly) | Twilio, SMTP |
 | Payment tracking | Payment History View | `payments` WHERE invoice_id | Auto-updated | Stripe webhooks |
 | Online payment | Payment Link Sheet, Stripe Checkout | `invoices`, `payments` | `create-payment-intent`, `process-stripe-payment-webhook` | Stripe |
@@ -319,7 +321,7 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 
 ---
 
-## Module 7: Contacts / Customers
+## Module 6: Contacts / Customers
 
 | Product Feature | UI Surfaces | Backend Tables | Edge Functions | External APIs |
 |-----------------|-------------|----------------|----------------|---------------|
@@ -350,7 +352,7 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 
 ---
 
-## Module 8: Reviews + Reputation
+## Module 7: Reviews + Reputation
 
 | Product Feature | UI Surfaces | Backend Tables | Edge Functions | External APIs |
 |-----------------|-------------|----------------|----------------|---------------|
@@ -374,7 +376,7 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 
 ---
 
-## Module 9: Marketing Campaigns
+## Module 8: Marketing Campaigns
 
 | Product Feature | UI Surfaces | Backend Tables | Edge Functions | External APIs |
 |-----------------|-------------|----------------|----------------|---------------|
@@ -400,7 +402,7 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 
 ---
 
-## Module 10: Team Management
+## Module 9: Team Management
 
 | Product Feature | UI Surfaces | Backend Tables | Edge Functions | External APIs |
 |-----------------|-------------|----------------|----------------|---------------|
@@ -426,7 +428,7 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 
 ---
 
-## Module 11: Home / Analytics
+## Module 10: Home / Analytics
 
 | Product Feature | UI Surfaces | Backend Tables | Edge Functions | External APIs |
 |-----------------|-------------|----------------|----------------|---------------|
@@ -457,7 +459,7 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 
 ---
 
-## Module 12: Settings
+## Module 11: Settings
 
 | Product Feature | UI Surfaces | Backend Tables | Edge Functions | External APIs |
 |-----------------|-------------|----------------|----------------|---------------|
@@ -486,7 +488,7 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 
 ---
 
-## Module 13: Notifications
+## Module 12: Notifications
 
 | Product Feature | UI Surfaces | Backend Tables | Edge Functions | External APIs |
 |-----------------|-------------|----------------|----------------|---------------|
@@ -513,7 +515,7 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 
 ---
 
-## Module 14: Adaptive Profession System
+## Module 13: Adaptive Profession System
 
 | Product Feature | UI Surfaces | Backend Tables | Edge Functions | External APIs |
 |-----------------|-------------|----------------|----------------|---------------|
@@ -540,7 +542,7 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 
 ---
 
-## Module 15: Onboarding Flow
+## Module 14: Onboarding Flow
 
 | Product Feature | UI Surfaces | Backend Tables | Edge Functions | External APIs |
 |-----------------|-------------|----------------|----------------|---------------|
@@ -567,7 +569,7 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 
 ---
 
-## Module 16: Integrations
+## Module 15: Integrations
 
 | Product Feature | UI Surfaces | Backend Tables | Edge Functions | External APIs |
 |-----------------|-------------|----------------|----------------|---------------|
@@ -597,7 +599,7 @@ Complete mapping between Product Features → UI Surfaces → Backend Tables →
 
 ---
 
-## Module 17: Non-Functional / Accessibility
+## Module 16: Non-Functional / Accessibility
 
 | Product Feature | UI Surfaces | Backend Tables | Edge Functions | External APIs |
 |-----------------|-------------|----------------|----------------|---------------|
@@ -740,19 +742,18 @@ All interactive elements meet WCAG AA standards with proper focus indicators, se
 | 2 AI Receptionist | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
 | 3 Jobs | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
 | 4 Bookings + Calendar | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
-| 5 Quotes | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
-| 6 Invoices | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
-| 7 Contacts | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
-| 8 Reviews | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
-| 9 Marketing | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
-| 10 Team Management | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
-| 11 Home / Analytics | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
-| 12 Settings | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
-| 13 Notifications | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
-| 14 Adaptive Profession | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
-| 15 Onboarding | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
-| 16 Integrations | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
-| 17 Non-Functional | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
+| 5 Money (Quotes, Invoices & Billing) | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
+| 6 Contacts | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
+| 7 Reviews | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
+| 8 Marketing | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
+| 9 Team Management | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
+| 10 Home / Analytics | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
+| 11 Settings | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
+| 12 Notifications | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
+| 13 Adaptive Profession | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
+| 14 Onboarding | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
+| 15 Integrations | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
+| 16 Non-Functional | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
 | **Global Components** | ✅ v2.5.1 | N/A | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ v2.5.1 | ✅ |
 
 ---

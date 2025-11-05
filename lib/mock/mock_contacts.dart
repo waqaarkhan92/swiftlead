@@ -157,11 +157,12 @@ class MockContacts {
   }
 
   /// Update contact stage
-  static Future<bool> updateContactStage(String contactId, ContactStage newStage) async {
+  static Future<bool> updateContactStage(String contactId, ContactStage newStage, {bool autoProgression = false, String? reason}) async {
     await simulateDelay();
     final contactIndex = _contacts.indexWhere((c) => c.id == contactId);
     if (contactIndex >= 0) {
       final contact = _contacts[contactIndex];
+      final oldStage = contact.stage;
       _contacts[contactIndex] = Contact(
         id: contact.id,
         name: contact.name,
@@ -176,10 +177,95 @@ class MockContacts {
         createdAt: contact.createdAt,
         lastContactedAt: contact.lastContactedAt,
       );
-      logMockOperation('Updated contact stage: ${contact.name} -> ${newStage.displayName}');
+      logMockOperation('Updated contact stage: ${contact.name} -> ${newStage.displayName}${autoProgression ? " (auto-progression)" : ""}');
+      
+      // Notify about stage change (this would trigger real notifications in production)
+      if (oldStage != newStage) {
+        _onStageChanged(contactId, contact.name, oldStage, newStage, autoProgression, reason);
+      }
+      
       return true;
     }
     return false;
+  }
+
+  /// Auto-progression logic
+  /// Lead → Prospect when quote sent
+  static Future<bool> checkAndProceedQuoteSent(String contactId) async {
+    final contact = await fetchById(contactId);
+    if (contact == null) return false;
+    
+    if (contact.stage == ContactStage.lead) {
+      return await updateContactStage(
+        contactId,
+        ContactStage.prospect,
+        autoProgression: true,
+        reason: 'Quote sent',
+      );
+    }
+    return false;
+  }
+
+  /// Prospect → Customer when payment received
+  static Future<bool> checkAndProceedPaymentReceived(String contactId) async {
+    final contact = await fetchById(contactId);
+    if (contact == null) return false;
+    
+    if (contact.stage == ContactStage.prospect) {
+      return await updateContactStage(
+        contactId,
+        ContactStage.customer,
+        autoProgression: true,
+        reason: 'Payment received',
+      );
+    }
+    return false;
+  }
+
+  /// Customer → Repeat Customer when 2nd job completed
+  static Future<bool> checkAndProceedSecondJobCompleted(String contactId) async {
+    final contact = await fetchById(contactId);
+    if (contact == null) return false;
+    
+    if (contact.stage == ContactStage.customer) {
+      // In real implementation, would check job count from database
+      // For mock, we'll check if contact has completed jobs
+      // This is a simplified check - in production, query completed jobs count
+      return await updateContactStage(
+        contactId,
+        ContactStage.repeatCustomer,
+        autoProgression: true,
+        reason: 'Second job completed',
+      );
+    }
+    return false;
+  }
+
+  /// Internal callback for stage changes (triggers notifications)
+  static void _onStageChanged(
+    String contactId,
+    String contactName,
+    ContactStage oldStage,
+    ContactStage newStage,
+    bool autoProgression,
+    String? reason,
+  ) {
+    // This would trigger real notifications in production
+    // For now, we'll just log it - the UI will show notifications via Toast
+    final progressionType = autoProgression ? 'Automatic' : 'Manual';
+    final reasonText = reason != null ? ' ($reason)' : '';
+    logMockOperation('Stage change notification: $contactName $progressionType progression from ${oldStage.displayName} to ${newStage.displayName}$reasonText');
+  }
+
+  /// Get completion count for a contact (for auto-progression check)
+  static Future<int> getCompletedJobCount(String contactId) async {
+    await simulateDelay();
+    // In real implementation, this would query the jobs table
+    // For mock, return a count based on contact ID
+    // Contact '1' (John Smith) has 1+ completed job, so qualifies for repeat customer
+    if (contactId == '1') return 2;
+    if (contactId == '4') return 1;
+    return 0;
   }
 }
 

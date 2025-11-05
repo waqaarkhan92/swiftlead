@@ -107,11 +107,242 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
   }
 
   void _showAddPaymentMethod() {
-    // TODO: Show add payment method sheet
-    Toast.show(
-      context,
-      message: 'Payment method setup coming soon',
-      type: ToastType.info,
+    String selectedType = 'Card';
+    final cardNumberController = TextEditingController();
+    final expiryMonthController = TextEditingController();
+    final expiryYearController = TextEditingController();
+    final cvvController = TextEditingController();
+    final holderNameController = TextEditingController();
+    final accountNumberController = TextEditingController();
+    final sortCodeController = TextEditingController();
+    final bankNameController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Add Payment Method'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Payment Method Type',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: SwiftleadTokens.spaceS),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Text('Card'),
+                        selected: selectedType == 'Card',
+                        onSelected: (selected) {
+                          setState(() {
+                            selectedType = 'Card';
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: SwiftleadTokens.spaceS),
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Text('Bank Account'),
+                        selected: selectedType == 'Bank Account',
+                        onSelected: (selected) {
+                          setState(() {
+                            selectedType = 'Bank Account';
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: SwiftleadTokens.spaceM),
+                if (selectedType == 'Card') ...[
+                  TextField(
+                    controller: cardNumberController,
+                    decoration: InputDecoration(
+                      labelText: 'Card Number',
+                      hintText: '1234 5678 9012 3456',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                      ),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: SwiftleadTokens.spaceS),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: expiryMonthController,
+                          decoration: InputDecoration(
+                            labelText: 'MM',
+                            hintText: '12',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                            ),
+                          ),
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                      const SizedBox(width: SwiftleadTokens.spaceS),
+                      Expanded(
+                        child: TextField(
+                          controller: expiryYearController,
+                          decoration: InputDecoration(
+                            labelText: 'YYYY',
+                            hintText: '2025',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                            ),
+                          ),
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                      const SizedBox(width: SwiftleadTokens.spaceS),
+                      Expanded(
+                        child: TextField(
+                          controller: cvvController,
+                          decoration: InputDecoration(
+                            labelText: 'CVV',
+                            hintText: '123',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                            ),
+                          ),
+                          keyboardType: TextInputType.number,
+                          obscureText: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: SwiftleadTokens.spaceS),
+                  TextField(
+                    controller: holderNameController,
+                    decoration: InputDecoration(
+                      labelText: 'Cardholder Name',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                      ),
+                    ),
+                  ),
+                ] else ...[
+                  TextField(
+                    controller: bankNameController,
+                    decoration: InputDecoration(
+                      labelText: 'Bank Name',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: SwiftleadTokens.spaceS),
+                  TextField(
+                    controller: accountNumberController,
+                    decoration: InputDecoration(
+                      labelText: 'Account Number',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                      ),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: SwiftleadTokens.spaceS),
+                  TextField(
+                    controller: sortCodeController,
+                    decoration: InputDecoration(
+                      labelText: 'Sort Code',
+                      hintText: '12-34-56',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                      ),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: SwiftleadTokens.spaceS),
+                  TextField(
+                    controller: holderNameController,
+                    decoration: InputDecoration(
+                      labelText: 'Account Holder Name',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (selectedType == 'Card') {
+                  final cardNumber = cardNumberController.text.replaceAll(' ', '');
+                  if (cardNumber.length >= 4) {
+                    final last4 = cardNumber.substring(cardNumber.length - 4);
+                    setState(() {
+                      _paymentMethods.add(
+                        _PaymentMethod(
+                          id: DateTime.now().millisecondsSinceEpoch.toString(),
+                          type: PaymentMethodType.card,
+                          last4: last4,
+                          expiryMonth: int.tryParse(expiryMonthController.text),
+                          expiryYear: int.tryParse(expiryYearController.text),
+                          isDefault: _paymentMethods.isEmpty,
+                          holderName: holderNameController.text.isNotEmpty
+                              ? holderNameController.text
+                              : 'Cardholder',
+                        ),
+                      );
+                    });
+                    Navigator.pop(context);
+                    Toast.show(
+                      context,
+                      message: 'Payment method added',
+                      type: ToastType.success,
+                    );
+                  }
+                } else {
+                  final accountNumber = accountNumberController.text;
+                  if (accountNumber.length >= 4) {
+                    final last4 = accountNumber.substring(accountNumber.length - 4);
+                    setState(() {
+                      _paymentMethods.add(
+                        _PaymentMethod(
+                          id: DateTime.now().millisecondsSinceEpoch.toString(),
+                          type: PaymentMethodType.bankAccount,
+                          last4: last4,
+                          isDefault: _paymentMethods.isEmpty,
+                          holderName: holderNameController.text.isNotEmpty
+                              ? holderNameController.text
+                              : 'Account Holder',
+                          bankName: bankNameController.text.isNotEmpty
+                              ? bankNameController.text
+                              : 'Bank',
+                        ),
+                      );
+                    });
+                    Navigator.pop(context);
+                    Toast.show(
+                      context,
+                      message: 'Bank account added',
+                      type: ToastType.success,
+                    );
+                  }
+                }
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

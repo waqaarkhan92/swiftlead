@@ -35,6 +35,29 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
   double _tax = 90.00;
   double _total = 540.00;
   DateTime _validUntil = DateTime.now().add(const Duration(days: 5));
+  int _viewCount = 12; // View count tracking
+  List<Map<String, dynamic>> _manualFollowUps = []; // Track manual follow-ups
+  
+  @override
+  void initState() {
+    super.initState();
+    // Feature 32: Quote Expiration Alerts - Check if expiring soon
+    _checkExpirationAlerts();
+  }
+  
+  void _checkExpirationAlerts() {
+    final daysRemaining = _validUntil.difference(DateTime.now()).inDays;
+    // Alert if expiring in 3 days or less
+    if (daysRemaining <= 3 && daysRemaining > 0 && _status == 'Sent') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Toast.show(
+          context,
+          message: 'Quote expires in $daysRemaining ${daysRemaining == 1 ? 'day' : 'days'}',
+          type: ToastType.warning,
+        );
+      });
+    }
+  }
 
 
   void _handleDeleteQuote() async {
@@ -99,6 +122,9 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
                     amount: _total,
                   );
                   break;
+                case 'resend':
+                  _handleOneClickResend();
+                  break;
                 case 'convert_job':
                   ConvertQuoteModal.show(
                     context: context,
@@ -124,6 +150,9 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
             },
             itemBuilder: (context) => [
               const PopupMenuItem(value: 'send', child: Text('Send Quote')),
+              // Feature 33: One-Click Resend
+              if (_status == 'Sent' || _status == 'Viewed')
+                const PopupMenuItem(value: 'resend', child: Text('Resend with Updated Expiry')),
               const PopupMenuItem(value: 'convert_job', child: Text('Convert to Job')),
               const PopupMenuItem(value: 'convert_invoice', child: Text('Convert to Invoice')),
               const PopupMenuItem(value: 'delete', child: Text('Delete')),
@@ -164,6 +193,10 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
 
         // QuoteChasers
         _buildChasersSection(),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+
+        // Feature 13: Quote Insights - AI analysis of acceptance patterns
+        _buildQuoteInsightsSection(),
       ],
     );
   }
@@ -353,6 +386,11 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
             label: 'Payment Terms',
             value: 'Net 15',
           ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
+          _InfoRow(
+            label: 'Views',
+            value: '$_viewCount times',
+          ),
         ],
       ),
     );
@@ -391,8 +429,183 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
             status: 'Scheduled',
             date: DateTime.now().add(const Duration(days: 7)),
           ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          // Manual Follow-ups List
+          if (_manualFollowUps.isNotEmpty) ...[
+            ..._manualFollowUps.map((followUp) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+                child: _ChaserItem(
+                  label: 'Manual Follow-up',
+                  status: followUp['sent'] == true ? 'Sent' : 'Pending',
+                  date: followUp['date'] as DateTime,
+                ),
+              );
+            }).toList(),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+          ],
+          // Manual Follow-up Button
+          PrimaryButton(
+            label: 'Send Manual Follow-up',
+            onPressed: () {
+              _handleManualFollowUp();
+            },
+            icon: Icons.send,
+          ),
         ],
       ),
+    );
+  }
+
+  void _handleManualFollowUp() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Send Manual Follow-up'),
+        content: const Text('Send a follow-up reminder to the client now?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // Save manual follow-up to state
+              setState(() {
+                _manualFollowUps.add({
+                  'date': DateTime.now(),
+                  'sent': true,
+                });
+              });
+              Toast.show(
+                context,
+                message: 'Manual follow-up sent',
+                type: ToastType.success,
+              );
+            },
+            child: const Text('Send'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Feature 13: Quote Insights - AI analysis of acceptance/decline patterns
+  Widget _buildQuoteInsightsSection() {
+    // Mock AI insights - in production would call AI service
+    final mockInsights = {
+      'acceptanceProbability': 0.72,
+      'typicalResponseTime': '2-3 days',
+      'similarQuotesAccepted': 18,
+      'similarQuotesDeclined': 7,
+      'recommendation': 'This quote has a 72% acceptance probability based on similar quotes. Consider following up in 2-3 days if no response.',
+    };
+
+    return FrostedContainer(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.insights,
+                  color: Color(SwiftleadTokens.primaryTeal),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: SwiftleadTokens.spaceS),
+              Text(
+                'Quote Insights',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ],
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(SwiftleadTokens.successGreen).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Acceptance Probability',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    Text(
+                      '${((mockInsights['acceptanceProbability'] as double) * 100).toInt()}%',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: const Color(SwiftleadTokens.successGreen),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: SwiftleadTokens.spaceS),
+                Text(
+                  mockInsights['recommendation'] as String,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildInsightMetric(
+                'Typical Response',
+                mockInsights['typicalResponseTime'] as String,
+                Icons.schedule,
+              ),
+              _buildInsightMetric(
+                'Similar Accepted',
+                '${mockInsights['similarQuotesAccepted']}',
+                Icons.check_circle,
+              ),
+              _buildInsightMetric(
+                'Similar Declined',
+                '${mockInsights['similarQuotesDeclined']}',
+                Icons.cancel,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInsightMetric(String label, String value, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, size: 24, color: const Color(SwiftleadTokens.primaryTeal)),
+        const SizedBox(height: SwiftleadTokens.spaceXS),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceXS),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall,
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 
@@ -412,6 +625,15 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
         label: const Text('Send Quote'),
         backgroundColor: const Color(SwiftleadTokens.primaryTeal),
       );
+    } else if (_status == 'Sent' || _status == 'Viewed') {
+      return FloatingActionButton.extended(
+        onPressed: () {
+          _handleAcceptQuoteWithDeposit();
+        },
+        icon: const Icon(Icons.check),
+        label: const Text('Accept Quote'),
+        backgroundColor: const Color(SwiftleadTokens.successGreen),
+      );
     } else if (_status == 'Accepted') {
       return FloatingActionButton.extended(
         onPressed: () {
@@ -429,6 +651,151 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
       );
     }
     return const SizedBox.shrink();
+  }
+
+  // Feature 33: One-Click Resend with updated expiry
+  void _handleOneClickResend() {
+    // Update expiry date to 30 days from now
+    setState(() {
+      _validUntil = DateTime.now().add(const Duration(days: 30));
+    });
+    
+    SendQuoteSheet.show(
+      context: context,
+      quoteId: widget.quoteId,
+      quoteNumber: widget.quoteNumber,
+      clientName: 'John Smith',
+      amount: _total,
+    );
+    
+    Toast.show(
+      context,
+      message: 'Quote resent with updated expiry date',
+      type: ToastType.success,
+    );
+  }
+
+  void _handleAcceptQuoteWithDeposit() {
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (dialogContext, setState) {
+          bool requireDeposit = false;
+          double depositAmount = _total * 0.5; // Default 50%
+          final depositController = TextEditingController(
+            text: depositAmount.toStringAsFixed(2),
+          );
+
+          return AlertDialog(
+            title: const Text('Accept Quote'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Accept quote #${widget.quoteNumber}?',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: SwiftleadTokens.spaceM),
+                  CheckboxListTile(
+                    title: const Text('Require Deposit Payment'),
+                    subtitle: const Text('Client must pay a deposit to accept'),
+                    value: requireDeposit,
+                    onChanged: (value) {
+                      setState(() {
+                        requireDeposit = value ?? false;
+                      });
+                    },
+                  ),
+                  if (requireDeposit) ...[
+                    const SizedBox(height: SwiftleadTokens.spaceS),
+                    TextFormField(
+                      controller: depositController,
+                      decoration: InputDecoration(
+                        labelText: 'Deposit Amount (£)',
+                        hintText: 'Enter deposit amount',
+                        prefixIcon: const Icon(Icons.payment),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                        ),
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (value) {
+                        final amount = double.tryParse(value) ?? 0.0;
+                        setState(() {
+                          depositAmount = amount;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: SwiftleadTokens.spaceS),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              depositAmount = _total * 0.25;
+                              depositController.text = depositAmount.toStringAsFixed(2);
+                              setState(() {});
+                            },
+                            child: const Text('25%'),
+                          ),
+                        ),
+                        const SizedBox(width: SwiftleadTokens.spaceS),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              depositAmount = _total * 0.5;
+                              depositController.text = depositAmount.toStringAsFixed(2);
+                              setState(() {});
+                            },
+                            child: const Text('50%'),
+                          ),
+                        ),
+                        const SizedBox(width: SwiftleadTokens.spaceS),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              depositAmount = _total;
+                              depositController.text = depositAmount.toStringAsFixed(2);
+                              setState(() {});
+                            },
+                            child: const Text('100%'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Cancel'),
+              ),
+              PrimaryButton(
+                label: 'Accept Quote',
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                  setState(() {
+                    _status = 'Accepted';
+                  });
+                  Toast.show(
+                    context,
+                    message: requireDeposit
+                        ? 'Quote accepted. Deposit payment link sent to client.'
+                        : 'Quote accepted',
+                    type: ToastType.success,
+                  );
+                },
+                icon: Icons.check,
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 
   Color _getStatusColor(String status) {

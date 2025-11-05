@@ -103,7 +103,7 @@ class SendQuoteSheet {
               Wrap(
                 spacing: SwiftleadTokens.spaceS,
                 runSpacing: SwiftleadTokens.spaceS,
-                children: ['SMS', 'Email', 'WhatsApp'].map((method) {
+                children: ['SMS', 'Email', 'WhatsApp', 'Inbox'].map((method) {
                   final isSelected = selectedMethods.contains(method);
                   return SwiftleadChip(
                     label: method,

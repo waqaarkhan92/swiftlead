@@ -9,6 +9,7 @@ import '../global/toast.dart';
 
 /// PaymentLinkSheet - Create and share payment link for invoice
 /// Exact specification from UI_Inventory_v2.5.1
+/// Feature 37: Quick Pay QR Code - QR code generation added
 class PaymentLinkSheet {
   static void show({
     required BuildContext context,
@@ -148,6 +149,84 @@ class PaymentLinkSheet {
                           },
                         ),
                       ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              
+              // Feature 37: Quick Pay QR Code
+              FrostedContainer(
+                padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Quick Pay QR Code',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: SwiftleadTokens.spaceM),
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                        ),
+                        child: Column(
+                          children: [
+                            // Placeholder QR Code - In production, use qr_flutter package
+                            Container(
+                              width: 200,
+                              height: 200,
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.qr_code,
+                                    size: 120,
+                                    color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.3),
+                                  ),
+                                  const SizedBox(height: SwiftleadTokens.spaceS),
+                                  Text(
+                                    'Scan to Pay',
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: SwiftleadTokens.spaceM),
+                            Text(
+                              '£${amount.toStringAsFixed(2)}',
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: const Color(SwiftleadTokens.primaryTeal),
+                              ),
+                            ),
+                            const SizedBox(height: SwiftleadTokens.spaceS),
+                            Text(
+                              'Invoice #$invoiceNumber',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: SwiftleadTokens.spaceM),
+                    Text(
+                      'Client can scan this QR code with their phone camera to pay instantly.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),

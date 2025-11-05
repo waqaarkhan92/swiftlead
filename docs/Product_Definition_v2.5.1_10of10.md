@@ -6,6 +6,8 @@
 
 > **📝 Document Updates Note:** This document has been updated to reflect the actual implementation. The Drawer / Secondary Navigation section (§21) now includes **Contacts**, **Marketing**, and **Reviews** in addition to the originally specified items (AI Hub, Reports & Analytics, Settings, Support & Help, Legal / Privacy). These updates align the specification with the current application implementation.
 
+> **🔄 Module Restructuring Note (v2.5.1):** Module 3.5 has been renamed to **"Money"** and now combines all features from the original Module 3.5 (Quotes & Estimates) and Module 3.6 (Invoices & Billing) into a single unified financial management module. All subsequent modules have been renumbered accordingly (3.6 → 3.7, 3.7 → 3.8, etc.). This aligns with the actual implementation where the Money screen contains tabs for Dashboard, Invoices, Quotes, Payments, and Deposits.
+
 > **v2.5.1 Enhancement Note:** Added comprehensive state handling (loading/empty/error), micro-interactions, smart suggestions, batch actions, keyboard shortcuts, offline support, accessibility enhancements, and improved data visualization across all modules. Synchronized with enhanced screen layouts and UI inventory.
 
 > **v2.5 Integration Note:** Document synchronized with premium layout component suite.  
@@ -18,7 +20,7 @@
 2. **Inbox** — Omni-Inbox unified messaging
 3. **Jobs** — Job management and tracking
 4. **Calendar** — Bookings and scheduling
-5. **Money** — Invoices & Billing
+5. **Money** — Quotes, Invoices & Billing
 
 ### Drawer / Secondary Navigation
 - **AI Hub** — AI tools and configuration
@@ -335,16 +337,17 @@ No extra tiers, no upsells — everything included.
 
 ---
 
-### 3.5 Quotes & Estimates
-**Purpose:** Professional quote generation with AI assistance, template library, and conversion tracking.
+### 3.5 Money (Quotes, Invoices & Billing)
+**Purpose:** Complete financial management hub combining professional quote generation, automated invoicing, payment processing, and financial analytics in one unified interface.
 
 **Core Capabilities:**
+
+#### Quotes & Estimates
 - **Quote Builder:**
   - Line-item editor with description, quantity, unit price
   - Add service categories
   - Labor tracking
   - Subtotal, tax, total calculation
-  - Discount application (% or fixed amount)
   - Expiry date
   - Terms and conditions
 - **AI Quote Assistant:**
@@ -353,91 +356,38 @@ No extra tiers, no upsells — everything included.
   - Identifies upsell opportunities
   - Flags missing items
   - Learns from accepted quotes
-- **Quote Templates:**
-  - Pre-built templates per service type
-  - Standard pricing packages (Basic / Standard / Premium)
-  - Quick modifications before sending
-  - Save custom templates
 - **Professional Presentation:**
-  - Branded PDF with logo and colors
-  - Include photos from Inbox or Jobs
   - Payment terms clearly stated
-  - Multiple service options (Good / Better / Best)
-  - Digital signature capture
 - **Quote Delivery:**
   - Send via email with preview link
   - Send via SMS with short link
   - Share via Inbox conversation
-  - Client views quote in branded portal
 - **Client Interaction:**
-  - Client views quote on mobile-friendly page
-  - Accept / Decline / Request Changes
-  - E-signature for acceptance
   - Deposit payment option
   - Countdown to expiry
 - **Quote Tracking:**
   - Status: Draft / Sent / Viewed / Accepted / Declined / Expired
   - View count tracking
-  - Time-on-page analytics
   - Follow-up reminders
 - **Quote Follow-Up:**
   - Automated follow-up sequences
   - Reminder at 3 days, 7 days before expiry
   - Manual follow-up prompts
   - Convert to job on acceptance
-- **Quote Variations:**
-  - Create multiple versions/options
-  - Side-by-side comparison for client
-  - Track which option selected
-- **Pricing Analytics:**
-  - Average quote value
-  - Acceptance rate by service type
-  - Time to acceptance
-  - Win/loss reasons
+- **Quote Insights:**
+  - AI analysis of quote acceptance/decline patterns
+  - Acceptance probability predictions
 
-**🆕 v2.5.1 Enhancements:**
-- **Smart Pricing:** Dynamic pricing based on demand, seasonality, client history
-- **Competitor Benchmarking:** Compare pricing to industry averages
-- **Bundle Builder:** Create service packages with discounts
-- **Visual Quote Editor:** Drag-drop line items with live preview
-- **Quote Expiration Alerts:** Notify team when quotes about to expire
-- **One-Click Resend:** Resend with updated expiry date
-- **Quote Insights:** AI analysis of why quotes accepted/declined
-- **Quick Quote:** Generate quote from message in under 60 seconds
-- **Mobile Optimized:** Full quote builder on mobile
-- **Multi-Currency:** Support for different currencies
-
-**Interactions:**
-- Create quote from Inbox conversation or Job
-- Tap to add/edit line items
-- Toggle between detailed and summary view
-- Preview before sending
-- Track delivery and viewing
-- Follow up with one tap
-- Convert accepted quote to job/invoice
-
-**UI Components:** QuoteBuilder, LineItemEditor, PricingOptimizer, QuoteStatusBadge, AcceptanceWidget, FollowUpScheduler
-
----
-
-### 3.6 Invoices & Billing
-**Purpose:** Automated invoicing with multiple payment methods, recurring billing, and reconciliation.
-
-**Core Capabilities:**
+#### Invoices & Billing
 - **Invoice Creation:**
   - Manual creation
   - Auto-generate from job completion
   - Convert from quote
-  - Import from template
-  - Batch invoicing
 - **Invoice Details:**
-  - Professional branded design
   - Line items from job/quote
   - Labor, fees
   - Tax calculation (VAT, sales tax)
-  - Discounts and adjustments
   - Payment terms (Due on receipt / Net 7/15/30)
-  - Late payment fees
   - Notes and terms
 - **Flexible Payment Options:**
   - Credit/Debit cards via Stripe
@@ -450,80 +400,88 @@ No extra tiers, no upsells — everything included.
 - **Payment Processing:**
   - Integrated Stripe checkout
   - Store cards securely for repeat clients
-  - Contactless payments via Stripe Terminal (if available)
   - Payment links sent via email/SMS
-  - One-click payment for clients
   - 3D Secure authentication
 - **Recurring Invoices:**
   - Define billing schedule
   - Automatic generation and sending
-  - Auto-charge stored payment methods
-  - Failed payment handling
   - Subscription management
 - **Payment Tracking:**
   - Status: Draft / Sent / Viewed / Partially Paid / Paid / Overdue / Void
   - Payment history per invoice
-  - Automatic status updates
   - Payment reminders automation
 - **Reminders & Collections:**
   - Automated payment reminders (due date, 7 days overdue, 14 days overdue)
-  - Customizable reminder templates
-  - Escalation workflows
-  - Late fee application
-  - Mark as uncollectible
 - **Receipts:**
-  - Auto-generate on payment
-  - Email receipt immediately
-  - Downloadable PDF
   - Include payment method details
-- **Financial Dashboard:**
+
+#### Financial Dashboard
+- **Overview Metrics:**
   - Outstanding invoices
   - Revenue by period
   - Average invoice value
   - Days to payment
   - Overdue amount
   - Cash flow projection
-- **Reporting:**
-  - Income by service type
-  - Payment method breakdown
-  - Client payment history
-  - Tax reports
-  - Export to accounting software
-- **Multi-Currency:**
-  - Support for multiple currencies
-  - Exchange rate handling
-  - Currency conversion
+- **Revenue Analytics:**
+  - This week vs last week
+  - This month vs last month
+  - Year-to-date revenue
+  - Revenue by service type (chart)
+  - Average job value
+- **Quick Stats:**
+  - Pending Quotes (count + value)
+  - Overdue Invoices (count + total amount)
+  - Active Payments (count + total)
+  - Deposits Pending (count + total)
 
 **🆕 v2.5.1 Enhancements:**
+
+#### Quotes Enhancements
+- **AI Quote Assistant:** Analyzes job description, suggests line items, pricing recommendations, upsell opportunities
+- **Smart Pricing:** Dynamic pricing based on demand, seasonality, client history
+- **Visual Quote Editor:** Drag-drop line items with live preview
+- **Quote Expiration Alerts:** Notify team when quotes about to expire
+- **One-Click Resend:** Resend with updated expiry date
+- **Quote Insights:** AI analysis of why quotes accepted/declined
+- **Quick Quote:** Generate quote from message in under 60 seconds
+- **Mobile Optimized:** Full quote builder on mobile
+
+#### Invoices & Billing Enhancements
 - **Smart Invoice Timing:** AI suggests optimal send time for payment
 - **Payment Plans:** Flexible installment options with auto-billing
 - **Quick Pay QR Code:** Generate QR code for instant payment
 - **Offline Payments:** Record cash/check payments offline, sync later
 - **Batch Actions:** Send reminders or mark paid for multiple invoices
-- **Payment Analytics:** Track payment behavior and predict collection
-- **Client Portal:** Clients view all invoices and payment history
-- **Auto-Reconciliation:** Match payments to invoices automatically
-- **Early Payment Incentives:** Offer discounts for early payment
-- **Invoice Disputes:** Allow clients to dispute with structured workflow
+
+#### Financial Dashboard Enhancements
+- **Date Range Selector:** Compare any period (today, week, month, quarter, year, custom)
+- **Real-Time Refresh:** Live updates without manual refresh
 
 **Interactions:**
+- Create quote from Inbox conversation or Job
 - Create invoice from job or quote
-- Edit line items and amounts
+- Tap to add/edit line items
+- Toggle between detailed and summary view
 - Preview before sending
-- Send via email/SMS
-- Track invoice status
+- Track delivery and viewing
+- Follow up with one tap
+- Convert accepted quote to job/invoice
 - Record payments manually
 - Void or refund
 - Download PDF
 - Email reminders
+- Pull-to-refresh to update all stats
+- Tap any card to drill into details
+- Filter by date range, status, or type
 
-**UI Components:** InvoiceBuilder, PaymentWidget, StatusTracker, ReminderScheduler, ReceiptViewer, FinancialDashboard
+**UI Components:** QuoteBuilder, InvoiceBuilder, LineItemEditor, PaymentWidget, PricingOptimizer, QuoteStatusBadge, InvoiceStatusBadge, AcceptanceWidget, FollowUpScheduler, StatusTracker, ReminderScheduler, ReceiptViewer, FinancialDashboard, RevenueChart, MetricCard
 
 ---
 
 #### [Enhanced Addendum — New Module: Contacts/CRM]
 
-### 3.7 Contacts / CRM (COMPLETE SPECIFICATION)
+### 3.6 Contacts / CRM (COMPLETE SPECIFICATION)
 
 **Purpose:** Comprehensive contact relationship management with lifecycle tracking, segmentation, and 360° customer view.
 
@@ -534,9 +492,6 @@ No extra tiers, no upsells — everything included.
 - Flexible tagging for categorization
 - Source tracking (web form, referral, ad, walk-in)
 - VIP/priority status flags
-- Preferred contact method and times
-- Language preference
-- Do-not-contact flags with reason tracking
 
 ### Contact Lifecycle Stages
 **Stages:** Lead → Prospect → Customer → Repeat Customer → Advocate → Inactive/Lost
@@ -558,24 +513,14 @@ Unified view of ALL interactions:
 - Reviews given
 - Notes from team members
 - Email opens and link clicks
-- Form submissions
 - Chronological with filtering by type
-- Export timeline as PDF report
 
 ### Contact Scoring & Qualification
 **Automatic Lead Scoring:**
 - Points for engagement (email open: +5, reply: +10, booking: +50)
 - Points for demographic fit (in service area: +15, target industry: +20)
 - Points for intent (quote requested: +30, pricing page visited: +10)
-- Score decay over time (reduce if no activity for 30 days)
 - Hot/Warm/Cold classification
-
-**Manual Qualification:**
-- Budget range
-- Timeline/urgency
-- Decision-making authority
-- Pain points/needs
-- Competitors being considered
 
 ### Segmentation & Filtering
 **Smart Segments:**
@@ -583,22 +528,12 @@ Unified view of ALL interactions:
 - Custom segments with boolean logic (AND/OR/NOT)
 - Filter by: stage, source, tags, custom fields, behavior, location
 - Save segments for reuse
-- Dynamic auto-updating segments
-- Use segments for targeted campaigns
-
-### Contact Relationships
-- Household/family members (residential services)
-- Company hierarchy (decision maker, influencer, gatekeeper)
-- Referral relationships (who referred whom)
-- Service provider relationships
-- Visualize relationship network
 
 ### Duplicate Detection & Merge
 - Match on phone, email, name similarity
 - Fuzzy matching algorithm with confidence scores
 - Review suggested duplicates
 - Merge wizard preserves all history
-- Undo merge within 30 days
 
 ### Bulk Import & Export
 **Import Wizard:**
@@ -610,14 +545,11 @@ Unified view of ALL interactions:
 6. Choose: Create new, update, or skip duplicates
 7. Background processing for large imports
 8. Email notification with error report
-9. Import templates for common sources
 
 **Export Options:**
 - Export all or filtered segment
 - Select fields to include
 - Format: CSV, Excel, vCard
-- Schedule automated exports
-- GDPR-compliant full data export
 
 ### Contact Notes & Collaboration
 - Team notes visible to all
@@ -627,29 +559,11 @@ Unified view of ALL interactions:
 - Pin important notes
 - Search notes across all contacts
 
-### Communication Preferences
-- Preferred contact method
-- Best time to contact
-- Timezone handling
-- Do-not-contact windows
-- Unsubscribe management per channel
-- GDPR consent tracking with audit log
-
-### Contact Insights (AI-Powered)
-- Predict churn risk
-- Suggest next best action
-- Identify upsell opportunities
-- Detect sentiment from message history
-- Calculate lifetime value
-- Engagement health score
-
 ### Custom Fields System
 - Create unlimited custom fields
 - Field types: Text, Number, Date, Dropdown, Multi-Select, Checkbox, URL
 - Required vs optional
-- Field visibility rules per profession
 - Use in segmentation and reporting
-- Bulk edit across multiple contacts
 
 **Backend Tables:**
 - `contacts` *(enhanced with new fields)*
@@ -658,10 +572,8 @@ Unified view of ALL interactions:
 - `contact_stages` *(new)*
 - `contact_scores` *(new)*
 - `contact_segments` *(new)*
-- `contact_relationships` *(new)*
 - `contact_timeline` *(view)*
 - `contact_notes` *(existing, enhanced)*
-- `contact_preferences` *(new)*
 - `import_jobs` *(new)*
 
 **Edge Functions:**
@@ -670,13 +582,12 @@ Unified view of ALL interactions:
 - `merge-contacts`
 - `import-contacts`
 - `export-contacts`
-- `suggest-next-action` (AI)
 
 ---
 
 #### [Enhanced Addendum — New Module: Marketing]
 
-### 3.8 Marketing / Campaigns (COMPLETE SPECIFICATION)
+### 3.7 Marketing / Campaigns (COMPLETE SPECIFICATION)
 
 **Purpose:** Multi-channel marketing automation with campaign builder, segmentation, and attribution.
 
@@ -833,7 +744,7 @@ Pre-built templates:
 
 #### [Enhanced Addendum — Enhanced Module: Notifications]
 
-### 3.9 Notifications System (ENHANCED SPECIFICATION)
+### 3.8 Notifications System (ENHANCED SPECIFICATION)
 
 **Purpose:** Intelligent multi-channel notification delivery with granular preferences and smart batching.
 
@@ -925,7 +836,7 @@ Pre-built templates:
 
 #### [Enhanced Addendum — New Module: Import/Export]
 
-### 3.10 Data Import / Export (COMPLETE SPECIFICATION)
+### 3.9 Data Import / Export (COMPLETE SPECIFICATION)
 
 **Purpose:** Bulk data operations for migration, backups, and integrations.
 
@@ -989,7 +900,7 @@ Pre-built templates:
 
 ---
 
-### 3.11 Dashboard (Home Screen)
+### 3.10 Dashboard (Home Screen)
 **Purpose:** At-a-glance business health overview with actionable insights and quick access to key metrics.
 
 **Core Capabilities:**
@@ -1037,10 +948,8 @@ Pre-built templates:
   - Conflicts or double-bookings flagged
 
 **🆕 v2.5.1 Enhancements:**
-- **Customizable Widget Layout:** Drag-and-drop to rearrange dashboard cards
 - **Date Range Selector:** Compare any period (today, week, month, quarter, year, custom)
 - **Goal Tracking:** Set revenue/booking goals and track progress
-- **Export Dashboard:** Download dashboard as PDF report
 - **Real-Time Refresh:** Live updates without manual refresh
 - **Smart Notifications:** Critical alerts highlighted at top
 - **Performance Badges:** Achievements and milestones celebrated
@@ -1060,7 +969,7 @@ Pre-built templates:
 
 ---
 
-### 3.12 AI Hub
+### 3.11 AI Hub
 **Purpose:** Central configuration and monitoring for all AI-powered features in Swiftlead.
 
 **Core Capabilities:**
@@ -1134,7 +1043,7 @@ Pre-built templates:
 
 ---
 
-### 3.13 Settings & Configuration
+### 3.12 Settings & Configuration
 **Purpose:** Organization-wide settings, team management, integrations, and preferences.
 
 **Core Capabilities:**
@@ -1224,7 +1133,7 @@ Pre-built templates:
 
 ---
 
-### 3.14 Adaptive Profession System
+### 3.13 Adaptive Profession System
 **Purpose:** Configure Swiftlead to match industry-specific terminology and workflows.
 
 **Core Capabilities:**
@@ -1251,8 +1160,6 @@ Pre-built templates:
   - Quote expiry periods
   - Reminder timing
 - **Template Library:**
-  - Industry-specific quote templates
-  - Invoice templates
   - Email templates
   - Message templates
 
@@ -1273,7 +1180,7 @@ Pre-built templates:
 
 ---
 
-### 3.15 Onboarding Flow
+### 3.14 Onboarding Flow
 **Purpose:** Seamless setup wizard for new users to get started quickly.
 
 **Core Capabilities:**
@@ -1328,7 +1235,7 @@ Pre-built templates:
 
 ---
 
-### 3.16 Platform Integrations
+### 3.15 Platform Integrations
 **Purpose:** Connect Swiftlead with essential external services for seamless workflow.
 
 **Core Capabilities:**
@@ -1381,7 +1288,7 @@ Pre-built templates:
 
 ---
 
-### 3.17 Reports & Analytics
+### 3.16 Reports & Analytics
 **Purpose:** Comprehensive business intelligence with customizable reports and data visualization.
 
 **Core Capabilities:**
@@ -1929,11 +1836,11 @@ Swiftlead gives every service business the power and polish of an enterprise sys
 - **Responsive Design:** Optimised layouts for mobile, tablet, desktop.
 - **Reliability:** 99.9 % uptime target, health checks, auto-failover.
 
-*This completes Module 17 for cross-reference alignment.*
+*This completes Non-Functional / Accessibility section for cross-reference alignment.*
 
 ---
 
-*All other modules (§3.1 Inbox, §3.2 AI, §3.3 Jobs, §3.4 Bookings, §3.5 Quotes, §3.6 Invoices, §3.11 Dashboard, §3.12 AI Hub, §3.13 Settings, §3.14 Adaptive Profession, §3.15 Onboarding, §3.16 Integrations, §3.17 Non-Functional) remain as fully specified and are production-ready.*
+*All other modules (§3.1 Inbox, §3.2 AI, §3.3 Jobs, §3.4 Bookings, §3.5 Money, §3.6 Contacts, §3.7 Marketing, §3.8 Notifications, §3.9 Data Import/Export, §3.10 Dashboard, §3.11 AI Hub, §3.12 Settings, §3.13 Adaptive Profession, §3.14 Onboarding, §3.15 Integrations, §3.16 Reports & Analytics) remain as fully specified and are production-ready.*
 
 *Version 2.5.1 Master — Merged November 2025 (Complete Specification with enhancements + Enhanced addenda integrated)*
 

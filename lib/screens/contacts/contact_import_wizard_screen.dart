@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/primary_button.dart';
-import '../../widgets/global/progress_bar.dart';
 import '../../widgets/global/info_banner.dart';
 import '../../theme/tokens.dart';
 import 'contact_import_results_screen.dart';
@@ -20,6 +19,7 @@ class _ContactImportWizardScreenState extends State<ContactImportWizardScreen> {
   int _currentStep = 0;
   final int _totalSteps = 4;
   bool _isProcessing = false;
+  String _duplicateHandling = 'create_new'; // 'create_new', 'update_existing', 'skip'
 
   @override
   Widget build(BuildContext context) {
@@ -278,6 +278,23 @@ class _ContactImportWizardScreenState extends State<ContactImportWizardScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
+                'Duplicates',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              Text(
+                '8',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: const Color(SwiftleadTokens.warningYellow),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
                 'Errors',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
@@ -289,6 +306,57 @@ class _ContactImportWizardScreenState extends State<ContactImportWizardScreen> {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          
+          // Duplicate Handling Options
+          Text(
+            'Handle Duplicates',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
+          InfoBanner(
+            message: '8 contacts match existing records. Choose how to handle them.',
+            type: InfoBannerType.info,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          RadioListTile<String>(
+            title: const Text('Create New Contacts'),
+            subtitle: const Text('Import all contacts, creating duplicates'),
+            value: 'create_new',
+            groupValue: _duplicateHandling,
+            onChanged: (value) {
+              setState(() {
+                _duplicateHandling = value!;
+              });
+            },
+            contentPadding: EdgeInsets.zero,
+          ),
+          RadioListTile<String>(
+            title: const Text('Update Existing Contacts'),
+            subtitle: const Text('Update existing contacts with import data'),
+            value: 'update_existing',
+            groupValue: _duplicateHandling,
+            onChanged: (value) {
+              setState(() {
+                _duplicateHandling = value!;
+              });
+            },
+            contentPadding: EdgeInsets.zero,
+          ),
+          RadioListTile<String>(
+            title: const Text('Skip Duplicates'),
+            subtitle: const Text('Skip duplicate contacts during import'),
+            value: 'skip',
+            groupValue: _duplicateHandling,
+            onChanged: (value) {
+              setState(() {
+                _duplicateHandling = value!;
+              });
+            },
+            contentPadding: EdgeInsets.zero,
           ),
         ],
       ),

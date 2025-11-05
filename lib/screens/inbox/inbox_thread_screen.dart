@@ -9,6 +9,7 @@ import '../../widgets/components/media_thumbnail.dart';
 import '../../widgets/components/media_preview_modal.dart';
 import '../../widgets/forms/smart_reply_suggestions_sheet.dart';
 import '../../widgets/global/toast.dart';
+import '../../widgets/global/primary_button.dart';
 import '../../theme/tokens.dart';
 import '../quotes/create_edit_quote_screen.dart';
 import '../jobs/create_edit_job_screen.dart';
@@ -616,25 +617,130 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
     );
   }
 
+  // Feature 34: Quick Quote - Generate quote from message in under 60 seconds
   void _handleCreateQuoteFromInbox() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CreateEditQuoteScreen(
-          initialData: {
-            'clientName': 'John Smith', // Would come from thread data
-            'notes': 'Quote from ${widget.channel} conversation',
-            'taxRate': 20.0,
-          },
+    // Show quick quote sheet with pre-filled data
+    _showQuickQuoteSheet();
+  }
+
+  void _showQuickQuoteSheet() {
+    final descriptionController = TextEditingController();
+    final amountController = TextEditingController();
+    
+    // Pre-fill from last message if available
+    if (_loadedMessages.isNotEmpty) {
+      final lastMessage = _loadedMessages.last;
+      descriptionController.text = lastMessage.content.length > 100 
+          ? '${lastMessage.content.substring(0, 100)}...' 
+          : lastMessage.content;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Quick Quote',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                children: [
+                  Text(
+                    'Create a quote for ${widget.contactName} in seconds',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: SwiftleadTokens.spaceL),
+                  TextField(
+                    controller: descriptionController,
+                    decoration: InputDecoration(
+                      labelText: 'Service Description',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                      ),
+                      hintText: 'Describe the service needed',
+                    ),
+                    maxLines: 3,
+                  ),
+                  const SizedBox(height: SwiftleadTokens.spaceM),
+                  TextField(
+                    controller: amountController,
+                    decoration: InputDecoration(
+                      labelText: 'Amount (£)',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                      ),
+                      prefixText: '£ ',
+                      hintText: '0.00',
+                    ),
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  ),
+                  const SizedBox(height: SwiftleadTokens.spaceL),
+                  PrimaryButton(
+                    label: 'Create Quote',
+                    icon: Icons.description,
+                    onPressed: () {
+                      final amount = double.tryParse(amountController.text) ?? 0.0;
+                      if (descriptionController.text.isEmpty || amount <= 0) {
+                        Toast.show(
+                          context,
+                          message: 'Please fill in description and amount',
+                          type: ToastType.error,
+                        );
+                        return;
+                      }
+                      
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CreateEditQuoteScreen(
+                            initialData: {
+                              'clientName': widget.contactName,
+                              'description': descriptionController.text,
+                              'amount': amount,
+                              'notes': 'Quick quote from ${widget.channel} conversation',
+                            },
+                          ),
+                        ),
+                      ).then((_) {
+                        Toast.show(
+                          context,
+                          message: 'Quote created in seconds!',
+                          type: ToastType.success,
+                        );
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
-    ).then((_) {
-      Toast.show(
-        context,
-        message: 'Quote created from conversation',
-        type: ToastType.success,
-      );
-    });
+    );
   }
 
   void _handleCreateJobFromInbox() {

@@ -162,7 +162,7 @@ class PaymentRequestModal {
             Wrap(
               spacing: SwiftleadTokens.spaceS,
               runSpacing: SwiftleadTokens.spaceS,
-              children: ['Stripe Link', 'Cash', 'Bank Transfer'].map((method) {
+              children: ['Stripe Link', 'Cash', 'Check', 'Bank Transfer'].map((method) {
                 final isSelected = selectedMethod == method;
                 return GestureDetector(
                   onTap: () {

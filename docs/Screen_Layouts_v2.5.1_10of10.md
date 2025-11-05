@@ -323,7 +323,7 @@ Complete visual specification for screen layouts, component hierarchies, and int
 **Sections:**
 
 1. **FrostedAppBar** → back button, job title, edit icon, overflow menu
-   - Overflow: Share, Duplicate, Export, Delete
+   - Overflow: Share, Duplicate, Delete
 2. **JobSummaryCard** → Key information at top
    - **ClientInfo:** Avatar, name, phone, email (tap to call/message)
    - **ServiceBadge:** Type of service
@@ -610,34 +610,41 @@ Complete visual specification for screen layouts, component hierarchies, and int
 
 ---
 
-### 5. MoneyScreen (Payments & Finance)
+### 5. MoneyScreen (Quotes, Invoices & Payments)
 
-**Purpose:** Financial overview with transaction history and quick payment actions.
+**Purpose:** Financial overview with quotes, invoices, transaction history, and quick payment actions.
 
 **Sections:**
 
-1. **FrostedAppBar** → date range filter, export button, search
-2. **BalanceHeader** → Large numeric display
+1. **FrostedAppBar** → date range filter, search
+2. **TabBar** → SegmentedControl with tabs: Dashboard | Quotes | Invoices | Payments | Deposits
+2. **Quotes Tab** (if Quotes tab selected)
+   - **QuotesListView** → List of quotes with status filters (All/Draft/Sent/Viewed/Accepted/Declined/Expired)
+   - **QuoteCard** → Shows client, amount, status, expiry date, quick actions
+   - **FAB** → "+ New Quote" with quick actions: "From Job", "From Template", "Blank"
+3. **Invoices Tab** (if Invoices tab selected)
+   - **InvoiceListView** → List of invoices with status filters (All/Paid/Pending/Overdue)
+4. **Dashboard Tab** (default, if Dashboard tab selected)
+   - **BalanceHeader** → Large numeric display
    - **TotalBalance:** Large bold number with currency symbol
    - **TrendIndicator:** ↑ 12% vs last month (green) or ↓ 5% (red)
    - **QuickActions:** "Send Invoice", "Request Payment", "Add Expense"
    - **StripeConnectionStatus:** "Connected to Stripe" with checkmark (or connect CTA)
-3. **MetricsRow** → 4 key financial metrics
+5. **MetricsRow** → 4 key financial metrics (Dashboard tab only)
    - **Outstanding:** Amount not yet paid (with count)
    - **Paid This Month:** Total received
    - **Pending:** In processing
    - **Overdue:** Late payments (with count and red highlight)
    - Each metric tappable for filtered view
-4. **RevenueBreakdownChart** → Interactive visualization
+6. **RevenueBreakdownChart** → Interactive visualization (Dashboard tab only)
    - **ChartTypeSwitcher:** Line / Bar / Donut toggle
    - **TimePeriod Selector:** 7D / 30D / 90D / 1Y / All
    - **Interactive Legend:** Tap to hide/show data series
    - **Tooltip:** Hover/tap data points for exact values
-   - **Export:** Download as image or data
-5. **TransactionFilterChips** → Quick filters
+7. **TransactionFilterChips** → Quick filters (Payments tab only)
    - All | Paid | Pending | Overdue | Refunded
    - Badge shows count per status
-6. **PaymentList** → Transaction history
+8. **PaymentList** → Transaction history (Payments tab only)
    - **PaymentTile:** Contains:
      - **ClientInfo:** Avatar + name
      - **Amount:** Bold with currency
@@ -650,7 +657,7 @@ Complete visual specification for screen layouts, component hierarchies, and int
    - Swipe right to resend payment link
    - Tap to view full invoice
    - Pull-to-refresh syncs with Stripe
-7. **FloatingActionButton** → "+ Payment"
+9. **FloatingActionButton** → "+ New" (context-aware: Quote/Invoice/Payment based on active tab)
    - Quick actions: "Send Invoice", "Payment Link", "Record Cash Payment"
 
 **Components Used:**
@@ -673,12 +680,12 @@ Complete visual specification for screen layouts, component hierarchies, and int
 - **Payment Reconciliation:** Auto-match payments to invoices
 - **Expense Tracking:** Record business expenses for profit tracking
 - **Tax Export:** Generate tax-ready reports
-- **Currency Conversion:** Multi-currency support with live rates
+
 - **Recurring Payments:** Setup subscription-like recurring invoices
 - **Payment Plans:** Split large invoices into installments
 - **Custom Payment Terms:** Net 15/30/60 with auto-reminders
 - **Refund Workflow:** Track partial/full refunds with reasons
-- **Keyboard Shortcuts (Web):** `I` = New invoice, `P` = Payment link, `E` = Export
+- **Keyboard Shortcuts (Web):** `I` = New invoice, `P` = Payment link
 
 **Behaviour Notes:**
 - Balance animates count-up on load
@@ -795,7 +802,7 @@ Complete visual specification for screen layouts, component hierarchies, and int
 
 **Sections:**
 
-1. **FrostedAppBar** → date range picker, export button
+1. **FrostedAppBar** → date range picker
 2. **ReportTypeTabs** → SegmentedControl
    - Overview | Revenue | Jobs | Clients | AI Performance
 3. **KPISummaryRow** → Top-level metrics
@@ -811,7 +818,6 @@ Complete visual specification for screen layouts, component hierarchies, and int
    - **Response Times:** Average by channel (line)
    - **Conversion Rates:** Inquiry → booking → payment (funnel)
    - Each chart interactive with drill-down
-   - Export individual charts as image/PDF
 5. **DataTableSection** → Detailed breakdowns
    - **Top Services:** Service type + count + revenue
    - **Top Clients:** Client + lifetime value + jobs count
@@ -825,7 +831,6 @@ Complete visual specification for screen layouts, component hierarchies, and int
    - **Outcome:** Successful/failed + result
    - **LinkedConversation:** Link to thread
    - Search and filter capabilities
-7. **ExportSection** → Download options
    - Format: PDF / Excel / CSV
    - Data range selector
    - Email report toggle
@@ -841,7 +846,6 @@ Complete visual specification for screen layouts, component hierarchies, and int
 - DateRangePicker (filter)
 - SegmentedControl (report types)
 - Badge (comparison indicators)
-- ExportButton (download reports)
 
 **Enhancements (v2.5.1):**
 - **Custom Reports:** Build reports with drag-drop metrics
@@ -853,7 +857,7 @@ Complete visual specification for screen layouts, component hierarchies, and int
 - **Attribution:** Which channels drive most revenue
 - **Team Performance:** Individual team member stats (if multi-user)
 - **Break-Even Analysis:** Calculate profitability per job
-- **Keyboard Shortcuts (Web):** `E` = Export, `R` = Refresh, `D` = Change date range
+- **Keyboard Shortcuts (Web):** `R` = Refresh, `D` = Change date range
 
 **Behaviour Notes:**
 - TrendTile shows mini KPI comparisons with arrow up/down icons
@@ -869,7 +873,6 @@ Complete visual specification for screen layouts, component hierarchies, and int
 | Loading | Skeleton metrics + charts | None | Progressive: KPIs → charts → tables |
 | Insufficient Data | "Not enough data yet" + info | "View Requirements" | Explains minimum data needed (e.g., 7 days) |
 | No Data | "No activity in this period" | "Change Date Range" | Suggests expanding date range |
-| Export Progress | Progress bar "Generating report... 45%" | "Cancel" | Shows export progress, allows cancel |
 | Error | "Failed to load reports" | "Try Again" | Retry preserves filters and date range |
 
 ---

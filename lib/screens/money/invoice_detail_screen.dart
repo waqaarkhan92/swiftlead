@@ -37,6 +37,7 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
   double _total = 540.00;
   double _amountPaid = 0.0;
   double _amountDue = 540.00;
+  List<Map<String, dynamic>> _splitPayments = []; // Track split payments
 
   @override
   void initState() {
@@ -262,6 +263,48 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
             },
           ),
         if (_status == 'Pending' || _status == 'Overdue')
+          const SizedBox(height: SwiftleadTokens.spaceM),
+        // Split Payment Button
+        if (_status == 'Pending' || _status == 'Overdue')
+          OutlinedButton.icon(
+            onPressed: () {
+              _showSplitPaymentDialog();
+            },
+            icon: const Icon(Icons.account_balance_wallet),
+            label: const Text('Record Split Payment'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+            ),
+          ),
+        if (_status == 'Pending' || _status == 'Overdue')
+          const SizedBox(height: SwiftleadTokens.spaceM),
+        // Feature 36: Payment Plans
+        if (_status == 'Pending' || _status == 'Overdue')
+          OutlinedButton.icon(
+            onPressed: () {
+              _showPaymentPlanDialog();
+            },
+            icon: const Icon(Icons.calendar_today),
+            label: const Text('Set Up Payment Plan'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+            ),
+          ),
+        if (_status == 'Pending' || _status == 'Overdue')
+          const SizedBox(height: SwiftleadTokens.spaceM),
+        // Feature 38: Offline Payment
+        if (_status == 'Pending' || _status == 'Overdue')
+          OutlinedButton.icon(
+            onPressed: () {
+              _showOfflinePaymentDialog();
+            },
+            icon: const Icon(Icons.payment),
+            label: const Text('Record Offline Payment'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+            ),
+          ),
+        if (_status == 'Pending' || _status == 'Overdue')
           const SizedBox(height: SwiftleadTokens.spaceL),
 
         // PaymentHistory
@@ -269,6 +312,10 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
           _buildPaymentHistory(),
           const SizedBox(height: SwiftleadTokens.spaceL),
         ],
+
+        // Feature 14: Bank Transfer Details Section
+        _buildBankDetailsSection(),
+        const SizedBox(height: SwiftleadTokens.spaceL),
 
         // Payment Reminders Timeline
         if (_status != 'Paid') ...[
@@ -278,6 +325,10 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
 
         // TermsAndNotes
         _buildTermsCard(),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+
+        // Feature 14: Smart Invoice Timing - AI suggests optimal send time
+        if (_status == 'Draft') _buildSmartInvoiceTimingSection(),
       ],
     );
   }
@@ -490,6 +541,34 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
   }
 
   Widget _buildPaymentHistory() {
+    final allPayments = <Map<String, dynamic>>[];
+    
+    // Add existing payment if any
+    if (_amountPaid > 0 && _splitPayments.isEmpty) {
+      allPayments.add({
+        'date': DateTime.now().subtract(const Duration(days: 2)),
+        'amount': _amountPaid,
+        'method': 'Stripe (Card)',
+        'status': 'Completed',
+        'details': 'Visa ending in 4242',
+      });
+    }
+    
+    // Add split payments
+    for (var split in _splitPayments) {
+      allPayments.add({
+        'date': split['date'] as DateTime,
+        'amount': split['amount'] as double,
+        'method': '${split['method']}',
+        'status': 'Completed',
+        'details': split['method'] == 'Bank Transfer' 
+            ? 'HSBC • Account ending in 1234 • Sort Code: 12-34-56' 
+            : split['method'] == 'Card' 
+                ? 'Visa ending in 4242'
+                : null,
+      });
+    }
+    
     return FrostedContainer(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -500,12 +579,26 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
-          _PaymentHistoryItem(
-            date: DateTime.now().subtract(const Duration(days: 2)),
-            amount: _amountPaid,
-            method: 'Stripe',
-            status: 'Completed',
-          ),
+          if (allPayments.isEmpty)
+            Text(
+              'No payments recorded yet',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6),
+              ),
+            )
+          else
+            ...allPayments.map((payment) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+                child: _PaymentHistoryItem(
+                  date: payment['date'] as DateTime,
+                  amount: payment['amount'] as double,
+                  method: payment['method'] as String,
+                  status: payment['status'] as String,
+                  paymentMethodDetails: payment['details'] as String?,
+                ),
+              );
+            }).toList(),
         ],
       ),
     );
@@ -529,6 +622,432 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
     ];
 
     return ChaseHistoryTimeline(chaseRecords: chaseRecords);
+  }
+
+  void _showSplitPaymentDialog() {
+    final TextEditingController amountController = TextEditingController();
+    String selectedMethod = 'Cash';
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Record Split Payment'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Amount Due: £${_amountDue.toStringAsFixed(2)}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Payment Amount',
+                  prefixText: '£',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                  ),
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              Text(
+                'Payment Method',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              Wrap(
+                spacing: SwiftleadTokens.spaceS,
+                children: ['Cash', 'Check', 'Bank Transfer', 'Card'].map((method) {
+                  final isSelected = selectedMethod == method;
+                  return ChoiceChip(
+                    label: Text(method),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        selectedMethod = method;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final amount = double.tryParse(amountController.text) ?? 0.0;
+                if (amount > 0 && amount <= _amountDue) {
+                  Navigator.pop(context);
+                  // Save split payment to state
+                  setState(() {
+                    _splitPayments.add({
+                      'amount': amount,
+                      'method': selectedMethod,
+                      'date': DateTime.now(),
+                    });
+                    _amountPaid += amount;
+                    _amountDue -= amount;
+                    if (_amountDue <= 0) {
+                      _status = 'Paid';
+                    }
+                  });
+                  Toast.show(
+                    context,
+                    message: 'Split payment recorded: £${amount.toStringAsFixed(2)} via $selectedMethod',
+                    type: ToastType.success,
+                  );
+                } else {
+                  Toast.show(
+                    context,
+                    message: 'Invalid amount. Must be between £0.01 and £${_amountDue.toStringAsFixed(2)}',
+                    type: ToastType.error,
+                  );
+                }
+              },
+              child: const Text('Record Payment'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Feature 36: Payment Plans - Set up flexible installments
+  void _showPaymentPlanDialog() {
+    int numberOfPayments = 2;
+    double installmentAmount = _total / numberOfPayments;
+    DateTime firstPaymentDate = DateTime.now().add(const Duration(days: 7));
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Set Up Payment Plan'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Total Amount: £${_total.toStringAsFixed(2)}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              Text(
+                'Number of Payments',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.remove),
+                    onPressed: numberOfPayments > 2
+                        ? () {
+                            setState(() {
+                              numberOfPayments--;
+                              installmentAmount = _total / numberOfPayments;
+                            });
+                          }
+                        : null,
+                  ),
+                  Expanded(
+                    child: Text(
+                      '$numberOfPayments payments',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: numberOfPayments < 12
+                        ? () {
+                            setState(() {
+                              numberOfPayments++;
+                              installmentAmount = _total / numberOfPayments;
+                            });
+                          }
+                        : null,
+                  ),
+                ],
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              Text(
+                'Installment Amount: £${installmentAmount.toStringAsFixed(2)}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: const Color(SwiftleadTokens.primaryTeal),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              Text(
+                'First Payment Date',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: firstPaymentDate,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      firstPaymentDate = picked;
+                    });
+                  }
+                },
+                icon: const Icon(Icons.calendar_today),
+                label: Text(
+                  '${firstPaymentDate.day}/${firstPaymentDate.month}/${firstPaymentDate.year}',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Toast.show(
+                  context,
+                  message: 'Payment plan created: $numberOfPayments installments of £${installmentAmount.toStringAsFixed(2)}',
+                  type: ToastType.success,
+                );
+                // TODO: Save payment plan to backend
+              },
+              child: const Text('Create Plan'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Feature 38: Offline Payments - Record cash/check offline, sync later
+  void _showOfflinePaymentDialog() {
+    final TextEditingController amountController = TextEditingController(text: _amountDue.toStringAsFixed(2));
+    final TextEditingController referenceController = TextEditingController();
+    String selectedMethod = 'Cash';
+    DateTime paymentDate = DateTime.now();
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Record Offline Payment'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'This payment will be recorded offline and synced when online.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Payment Amount',
+                  prefixText: '£',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                  ),
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              Text(
+                'Payment Method',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              Wrap(
+                spacing: SwiftleadTokens.spaceS,
+                children: ['Cash', 'Check', 'Bank Transfer'].map((method) {
+                  final isSelected = selectedMethod == method;
+                  return ChoiceChip(
+                    label: Text(method),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        selectedMethod = method;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              TextField(
+                controller: referenceController,
+                decoration: InputDecoration(
+                  labelText: 'Reference (optional)',
+                  hintText: 'Check number, transaction ID, etc.',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                  ),
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              Text(
+                'Payment Date',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: paymentDate,
+                    firstDate: DateTime.now().subtract(const Duration(days: 30)),
+                    lastDate: DateTime.now(),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      paymentDate = picked;
+                    });
+                  }
+                },
+                icon: const Icon(Icons.calendar_today),
+                label: Text(
+                  '${paymentDate.day}/${paymentDate.month}/${paymentDate.year}',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final amount = double.tryParse(amountController.text) ?? 0.0;
+                if (amount > 0) {
+                  Navigator.pop(context);
+                  // Save offline payment to state (will sync when online)
+                  setState(() {
+                    _splitPayments.add({
+                      'amount': amount,
+                      'method': selectedMethod,
+                      'date': paymentDate,
+                      'reference': referenceController.text.isNotEmpty ? referenceController.text : null,
+                      'offline': true,
+                    });
+                    _amountPaid += amount;
+                    _amountDue -= amount;
+                    if (_amountDue <= 0) {
+                      _status = 'Paid';
+                    }
+                  });
+                  Toast.show(
+                    context,
+                    message: 'Offline payment recorded: £${amount.toStringAsFixed(2)} via $selectedMethod. Will sync when online.',
+                    type: ToastType.info,
+                  );
+                } else {
+                  Toast.show(
+                    context,
+                    message: 'Please enter a valid amount',
+                    type: ToastType.error,
+                  );
+                }
+              },
+              child: const Text('Record Payment'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Feature 14: Bank Transfer Details Section
+  Widget _buildBankDetailsSection() {
+    return FrostedContainer(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.account_balance,
+                size: 24,
+                color: Color(SwiftleadTokens.primaryTeal),
+              ),
+              const SizedBox(width: SwiftleadTokens.spaceS),
+              Text(
+                'Bank Transfer Details',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ],
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          Text(
+            'For bank transfer payments, please use the following details:',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          _InfoRow(
+            label: 'Bank Name',
+            value: 'HSBC',
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
+          _InfoRow(
+            label: 'Account Name',
+            value: 'Swiftlead Ltd',
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
+          _InfoRow(
+            label: 'Account Number',
+            value: '12345678',
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
+          _InfoRow(
+            label: 'Sort Code',
+            value: '12-34-56',
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Reference',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+              Text(
+                widget.invoiceNumber,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: const Color(SwiftleadTokens.primaryTeal),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildTermsCard() {
@@ -558,6 +1077,145 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // Feature 14: Smart Invoice Timing - AI suggests optimal send time
+  Widget _buildSmartInvoiceTimingSection() {
+    // Mock AI timing suggestion - in production would call AI service
+    final mockTiming = {
+      'optimalSendTime': DateTime.now().add(const Duration(hours: 2)),
+      'reason': 'Based on client payment patterns, sending at 10:00 AM on Tuesday increases payment speed by 23%',
+      'predictedPaymentDays': 12,
+      'averagePaymentDays': 18,
+    };
+
+    final optimalTime = mockTiming['optimalSendTime'] as DateTime;
+    final timeUntilOptimal = optimalTime.difference(DateTime.now());
+
+    return FrostedContainer(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.schedule,
+                  color: Color(SwiftleadTokens.primaryTeal),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: SwiftleadTokens.spaceS),
+              Text(
+                'Smart Invoice Timing',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ],
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Optimal Send Time',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      '${optimalTime.hour.toString().padLeft(2, '0')}:${optimalTime.minute.toString().padLeft(2, '0')}',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: const Color(SwiftleadTokens.primaryTeal),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: SwiftleadTokens.spaceS),
+                Text(
+                  '${timeUntilOptimal.inHours}h ${timeUntilOptimal.inMinutes.remainder(60)}m from now',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: const Color(SwiftleadTokens.textSecondaryLight),
+                  ),
+                ),
+                const SizedBox(height: SwiftleadTokens.spaceM),
+                Text(
+                  mockTiming['reason'] as String,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: SwiftleadTokens.spaceM),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildTimingMetric(
+                      'Predicted Payment',
+                      '${mockTiming['predictedPaymentDays']} days',
+                      Icons.trending_down,
+                      const Color(SwiftleadTokens.successGreen),
+                    ),
+                    _buildTimingMetric(
+                      'Average Payment',
+                      '${mockTiming['averagePaymentDays']} days',
+                      Icons.trending_flat,
+                      const Color(SwiftleadTokens.textSecondaryLight),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          PrimaryButton(
+            label: 'Schedule Send at Optimal Time',
+            onPressed: () {
+              Toast.show(
+                context,
+                message: 'Invoice scheduled to send at ${optimalTime.hour.toString().padLeft(2, '0')}:${optimalTime.minute.toString().padLeft(2, '0')}',
+                type: ToastType.success,
+              );
+            },
+            icon: Icons.send,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimingMetric(String label, String value, IconData icon, Color color) {
+    return Column(
+      children: [
+        Icon(icon, size: 24, color: color),
+        const SizedBox(height: SwiftleadTokens.spaceXS),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceXS),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall,
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 
@@ -647,12 +1305,14 @@ class _PaymentHistoryItem extends StatelessWidget {
   final double amount;
   final String method;
   final String status;
+  final String? paymentMethodDetails;
 
   const _PaymentHistoryItem({
     required this.date,
     required this.amount,
     required this.method,
     required this.status,
+    this.paymentMethodDetails,
   });
 
   String _formatDate(DateTime date) {
@@ -677,6 +1337,14 @@ class _PaymentHistoryItem extends StatelessWidget {
               method,
               style: Theme.of(context).textTheme.bodySmall,
             ),
+            if (paymentMethodDetails != null)
+              Text(
+                paymentMethodDetails!,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontSize: 11,
+                  color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                ),
+              ),
           ],
         ),
         Column(

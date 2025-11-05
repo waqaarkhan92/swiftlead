@@ -6,6 +6,9 @@ import '../../widgets/global/frosted_container.dart';
 import '../../widgets/components/trend_tile.dart';
 import '../../widgets/components/segmented_control.dart';
 import '../../widgets/global/chip.dart';
+import '../../widgets/global/confirmation_dialog.dart';
+import '../../widgets/global/haptic_feedback.dart' as app_haptics;
+import '../../widgets/global/info_banner.dart';
 import '../../theme/tokens.dart';
 import '../quotes/create_edit_quote_screen.dart';
 import '../quotes/quote_detail_screen.dart';
@@ -20,6 +23,7 @@ import 'deposits_screen.dart';
 import '../../widgets/forms/job_export_sheet.dart';
 import '../../widgets/forms/money_filter_sheet.dart';
 import '../../widgets/components/trend_line_chart.dart';
+import '../../widgets/global/toast.dart';
 import '../../config/mock_config.dart';
 import '../../mock/mock_repository.dart';
 import '../main_navigation.dart' as main_nav;
@@ -40,16 +44,38 @@ class _MoneyScreenState extends State<MoneyScreen> {
   final List<String> _filters = ['All', 'Paid', 'Pending', 'Overdue', 'Refunded'];
   String _selectedQuoteFilter = 'All';
   final List<String> _quoteFilters = ['All', 'Draft', 'Sent', 'Viewed', 'Accepted', 'Declined', 'Expired'];
-  String _selectedPeriod = '30D'; // For dashboard chart
+  String _selectedPeriod = '30D'; // For dashboard chart (can be 'Custom')
 
   // Financial data from mock
   double _totalRevenue = 0;
   double _thisMonthRevenue = 0;
+  double _lastMonthRevenue = 1740.0; // For comparison
   double _outstanding = 0;
   double _overdue = 0;
+  double _depositsPending = 0.0;
+  int _depositsCount = 0;
   List<Invoice> _allInvoices = [];
   List<Invoice> _filteredInvoices = [];
   List<Payment> _payments = [];
+  DateTime? _customStartDate;
+  DateTime? _customEndDate;
+
+  // Analytics Metrics (Features 21-28)
+  double _averageInvoiceValue = 0.0;
+  int _daysToPayment = 0;
+  double _cashFlowProjection = 0.0;
+  double _thisWeekRevenue = 0.0;
+  double _lastWeekRevenue = 0.0;
+  double _yearToDateRevenue = 0.0;
+  double _averageJobValue = 0.0;
+  int _pendingQuotesCount = 0;
+  double _pendingQuotesValue = 0.0;
+  int _activePaymentsCount = 0;
+  double _activePaymentsValue = 0.0;
+
+  // Feature 39: Batch Actions
+  bool _isBatchMode = false;
+  Set<String> _selectedInvoiceIds = {};
 
   @override
   void initState() {
@@ -69,6 +95,49 @@ class _MoneyScreenState extends State<MoneyScreen> {
 
       _allInvoices = await MockPayments.fetchAllInvoices();
       _payments = await MockPayments.fetchAllPayments();
+      
+      // Calculate deposits pending (mock data)
+      _depositsPending = 1250.0;
+      _depositsCount = 3;
+      
+      // Calculate Analytics Metrics (Features 21-28)
+      // Average Invoice Value (Feature 21)
+      _averageInvoiceValue = _allInvoices.isEmpty 
+          ? 0.0 
+          : _allInvoices.map((i) => i.amount).reduce((a, b) => a + b) / _allInvoices.length;
+      
+      // Days to Payment (Feature 22) - average days from invoice date to payment
+      final paidInvoices = _allInvoices.where((i) => i.status == InvoiceStatus.paid).toList();
+      if (paidInvoices.isNotEmpty) {
+        final totalDays = paidInvoices.length * 7; // Mock: 7 days average
+        _daysToPayment = (totalDays / paidInvoices.length).round();
+      }
+      
+      // Cash Flow Projection (Feature 23) - next 30 days
+      _cashFlowProjection = _thisMonthRevenue * 1.1; // Mock: 10% growth projection
+      
+      // Week vs Last Week (Feature 24)
+      _thisWeekRevenue = 2450.0; // Mock data
+      _lastWeekRevenue = 2100.0; // Mock data
+      
+      // Year-to-Date (Feature 25)
+      _yearToDateRevenue = 28500.0; // Mock data
+      
+      // Average Job Value (Feature 26) - from invoices
+      _averageJobValue = _averageInvoiceValue; // Assuming jobs = invoices for mock
+      
+      // Pending Quotes (Feature 27)
+      _pendingQuotesCount = 8;
+      _pendingQuotesValue = 3200.0; // Mock data
+      
+      // Active Payments (Feature 28)
+      final activePayments = _payments.where((p) => 
+        p.status == PaymentStatus.pending || p.status == PaymentStatus.processing
+      ).toList();
+      _activePaymentsCount = activePayments.length;
+      _activePaymentsValue = activePayments.isEmpty 
+          ? 0.0 
+          : activePayments.map((p) => p.amount).reduce((a, b) => a + b);
     }
 
     _applyInvoiceFilter();
@@ -149,7 +218,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                 context: context,
               );
               if (filters != null) {
-                // TODO: Apply filters
+                _applyMoneyFilters(filters);
               }
             },
           ),
@@ -157,28 +226,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
           IconButton(
             icon: const Icon(Icons.date_range_outlined),
             onPressed: () {
-              _showDateRangePicker(context);
-            },
-          ),
-          // Export button
-          IconButton(
-            icon: const Icon(Icons.download_outlined),
-            onPressed: () {
-              // Use job export sheet as template - in real app would have money export sheet
-              // For now, show a placeholder
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Export Data'),
-                  content: const Text('Export functionality coming soon'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('OK'),
-                    ),
-                  ],
-                ),
-              );
+              _showDateRangePicker();
             },
           ),
           IconButton(
@@ -228,14 +276,6 @@ class _MoneyScreenState extends State<MoneyScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => const PaymentMethodsScreen(),
-                    ),
-                  );
-                  break;
-                case 'deposits':
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const DepositsScreen(),
                     ),
                   );
                   break;
@@ -293,16 +333,6 @@ class _MoneyScreenState extends State<MoneyScreen> {
                   ],
                 ),
               ),
-              const PopupMenuItem<String>(
-                value: 'deposits',
-                child: Row(
-                  children: [
-                    Icon(Icons.payments, size: 20),
-                    SizedBox(width: 12),
-                    Text('Deposits'),
-                  ],
-                ),
-              ),
             ],
           ),
         ],
@@ -344,20 +374,102 @@ class _MoneyScreenState extends State<MoneyScreen> {
     );
   }
 
-  void _showDateRangePicker(BuildContext context) {
-    showDialog(
+  void _showDateRangePicker() async {
+    final DateTimeRange? picked = await showDateRangePicker(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Date Range Filter'),
-        content: const Text('Date range picker coming soon'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      initialDateRange: DateTimeRange(
+        start: _customStartDate ?? DateTime.now().subtract(const Duration(days: 30)),
+        end: _customEndDate ?? DateTime.now(),
       ),
     );
+    if (picked != null) {
+      setState(() {
+        _selectedPeriod = 'Custom';
+        _customStartDate = picked.start;
+        _customEndDate = picked.end;
+        _applyDateRangeFilter();
+      });
+    }
+  }
+
+  void _showCustomDateRangePicker() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      initialDateRange: DateTimeRange(
+        start: DateTime.now().subtract(const Duration(days: 30)),
+        end: DateTime.now(),
+      ),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedPeriod = 'Custom';
+        _customStartDate = picked.start;
+        _customEndDate = picked.end;
+        _applyDateRangeFilter();
+      });
+    }
+  }
+
+  void _applyDateRangeFilter() {
+    if (_selectedPeriod == 'Custom' && _customStartDate != null && _customEndDate != null) {
+      // Filter invoices and payments by custom date range
+      _filteredInvoices = _allInvoices.where((invoice) {
+        // Mock: Filter by invoice date if available
+        // In real app, would check invoice.created_at or invoice.due_date
+        return true;
+      }).toList();
+    } else {
+      // Apply preset period filter
+      _applyInvoiceFilter();
+    }
+  }
+
+  void _applyMoneyFilters(Map<String, dynamic> filters) {
+    setState(() {
+      // Apply type filter
+      if (filters['type'] != null && filters['type'] != 'All') {
+        // Filter by transaction type
+        // This would filter invoices, payments, quotes based on type
+      }
+      
+      // Apply status filter
+      if (filters['status'] != null && filters['status'] != 'All') {
+        _selectedFilter = filters['status'];
+        _applyInvoiceFilter();
+      }
+      
+      // Apply date range filter
+      if (filters['dateRange'] != null && filters['dateRange'] != 'All') {
+        final now = DateTime.now();
+        DateTime? startDate;
+        
+        switch (filters['dateRange']) {
+          case 'Today':
+            startDate = DateTime(now.year, now.month, now.day);
+            break;
+          case 'This Week':
+            startDate = now.subtract(Duration(days: now.weekday - 1));
+            break;
+          case 'This Month':
+            startDate = DateTime(now.year, now.month, 1);
+            break;
+          case 'This Year':
+            startDate = DateTime(now.year, 1, 1);
+            break;
+        }
+        
+        if (startDate != null) {
+          _customStartDate = startDate;
+          _customEndDate = now;
+          _selectedPeriod = 'Custom';
+          _applyDateRangeFilter();
+        }
+      }
+    });
   }
 
   Widget _buildLoadingState() {
@@ -471,6 +583,47 @@ class _MoneyScreenState extends State<MoneyScreen> {
           _buildMetricsRow(),
           const SizedBox(height: SwiftleadTokens.spaceL),
           
+          // Analytics Metrics Section (Features 21-28)
+          _buildAnalyticsMetricsSection(),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+
+          // Deposits Pending Stat
+          if (_depositsCount > 0)
+            Padding(
+              padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceM),
+              child: FrostedContainer(
+                padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Deposits Pending',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          '$_depositsCount deposits',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                    Text(
+                      '£${_depositsPending.toStringAsFixed(2)}',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (_depositsCount > 0)
+            const SizedBox(height: SwiftleadTokens.spaceL),
+          
           // RevenueBreakdownChart - Interactive visualization
           _buildRevenueChart(),
           const SizedBox(height: SwiftleadTokens.spaceL),
@@ -487,80 +640,339 @@ class _MoneyScreenState extends State<MoneyScreen> {
   }
 
   Widget _buildInvoicesTab() {
-    return RefreshIndicator(
-      onRefresh: () async {
-        await _loadFinancialData();
-      },
-      child: ListView(
-        padding: const EdgeInsets.only(
-          left: SwiftleadTokens.spaceM,
-          right: SwiftleadTokens.spaceM,
-          top: SwiftleadTokens.spaceM,
-          bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
-        ),
-        children: [
-          // Filter Chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: ['All', 'Paid', 'Pending', 'Overdue'].map((filter) {
-                final isSelected = _selectedFilter == filter;
-                return Padding(
-                  padding: const EdgeInsets.only(right: SwiftleadTokens.spaceS),
-                  child: SwiftleadChip(
-                    label: filter,
-                    isSelected: isSelected,
-                    onTap: () {
-                      setState(() {
-                        _selectedFilter = filter;
-                        _applyInvoiceFilter();
-                      });
-                    },
-                  ),
-                );
-              }).toList(),
+    return Stack(
+      children: [
+        RefreshIndicator(
+          onRefresh: () async {
+            await _loadFinancialData();
+          },
+          child: ListView(
+            padding: EdgeInsets.only(
+              left: SwiftleadTokens.spaceM,
+              right: SwiftleadTokens.spaceM,
+              top: SwiftleadTokens.spaceM,
+              bottom: _isBatchMode ? 96 : 96, // Extra space for batch action bar
             ),
-          ),
-          const SizedBox(height: SwiftleadTokens.spaceM),
-          
-          // Invoice List
-          _filteredInvoices.isEmpty
-              ? EmptyStateCard(
-                  title: 'No ${_selectedFilter.toLowerCase()} invoices',
-                  description: 'Invoices will appear here when they match this filter.',
-                  icon: Icons.receipt_outlined,
-                )
-              : ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _filteredInvoices.length,
-                  itemBuilder: (context, index) {
-                    final invoice = _filteredInvoices[index];
+            children: [
+              // Filter Chips
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: ['All', 'Paid', 'Pending', 'Overdue'].map((filter) {
+                    final isSelected = _selectedFilter == filter;
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
-                      child: _InvoiceCard(
-                        invoiceNumber: invoice.id,
-                        clientName: invoice.contactName,
-                        amount: invoice.amount,
-                        status: invoice.status.displayName,
+                      padding: const EdgeInsets.only(right: SwiftleadTokens.spaceS),
+                      child: SwiftleadChip(
+                        label: filter,
+                        isSelected: isSelected,
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => InvoiceDetailScreen(
-                                invoiceId: invoice.id,
-                                invoiceNumber: invoice.id,
-                              ),
-                            ),
-                          );
+                          setState(() {
+                            _selectedFilter = filter;
+                            _applyInvoiceFilter();
+                            // Exit batch mode when filter changes
+                            if (_isBatchMode) {
+                              _isBatchMode = false;
+                              _selectedInvoiceIds.clear();
+                            }
+                          });
                         },
                       ),
                     );
-                  },
+                  }).toList(),
                 ),
-        ],
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              
+              // Batch Mode Info Banner
+              if (_isBatchMode)
+                InfoBanner(
+                  message: '${_selectedInvoiceIds.length} invoice${_selectedInvoiceIds.length == 1 ? '' : 's'} selected',
+                  type: InfoBannerType.info,
+                ),
+              if (_isBatchMode) const SizedBox(height: SwiftleadTokens.spaceM),
+              
+              // Invoice List
+              _filteredInvoices.isEmpty
+                  ? EmptyStateCard(
+                      title: 'No ${_selectedFilter.toLowerCase()} invoices',
+                      description: 'Invoices will appear here when they match this filter.',
+                      icon: Icons.receipt_outlined,
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _filteredInvoices.length,
+                      itemBuilder: (context, index) {
+                        final invoice = _filteredInvoices[index];
+                        final isSelected = _selectedInvoiceIds.contains(invoice.id);
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+                          child: GestureDetector(
+                            onTap: () {
+                              if (_isBatchMode) {
+                                // Toggle selection in batch mode
+                                setState(() {
+                                  if (isSelected) {
+                                    _selectedInvoiceIds.remove(invoice.id);
+                                    if (_selectedInvoiceIds.isEmpty) {
+                                      _isBatchMode = false;
+                                    }
+                                  } else {
+                                    _selectedInvoiceIds.add(invoice.id);
+                                  }
+                                });
+                              } else {
+                                // Normal tap - open invoice
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => InvoiceDetailScreen(
+                                      invoiceId: invoice.id,
+                                      invoiceNumber: invoice.id,
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                            onLongPress: () {
+                              app_haptics.HapticFeedback.medium();
+                              if (!_isBatchMode) {
+                                setState(() {
+                                  _isBatchMode = true;
+                                  _selectedInvoiceIds.add(invoice.id);
+                                });
+                              } else {
+                                // Toggle selection
+                                setState(() {
+                                  if (isSelected) {
+                                    _selectedInvoiceIds.remove(invoice.id);
+                                    if (_selectedInvoiceIds.isEmpty) {
+                                      _isBatchMode = false;
+                                    }
+                                  } else {
+                                    _selectedInvoiceIds.add(invoice.id);
+                                  }
+                                });
+                              }
+                            },
+                            child: _InvoiceCard(
+                              invoiceNumber: invoice.id,
+                              clientName: invoice.contactName,
+                              amount: invoice.amount,
+                              status: invoice.status.displayName,
+                              isSelected: isSelected,
+                              isBatchMode: _isBatchMode,
+                              onTap: () {
+                                // Handled by GestureDetector
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ],
+          ),
+        ),
+        
+        // Feature 39: Batch Action Bar
+        if (_isBatchMode)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: FrostedContainer(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SwiftleadTokens.spaceM,
+                vertical: SwiftleadTokens.spaceS,
+              ),
+              borderRadius: 0,
+              child: SafeArea(
+                top: false,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildBatchActionButton(
+                      icon: Icons.email_outlined,
+                      label: 'Send Reminder',
+                      onPressed: _handleBatchSendReminder,
+                    ),
+                    _buildBatchActionButton(
+                      icon: Icons.check_circle_outline,
+                      label: 'Mark Paid',
+                      onPressed: _handleBatchMarkPaid,
+                    ),
+                    _buildBatchActionButton(
+                      icon: Icons.download_outlined,
+                      label: 'Download',
+                      onPressed: _handleBatchDownload,
+                    ),
+                    _buildBatchActionButton(
+                      icon: Icons.delete_outline,
+                      label: 'Delete',
+                      onPressed: _handleBatchDelete,
+                      isDestructive: true,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildBatchActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    bool isDestructive = false,
+  }) {
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(SwiftleadTokens.radiusButton),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: SwiftleadTokens.spaceS,
+          vertical: SwiftleadTokens.spaceS,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isDestructive 
+                  ? const Color(SwiftleadTokens.errorRed)
+                  : Theme.of(context).iconTheme.color,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: isDestructive 
+                    ? const Color(SwiftleadTokens.errorRed)
+                    : null,
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  // Feature 39: Batch Actions - Send Reminder
+  void _handleBatchSendReminder() {
+    if (_selectedInvoiceIds.isEmpty) return;
+    
+    final count = _selectedInvoiceIds.length;
+    final invoiceIdsCopy = Set<String>.from(_selectedInvoiceIds);
+    
+    // TODO: Call backend API to send reminders
+    setState(() {
+      _isBatchMode = false;
+      _selectedInvoiceIds.clear();
+    });
+    
+    Toast.show(
+      context,
+      message: 'Payment reminder sent to $count client${count == 1 ? '' : 's'}',
+      type: ToastType.success,
+    );
+  }
+
+  // Feature 39: Batch Actions - Mark Paid
+  void _handleBatchMarkPaid() {
+    if (_selectedInvoiceIds.isEmpty) return;
+    
+    final count = _selectedInvoiceIds.length;
+    final invoiceIdsCopy = Set<String>.from(_selectedInvoiceIds);
+    
+    // Update invoice status to paid by replacing with new Invoice objects
+    setState(() {
+      _allInvoices = _allInvoices.map((invoice) {
+        if (invoiceIdsCopy.contains(invoice.id) && invoice.status != InvoiceStatus.paid) {
+          // Create new Invoice with paid status
+          return Invoice(
+            id: invoice.id,
+            contactId: invoice.contactId,
+            contactName: invoice.contactName,
+            amount: invoice.amount,
+            status: InvoiceStatus.paid,
+            dueDate: invoice.dueDate,
+            paidDate: DateTime.now(),
+            serviceDescription: invoice.serviceDescription,
+            items: invoice.items,
+            createdAt: invoice.createdAt,
+          );
+        }
+        return invoice;
+      }).toList();
+      
+      _isBatchMode = false;
+      _selectedInvoiceIds.clear();
+      _applyInvoiceFilter();
+      _loadFinancialData(); // Refresh totals
+    });
+    
+    Toast.show(
+      context,
+      message: '$count invoice${count == 1 ? '' : 's'} marked as paid',
+      type: ToastType.success,
+    );
+  }
+
+  // Feature 39: Batch Actions - Download
+  void _handleBatchDownload() {
+    if (_selectedInvoiceIds.isEmpty) return;
+    
+    final count = _selectedInvoiceIds.length;
+    final invoiceIdsCopy = Set<String>.from(_selectedInvoiceIds);
+    
+    // TODO: Call backend API to download invoices as PDF
+    setState(() {
+      _isBatchMode = false;
+      _selectedInvoiceIds.clear();
+    });
+    
+    Toast.show(
+      context,
+      message: 'Downloading $count invoice${count == 1 ? '' : 's'}...',
+      type: ToastType.info,
+    );
+  }
+
+  // Feature 39: Batch Actions - Delete
+  void _handleBatchDelete() {
+    if (_selectedInvoiceIds.isEmpty) return;
+    
+    final count = _selectedInvoiceIds.length;
+    final invoiceIdsCopy = Set<String>.from(_selectedInvoiceIds);
+    
+    SwiftleadConfirmationDialog.show(
+      context: context,
+      title: 'Delete $count invoice${count == 1 ? '' : 's'}?',
+      description: 'Are you sure you want to delete these invoices? This action cannot be undone.',
+      primaryActionLabel: 'Delete',
+      isDestructive: true,
+      secondaryActionLabel: 'Cancel',
+      icon: Icons.warning_rounded,
+    ).then((confirmed) {
+      if (confirmed == true && mounted) {
+        // Remove invoices from list
+        setState(() {
+          _allInvoices.removeWhere((invoice) => invoiceIdsCopy.contains(invoice.id));
+          _isBatchMode = false;
+          _selectedInvoiceIds.clear();
+          _applyInvoiceFilter();
+          _loadFinancialData(); // Refresh totals
+        });
+        
+        Toast.show(
+          context,
+          message: '$count invoice${count == 1 ? '' : 's'} deleted',
+          type: ToastType.success,
+        );
+      }
+    });
   }
 
   Widget _buildPaymentsTab() {
@@ -588,39 +1000,161 @@ class _MoneyScreenState extends State<MoneyScreen> {
   }
 
   Widget _buildDepositsTab() {
+    // Mock deposits data - in real app would come from backend
+    final deposits = [
+      {
+        'jobTitle': 'Bathroom Renovation',
+        'clientName': 'Sarah Williams',
+        'amount': 500.0,
+        'status': 'Pending',
+        'dueDate': DateTime.now().add(const Duration(days: 5)),
+      },
+      {
+        'jobTitle': 'Kitchen Sink Install',
+        'clientName': 'Emily Chen',
+        'amount': 150.0,
+        'status': 'Collected',
+        'collectedDate': DateTime.now().subtract(const Duration(days: 8)),
+      },
+      {
+        'jobTitle': 'Heating System Installation',
+        'clientName': 'David Brown',
+        'amount': 2000.0,
+        'status': 'Collected',
+        'collectedDate': DateTime.now().subtract(const Duration(days: 28)),
+      },
+    ];
+
     return RefreshIndicator(
       onRefresh: () async {
         await _loadFinancialData();
       },
       child: ListView(
-        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+        padding: const EdgeInsets.only(
+          left: SwiftleadTokens.spaceM,
+          right: SwiftleadTokens.spaceM,
+          top: SwiftleadTokens.spaceM,
+          bottom: 96, // Space for nav
+        ),
         children: [
-          FrostedContainer(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Deposits',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: SwiftleadTokens.spaceM),
-                Text(
-                  'Manage deposit payments and requests',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: SwiftleadTokens.spaceL),
-                EmptyStateCard(
-                  title: 'No deposits yet',
-                  description: 'Deposits will appear here when requested',
-                  icon: Icons.payment,
-                ),
-              ],
-            ),
+          Text(
+            'Deposits',
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          if (deposits.isEmpty)
+            EmptyStateCard(
+              title: 'No deposits yet',
+              description: 'Deposits will appear here when requested',
+              icon: Icons.payment,
+            )
+          else
+            ...deposits.map((deposit) {
+              Color statusColor;
+              IconData statusIcon;
+              switch (deposit['status']) {
+                case 'Pending':
+                  statusColor = const Color(SwiftleadTokens.warningYellow);
+                  statusIcon = Icons.pending;
+                  break;
+                case 'Collected':
+                  statusColor = const Color(SwiftleadTokens.successGreen);
+                  statusIcon = Icons.check_circle;
+                  break;
+                default:
+                  statusColor = Colors.grey;
+                  statusIcon = Icons.undo;
+              }
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceM),
+                child: FrostedContainer(
+                  padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  deposit['jobTitle'] as String,
+                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  deposit['clientName'] as String,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '£${(deposit['amount'] as double).toStringAsFixed(2)}',
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    statusIcon,
+                                    size: 16,
+                                    color: statusColor,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    deposit['status'] as String,
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: statusColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: SwiftleadTokens.spaceM),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today,
+                            size: 14,
+                            color: Theme.of(context).textTheme.bodySmall?.color,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            deposit['status'] == 'Pending' && deposit['dueDate'] != null
+                                ? 'Due: ${_formatDate(deposit['dueDate'] as DateTime)}'
+                                : deposit['collectedDate'] != null
+                                    ? 'Collected: ${_formatDate(deposit['collectedDate'] as DateTime)}'
+                                    : 'Requested: ${_formatDate(DateTime.now())}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
         ],
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 
   Widget _buildQuotesTab() {
@@ -863,9 +1397,9 @@ class _MoneyScreenState extends State<MoneyScreen> {
               child: TrendTile(
                 label: 'Paid This Month',
                 value: '£2,000',
-                trend: '+15%',
+                trend: '+15% vs last month',
                 isPositive: true,
-                tooltip: 'Total received this month',
+                tooltip: 'Total received this month vs last month (£1,740)',
               ),
             ),
           ],
@@ -898,6 +1432,165 @@ class _MoneyScreenState extends State<MoneyScreen> {
     );
   }
 
+  Widget _buildAnalyticsMetricsSection() {
+    return FrostedContainer(
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Analytics & Insights',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          // Feature 21: Average Invoice Value
+          _buildAnalyticsRow(
+            label: 'Average Invoice Value',
+            value: '£${_averageInvoiceValue.toStringAsFixed(2)}',
+            icon: Icons.receipt,
+          ),
+          const Divider(),
+          // Feature 22: Days to Payment
+          _buildAnalyticsRow(
+            label: 'Days to Payment',
+            value: '$_daysToPayment days',
+            icon: Icons.schedule,
+          ),
+          const Divider(),
+          // Feature 23: Cash Flow Projection
+          _buildAnalyticsRow(
+            label: 'Cash Flow Projection (30d)',
+            value: '£${_cashFlowProjection.toStringAsFixed(2)}',
+            icon: Icons.trending_up,
+          ),
+          const Divider(),
+          // Feature 24: Week vs Last Week
+          _buildAnalyticsRow(
+            label: 'This Week vs Last Week',
+            value: '£${_thisWeekRevenue.toStringAsFixed(2)}',
+            subtitle: 'Last week: £${_lastWeekRevenue.toStringAsFixed(2)}',
+            icon: Icons.calendar_today,
+            trend: _thisWeekRevenue >= _lastWeekRevenue ? '+' : '-',
+            trendValue: ((_thisWeekRevenue - _lastWeekRevenue) / _lastWeekRevenue * 100).abs().toStringAsFixed(1),
+          ),
+          const Divider(),
+          // Feature 25: Year-to-Date
+          _buildAnalyticsRow(
+            label: 'Year-to-Date Revenue',
+            value: '£${_yearToDateRevenue.toStringAsFixed(2)}',
+            icon: Icons.calendar_month,
+          ),
+          const Divider(),
+          // Feature 26: Average Job Value
+          _buildAnalyticsRow(
+            label: 'Average Job Value',
+            value: '£${_averageJobValue.toStringAsFixed(2)}',
+            icon: Icons.work,
+          ),
+          const Divider(),
+          // Feature 27: Pending Quotes
+          _buildAnalyticsRow(
+            label: 'Pending Quotes',
+            value: '£${_pendingQuotesValue.toStringAsFixed(2)}',
+            subtitle: '$_pendingQuotesCount quotes',
+            icon: Icons.description,
+          ),
+          const Divider(),
+          // Feature 28: Active Payments
+          _buildAnalyticsRow(
+            label: 'Active Payments',
+            value: '£${_activePaymentsValue.toStringAsFixed(2)}',
+            subtitle: '$_activePaymentsCount payments',
+            icon: Icons.payment,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnalyticsRow({
+    required String label,
+    required String value,
+    String? subtitle,
+    IconData? icon,
+    String? trend,
+    String? trendValue,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: SwiftleadTokens.spaceS),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                if (icon != null) ...[
+                  Icon(
+                    icon,
+                    size: 20,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                  ),
+                  const SizedBox(width: SwiftleadTokens.spaceS),
+                ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              if (trend != null && trendValue != null) ...[
+                Icon(
+                  trend == '+' ? Icons.trending_up : Icons.trending_down,
+                  size: 16,
+                  color: trend == '+' 
+                      ? const Color(SwiftleadTokens.successGreen)
+                      : const Color(SwiftleadTokens.errorRed),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '$trend$trendValue%',
+                  style: TextStyle(
+                    color: trend == '+' 
+                        ? const Color(SwiftleadTokens.successGreen)
+                        : const Color(SwiftleadTokens.errorRed),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(width: SwiftleadTokens.spaceS),
+              ],
+              Text(
+                value,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildRevenueChart() {
     return FrostedContainer(
       padding: const EdgeInsets.all(20),
@@ -924,25 +1617,37 @@ class _MoneyScreenState extends State<MoneyScreen> {
             ],
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
-          // TimePeriod Selector: 7D / 30D / 90D / 1Y / All
+          // TimePeriod Selector: 7D / 30D / 90D / 1Y / All / Custom
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: ['7D', '30D', '90D', '1Y', 'All'].map((period) {
-                final isSelected = period == _selectedPeriod;
-                return Padding(
+              children: [
+                ...['7D', '30D', '90D', '1Y', 'All'].map((period) {
+                  final isSelected = period == _selectedPeriod && period != 'Custom';
+                  return Padding(
+                    padding: const EdgeInsets.only(right: SwiftleadTokens.spaceS),
+                    child: SwiftleadChip(
+                      label: period,
+                      isSelected: isSelected,
+                      onTap: () {
+                        setState(() {
+                          _selectedPeriod = period;
+                        });
+                      },
+                    ),
+                  );
+                }),
+                Padding(
                   padding: const EdgeInsets.only(right: SwiftleadTokens.spaceS),
                   child: SwiftleadChip(
-                    label: period,
-                    isSelected: isSelected,
+                    label: 'Custom',
+                    isSelected: _selectedPeriod == 'Custom',
                     onTap: () {
-                      setState(() {
-                        _selectedPeriod = period;
-                      });
+                      _showCustomDateRangePicker();
                     },
                   ),
-                );
-              }).toList(),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: SwiftleadTokens.spaceL),
@@ -1225,6 +1930,8 @@ class _InvoiceCard extends StatelessWidget {
   final double amount;
   final String status;
   final VoidCallback onTap;
+  final bool isSelected;
+  final bool isBatchMode;
 
   const _InvoiceCard({
     required this.invoiceNumber,
@@ -1232,6 +1939,8 @@ class _InvoiceCard extends StatelessWidget {
     required this.amount,
     required this.status,
     required this.onTap,
+    this.isSelected = false,
+    this.isBatchMode = false,
   });
 
   Color _getStatusColor(String status) {
@@ -1249,63 +1958,68 @@ class _InvoiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: FrostedContainer(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    invoiceNumber,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    clientName,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
+    return FrostedContainer(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Selection checkbox in batch mode
+          if (isBatchMode) ...[
+            Checkbox(
+              value: isSelected,
+              onChanged: null, // Handled by GestureDetector parent
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            const SizedBox(width: SwiftleadTokens.spaceS),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '£${amount.toStringAsFixed(2)}',
+                  invoiceNumber,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _getStatusColor(status).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    status,
-                    style: TextStyle(
-                      color: _getStatusColor(status),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                Text(
+                  clientName,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '£${amount.toStringAsFixed(2)}',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: _getStatusColor(status).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    color: _getStatusColor(status),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

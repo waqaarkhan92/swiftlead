@@ -307,16 +307,21 @@ User opens Calendar → Views schedule → Taps time slot → Creates booking �
 
 ---
 
-## 5. Money (Invoicing & Payments)
+## 5. Money (Quotes, Invoices & Payments)
 
 ### Flow Summary
-User opens Money → Views balance and recent transactions → Creates invoice → Sends payment link → Tracks payment status → Receives Stripe webhook → Shows success notification
+User opens Money → Views balance and recent transactions → Creates quote/invoice → Sends quote/invoice → Tracks payment status → Receives Stripe webhook → Shows success notification
 
 ### Screens & Surfaces
 
 | Screen/Surface | CRUD | Data Source | Navigation | State Screens | Components |
 |----------------|------|-------------|------------|---------------|------------|
 | **Money Dashboard** | Read | `get-revenue-breakdown` function | Bottom nav → Money tab | Empty: "No transactions yet" + CTA "Send first invoice", Loading: Skeleton cards + chart, Error: Retry, Pull-to-refresh enabled | SkeletonLoader, EmptyStateCard, PullToRefresh, InfoBanner (Stripe connection status) |
+| **QuotesListView** | Read | `quotes` WHERE `org_id` | Money → Quotes tab | Empty: "No quotes yet" + CTA, Loading: Skeleton list, Error: Retry | SkeletonLoader, EmptyStateCard, Badge (status counts), SearchBar, Chip (filters) |
+| **QuoteDetailView** | Read | `quotes` by id | Quote list → Tap quote | Loading: Skeleton, Error: Retry | SkeletonLoader, FAB (quick actions), Badge (status), Tooltip (status meanings) |
+| **Create/Edit Quote Form** | Create, Update | `create-quote`, `update-quote` | Money → + button → Create Quote OR Quote detail → Edit | Saving: "Creating quote..." + progress, Saved: Success toast + send options, Validation errors: Inline messages | ProgressBar, Toast, InfoBanner (tax settings), Chip (line items) |
+| **Send Quote Sheet** | Create | `send-quote` function | Quote detail → Send quote | Sending: "Sending quote..." + progress, Sent: Success toast + link copied, Share options shown | BottomSheet, ProgressBar, Toast, Chip (send methods: SMS, Email, WhatsApp) |
+| **Quote Chaser Log** | Read | `quote_chasers` WHERE `quote_id` | Quote detail → Chasers | Empty: "No chasers scheduled" + auto-chaser info, Loading: Skeleton | EmptyStateCard, InfoBanner (auto-chase settings) |
 | **InvoiceListView** | Read | `invoices` WHERE `org_id` | Money → Invoices tab | Empty: "No invoices yet" + CTA, Loading: Skeleton list, Error: Retry | SkeletonLoader, EmptyStateCard, Badge (status counts), SearchBar, Chip (filters) |
 | **InvoiceDetailView** | Read | `invoices` by id | Invoice list → Tap invoice | Loading: Skeleton, Error: Retry | SkeletonLoader, FAB (quick actions), Badge (payment status), Tooltip (status meanings) |
 | **Create/Edit Invoice Form** | Create, Update | `create-invoice`, `update-invoice` | Money → + button OR Detail → Edit | Saving: "Creating invoice..." + progress, Saved: Success toast + send options, Validation errors: Inline messages | ProgressBar, Toast, InfoBanner (tax settings), Chip (line items) |
@@ -330,13 +335,14 @@ User opens Money → Views balance and recent transactions → Creates invoice �
 | **Invoice Templates** | Read, Create, Update | `invoice_templates` | Settings → Invoice Templates | Empty: "Create first template" + suggestions, Loading: Skeleton, Saving: Progress | EmptyStateCard, SkeletonLoader, Toast |
 | **Recurring Invoices** | Create, Read | `recurring_invoices` | Money → Recurring tab | Empty: "No recurring invoices" + CTA, Loading: Skeleton, Error: Retry | EmptyStateCard, SkeletonLoader, Badge (schedule), Chip (status) |
 | **Payment Reminders** | Read | `payment_reminders` WHERE `invoice_id` | Invoice detail → Reminders | Empty: "No reminders scheduled" + auto-reminder info, Loading: Skeleton | EmptyStateCard, InfoBanner (auto-chase settings) |
-| **Export Transactions** | Read (export) | `export-transactions` function | Money → Export button | Generating: "Preparing export..." + progress, Complete: Download link + toast | BottomSheet, ProgressBar, Toast, Chip (format options: CSV, PDF) |
+| **Export Transactions** | ~~REMOVED~~ | ~~Removed from Module 3.5~~ | ~~Money → Export button~~ | ~~Removed~~ | ~~Removed~~ |
 | **Deposit Tracking** | Read | `deposits` WHERE `org_id` | Money → Deposits tab | Empty: "No deposits received", Loading: Skeleton, Error: Retry | SkeletonLoader, EmptyStateCard, Badge (status), ProgressBar (deposit vs balance) |
 
 ### Components Used
 - **BalanceCard** — Large card showing current balance, pending, and received amounts with visual breakdown
 - **RevenueChart** — Line/bar/pie chart showing revenue trends over time with interactive tooltips
 - **PaymentTile** — Transaction row with client, amount, status, date + tap to expand
+- **QuoteCard** — Quote summary with client, items, total, status, expiry date + quick actions (send, view, edit, convert)
 - **InvoiceCard** — Invoice summary with client, items, total, status + quick actions (send, view, edit)
 - **PaymentStatusBadge** — Color-coded badge (paid/pending/overdue/refunded) with icon
 - **LineItemRow** — Invoice line item with description, quantity, rate, amount + inline edit
@@ -350,21 +356,22 @@ User opens Money → Views balance and recent transactions → Creates invoice �
 - **ChaseHistoryTimeline** — Timeline showing automated payment reminders sent
 
 ### Interaction Enhancements (v2.5.1)
-- **One-Tap Send:** Quick send button that uses client's preferred contact method
-- **Smart Defaults:** Invoice pre-filled based on linked job or previous invoices to same client
+- **One-Tap Send:** Quick send button that uses client's preferred contact method (quotes and invoices)
+- **Smart Defaults:** Quote/Invoice pre-filled based on linked job or previous quotes/invoices to same client
+- **Quote Conversion:** One-tap conversion from quote to invoice or booking
+- **Quote Chasers:** Automated follow-up reminders at T+1, T+3, T+7 days
 - **Payment Notifications:** Real-time toast when payment received with success animation
 - **Quick Copy:** Tap to copy payment link to clipboard with confirmation toast
 - **Bulk Invoicing:** Select multiple jobs to batch invoice with single click
 - **Payment Plan Support:** Option to split invoice into multiple payments with schedule
 - **Currency Conversion:** Automatic currency detection and conversion with live rates
 - **Tip Suggestions:** Optional tip amounts shown to clients on payment page
-- **Receipt Auto-Send:** Automatic receipt email when payment completes
 - **Offline Invoicing:** Create invoices offline, sync when connected
 - **Voice Invoice:** Use voice to dictate line items for hands-free invoicing
 - **Invoice Preview:** Live preview of client-facing invoice as you create it
 - **Payment Tracking Dashboard:** Visual funnel showing invoice → sent → viewed → paid conversion
 - **Late Fee Automation:** Automatic late fees added to overdue invoices based on settings
-- **Multi-Currency Support:** Accept payments in multiple currencies with automatic conversion
+
 
 ---
 
