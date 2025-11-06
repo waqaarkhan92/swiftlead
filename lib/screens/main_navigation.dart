@@ -13,8 +13,8 @@ import 'settings/settings_screen.dart';
 import 'support/support_screen.dart';
 import 'legal/legal_screen.dart';
 import 'contacts/contacts_screen.dart';
-import 'marketing/marketing_screen.dart';
 import '../theme/tokens.dart';
+import '../utils/profession_config.dart';
 
 /// Main Navigation - Bottom tab navigation with drawer
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -36,19 +36,69 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
   
-  List<Widget> get _screens => [
-    HomeScreen(),
-    InboxScreen(),
-    JobsScreen(),
-    CalendarScreen(),
-    MoneyScreen(),
-  ];
+  // Get visible screens based on profession
+  List<Widget> get _screens {
+    final config = ProfessionState.config;
+    final screens = <Widget>[];
+    
+    if (config.isModuleVisible('home')) screens.add(HomeScreen());
+    if (config.isModuleVisible('inbox')) screens.add(InboxScreen());
+    if (config.isModuleVisible('jobs')) screens.add(JobsScreen());
+    if (config.isModuleVisible('calendar')) screens.add(CalendarScreen());
+    if (config.isModuleVisible('money')) screens.add(MoneyScreen());
+    
+    return screens;
+  }
+  
+  // Get navigation items based on profession
+  List<NavItem> get _navItems {
+    final config = ProfessionState.config;
+    final items = <NavItem>[];
+    
+    if (config.isModuleVisible('home')) {
+      items.add(NavItem(
+        icon: Icons.home_outlined,
+        activeIcon: Icons.home,
+        label: 'Home',
+      ));
+    }
+    if (config.isModuleVisible('inbox')) {
+      items.add(NavItem(
+        icon: Icons.inbox_outlined,
+        activeIcon: Icons.inbox,
+        label: 'Inbox',
+        badgeCount: 24,
+      ));
+    }
+    if (config.isModuleVisible('jobs')) {
+      items.add(NavItem(
+        icon: Icons.work_outline,
+        activeIcon: Icons.work,
+        label: config.getLabel('Jobs'),
+      ));
+    }
+    if (config.isModuleVisible('calendar')) {
+      items.add(NavItem(
+        icon: Icons.calendar_today_outlined,
+        activeIcon: Icons.calendar_today,
+        label: 'Calendar',
+      ));
+    }
+    if (config.isModuleVisible('money')) {
+      items.add(NavItem(
+        customIcon: '£',
+        customActiveIcon: '£',
+        label: 'Money',
+      ));
+    }
+    
+    return items;
+  }
   
   // Mapping for drawer screens
   Map<String, Widget> get _drawerScreenMap => {
     'ai_hub': AIHubScreen(),
     'contacts': ContactsScreen(),
-    'marketing': MarketingScreen(),
     'reports': ReportsScreen(),
     'reviews': ReviewsScreen(),
     'settings': SettingsScreen(
@@ -92,15 +142,6 @@ class _MainNavigationState extends State<MainNavigation> {
             onTap: () {
               Navigator.pop(context);
               setState(() => _drawerScreen = _drawerScreenMap['contacts']);
-            },
-          ),
-          DrawerItem(
-            icon: Icons.campaign_outlined,
-            label: 'Marketing',
-            isSelected: false,
-            onTap: () {
-              Navigator.pop(context);
-              setState(() => _drawerScreen = _drawerScreenMap['marketing']);
             },
           ),
           DrawerItem(
@@ -200,34 +241,7 @@ class _MainNavigationState extends State<MainNavigation> {
                 _drawerScreen = null; // Clear drawer screen when switching tabs
               });
             },
-            items: [
-              NavItem(
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home,
-                label: 'Home',
-              ),
-              NavItem(
-                icon: Icons.inbox_outlined,
-                activeIcon: Icons.inbox,
-                label: 'Inbox',
-                badgeCount: 24, // Example
-              ),
-              NavItem(
-                icon: Icons.work_outline,
-                activeIcon: Icons.work,
-                label: 'Jobs',
-              ),
-              NavItem(
-                icon: Icons.calendar_today_outlined,
-                activeIcon: Icons.calendar_today,
-                label: 'Calendar',
-              ),
-              NavItem(
-                customIcon: '£',
-                customActiveIcon: '£',
-                label: 'Money',
-              ),
-            ],
+            items: _navItems,
           ),
         ],
       ),

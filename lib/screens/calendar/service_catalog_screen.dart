@@ -7,6 +7,7 @@ import '../../widgets/global/search_bar.dart';
 import '../../widgets/global/chip.dart';
 import '../../widgets/global/primary_button.dart';
 import '../../theme/tokens.dart';
+import '../../utils/profession_config.dart';
 import 'service_editor_screen.dart';
 
 /// Service Catalog Screen - Browse and select services for bookings
@@ -29,41 +30,80 @@ class _ServiceCatalogScreenState extends State<ServiceCatalogScreen> {
   String? _selectedCategory;
   String? _selectedServiceId;
 
-  final List<String> _categories = ['All', 'Repairs', 'Installation', 'Maintenance', 'Consultation'];
-  final List<_ServiceItem> _services = [
-    _ServiceItem(
-      id: '1',
-      name: 'Kitchen Sink Repair',
-      category: 'Repairs',
-      duration: 60,
-      price: 150.0,
-      description: 'Full repair service for kitchen sink issues',
-    ),
-    _ServiceItem(
-      id: '2',
-      name: 'Bathroom Installation',
-      category: 'Installation',
-      duration: 240,
-      price: 500.0,
-      description: 'Complete bathroom installation service',
-    ),
-    _ServiceItem(
-      id: '3',
-      name: 'Heating System Check',
-      category: 'Maintenance',
-      duration: 90,
-      price: 100.0,
-      description: 'Annual heating system maintenance check',
-    ),
-    _ServiceItem(
-      id: '4',
-      name: 'Electrical Consultation',
-      category: 'Consultation',
-      duration: 30,
-      price: 50.0,
-      description: 'Professional electrical consultation',
-    ),
-  ];
+  List<String> get _categories => ['All', 'Repairs', 'Installation', 'Maintenance', 'Consultation'];
+  
+  // Get profession-specific service templates
+  List<_ServiceItem> get _services {
+    final profession = ProfessionState.currentProfession;
+    final templates = ProfessionConfig.getServiceTypeTemplates(profession);
+    
+    // If templates are available, use them; otherwise use defaults
+    if (templates.isEmpty) {
+      return [
+        _ServiceItem(
+          id: '1',
+          name: 'Kitchen Sink Repair',
+          category: 'Repairs',
+          duration: 60,
+          price: 150.0,
+          description: 'Full repair service for kitchen sink issues',
+        ),
+        _ServiceItem(
+          id: '2',
+          name: 'Bathroom Installation',
+          category: 'Installation',
+          duration: 240,
+          price: 500.0,
+          description: 'Complete bathroom installation service',
+        ),
+        _ServiceItem(
+          id: '3',
+          name: 'Heating System Check',
+          category: 'Maintenance',
+          duration: 90,
+          price: 100.0,
+          description: 'Annual heating system maintenance check',
+        ),
+        _ServiceItem(
+          id: '4',
+          name: 'Electrical Consultation',
+          category: 'Consultation',
+          duration: 30,
+          price: 50.0,
+          description: 'Professional electrical consultation',
+        ),
+      ];
+    }
+    
+    // Convert templates to service items
+    return templates.asMap().entries.map((entry) {
+      final index = entry.key;
+      final template = entry.value;
+      return _ServiceItem(
+        id: 'template_$index',
+        name: template,
+        category: _getCategoryForTemplate(template),
+        duration: 60, // Default duration
+        price: 0.0, // Will be set by user
+        description: 'Profession-specific service: $template',
+      );
+    }).toList();
+  }
+  
+  String _getCategoryForTemplate(String template) {
+    // Simple categorization logic
+    if (template.toLowerCase().contains('repair') || 
+        template.toLowerCase().contains('installation')) {
+      return 'Repairs';
+    } else if (template.toLowerCase().contains('consultation') ||
+               template.toLowerCase().contains('consultation')) {
+      return 'Consultation';
+    } else if (template.toLowerCase().contains('maintenance') ||
+               template.toLowerCase().contains('check')) {
+      return 'Maintenance';
+    }
+    return 'All';
+  }
 
   @override
   void initState() {

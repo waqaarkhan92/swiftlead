@@ -7,6 +7,8 @@ import '../../widgets/global/chip.dart';
 import '../../widgets/global/progress_bar.dart';
 import '../../widgets/global/toast.dart';
 import '../../theme/tokens.dart';
+import '../../utils/profession_config.dart';
+import '../../utils/profession_config.dart';
 
 /// Create/Edit Invoice Form - Create or edit an invoice
 /// Exact specification from UI_Inventory_v2.5.1
@@ -146,7 +148,7 @@ class _CreateEditInvoiceScreenState extends State<CreateEditInvoiceScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
-        title: widget.invoiceId != null ? 'Edit Invoice' : 'Create Invoice',
+        title: widget.invoiceId != null ? 'Edit ${ProfessionState.config.getLabel('Invoice')}' : 'Create ${ProfessionState.config.getLabel('Invoice')}',
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -166,27 +168,68 @@ class _CreateEditInvoiceScreenState extends State<CreateEditInvoiceScreen> {
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
 
-            // Client Selector
-            TextFormField(
-              controller: _clientController,
-              decoration: InputDecoration(
-                labelText: 'Bill To *',
-                hintText: 'Select or enter client name',
-                suffixIcon: const Icon(Icons.person),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-                ),
+            // iOS-style grouped sections
+            // Section 1: Client Information
+            FrostedContainer(
+              padding: EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Text(
+                      'Client Information',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: TextFormField(
+                      controller: _clientController,
+                      decoration: InputDecoration(
+                        labelText: 'Bill To *',
+                        hintText: 'Select or enter client name',
+                        suffixIcon: const Icon(Icons.person),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please select a client';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please select a client';
-                }
-                return null;
-              },
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
-
-            // Dates
+            // Section 2: Dates & Tax
+            FrostedContainer(
+              padding: EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Text(
+                      'Dates & Tax',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Column(
+                      children: [
+                        // Dates
             Row(
               children: [
                 Expanded(
@@ -261,228 +304,233 @@ class _CreateEditInvoiceScreenState extends State<CreateEditInvoiceScreen> {
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: SwiftleadTokens.spaceM),
-
-            // Tax Rate
-            Text(
-              'Tax Rate',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: SwiftleadTokens.spaceS),
-            Row(
-              children: [
-                Expanded(
-                  child: Slider(
-                    value: _taxRate,
-                    min: 0,
-                    max: 30,
-                    divisions: 30,
-                    label: '${_taxRate.toStringAsFixed(0)}%',
-                    onChanged: (value) {
-                      setState(() {
-                        _taxRate = value;
-                      });
-                    },
-                  ),
-                ),
-                SizedBox(
-                  width: 60,
-                  child: Text(
-                    '${_taxRate.toStringAsFixed(0)}%',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceM),
+                        // Tax Rate
+                        Text(
+                          'Tax Rate',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceS),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Slider(
+                                value: _taxRate,
+                                min: 0,
+                                max: 30,
+                                divisions: 30,
+                                label: '${_taxRate.toStringAsFixed(0)}%',
+                                onChanged: (value) {
+                                  setState(() {
+                                    _taxRate = value;
+                                  });
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              width: 60,
+                              child: Text(
+                                '${_taxRate.toStringAsFixed(0)}%',
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    textAlign: TextAlign.right,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: SwiftleadTokens.spaceM),
-
-            // Line Items
-            Text(
-              'Line Items *',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
+                ],
               ),
             ),
-            const SizedBox(height: SwiftleadTokens.spaceS),
-            ...List.generate(_lineItems.length, (index) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
-                child: _buildLineItemRow(index),
-              );
-            }),
-            TextButton.icon(
-              onPressed: () {
-                setState(() {
-                  _lineItems.add(_InvoiceLineItem(description: '', quantity: 1, rate: 0.0));
-                });
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('Add Line Item'),
-            ),
             const SizedBox(height: SwiftleadTokens.spaceM),
-
-            // Labor & Fees
+            // Section 3: Line Items
             FrostedContainer(
-              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              padding: EdgeInsets.zero,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Labor & Fees',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Text(
+                      'Line Items',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: SwiftleadTokens.spaceM),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Column(
+                      children: [
+                        // Line Items
+                        Text(
+                          'Line Items *',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceS),
+                        ...List.generate(_lineItems.length, (index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+                            child: _buildLineItemRow(index),
+                          );
+                        }),
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _lineItems.add(_InvoiceLineItem(description: '', quantity: 1, rate: 0.0));
+                            });
+                          },
+                          icon: const Icon(Icons.add),
+                          label: const Text('Add Line Item'),
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceM),
+                        // Labor & Fees
+                        Row(
                           children: [
-                            Text(
-                              'Labor Hours',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            const SizedBox(height: SwiftleadTokens.spaceXS),
-                            TextField(
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                hintText: '0.0',
-                                prefixText: 'Hours: ',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-                                ),
-                                isDense: true,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Labor Hours',
+                                    style: Theme.of(context).textTheme.bodySmall,
+                                  ),
+                                  const SizedBox(height: SwiftleadTokens.spaceXS),
+                                  TextField(
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                      hintText: '0.0',
+                                      prefixText: 'Hours: ',
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                                      ),
+                                      isDense: true,
+                                    ),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _laborHours = double.tryParse(value) ?? 0.0;
+                                      });
+                                    },
+                                    controller: TextEditingController(text: _laborHours.toStringAsFixed(1)),
+                                  ),
+                                ],
                               ),
-                              onChanged: (value) {
-                                setState(() {
-                                  _laborHours = double.tryParse(value) ?? 0.0;
-                                });
-                              },
-                              controller: TextEditingController(text: _laborHours.toStringAsFixed(1)),
+                            ),
+                            const SizedBox(width: SwiftleadTokens.spaceM),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Additional Fees',
+                                    style: Theme.of(context).textTheme.bodySmall,
+                                  ),
+                                  const SizedBox(height: SwiftleadTokens.spaceXS),
+                                  TextField(
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                      hintText: '0.00',
+                                      prefixText: '£',
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                                      ),
+                                      isDense: true,
+                                    ),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _fees = double.tryParse(value) ?? 0.0;
+                                      });
+                                    },
+                                    controller: TextEditingController(text: _fees.toStringAsFixed(2)),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: SwiftleadTokens.spaceM),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Additional Fees',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            const SizedBox(height: SwiftleadTokens.spaceXS),
-                            TextField(
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                hintText: '0.00',
-                                prefixText: '£',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-                                ),
-                                isDense: true,
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  _fees = double.tryParse(value) ?? 0.0;
-                                });
-                              },
-                              controller: TextEditingController(text: _fees.toStringAsFixed(2)),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
-
-            // Totals Preview
+            // Section 4: Totals & Notes
             FrostedContainer(
-              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              padding: EdgeInsets.zero,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _TotalRow(label: 'Subtotal', amount: _subtotal),
-                  if (_fees > 0)
-                    _TotalRow(label: 'Additional Fees', amount: _fees),
-                  if (_laborHours > 0)
-                    _TotalRow(label: 'Labor (${_laborHours.toStringAsFixed(1)}h)', amount: _laborHours * 50.0), // Assuming £50/hour rate
-                  _TotalRow(label: 'Tax (${_taxRate.toStringAsFixed(0)}%)', amount: _tax),
-                  const Divider(),
-                  _TotalRow(
-                    label: 'Total',
-                    amount: _total,
-                    isTotal: true,
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Text(
+                      'Totals & Notes',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: SwiftleadTokens.spaceM),
-
-            // Attach Job Photos (if creating from job)
-            if (_linkedJobId != null) ...[
-              FrostedContainer(
-                padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Attach Job Photos',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Column(
+                      children: [
+                        // Totals Preview
+                        _TotalRow(label: 'Subtotal', amount: _subtotal),
+                        if (_fees > 0)
+                          _TotalRow(label: 'Additional Fees', amount: _fees),
+                        if (_laborHours > 0)
+                          _TotalRow(label: 'Labor (${_laborHours.toStringAsFixed(1)}h)', amount: _laborHours * 50.0),
+                        _TotalRow(label: 'Tax (${_taxRate.toStringAsFixed(0)}%)', amount: _tax),
+                        const Divider(),
+                        _TotalRow(
+                          label: 'Total',
+                          amount: _total,
+                          isTotal: true,
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceM),
+                        // Notes
+                        TextFormField(
+                          controller: _notesController,
+                          maxLines: 4,
+                          decoration: InputDecoration(
+                            labelText: 'Notes (Optional)',
+                            hintText: 'Add payment terms or additional notes...',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
                             ),
                           ),
-                          Text(
-                            'Include job photos with invoice',
-                            style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        if (_linkedJobId != null) ...[
+                          const SizedBox(height: SwiftleadTokens.spaceM),
+                          SwitchListTile(
+                            title: const Text('Attach Job Photos'),
+                            subtitle: const Text('Include job photos with invoice'),
+                            value: _attachJobPhotos,
+                            onChanged: (value) {
+                              setState(() {
+                                _attachJobPhotos = value;
+                              });
+                            },
                           ),
                         ],
-                      ),
+                      ],
                     ),
-                    Switch(
-                      value: _attachJobPhotos,
-                      onChanged: (value) {
-                        setState(() {
-                          _attachJobPhotos = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: SwiftleadTokens.spaceM),
-            ],
-            
-            // Notes
-            TextFormField(
-              controller: _notesController,
-              maxLines: 4,
-              decoration: InputDecoration(
-                labelText: 'Notes (Optional)',
-                hintText: 'Add payment terms or additional notes...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-                ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: SwiftleadTokens.spaceL),
-
-            // Save Button
+            const SizedBox(height: SwiftleadTokens.spaceM),
+            // Sticky save button (iOS pattern)
             if (_isSaving)
               const SwiftleadProgressBar()
             else

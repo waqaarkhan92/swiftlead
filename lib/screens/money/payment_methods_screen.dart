@@ -456,13 +456,24 @@ class _PaymentMethodCard extends StatelessWidget {
                 },
                 itemBuilder: (context) => [
                   if (!method.isDefault)
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'set_default',
-                      child: Text('Set as Default'),
+                      child: Text(
+                        'Set as Default',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
-                    child: Text('Remove'),
+                    child: Text(
+                      'Remove',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: const Color(SwiftleadTokens.errorRed),
+                      ),
+                    ),
                   ),
                 ],
               ),

@@ -64,14 +64,21 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'request_payment',
-                child: Row(
-                  children: [
-                    Icon(Icons.request_quote, size: 20),
-                    SizedBox(width: SwiftleadTokens.spaceS),
-                    Text('Request Payment'),
-                  ],
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.request_quote, size: 20),
+                      const SizedBox(width: SwiftleadTokens.spaceS),
+                      Text(
+                        'Request Payment',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

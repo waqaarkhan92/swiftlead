@@ -64,8 +64,24 @@ class _CapacityOptimizationScreenState extends State<CapacityOptimizationScreen>
               });
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'week', child: Text('This Week')),
-              const PopupMenuItem(value: 'month', child: Text('This Month')),
+              PopupMenuItem(
+                value: 'week',
+                child: Text(
+                  'This Week',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'month',
+                child: Text(
+                  'This Month',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
             ],
           ),
         ],

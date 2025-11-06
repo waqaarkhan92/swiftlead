@@ -31,12 +31,6 @@ class _SupportScreenState extends State<SupportScreen> {
       appBar: FrostedAppBar(
         scaffoldKey: main_nav.MainNavigation.scaffoldKey,
         title: 'Support & Help',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: _isLoading
           ? _buildLoadingState()
@@ -133,7 +127,22 @@ class _SupportScreenState extends State<SupportScreen> {
             ),
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              // Open status page
+              launchUrl(
+                Uri.parse('https://status.swiftlead.co'),
+                mode: LaunchMode.externalApplication,
+              ).catchError((error) {
+                if (mounted) {
+                  Toast.show(
+                    context,
+                    message: 'Could not open status page',
+                    type: ToastType.error,
+                  );
+                }
+                return false;
+              });
+            },
             child: const Text('Status Page'),
           ),
         ],

@@ -112,34 +112,56 @@ class _BookingTemplatesScreenState extends State<BookingTemplatesScreen> {
                                     }
                                   },
                                   itemBuilder: (context) => [
-                                    const PopupMenuItem(
+                                    PopupMenuItem(
                                       value: 'use',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.play_arrow, size: 20),
-                                          SizedBox(width: SwiftleadTokens.spaceS),
-                                          Text('Use Template'),
-                                        ],
+                                      child: Builder(
+                                        builder: (context) => Row(
+                                          children: [
+                                            const Icon(Icons.play_arrow, size: 20),
+                                            const SizedBox(width: SwiftleadTokens.spaceS),
+                                            Text(
+                                              'Use Template',
+                                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                    const PopupMenuItem(
+                                    PopupMenuItem(
                                       value: 'edit',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.edit, size: 20),
-                                          SizedBox(width: SwiftleadTokens.spaceS),
-                                          Text('Edit'),
-                                        ],
+                                      child: Builder(
+                                        builder: (context) => Row(
+                                          children: [
+                                            const Icon(Icons.edit, size: 20),
+                                            const SizedBox(width: SwiftleadTokens.spaceS),
+                                            Text(
+                                              'Edit',
+                                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                    const PopupMenuItem(
+                                    PopupMenuItem(
                                       value: 'delete',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.delete, color: Color(SwiftleadTokens.errorRed), size: 20),
-                                          SizedBox(width: SwiftleadTokens.spaceS),
-                                          Text('Delete', style: TextStyle(color: Color(SwiftleadTokens.errorRed))),
-                                        ],
+                                      child: Builder(
+                                        builder: (context) => Row(
+                                          children: [
+                                            const Icon(Icons.delete, color: Color(SwiftleadTokens.errorRed), size: 20),
+                                            const SizedBox(width: SwiftleadTokens.spaceS),
+                                            Text(
+                                              'Delete',
+                                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                fontWeight: FontWeight.w500,
+                                                color: const Color(SwiftleadTokens.errorRed),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ],

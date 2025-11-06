@@ -1,0 +1,4308 @@
+{
+  "modules": {
+    "1": {
+      "number": "1",
+      "name": "Omni-Inbox (Unified Messaging)",
+      "purpose": "Unified messaging hub for all customer communication channels across SMS, WhatsApp, Facebook, Instagram, and Email with enhanced UX and smart features.",
+      "core_capabilities": [],
+      "features": [
+        "**Unified Message View:** Single interface displaying all SMS, WhatsApp, Facebook Messenger, Instagram Direct, and **Email (IMAP/SMTP)** messages in chronological order",
+        "**Message Threading:** Automatic grouping of messages by contact, maintaining conversation history across all channels",
+        "**Real-time Updates:** Live message delivery with push notifications and in-app badges (Note: Deferred until backend is wired. Current implementation uses pull-based approach with `_loadMessages()` which is acceptable for MVP.)",
+        "**AI Message Summarisation:** Automatically summarises long conversation threads into key points and action items",
+        "**Quick Reply Templates:** Pre-written response templates accessible via shortcuts for common queries",
+        "**Canned Responses:** Library of saved responses organized by category (booking, pricing, availability, etc.)",
+        "**Smart Reply Suggestions:** AI suggests 3 contextual quick replies based on conversation content",
+        "**Rich Media Support:** Send and receive file attachments, photos, voice notes, and documents across all platforms",
+        "**Voice Note Player:** Inline audio player with waveform visualization and playback controls",
+        "**Link Previews:** Rich previews of URLs shared in messages with thumbnail and metadata",
+        "**Search & Filters:** Full-text search across all messages with filters by contact, date, channel, read status, and lead source",
+        "**Advanced Filters:** Combine filters (e.g., \"Unread WhatsApp messages from this week\")",
+        "**Lead Source Tagging:** Automatically tag messages with lead source (Google Ads / Facebook Ads / Website / Referral / Direct) for tracking. Note: Lead Source is distinct from message channel - it represents where the lead originally came from, not the communication platform used.",
+        "**Typing Indicators:** Display real-time typing status where supported by platform APIs",
+        "**Read Receipts:** Visual confirmation of message delivery and read status (where supported)",
+        "**Missed-Call Integration:** Display missed call notifications inline with messaging threads",
+        "**Message Actions:** Reply, forward, mark as read/unread, archive, delete, assign to team members, and convert to quote/job",
+        "**Message Reactions:** Add emoji reactions to messages (where supported)",
+        "**Smart Sorting:** Pinned \u2192 Unread \u2192 Recent \u2192 Archived with customizable order",
+        "**Conversation Preview:** Long-press conversation for quick preview without opening"
+      ],
+      "interactions": [
+        "Tap message to expand and view full conversation thread",
+        "Swipe actions for quick reply, archive, pin, or delete",
+        "Long-press for additional options (forward, assign, add note, batch select)",
+        "Pull-to-refresh to sync latest messages",
+        "Scroll to load message history (infinite scroll with virtualization)",
+        "Filter by lead source, channel, or assigned team member",
+        "Search across all conversations with instant results and highlighted matches",
+        "Tap-hold message bubble for reactions or context menu"
+      ],
+      "ui_components": [
+        "MessageComposerBar",
+        "Badge",
+        "Skeleton",
+        "Toast",
+        "WhatsApp",
+        "ChatBubble"
+      ],
+      "enhancements": [],
+      "future_features": [],
+      "automations": []
+    },
+    "2": {
+      "number": "2",
+      "name": "AI Receptionist",
+      "purpose": "Automated first-response system that handles incoming inquiries 24/7 and qualifies leads with enhanced intelligence and performance tracking.",
+      "core_capabilities": [],
+      "features": [
+        "**Instant Auto-Reply:** Automatically responds to missed calls, texts, or messages within seconds",
+        "**Branded Missed Call Text-Back:** Sends professional follow-up message after missed calls with direct link to book appointment or reply",
+        "**Smart FAQs:** AI-powered responses to frequently asked questions learned from business profile and historical conversations",
+        "**Booking Assistance:** Automatically offers available time slots based on calendar availability when booking inquiries are detected (Note: Backend verification needed once backend is wired)",
+        "**Lead Qualification:** Collects essential information (name, service needed, postcode/address) before human handover (Note: Backend verification needed once backend is wired)",
+        "**After-Hours Handling:** Provides automated responses outside business hours with clear expectation of response time next morning",
+        "**Smart Handover:** Seamlessly transfers qualified leads to human team members with full context and conversation history (Note: Backend verification needed once backend is wired)",
+        "**Confidence Scoring:** AI reports confidence level per response for quality monitoring (Note: Backend verification needed once backend is wired)",
+        "**Custom Response Override:** Set specific responses for particular keywords or phrases (Note: Backend verification needed once backend is wired)",
+        "**Escalation Rules:** Smart handover based on sentiment, complexity, or keywords (Note: Backend verification needed once backend is wired)",
+        "**AI Performance Analytics:** Track response time, qualification rate, booking conversion",
+        "**Test Mode:** Test AI responses in sandbox before enabling for real customers",
+        "**Fallback Responses:** Graceful handling when AI is uncertain (Note: Backend verification needed once backend is wired)",
+        "**Context Retention:** AI remembers previous conversations with same contact (Note: Backend verification needed once backend is wired)",
+        "Trigger on missed call \u2192 send branded text-back within 30 seconds",
+        "Trigger on new message after hours \u2192 send after-hours greeting with next-day response promise",
+        "Trigger on booking keyword \u2192 offer available slots immediately",
+        "Trigger on location question \u2192 share service area coverage",
+        "Trigger on pricing question \u2192 respond with standard pricing range or offer to quote",
+        "Trigger on qualification complete \u2192 notify team + create lead record"
+      ],
+      "interactions": [],
+      "ui_components": [
+        "ConversationSimulator",
+        "LearningGraph",
+        "PerformanceMetrics",
+        "AIInsightCard",
+        "ResponsePreview",
+        "AISwitchToggle"
+      ],
+      "enhancements": [],
+      "future_features": [],
+      "automations": [
+        "Trigger on missed call \u2192 send branded text-back within 30 seconds",
+        "Trigger on new message after hours \u2192 send after-hours greeting with next-day response promise",
+        "Trigger on booking keyword \u2192 offer available slots immediately",
+        "Trigger on location question \u2192 share service area coverage",
+        "Trigger on pricing question \u2192 respond with standard pricing range or offer to quote",
+        "Trigger on qualification complete \u2192 notify team + create lead record"
+      ]
+    },
+    "3": {
+      "number": "3",
+      "name": "Jobs (Job Management)",
+      "purpose": "Track jobs from quote to completion with AI insights, smart scheduling, and team coordination.",
+      "core_capabilities": [],
+      "features": [
+        "**Job Lifecycle:** Quote \u2192 Scheduled \u2192 In Progress \u2192 Completed \u2192 Invoiced/Paid",
+        "**Parts & Materials:** *(Removed - not needed)*",
+        "**Quality Checklists:** *(Removed - not needed)*",
+        "**Smart Job Suggestions:** AI suggests related services based on job history (Note: Backend verification needed once backend is wired)",
+        "**Quick Actions:** Swipe gestures for common operations",
+        "**Risk Alerts:** Warn about scheduling conflicts or overdue jobs",
+        "Tap job to view full details",
+        "Swipe job card for quick actions (call client, navigate, mark complete)",
+        "Drag-and-drop jobs between status columns (Kanban)",
+        "Filter by status, assigned team member, date range, priority",
+        "Search jobs by client name, address, or description",
+        "Sort by due date, priority, value, or creation date",
+        "Tap client name to view full contact profile",
+        "Tap address to open in maps",
+        "Long-press for batch selection",
+        "Pull-to-refresh to sync latest updates"
+      ],
+      "interactions": [
+        "Tap job to view full details",
+        "Swipe job card for quick actions (call client, navigate, mark complete)",
+        "Drag-and-drop jobs between status columns (Kanban)",
+        "Filter by status, assigned team member, date range, priority",
+        "Search jobs by client name, address, or description",
+        "Sort by due date, priority, value, or creation date",
+        "Tap client name to view full contact profile",
+        "Tap address to open in maps",
+        "Long-press for batch selection",
+        "Pull-to-refresh to sync latest updates"
+      ],
+      "ui_components": [
+        "JobTimeline",
+        "RecurrenceSelector",
+        "JobStatusPipeline",
+        "JobCard",
+        "TimerWidget",
+        "PhotoGallery",
+        "AssignmentPicker"
+      ],
+      "enhancements": [],
+      "future_features": [],
+      "automations": []
+    },
+    "4": {
+      "number": "4",
+      "name": "Calendar & Bookings",
+      "purpose": "Unified scheduling with availability management, automated confirmations, and multi-calendar sync.",
+      "core_capabilities": [],
+      "features": [
+        "**Smart Availability:** AI suggests optimal time slots based on preferences",
+        "**Capacity Optimization:** Visualize utilization and suggest improvements",
+        "**Booking Templates:** Pre-configure common booking scenarios",
+        "**Conflict Resolution:** Smart suggestions when double-booking detected",
+        "**Group Bookings:** Handle multi-person appointments (classes, consultations)",
+        "**Resource Management:** Track equipment/room availability",
+        "**Booking Analytics:** Track booking sources, conversion rates, peak times",
+        "**Weather Integration:** Display weather forecast for outdoor jobs",
+        "**Buffer Time Management:** Auto-calculate travel/prep time between appointments with visual indicators and adjustable buffer settings",
+        "**Quick Reschedule:** Drag-and-drop booking cards to reschedule to new time slots with automatic notifications",
+        "Tap date to view day details",
+        "Tap booking to view/edit",
+        "Long-press for quick actions (call, message, directions, cancel)",
+        "Swipe booking for quick status change",
+        "Pinch-to-zoom calendar view",
+        "Drag-and-drop booking to reschedule (day view)",
+        "Filter by team member, service type, or status",
+        "Color code by category"
+      ],
+      "interactions": [
+        "Tap date to view day details",
+        "Tap booking to view/edit",
+        "Long-press for quick actions (call, message, directions, cancel)",
+        "Swipe booking for quick status change",
+        "Pinch-to-zoom calendar view",
+        "Drag-and-drop booking to reschedule (day view)",
+        "Filter by team member, service type, or status",
+        "Color code by category"
+      ],
+      "ui_components": [
+        "ReminderScheduler",
+        "BookingForm",
+        "RecurrenceBuilder",
+        "AvailabilityEditor",
+        "CalendarGrid",
+        "TimeSlotPicker"
+      ],
+      "enhancements": [],
+      "future_features": [],
+      "automations": []
+    },
+    "5": {
+      "number": "5",
+      "name": "Money (Quotes, Invoices & Billing)",
+      "purpose": "Complete financial management hub combining professional quote generation, automated invoicing, payment processing, and financial analytics in one unified interface.",
+      "core_capabilities": [],
+      "features": [
+        "**AI Quote Assistant:** Analyzes job description, suggests line items, pricing recommendations, upsell opportunities",
+        "**Smart Pricing:** Dynamic pricing based on demand, seasonality, client history",
+        "**Visual Quote Editor:** Drag-drop line items with live preview",
+        "**Quote Expiration Alerts:** Notify team when quotes about to expire",
+        "**One-Click Resend:** Resend with updated expiry date",
+        "**Quote Insights:** AI analysis of why quotes accepted/declined",
+        "**Quick Quote:** Generate quote from message in under 60 seconds",
+        "**Mobile Optimized:** Full quote builder on mobile",
+        "**Smart Invoice Timing:** AI suggests optimal send time for payment",
+        "**Payment Plans:** Flexible installment options with auto-billing",
+        "**Quick Pay QR Code:** Generate QR code for instant payment",
+        "**Offline Payments:** Record cash/check payments offline, sync later",
+        "**Batch Actions:** Send reminders or mark paid for multiple invoices",
+        "**Date Range Selector:** Compare any period (today, week, month, quarter, year, custom)",
+        "**Real-Time Refresh:** Live updates without manual refresh",
+        "Create quote from Inbox conversation or Job",
+        "Create invoice from job or quote",
+        "Tap to add/edit line items",
+        "Toggle between detailed and summary view",
+        "Preview before sending"
+      ],
+      "interactions": [
+        "Create quote from Inbox conversation or Job",
+        "Create invoice from job or quote",
+        "Tap to add/edit line items",
+        "Toggle between detailed and summary view",
+        "Preview before sending",
+        "Track delivery and viewing",
+        "Follow up with one tap",
+        "Convert accepted quote to job/invoice",
+        "Record payments manually",
+        "Void or refund",
+        "Download PDF",
+        "Email reminders",
+        "Pull-to-refresh to update all stats",
+        "Tap any card to drill into details",
+        "Filter by date range, status, or type"
+      ],
+      "ui_components": [
+        "InvoiceStatusBadge",
+        "New",
+        "Enhanced",
+        "InvoiceBuilder",
+        "FollowUpScheduler",
+        "PaymentWidget",
+        "RevenueChart",
+        "QuoteBuilder",
+        "QuoteStatusBadge",
+        "ReceiptViewer",
+        "Addendum",
+        "Contacts",
+        "AcceptanceWidget",
+        "StatusTracker",
+        "Module",
+        "LineItemEditor",
+        "MetricCard",
+        "ReminderScheduler",
+        "FinancialDashboard",
+        "PricingOptimizer",
+        "CRM"
+      ],
+      "enhancements": [],
+      "future_features": [],
+      "automations": []
+    },
+    "6": {
+      "number": "6",
+      "name": "Contacts / CRM (COMPLETE SPECIFICATION)",
+      "purpose": "Comprehensive contact relationship management with lifecycle tracking, segmentation, and 360\u00b0 customer view.",
+      "core_capabilities": [],
+      "features": [
+        "Complete contact records with name, email, phone(s), address, company, title",
+        "Profile photo with automatic initial generation",
+        "Custom fields per industry (license #, account #, membership level)",
+        "Flexible tagging for categorization",
+        "Source tracking (web form, referral, ad, walk-in)",
+        "VIP/priority status flags",
+        "Automatic: Lead \u2192 Prospect when quote sent",
+        "Automatic: Prospect \u2192 Customer when first payment received",
+        "Automatic: Customer \u2192 Repeat when 2nd job completed",
+        "Manual override with reason tracking",
+        "Stage changes trigger notifications and automations",
+        "Messages across all channels (SMS, WhatsApp, email, social)",
+        "Call history (duration, recordings, transcripts)",
+        "Jobs/bookings with status and outcomes",
+        "Quotes sent and their status",
+        "Invoices and payment history",
+        "Reviews given",
+        "Notes from team members",
+        "Email opens and link clicks",
+        "Chronological with filtering by type"
+      ],
+      "interactions": [],
+      "ui_components": [],
+      "enhancements": [],
+      "future_features": [],
+      "automations": []
+    },
+    "7": {
+      "number": "7",
+      "name": "Reviews (COMPLETE SPECIFICATION)",
+      "purpose": "Comprehensive review management and reputation tracking across multiple platforms with automated request workflows and response management.",
+      "core_capabilities": [],
+      "features": [
+        "**Google Reviews:** Sync from Google Business Profile",
+        "**Facebook Reviews:** Import from Facebook Business Page",
+        "**Yelp Reviews:** Connect Yelp Business account",
+        "**Internal Reviews:** Collect reviews directly in-app",
+        "Automatic sync on configurable schedule (hourly, daily, weekly)",
+        "Manual refresh option",
+        "Average rating across all platforms",
+        "Total review count",
+        "Rating distribution (5-star breakdown)",
+        "Recent reviews (last 7/30 days)",
+        "Platform comparison (rating by source)",
+        "Response rate percentage",
+        "Trend indicators (up/down vs previous period)",
+        "Request new reviews",
+        "View pending responses",
+        "Respond to reviews",
+        "Export review data",
+        "Trigger after job completion",
+        "Trigger after payment received",
+        "Trigger after quote acceptance"
+      ],
+      "interactions": [],
+      "ui_components": [],
+      "enhancements": [],
+      "future_features": [],
+      "automations": []
+    },
+    "8": {
+      "number": "8",
+      "name": "Notifications System (ENHANCED SPECIFICATION)",
+      "purpose": "Intelligent multi-channel notification delivery with granular preferences and smart batching.",
+      "core_capabilities": [],
+      "features": [
+        "**Push:** Mobile app + web push with rich notifications",
+        "**Email:** Instant, daily digest, weekly digest",
+        "**SMS:** Critical alerts only (opt-in)",
+        "**In-App:** Notification center with history",
+        "Enable/disable entirely",
+        "Choose channels (push, email, SMS, in-app)",
+        "Set priority (instant, batched, digest-only)",
+        "Push: Enable/disable per device",
+        "Email: Choose address if multiple",
+        "SMS: Enable only for critical",
+        "Toggle switches for each type\u00d7channel",
+        "Preview notifications",
+        "Reset to defaults",
+        "Group similar notifications",
+        "Batch intervals: 5 min, 15 min, 1 hour, digest-only",
+        "Exclude critical from batching",
+        "User-configurable per type",
+        "Reply button",
+        "Mark Complete button (updates without opening app)",
+        "View button (deep link)"
+      ],
+      "interactions": [],
+      "ui_components": [],
+      "enhancements": [],
+      "future_features": [],
+      "automations": []
+    },
+    "9": {
+      "number": "9",
+      "name": "Data Import / Export (COMPLETE SPECIFICATION)",
+      "purpose": "Bulk data operations for migration, backups, and integrations.",
+      "core_capabilities": [],
+      "features": [
+        "`import_jobs`",
+        "`import_errors`",
+        "`export_jobs`",
+        "`gdpr_requests`",
+        "<!-- REMOVED: `export_templates`, `scheduled_exports` - Removed per decision matrix 2025-11-05 -->",
+        "`import-data`",
+        "`export-data`",
+        "<!-- REMOVED: `process-scheduled-export` - Removed per decision matrix 2025-11-05 -->",
+        "`generate-gdpr-export`",
+        "`process-gdpr-deletion`"
+      ],
+      "interactions": [],
+      "ui_components": [],
+      "enhancements": [],
+      "future_features": [],
+      "automations": []
+    },
+    "10": {
+      "number": "10",
+      "name": "Dashboard (Home Screen)",
+      "purpose": "At-a-glance business health overview with actionable insights and quick access to key metrics.",
+      "core_capabilities": [],
+      "features": [
+        "**Date Range Selector:** Compare any period (today, week, month, quarter, year, custom)",
+        "**Goal Tracking:** Set revenue/booking goals and track progress",
+        "**Real-Time Refresh:** Live updates without manual refresh",
+        "**Smart Notifications:** Critical alerts highlighted at top",
+        "**Performance Badges:** Achievements and milestones celebrated",
+        "**Weather Widget:** Weather forecast for outdoor job planning",
+        "**Offline Mode:** View cached dashboard data when offline",
+        "Pull-to-refresh to update all stats",
+        "Tap any card to drill into details",
+        "Swipe activity feed to view more items",
+        "Tap insight to view supporting data",
+        "Tap quick action button to launch workflow",
+        "Filter date range for all metrics",
+        "Tap team member to view individual dashboard"
+      ],
+      "interactions": [
+        "Pull-to-refresh to update all stats",
+        "Tap any card to drill into details",
+        "Swipe activity feed to view more items",
+        "Tap insight to view supporting data",
+        "Tap quick action button to launch workflow",
+        "Filter date range for all metrics",
+        "Tap team member to view individual dashboard"
+      ],
+      "ui_components": [
+        "RevenueChart",
+        "MetricCard",
+        "ActivityFeed",
+        "InsightCard",
+        "GoalProgressBar",
+        "QuickActionButton"
+      ],
+      "enhancements": [],
+      "future_features": [],
+      "automations": []
+    },
+    "11": {
+      "number": "11",
+      "name": "AI Hub",
+      "purpose": "Central configuration and monitoring for all AI-powered features in Swiftlead.",
+      "core_capabilities": [],
+      "features": [
+        "**Conversation Simulator:** Preview AI responses before enabling (Test Mode)",
+        "**Custom Training:** Upload conversation examples to improve AI (Test Mode)",
+        "**Confidence Thresholds:** Set minimum confidence before AI responds",
+        "**Sentiment Analysis:** Monitor emotional tone of AI interactions",
+        "**Smart Scheduling:** AI learns optimal response times",
+        "Toggle AI features on/off",
+        "Adjust settings with sliders and dropdowns",
+        "View real-time AI performance metrics",
+        "Test AI responses with sample queries",
+        "Review and approve AI suggestions",
+        "Export AI interaction logs"
+      ],
+      "interactions": [
+        "Toggle AI features on/off",
+        "Adjust settings with sliders and dropdowns",
+        "View real-time AI performance metrics",
+        "Test AI responses with sample queries",
+        "Review and approve AI suggestions",
+        "Export AI interaction logs"
+      ],
+      "ui_components": [
+        "ConversationSimulator",
+        "InsightCards",
+        "ConfidenceSlider",
+        "UsageGauge",
+        "ToneSelector",
+        "AIToggle"
+      ],
+      "enhancements": [],
+      "future_features": [],
+      "automations": []
+    },
+    "12": {
+      "number": "12",
+      "name": "Settings & Configuration",
+      "purpose": "Organization-wide settings, team management, integrations, and preferences.",
+      "core_capabilities": [],
+      "features": [
+        "**Quick Setup Wizard:** Guided onboarding for first-time setup",
+        "**Settings Search:** Find any setting quickly",
+        "**Bulk Configuration:** Apply settings across team members",
+        "**Template Library:** Pre-built configurations for common professions",
+        "**Import/Export Settings:** Transfer configuration between organizations",
+        "**Dark Mode:** Toggle light/dark theme",
+        "**Accessibility:** Font size, contrast adjustments, screen reader mode",
+        "**Keyboard Shortcuts:** View and customize shortcuts",
+        "Navigate settings via sidebar menu",
+        "Search settings with instant results",
+        "Toggle switches for binary options",
+        "Edit text fields inline",
+        "Save changes with confirmation",
+        "Preview changes before applying",
+        "Reset to defaults option"
+      ],
+      "interactions": [
+        "Navigate settings via sidebar menu",
+        "Search settings with instant results",
+        "Toggle switches for binary options",
+        "Edit text fields inline",
+        "Save changes with confirmation",
+        "Preview changes before applying",
+        "Reset to defaults option"
+      ],
+      "ui_components": [
+        "FileUploader",
+        "ToggleSwitch",
+        "SettingsSidebar",
+        "IntegrationCard",
+        "ColorPicker",
+        "TeamMemberList"
+      ],
+      "enhancements": [],
+      "future_features": [],
+      "automations": []
+    },
+    "13": {
+      "number": "13",
+      "name": "Adaptive Profession System",
+      "purpose": "Configure Swiftlead to match industry-specific terminology and workflows.",
+      "core_capabilities": [],
+      "features": [
+        "**Smart Recommendations:** AI suggests optimal settings based on profession",
+        "**Industry Benchmarks:** Compare performance to industry averages",
+        "**Multi-Profession Support:** Manage multiple service types in one account",
+        "**Clone Configuration:** Duplicate settings for franchise/multi-location",
+        "Select profession during onboarding",
+        "Change profession in Settings",
+        "Preview how UI changes with different professions",
+        "Customize labels and fields",
+        "Enable/disable modules"
+      ],
+      "interactions": [
+        "Select profession during onboarding",
+        "Change profession in Settings",
+        "Preview how UI changes with different professions",
+        "Customize labels and fields",
+        "Enable/disable modules"
+      ],
+      "ui_components": [
+        "TemplateLibrary",
+        "TerminologyMapper",
+        "ProfessionSelector",
+        "ModuleToggle"
+      ],
+      "enhancements": [],
+      "future_features": [],
+      "automations": []
+    },
+    "14": {
+      "number": "14",
+      "name": "Onboarding Flow",
+      "purpose": "Seamless setup wizard for new users to get started quickly.",
+      "core_capabilities": [],
+      "features": [
+        "**Progress Indicator:** Visual progress through onboarding",
+        "**Save & Continue Later:** Pause onboarding and resume",
+        "**Smart Defaults:** AI suggests settings based on profession",
+        "**Import Data:** Migrate from competitors during onboarding",
+        "**Video Tutorials:** Inline help videos per step",
+        "**Skip All:** Quick start with defaults, customize later",
+        "Tap \"Next\" to proceed to next step",
+        "Tap \"Back\" to revisit previous step",
+        "Tap \"Skip\" to defer optional steps",
+        "Drag-and-drop to upload logo",
+        "Toggle switches for features",
+        "Progress bar shows completion"
+      ],
+      "interactions": [
+        "Tap \"Next\" to proceed to next step",
+        "Tap \"Back\" to revisit previous step",
+        "Tap \"Skip\" to defer optional steps",
+        "Drag-and-drop to upload logo",
+        "Toggle switches for features",
+        "Progress bar shows completion"
+      ],
+      "ui_components": [
+        "ProgressStepper",
+        "IntegrationConnector",
+        "PreviewCard",
+        "OnboardingCarousel",
+        "ProfessionPicker"
+      ],
+      "enhancements": [],
+      "future_features": [],
+      "automations": []
+    },
+    "15": {
+      "number": "15",
+      "name": "Platform Integrations",
+      "purpose": "Connect Swiftlead with essential external services for seamless workflow.",
+      "core_capabilities": [],
+      "features": [
+        "**Integration Marketplace:** Browse and enable integrations",
+        "**One-Click Connect:** OAuth for easy authorization",
+        "**Sync Status Dashboard:** Monitor integration health",
+        "**Webhook Support:** Custom integrations via webhooks",
+        "**Zapier Integration:** Connect to 1000+ apps",
+        "**API Access:** Developer API for custom integrations",
+        "Browse available integrations",
+        "Click \"Connect\" to authorize",
+        "Configure sync settings",
+        "Test connection",
+        "Monitor sync status",
+        "Disconnect or reconnect"
+      ],
+      "interactions": [
+        "Browse available integrations",
+        "Click \"Connect\" to authorize",
+        "Configure sync settings",
+        "Test connection",
+        "Monitor sync status",
+        "Disconnect or reconnect"
+      ],
+      "ui_components": [
+        "ConnectionStatus",
+        "IntegrationCard",
+        "OAuthFlow",
+        "WebhookBuilder",
+        "SyncSettings"
+      ],
+      "enhancements": [],
+      "future_features": [],
+      "automations": []
+    },
+    "16": {
+      "number": "16",
+      "name": "Reports & Analytics",
+      "purpose": "Comprehensive business intelligence with customizable reports and data visualization.",
+      "core_capabilities": [],
+      "features": [
+        "**AI Insights:** Automatic anomaly detection and insights",
+        "**Predictive Analytics:** Forecast revenue and bookings",
+        "**Cohort Analysis:** Track client retention over time",
+        "**Benchmark Comparisons:** Compare to industry standards",
+        "**Mobile Reports:** Full reporting on mobile devices",
+        "**Real-Time Data:** Live dashboards with auto-refresh",
+        "**Data Warehouse:** Historical data retention for trend analysis",
+        "Select report from library",
+        "Customize date range and filters",
+        "Create custom dashboards",
+        "Configure GDPR settings from Settings",
+        "Set data-retention periods per data type",
+        "Enable 2FA for account security",
+        "View audit logs and export for compliance",
+        "Request data deletion for GDPR compliance",
+        "Monitor security events and alerts",
+        "Job management (\u00a389)",
+        "SMS messaging (\u00a325)",
+        "**Total: \u00a3163/mo in separate tools**",
+        "\u2705 Flutter SDK 3.35.6+ installed"
+      ],
+      "interactions": [
+        "Select report from library",
+        "Customize date range and filters",
+        "Create custom dashboards"
+      ],
+      "ui_components": [
+        "One",
+        "ReportBuilder",
+        "Industry",
+        "REMOVED",
+        "ChartWidget",
+        "Removed",
+        "DateRangePicker",
+        "Configuration",
+        "Adaptive",
+        "Profession",
+        "Fit",
+        "DataTable",
+        "Codebase",
+        "FilterPanel",
+        "ExportButton"
+      ],
+      "enhancements": [],
+      "future_features": [],
+      "automations": []
+    }
+  },
+  "screens": [
+    {
+      "path": "screens/main_navigation.dart",
+      "name": "main_navigation",
+      "class_name": "main_navigation",
+      "module": "unknown",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 17
+    },
+    {
+      "path": "screens/settings/email_configuration_screen.dart",
+      "name": "email_configuration_screen",
+      "class_name": "EmailConfigurationScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [
+          "_handleConnectDisconnect"
+        ],
+        "private_methods": [
+          "_handleConnectDisconnect"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/settings/data_export_screen.dart",
+      "name": "data_export_screen",
+      "class_name": "DataExportScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/settings/security_settings_screen.dart",
+      "name": "security_settings_screen",
+      "class_name": "SecuritySettingsScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": [
+          "_showSignOutDialog"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/settings/twilio_configuration_screen.dart",
+      "name": "twilio_configuration_screen",
+      "class_name": "TwilioConfigurationScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [
+          "_handleConnectDisconnect"
+        ],
+        "private_methods": [
+          "_handleConnectDisconnect"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/settings/profession_configuration_screen.dart",
+      "name": "profession_configuration_screen",
+      "class_name": "ProfessionConfigurationScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": true
+      },
+      "imports_count": 7
+    },
+    {
+      "path": "screens/settings/google_calendar_setup_screen.dart",
+      "name": "google_calendar_setup_screen",
+      "class_name": "GoogleCalendarSetupScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [
+          "_handleConnectDisconnect"
+        ],
+        "private_methods": [
+          "_handleConnectDisconnect"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/settings/settings_screen.dart",
+      "name": "settings_screen",
+      "class_name": "SettingsScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent",
+          "_buildProfileCard",
+          "_buildSettingsSectionList",
+          "_buildPlanCard",
+          "_buildDangerZone"
+        ],
+        "action_methods": [
+          "_handleHelpTap"
+        ],
+        "private_methods": [
+          "_showTemplateLibrary",
+          "_showClearCacheConfirmation",
+          "_showThemeSelector",
+          "_showImportExportSettings",
+          "_showBulkConfiguration",
+          "_handleHelpTap",
+          "_showDeleteConfirmation"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 1,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 34
+    },
+    {
+      "path": "screens/settings/app_preferences_screen.dart",
+      "name": "app_preferences_screen",
+      "class_name": "AppPreferencesScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": false,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 5
+    },
+    {
+      "path": "screens/settings/organization_profile_screen.dart",
+      "name": "organization_profile_screen",
+      "class_name": "OrganizationProfileScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [
+          "_handleSave"
+        ],
+        "private_methods": [
+          "_handleSave"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 7
+    },
+    {
+      "path": "screens/settings/change_password_screen.dart",
+      "name": "change_password_screen",
+      "class_name": "ChangePasswordScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 5
+    },
+    {
+      "path": "screens/settings/canned_responses_screen.dart",
+      "name": "canned_responses_screen",
+      "class_name": "CannedResponsesScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_deleteResponse",
+          "_showEditResponseSheet",
+          "_showAddResponseSheet"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/settings/apple_calendar_setup_screen.dart",
+      "name": "apple_calendar_setup_screen",
+      "class_name": "AppleCalendarSetupScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [
+          "_handleConnectDisconnect"
+        ],
+        "private_methods": [
+          "_handleConnectDisconnect"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": true
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/settings/custom_fields_manager_screen.dart",
+      "name": "custom_fields_manager_screen",
+      "class_name": "CustomFieldsManagerScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildEmptyState",
+          "_buildFieldsList",
+          "_buildFieldCard"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 11
+    },
+    {
+      "path": "screens/settings/team_management_screen.dart",
+      "name": "team_management_screen",
+      "class_name": "TeamManagementScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": false,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/settings/edit_profile_screen.dart",
+      "name": "edit_profile_screen",
+      "class_name": "EditProfileScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 5
+    },
+    {
+      "path": "screens/settings/meta_business_setup_screen.dart",
+      "name": "meta_business_setup_screen",
+      "class_name": "MetaBusinessSetupScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [
+          "_handleConnectDisconnect"
+        ],
+        "private_methods": [
+          "_handleConnectDisconnect"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/settings/stripe_connection_screen.dart",
+      "name": "stripe_connection_screen",
+      "class_name": "StripeConnectionScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [
+          "_handleConnectDisconnect"
+        ],
+        "private_methods": [
+          "_handleConnectDisconnect"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/settings/invoice_customization_screen.dart",
+      "name": "invoice_customization_screen",
+      "class_name": "InvoiceCustomizationScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 6
+    },
+    {
+      "path": "screens/settings/subscription_billing_screen.dart",
+      "name": "subscription_billing_screen",
+      "class_name": "SubscriptionBillingScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 7
+    },
+    {
+      "path": "screens/settings/account_deletion_screen.dart",
+      "name": "account_deletion_screen",
+      "class_name": "AccountDeletionScreen",
+      "module": "3.12",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": [
+          "_previousStep",
+          "_nextStep"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 7
+    },
+    {
+      "path": "screens/home/home_screen.dart",
+      "name": "home_screen",
+      "class_name": "HomeScreen",
+      "module": "3.10",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent",
+          "_buildMetricsRow",
+          "_buildChartCard",
+          "_buildTileGrid",
+          "_buildQuickActionChipsRow",
+          "_buildActivityFeed"
+        ],
+        "action_methods": [
+          "_handleProfileTap"
+        ],
+        "private_methods": [
+          "_handleProfileTap"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": false,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 4,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 18
+    },
+    {
+      "path": "screens/calendar/booking_templates_screen.dart",
+      "name": "booking_templates_screen",
+      "class_name": "BookingTemplatesScreen",
+      "module": "3.4",
+      "features": {
+        "widget_methods": [
+          "_buildInfoChip"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_showCreateTemplateDialog",
+          "_showEditTemplateDialog",
+          "_showDeleteConfirmDialog",
+          "_useTemplate"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/calendar/reminder_settings_screen.dart",
+      "name": "reminder_settings_screen",
+      "class_name": "ReminderSettingsScreen",
+      "module": "3.4",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 6
+    },
+    {
+      "path": "screens/calendar/create_edit_booking_screen.dart",
+      "name": "create_edit_booking_screen",
+      "class_name": "CreateEditBookingScreen",
+      "module": "3.4",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": [
+          "_checkForConflicts",
+          "_showTeamAssignmentSheet",
+          "_showSkillBasedAssignment"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 18
+    },
+    {
+      "path": "screens/calendar/booking_analytics_screen.dart",
+      "name": "booking_analytics_screen",
+      "class_name": "BookingAnalyticsScreen",
+      "module": "3.4",
+      "features": {
+        "widget_methods": [
+          "_buildSummaryCard"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": false,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 5
+    },
+    {
+      "path": "screens/calendar/booking_detail_screen.dart",
+      "name": "booking_detail_screen",
+      "class_name": "BookingDetailScreen",
+      "module": "3.4",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent",
+          "_buildBookingSummaryCard",
+          "_buildClientInfo",
+          "_buildServiceDetails",
+          "_buildWeatherForecast",
+          "_buildStatusCard",
+          "_buildOnMyWayButton",
+          "_buildETACountdown",
+          "_buildQuickActions",
+          "_buildReminderStatus",
+          "_buildBookingNotes",
+          "_buildCancellationPolicy",
+          "_buildNoShowTracking"
+        ],
+        "action_methods": [
+          "_handleCreateJobFromBooking",
+          "_handleMarkNoShow"
+        ],
+        "private_methods": [
+          "_handleCreateJobFromBooking",
+          "_handleMarkNoShow"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 17
+    },
+    {
+      "path": "screens/calendar/resource_management_screen.dart",
+      "name": "resource_management_screen",
+      "class_name": "ResourceManagementScreen",
+      "module": "3.4",
+      "features": {
+        "widget_methods": [
+          "_buildStatusBadge"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_showAddResourceDialog",
+          "_showDeleteConfirmDialog",
+          "_showEditResourceDialog"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/calendar/calendar_search_screen.dart",
+      "name": "calendar_search_screen",
+      "class_name": "CalendarSearchScreen",
+      "module": "3.4",
+      "features": {
+        "widget_methods": [
+          "_buildSearchTips",
+          "_buildEmptyState",
+          "_buildSearchResults"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 2,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 11
+    },
+    {
+      "path": "screens/calendar/capacity_optimization_screen.dart",
+      "name": "capacity_optimization_screen",
+      "class_name": "CapacityOptimizationScreen",
+      "module": "3.4",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 6
+    },
+    {
+      "path": "screens/calendar/calendar_screen.dart",
+      "name": "calendar_screen",
+      "class_name": "CalendarScreen",
+      "module": "3.4",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent",
+          "_buildCalendarHeader",
+          "_buildCalendarWidget",
+          "_buildDayView",
+          "_buildWeekView",
+          "_buildMonthView",
+          "_buildBookingList",
+          "_buildOnMyWayButton"
+        ],
+        "action_methods": [
+          "_handleDragReschedule"
+        ],
+        "private_methods": [
+          "_handleDragReschedule",
+          "_applyFilters"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 3,
+        "has_mock_data": true,
+        "backend_notes": true
+      },
+      "imports_count": 25
+    },
+    {
+      "path": "screens/calendar/service_catalog_screen.dart",
+      "name": "service_catalog_screen",
+      "class_name": "ServiceCatalogScreen",
+      "module": "3.4",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 11
+    },
+    {
+      "path": "screens/calendar/blocked_time_screen.dart",
+      "name": "blocked_time_screen",
+      "class_name": "BlockedTimeScreen",
+      "module": "3.4",
+      "features": {
+        "widget_methods": [
+          "_buildContent",
+          "_buildBlockedTimeCard"
+        ],
+        "action_methods": [
+          "_handleDelete"
+        ],
+        "private_methods": [
+          "_showBlockedTimeSheet",
+          "_showAddBlockedTimeSheet",
+          "_handleDelete",
+          "_showEditBlockedTimeSheet"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 7
+    },
+    {
+      "path": "screens/calendar/service_editor_screen.dart",
+      "name": "service_editor_screen",
+      "class_name": "ServiceEditorScreen",
+      "module": "3.4",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 6
+    },
+    {
+      "path": "screens/inbox/thread_search_screen.dart",
+      "name": "thread_search_screen",
+      "class_name": "ThreadSearchScreen",
+      "module": "3.1",
+      "features": {
+        "widget_methods": [
+          "_buildSearchTips",
+          "_buildEmptyState",
+          "_buildSearchResults",
+          "_buildHighlightedMessageBubble",
+          "_buildHighlightedText"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_performSearch"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 1,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 9
+    },
+    {
+      "path": "screens/inbox/scheduled_messages_screen.dart",
+      "name": "scheduled_messages_screen",
+      "class_name": "ScheduledMessagesScreen",
+      "module": "3.1",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent",
+          "_buildScheduledMessageCard"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": false,
+        "api_calls_count": 2,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 14
+    },
+    {
+      "path": "screens/inbox/message_search_screen.dart",
+      "name": "message_search_screen",
+      "class_name": "MessageSearchScreen",
+      "module": "3.1",
+      "features": {
+        "widget_methods": [
+          "_buildSearchTips",
+          "_buildEmptyState",
+          "_buildSearchResults",
+          "_buildHighlightedMessageBubble",
+          "_buildHighlightedText"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_performSearch"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 1,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 11
+    },
+    {
+      "path": "screens/inbox/inbox_screen.dart",
+      "name": "inbox_screen",
+      "class_name": "InboxScreen",
+      "module": "3.1",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent",
+          "_buildBatchActionButton",
+          "_buildChatList",
+          "_buildContextMenuDialog"
+        ],
+        "action_methods": [
+          "_handleBatchArchive",
+          "_handleBatchMarkRead",
+          "_handleBatchPin",
+          "_handleBatchDelete"
+        ],
+        "private_methods": [
+          "_handleBatchArchive",
+          "_applyFilter",
+          "_handleBatchMarkRead",
+          "_handleBatchDelete",
+          "_handleBatchPin",
+          "_showContextMenu",
+          "_applyAdvancedFilters"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 3,
+        "has_mock_data": true,
+        "backend_notes": true
+      },
+      "imports_count": 28
+    },
+    {
+      "path": "screens/inbox/inbox_thread_screen.dart",
+      "name": "inbox_thread_screen",
+      "class_name": "InboxThreadScreen",
+      "module": "3.1",
+      "features": {
+        "widget_methods": [
+          "_buildMessageWidget"
+        ],
+        "action_methods": [
+          "_handleCreateQuoteFromInbox",
+          "_handleCreateJobFromInbox",
+          "_handleAIExtractJob"
+        ],
+        "private_methods": [
+          "_handleAIExtractJob",
+          "_handleCreateJobFromInbox",
+          "_showMessageDetails",
+          "_showReactionPicker",
+          "_onScroll",
+          "_showInternalNotes",
+          "_blockContact",
+          "_handleCreateQuoteFromInbox",
+          "_showQuickQuoteSheet",
+          "_performBlock"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 9,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 29
+    },
+    {
+      "path": "screens/quotes/create_edit_quote_screen.dart",
+      "name": "create_edit_quote_screen",
+      "class_name": "CreateEditQuoteScreen",
+      "module": "3.5",
+      "features": {
+        "widget_methods": [
+          "_buildLineItemRow"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 12
+    },
+    {
+      "path": "screens/quotes/quote_detail_screen.dart",
+      "name": "quote_detail_screen",
+      "class_name": "QuoteDetailScreen",
+      "module": "3.5",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent",
+          "_buildQuoteSummaryCard",
+          "_buildClientInfo",
+          "_buildLineItems",
+          "_buildTermsCard",
+          "_buildChasersSection",
+          "_buildQuoteInsightsSection",
+          "_buildInsightMetric",
+          "_buildQuickActions"
+        ],
+        "action_methods": [
+          "_handleDeleteQuote",
+          "_handleManualFollowUp",
+          "_handleOneClickResend",
+          "_handleAcceptQuoteWithDeposit"
+        ],
+        "private_methods": [
+          "_handleAcceptQuoteWithDeposit",
+          "_handleManualFollowUp",
+          "_checkExpirationAlerts",
+          "_handleOneClickResend",
+          "_handleDeleteQuote"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 14
+    },
+    {
+      "path": "screens/contacts/segments_screen.dart",
+      "name": "segments_screen",
+      "class_name": "SegmentsScreen",
+      "module": "3.6",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildEmptyState",
+          "_buildSegmentsList",
+          "_buildSegmentCard"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 7
+    },
+    {
+      "path": "screens/contacts/contacts_screen.dart",
+      "name": "contacts_screen",
+      "class_name": "ContactsScreen",
+      "module": "3.6",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_showAddContactSheet",
+          "_applyFilters",
+          "_showFilterSheet"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 1,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 16
+    },
+    {
+      "path": "screens/contacts/create_edit_contact_screen.dart",
+      "name": "create_edit_contact_screen",
+      "class_name": "CreateEditContactScreen",
+      "module": "3.6",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 10
+    },
+    {
+      "path": "screens/contacts/contact_detail_screen.dart",
+      "name": "contact_detail_screen",
+      "class_name": "ContactDetailScreen",
+      "module": "3.6",
+      "features": {
+        "widget_methods": [
+          "_buildContent",
+          "_buildProfileCard",
+          "_buildStageProgressBar",
+          "_buildScoreIndicator",
+          "_buildOverviewTab",
+          "_buildTimelineTab",
+          "_buildNotesTab",
+          "_buildRelatedTab",
+          "_buildNoteContent"
+        ],
+        "action_methods": [
+          "_handleCreateQuoteFromContact",
+          "_handleMessageContact",
+          "_handleCreateJobFromContact",
+          "_handleCallContact",
+          "_handleEmailContact",
+          "_handleTimelineEventTap"
+        ],
+        "private_methods": [
+          "_handleCreateJobFromContact",
+          "_handleMessageContact",
+          "_handleTimelineEventTap",
+          "_handleEmailContact",
+          "_handleCallContact",
+          "_showAddNoteSheet",
+          "_handleCreateQuoteFromContact",
+          "_showDeleteConfirmation"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 7,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 24
+    },
+    {
+      "path": "screens/contacts/contact_import_results_screen.dart",
+      "name": "contact_import_results_screen",
+      "class_name": "ContactImportResultsScreen",
+      "module": "3.6",
+      "features": {
+        "widget_methods": [
+          "_buildSummaryCard",
+          "_buildStatCard",
+          "_buildUndoButton",
+          "_buildErrorList"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_downloadErrorReport"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 5
+    },
+    {
+      "path": "screens/contacts/segment_builder_screen.dart",
+      "name": "segment_builder_screen",
+      "class_name": "SegmentBuilderScreen",
+      "module": "3.6",
+      "features": {
+        "widget_methods": [
+          "_buildFilterRule"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_addRule",
+          "_loadSegment"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 5
+    },
+    {
+      "path": "screens/contacts/contact_import_wizard_screen.dart",
+      "name": "contact_import_wizard_screen",
+      "class_name": "ContactImportWizardScreen",
+      "module": "3.6",
+      "features": {
+        "widget_methods": [
+          "_buildStepIndicator",
+          "_buildStepContent",
+          "_buildUploadStep",
+          "_buildMappingStep",
+          "_buildReviewStep",
+          "_buildImportStep",
+          "_buildNavigationButtons"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 7
+    },
+    {
+      "path": "screens/contacts/contact_export_builder_screen.dart",
+      "name": "contact_export_builder_screen",
+      "class_name": "ContactExportBuilderScreen",
+      "module": "3.6",
+      "features": {
+        "widget_methods": [
+          "_buildExportingState",
+          "_buildFormatSelector",
+          "_buildFieldSelector",
+          "_buildOptions"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_showExportCompleteSheet"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/contacts/duplicate_detector_screen.dart",
+      "name": "duplicate_detector_screen",
+      "class_name": "DuplicateDetectorScreen",
+      "module": "3.6",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildEmptyState",
+          "_buildDuplicatesList",
+          "_buildDuplicateCard",
+          "_buildContactSummary"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 1,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 9
+    },
+    {
+      "path": "screens/ai_hub/faq_management_screen.dart",
+      "name": "faq_management_screen",
+      "class_name": "FAQManagementScreen",
+      "module": "3.11",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_showEditFAQSheet",
+          "_showAddFAQSheet",
+          "_showDeleteConfirmation"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": false,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 9
+    },
+    {
+      "path": "screens/ai_hub/call_transcript_screen.dart",
+      "name": "call_transcript_screen",
+      "class_name": "CallTranscriptScreen",
+      "module": "3.11",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 5
+    },
+    {
+      "path": "screens/ai_hub/ai_configuration_screen.dart",
+      "name": "ai_configuration_screen",
+      "class_name": "AIConfigurationScreen",
+      "module": "3.11",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 18
+    },
+    {
+      "path": "screens/ai_hub/ai_performance_screen.dart",
+      "name": "ai_performance_screen",
+      "class_name": "AIPerformanceScreen",
+      "module": "3.11",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 5
+    },
+    {
+      "path": "screens/ai_hub/ai_hub_screen.dart",
+      "name": "ai_hub_screen",
+      "class_name": "AIHubScreen",
+      "module": "3.11",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent",
+          "_buildAIStatusCard",
+          "_buildSmartTileGrid",
+          "_buildAIThreadPreview",
+          "_buildAIConfigCard",
+          "_buildPerformanceMetrics",
+          "_buildAIFeatureConfigurations"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_showToneSelector"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 19
+    },
+    {
+      "path": "screens/ai_hub/ai_activity_log_screen.dart",
+      "name": "ai_activity_log_screen",
+      "class_name": "AIActivityLogScreen",
+      "module": "3.11",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": false,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/ai_hub/ai_training_mode_screen.dart",
+      "name": "ai_training_mode_screen",
+      "class_name": "AITrainingModeScreen",
+      "module": "3.11",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_showAddTrainingExampleSheet"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 9
+    },
+    {
+      "path": "screens/support/support_screen.dart",
+      "name": "support_screen",
+      "class_name": "SupportScreen",
+      "module": "unknown",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent",
+          "_buildSearchBar",
+          "_buildStatusBanner",
+          "_buildQuickLinksGrid",
+          "_buildFAQList",
+          "_buildContactSupportCard",
+          "_buildTroubleshootingTools"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 1,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 9
+    },
+    {
+      "path": "screens/money/payment_methods_screen.dart",
+      "name": "payment_methods_screen",
+      "class_name": "PaymentMethodsScreen",
+      "module": "3.5",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": [
+          "_showAddPaymentMethod"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/money/recurring_invoices_screen.dart",
+      "name": "recurring_invoices_screen",
+      "class_name": "RecurringInvoicesScreen",
+      "module": "3.5",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": true,
+        "backend_notes": true
+      },
+      "imports_count": 10
+    },
+    {
+      "path": "screens/money/money_screen.dart",
+      "name": "money_screen",
+      "class_name": "MoneyScreen",
+      "module": "3.5",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent",
+          "_buildDashboardTab",
+          "_buildInvoicesTab",
+          "_buildBatchActionButton",
+          "_buildPaymentsTab",
+          "_buildDepositsTab",
+          "_buildQuotesTab",
+          "_buildBalanceHeader",
+          "_buildMetricsRow",
+          "_buildAnalyticsMetricsSection",
+          "_buildAnalyticsRow",
+          "_buildRevenueChart",
+          "_buildFilterChips",
+          "_buildPaymentList"
+        ],
+        "action_methods": [
+          "_handleSendInvoiceFromDashboard",
+          "_handleRequestPaymentFromDashboard",
+          "_handleAddPayment",
+          "_handleAddInvoice",
+          "_handleAddQuote",
+          "_handleBatchSendReminder",
+          "_handleBatchMarkPaid",
+          "_handleBatchDownload",
+          "_handleBatchDelete"
+        ],
+        "private_methods": [
+          "_applyDateRangeFilter",
+          "_handleRequestPaymentFromDashboard",
+          "_showCustomDateRangePicker",
+          "_handleBatchDownload",
+          "_handleBatchDelete",
+          "_handleSendInvoiceFromDashboard",
+          "_handleAddQuote",
+          "_handleAddPayment",
+          "_handleBatchMarkPaid",
+          "_applyMoneyFilters"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 3,
+        "has_mock_data": true,
+        "backend_notes": true
+      },
+      "imports_count": 28
+    },
+    {
+      "path": "screens/money/invoice_detail_screen.dart",
+      "name": "invoice_detail_screen",
+      "class_name": "InvoiceDetailScreen",
+      "module": "3.5",
+      "features": {
+        "widget_methods": [
+          "_buildContent",
+          "_buildInvoiceSummaryCard",
+          "_buildClientInfo",
+          "_buildLineItems",
+          "_buildPaymentHistory",
+          "_buildPaymentRemindersTimeline",
+          "_buildBankDetailsSection",
+          "_buildTermsCard",
+          "_buildSmartInvoiceTimingSection",
+          "_buildTimingMetric"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_showSplitPaymentDialog",
+          "_showOfflinePaymentDialog",
+          "_showPaymentPlanDialog"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 2,
+        "has_mock_data": true,
+        "backend_notes": true
+      },
+      "imports_count": 16
+    },
+    {
+      "path": "screens/money/create_edit_invoice_screen.dart",
+      "name": "create_edit_invoice_screen",
+      "class_name": "CreateEditInvoiceScreen",
+      "module": "3.5",
+      "features": {
+        "widget_methods": [
+          "_buildLineItemRow"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 11
+    },
+    {
+      "path": "screens/money/deposits_screen.dart",
+      "name": "deposits_screen",
+      "class_name": "DepositsScreen",
+      "module": "3.5",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 7
+    },
+    {
+      "path": "screens/money/money_search_screen.dart",
+      "name": "money_search_screen",
+      "class_name": "MoneySearchScreen",
+      "module": "3.5",
+      "features": {
+        "widget_methods": [
+          "_buildSearchTips",
+          "_buildSearchResults",
+          "_buildEmptyState"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_performSearch"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 3,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 11
+    },
+    {
+      "path": "screens/money/payment_detail_screen.dart",
+      "name": "payment_detail_screen",
+      "class_name": "PaymentDetailScreen",
+      "module": "3.5",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 12
+    },
+    {
+      "path": "screens/jobs/jobs_screen.dart",
+      "name": "jobs_screen",
+      "class_name": "JobsScreen",
+      "module": "3.3",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent",
+          "_buildJobList",
+          "_buildKanbanView",
+          "_buildKanbanColumn"
+        ],
+        "action_methods": [
+          "_handleQuickAction"
+        ],
+        "private_methods": [
+          "_handleQuickAction",
+          "_applyFilter",
+          "_showSortMenu"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 2,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 17
+    },
+    {
+      "path": "screens/jobs/job_detail_screen.dart",
+      "name": "job_detail_screen",
+      "class_name": "JobDetailScreen",
+      "module": "3.3",
+      "features": {
+        "widget_methods": [
+          "_buildJobSummaryCard",
+          "_buildActionButtonsRow",
+          "_buildJobTabView",
+          "_buildTimelineTab",
+          "_buildNotesTab",
+          "_buildDetailsTab",
+          "_buildMessagesTab",
+          "_buildMediaTab",
+          "_buildConflictAlert",
+          "_buildChasersTab",
+          "_buildChasersTab"
+        ],
+        "action_methods": [
+          "_handleCreateQuoteFromJob",
+          "_handleMessageClient",
+          "_handleSendInvoiceFromJob",
+          "_handleCallClient",
+          "_handleNavigateToAddress",
+          "_handleSyncToCalendar"
+        ],
+        "private_methods": [
+          "_handleSendInvoiceFromJob",
+          "_showMediaUploadSheet",
+          "_showAddNoteSheet",
+          "_showBeforeAfterSlider",
+          "_handleNavigateToAddress",
+          "_handleSyncToCalendar",
+          "_showConflictDetails",
+          "_showCelebration",
+          "_handleMessageClient",
+          "_handleCallClient"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 1,
+        "has_mock_data": true,
+        "backend_notes": true
+      },
+      "imports_count": 32
+    },
+    {
+      "path": "screens/jobs/job_search_screen.dart",
+      "name": "job_search_screen",
+      "class_name": "JobSearchScreen",
+      "module": "3.3",
+      "features": {
+        "widget_methods": [
+          "_buildSearchTips",
+          "_buildEmptyState",
+          "_buildSearchResults"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_performSearch"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 1,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 11
+    },
+    {
+      "path": "screens/jobs/create_edit_job_screen.dart",
+      "name": "create_edit_job_screen",
+      "class_name": "CreateEditJobScreen",
+      "module": "3.3",
+      "features": {
+        "widget_methods": [],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 1,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 15
+    },
+    {
+      "path": "screens/legal/legal_screen.dart",
+      "name": "legal_screen",
+      "class_name": "LegalScreen",
+      "module": "unknown",
+      "features": {
+        "widget_methods": [
+          "_buildContent"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_showDocument"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": false,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 5
+    },
+    {
+      "path": "screens/notifications/notifications_screen.dart",
+      "name": "notifications_screen",
+      "class_name": "NotificationsScreen",
+      "module": "3.8",
+      "features": {
+        "widget_methods": [
+          "_buildContent",
+          "_buildPreferencesTab",
+          "_buildCenterTab",
+          "_buildSettingsTab"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": false,
+        "api_calls_count": 0,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 8
+    },
+    {
+      "path": "screens/onboarding/onboarding_screen.dart",
+      "name": "onboarding_screen",
+      "class_name": "OnboardingScreen",
+      "module": "3.14",
+      "features": {
+        "widget_methods": [
+          "_buildProgressBar",
+          "_buildWelcomeStep",
+          "_buildBenefitTile",
+          "_buildProfessionStep",
+          "_buildBusinessDetailsStep",
+          "_buildBusinessHoursSelector",
+          "_buildTeamMembersStep",
+          "_buildIntegrationsStep",
+          "_buildIntegrationCard",
+          "_buildAIConfigStep",
+          "_buildBookingSetupStep",
+          "_buildFinalChecklistStep",
+          "_buildChecklistItem",
+          "_buildNavigationButtons"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_nextStep",
+          "_skipOnboarding",
+          "_finishOnboarding",
+          "_uploadLogo",
+          "_addService",
+          "_previousStep",
+          "_saveAndContinueLater",
+          "_testAIResponse",
+          "_connectIntegration"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": true,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 6
+    },
+    {
+      "path": "screens/reports/benchmark_comparison_screen.dart",
+      "name": "benchmark_comparison_screen",
+      "class_name": "BenchmarkComparisonScreen",
+      "module": "3.16",
+      "features": {
+        "widget_methods": [
+          "_buildMetricsCards",
+          "_buildMetricCard"
+        ],
+        "action_methods": [],
+        "private_methods": []
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": false,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 5
+    },
+    {
+      "path": "screens/reports/reports_screen.dart",
+      "name": "reports_screen",
+      "class_name": "ReportsScreen",
+      "module": "3.16",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent",
+          "_buildOverviewTab",
+          "_buildRevenueTab",
+          "_buildJobsTab",
+          "_buildJobsDataTable",
+          "_buildClientsTab",
+          "_buildClientsDataTable",
+          "_buildAIPerformanceTab",
+          "_buildTeamTab",
+          "_buildKPISummaryRow",
+          "_buildChartCardGrid",
+          "_buildDataTableSection",
+          "_buildBusiestDaysTable",
+          "_buildPeakHoursTable",
+          "_buildAutomationHistory",
+          "_buildGoalTrackingSection"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_showGoalTracking",
+          "_showGoalTrackingOld",
+          "_showDateRangePicker"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": true,
+        "backend_notes": false
+      },
+      "imports_count": 23
+    },
+    {
+      "path": "screens/reports/goal_tracking_screen.dart",
+      "name": "goal_tracking_screen",
+      "class_name": "GoalTrackingScreen",
+      "module": "3.16",
+      "features": {
+        "widget_methods": [
+          "_buildSummaryCard",
+          "_buildStatItem",
+          "_buildGoalCard"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_showAddGoalDialog"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": false,
+        "has_loading_state": false,
+        "has_empty_state": false,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 7
+    },
+    {
+      "path": "screens/reviews/reviews_screen.dart",
+      "name": "reviews_screen",
+      "class_name": "ReviewsScreen",
+      "module": "3.7",
+      "features": {
+        "widget_methods": [
+          "_buildLoadingState",
+          "_buildContent",
+          "_buildDashboardTab",
+          "_buildStarDistribution",
+          "_buildRecentReviews",
+          "_buildReviewCard",
+          "_buildRequestsTab",
+          "_buildRequestList",
+          "_buildRequestCard",
+          "_buildAllReviewsTab",
+          "_buildReviewsList",
+          "_buildAnalyticsTab",
+          "_buildSentimentChart",
+          "_buildSentimentBar",
+          "_buildNPSTab"
+        ],
+        "action_methods": [],
+        "private_methods": [
+          "_showReviewSettings",
+          "_showResponseForm",
+          "_showRequestReview"
+        ]
+      },
+      "implementation": {
+        "has_stateful": true,
+        "has_setstate": true,
+        "has_loading_state": true,
+        "has_empty_state": true,
+        "has_error_state": true,
+        "has_navigation": true,
+        "api_calls_count": 0,
+        "has_mock_data": false,
+        "backend_notes": false
+      },
+      "imports_count": 15
+    }
+  ],
+  "widgets": [
+    {
+      "path": "widgets/forms/response_delay_config_sheet.dart",
+      "name": "response_delay_config_sheet",
+      "class_name": "ResponseDelayConfigSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/review_request_sheet.dart",
+      "name": "review_request_sheet",
+      "class_name": "ReviewRequestSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/jobs_filter_sheet.dart",
+      "name": "jobs_filter_sheet",
+      "class_name": "JobsFilterSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/booking_assistance_config_sheet.dart",
+      "name": "booking_assistance_config_sheet",
+      "class_name": "BookingAssistanceConfigSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/jobs_quick_actions_sheet.dart",
+      "name": "jobs_quick_actions_sheet",
+      "class_name": "JobsQuickActionsSheet",
+      "category": "forms",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/forms/convert_quote_modal.dart",
+      "name": "convert_quote_modal",
+      "class_name": "ConvertQuoteModal",
+      "category": "forms",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/forms/job_export_sheet.dart",
+      "name": "job_export_sheet",
+      "class_name": "JobExportSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/confidence_threshold_config_sheet.dart",
+      "name": "confidence_threshold_config_sheet",
+      "class_name": "ConfidenceThresholdConfigSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/job_assignment_sheet.dart",
+      "name": "job_assignment_sheet",
+      "class_name": "JobAssignmentSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/on_my_way_sheet.dart",
+      "name": "on_my_way_sheet",
+      "class_name": "OnMyWaySheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/complete_booking_modal.dart",
+      "name": "complete_booking_modal",
+      "class_name": "CompleteBookingModal",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/cancel_booking_modal.dart",
+      "name": "cancel_booking_modal",
+      "class_name": "CancelBookingModal",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/refund_modal.dart",
+      "name": "refund_modal",
+      "class_name": "RefundModal",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/calendar_filter_sheet.dart",
+      "name": "calendar_filter_sheet",
+      "class_name": "CalendarFilterSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/custom_field_editor_sheet.dart",
+      "name": "custom_field_editor_sheet",
+      "class_name": "CustomFieldEditorSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/inbox_filter_sheet.dart",
+      "name": "inbox_filter_sheet",
+      "class_name": "InboxFilterSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/contact_merge_preview_modal.dart",
+      "name": "contact_merge_preview_modal",
+      "class_name": "ContactMergePreviewModal",
+      "category": "forms",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/forms/ai_tone_selector_sheet.dart",
+      "name": "ai_tone_selector_sheet",
+      "class_name": "AIToneSelectorSheet",
+      "category": "forms",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/forms/send_quote_sheet.dart",
+      "name": "send_quote_sheet",
+      "class_name": "SendQuoteSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/compose_message_sheet.dart",
+      "name": "compose_message_sheet",
+      "class_name": "ComposeMessageSheet",
+      "category": "forms",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/forms/schedule_message_sheet.dart",
+      "name": "schedule_message_sheet",
+      "class_name": "ScheduleMessageSheet",
+      "category": "forms",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/forms/contacts_filter_sheet.dart",
+      "name": "contacts_filter_sheet",
+      "class_name": "ContactsFilters",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/payment_request_modal.dart",
+      "name": "payment_request_modal",
+      "class_name": "PaymentRequestModal",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/booking_confirmation_sheet.dart",
+      "name": "booking_confirmation_sheet",
+      "class_name": "BookingConfirmationSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/ai_quote_assistant_config_sheet.dart",
+      "name": "ai_quote_assistant_config_sheet",
+      "class_name": "AIQuoteAssistantConfigSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/auto_reply_template_editor_sheet.dart",
+      "name": "auto_reply_template_editor_sheet",
+      "class_name": "AutoReplyTemplateEditorSheet",
+      "category": "forms",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/forms/money_filter_sheet.dart",
+      "name": "money_filter_sheet",
+      "class_name": "MoneyFilterSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/ai_availability_suggestions_sheet.dart",
+      "name": "ai_availability_suggestions_sheet",
+      "class_name": "AIAvailabilitySuggestionsSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/link_invoice_to_job_sheet.dart",
+      "name": "link_invoice_to_job_sheet",
+      "class_name": "LinkInvoiceToJobSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/smart_reply_suggestions_sheet.dart",
+      "name": "smart_reply_suggestions_sheet",
+      "class_name": "SmartReplySuggestionsSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/reschedule_sheet.dart",
+      "name": "reschedule_sheet",
+      "class_name": "RescheduleSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/booking_offer_sheet.dart",
+      "name": "booking_offer_sheet",
+      "class_name": "BookingOfferSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/ai_quote_assistant_sheet.dart",
+      "name": "ai_quote_assistant_sheet",
+      "class_name": "AIQuoteAssistantSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/payment_link_sheet.dart",
+      "name": "payment_link_sheet",
+      "class_name": "PaymentLinkSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/job_template_selector_sheet.dart",
+      "name": "job_template_selector_sheet",
+      "class_name": "JobTemplateSelectorSheet",
+      "category": "forms",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/forms/ai_review_reply_config_sheet.dart",
+      "name": "ai_review_reply_config_sheet",
+      "class_name": "AIReviewReplyConfigSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/custom_response_override_sheet.dart",
+      "name": "custom_response_override_sheet",
+      "class_name": "CustomResponseOverrideSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/thread_assignment_sheet.dart",
+      "name": "thread_assignment_sheet",
+      "class_name": "ThreadAssignmentSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/business_hours_editor_sheet.dart",
+      "name": "business_hours_editor_sheet",
+      "class_name": "BusinessHoursEditorSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/contact_stage_change_sheet.dart",
+      "name": "contact_stage_change_sheet",
+      "class_name": "ContactStageChangeSheet",
+      "category": "forms",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/forms/lead_qualification_config_sheet.dart",
+      "name": "lead_qualification_config_sheet",
+      "class_name": "LeadQualificationConfigSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/smart_handover_config_sheet.dart",
+      "name": "smart_handover_config_sheet",
+      "class_name": "SmartHandoverConfigSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/message_actions_sheet.dart",
+      "name": "message_actions_sheet",
+      "class_name": "MessageActionsSheet",
+      "category": "forms",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/forms/after_hours_response_editor_sheet.dart",
+      "name": "after_hours_response_editor_sheet",
+      "class_name": "AfterHoursResponseEditorSheet",
+      "category": "forms",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/forms/escalation_rules_config_sheet.dart",
+      "name": "escalation_rules_config_sheet",
+      "class_name": "EscalationRulesConfigSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/deposit_request_sheet.dart",
+      "name": "deposit_request_sheet",
+      "class_name": "DepositRequestSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/contact_selector_sheet.dart",
+      "name": "contact_selector_sheet",
+      "class_name": "ContactSelectorSheet",
+      "category": "forms",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/forms/media_upload_sheet.dart",
+      "name": "media_upload_sheet",
+      "class_name": "MediaUploadSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/forms/fallback_response_config_sheet.dart",
+      "name": "fallback_response_config_sheet",
+      "class_name": "FallbackResponseConfigSheet",
+      "category": "forms",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/components/time_slot_picker.dart",
+      "name": "time_slot_picker",
+      "class_name": "TimeSlotPicker",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/payment_status_badge.dart",
+      "name": "payment_status_badge",
+      "class_name": "PaymentStatusBadge",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/internal_notes_modal.dart",
+      "name": "internal_notes_modal",
+      "class_name": "InternalNotesModal",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/quick_action_chip.dart",
+      "name": "quick_action_chip",
+      "class_name": "QuickActionChip",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/missed_call_notification.dart",
+      "name": "missed_call_notification",
+      "class_name": "MissedCallNotification",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/response_times_chart.dart",
+      "name": "response_times_chart",
+      "class_name": "ResponseTimeData",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/dnd_schedule_editor.dart",
+      "name": "dnd_schedule_editor",
+      "class_name": "DNDScheduleEditor",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/trend_line_chart.dart",
+      "name": "trend_line_chart",
+      "class_name": "TrendLineChart",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/tone_preview_card.dart",
+      "name": "tone_preview_card",
+      "class_name": "TonePreviewCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/stage_progress_bar.dart",
+      "name": "stage_progress_bar",
+      "class_name": "StageProgressBar",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/reaction_picker.dart",
+      "name": "reaction_picker",
+      "class_name": "ReactionPicker",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/sms_composer.dart",
+      "name": "sms_composer",
+      "class_name": "SMSComposer",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/notification_card.dart",
+      "name": "notification_card",
+      "class_name": "NotificationCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/ai_performance_chart.dart",
+      "name": "ai_performance_chart",
+      "class_name": "AIPerformanceChart",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/channel_performance_chart.dart",
+      "name": "channel_performance_chart",
+      "class_name": "ChannelPerformanceData",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/learning_progress_bar.dart",
+      "name": "learning_progress_bar",
+      "class_name": "LearningProgressBar",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/automation_stats_card.dart",
+      "name": "automation_stats_card",
+      "class_name": "AutomationStatsCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/voice_note_player.dart",
+      "name": "voice_note_player",
+      "class_name": "VoiceNotePlayer",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/ai_receptionist_thread.dart",
+      "name": "ai_receptionist_thread",
+      "class_name": "AIReceptionistThread",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/settings_section.dart",
+      "name": "settings_section",
+      "class_name": "SettingsSection",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/score_breakdown_card.dart",
+      "name": "score_breakdown_card",
+      "class_name": "ScoreBreakdownCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/subscription_card.dart",
+      "name": "subscription_card",
+      "class_name": "SubscriptionCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/segmented_control.dart",
+      "name": "segmented_control",
+      "class_name": "SegmentedControl",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/team_member_avatar.dart",
+      "name": "team_member_avatar",
+      "class_name": "TeamMemberAvatar",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/priority_badge.dart",
+      "name": "priority_badge",
+      "class_name": "PriorityBadge",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/team_member_card.dart",
+      "name": "team_member_card",
+      "class_name": "TeamMemberCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/chase_history_timeline.dart",
+      "name": "chase_history_timeline",
+      "class_name": "ChaseHistoryTimeline",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/ai_status_indicator.dart",
+      "name": "ai_status_indicator",
+      "class_name": "AIStatusIndicator",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/lead_source_pie_chart.dart",
+      "name": "lead_source_pie_chart",
+      "class_name": "LeadSourcePieChart",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/settings_row.dart",
+      "name": "settings_row",
+      "class_name": "SettingsRow",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/score_indicator.dart",
+      "name": "score_indicator",
+      "class_name": "ScoreIndicator",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/date_separator.dart",
+      "name": "date_separator",
+      "class_name": "DateSeparator",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/recurring_schedule_card.dart",
+      "name": "recurring_schedule_card",
+      "class_name": "RecurringScheduleCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/link_preview_card.dart",
+      "name": "link_preview_card",
+      "class_name": "LinkPreviewCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/conflict_warning_card.dart",
+      "name": "conflict_warning_card",
+      "class_name": "ConflictWarningCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/message_detail_sheet.dart",
+      "name": "message_detail_sheet",
+      "class_name": "MessageDetailSheet",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/chat_title_row.dart",
+      "name": "chat_title_row",
+      "class_name": "ChatTitleRow",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/pinned_chat_row.dart",
+      "name": "pinned_chat_row",
+      "class_name": "PinnedChatRow",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/calendar_widget.dart",
+      "name": "calendar_widget",
+      "class_name": "CalendarWidget",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/data_table.dart",
+      "name": "data_table",
+      "class_name": "DataTableColumn",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/team_performance_card.dart",
+      "name": "team_performance_card",
+      "class_name": "TeamPerformanceCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/typing_indicator.dart",
+      "name": "typing_indicator",
+      "class_name": "TypingIndicator",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/deposit_badge.dart",
+      "name": "deposit_badge",
+      "class_name": "DepositBadge",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/integration_card.dart",
+      "name": "integration_card",
+      "class_name": "IntegrationCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/eta_countdown.dart",
+      "name": "eta_countdown",
+      "class_name": "ETACountdown",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/ai_insight_banner.dart",
+      "name": "ai_insight_banner",
+      "class_name": "AIInsightBanner",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/conversion_funnel_chart.dart",
+      "name": "conversion_funnel_chart",
+      "class_name": "ConversionFunnelChart",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/on_my_way_button.dart",
+      "name": "on_my_way_button",
+      "class_name": "OnMyWayButton",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/tax_calculator.dart",
+      "name": "tax_calculator",
+      "class_name": "TaxCalculator",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/faq_card.dart",
+      "name": "faq_card",
+      "class_name": "FAQCard",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/ai_usage_credits_card.dart",
+      "name": "ai_usage_credits_card",
+      "class_name": "AIUsageCreditsCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/message_composer_bar.dart",
+      "name": "message_composer_bar",
+      "class_name": "MessageComposerBar",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/channel_icon_badge.dart",
+      "name": "channel_icon_badge",
+      "class_name": "ChannelIconBadge",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/job_card.dart",
+      "name": "job_card",
+      "class_name": "JobCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/confidence_indicator.dart",
+      "name": "confidence_indicator",
+      "class_name": "ConfidenceIndicator",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/payment_tile.dart",
+      "name": "payment_tile",
+      "class_name": "PaymentTile",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/goal_progress_ring.dart",
+      "name": "goal_progress_ring",
+      "class_name": "GoalProgressRing",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/recurrence_pattern_picker.dart",
+      "name": "recurrence_pattern_picker",
+      "class_name": "RecurrencePatternPicker",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/conversation_preview_sheet.dart",
+      "name": "conversation_preview_sheet",
+      "class_name": "ConversationPreviewSheet",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/email_composer.dart",
+      "name": "email_composer",
+      "class_name": "EmailComposer",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/invoice_card.dart",
+      "name": "invoice_card",
+      "class_name": "InvoiceCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/digest_schedule_selector.dart",
+      "name": "digest_schedule_selector",
+      "class_name": "DigestScheduleSelector",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/grouped_notification_card.dart",
+      "name": "grouped_notification_card",
+      "class_name": "GroupedNotificationCard",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/media_thumbnail.dart",
+      "name": "media_thumbnail",
+      "class_name": "MediaThumbnail",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/read_receipt_icon.dart",
+      "name": "read_receipt_icon",
+      "class_name": "ReadReceiptIcon",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/smart_reply_chip.dart",
+      "name": "smart_reply_chip",
+      "class_name": "SmartReplyChip",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/service_tile.dart",
+      "name": "service_tile",
+      "class_name": "ServiceTile",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/kpi_card.dart",
+      "name": "kpi_card",
+      "class_name": "KPICard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/line_item_row.dart",
+      "name": "line_item_row",
+      "class_name": "LineItemRow",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/unread_badge.dart",
+      "name": "unread_badge",
+      "class_name": "UnreadBadge",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/template_card.dart",
+      "name": "template_card",
+      "class_name": "TemplateCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/ai_insight_card.dart",
+      "name": "ai_insight_card",
+      "class_name": "AIInsightCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/internal_notes_button.dart",
+      "name": "internal_notes_button",
+      "class_name": "InternalNotesButton",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/contact_profile_card.dart",
+      "name": "contact_profile_card",
+      "class_name": "ContactProfileCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/refund_progress.dart",
+      "name": "refund_progress",
+      "class_name": "RefundProgress",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/booking_card.dart",
+      "name": "booking_card",
+      "class_name": "BookingCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/balance_card.dart",
+      "name": "balance_card",
+      "class_name": "BalanceCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/contact_card.dart",
+      "name": "contact_card",
+      "class_name": "ContactCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/reminder_toggle.dart",
+      "name": "reminder_toggle",
+      "class_name": "ReminderToggle",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/ai_summary_card.dart",
+      "name": "ai_summary_card",
+      "class_name": "AISummaryCard",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/chat_bubble.dart",
+      "name": "chat_bubble",
+      "class_name": "ChatBubble",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/payment_link_button.dart",
+      "name": "payment_link_button",
+      "class_name": "PaymentLinkButton",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/trend_tile.dart",
+      "name": "trend_tile",
+      "class_name": "TrendTile",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/business_hours_grid.dart",
+      "name": "business_hours_grid",
+      "class_name": "BusinessHoursGrid",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/date_chip.dart",
+      "name": "date_chip",
+      "class_name": "DateChip",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/call_transcript_row.dart",
+      "name": "call_transcript_row",
+      "class_name": "CallTranscriptRow",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/progress_pill.dart",
+      "name": "progress_pill",
+      "class_name": "ProgressPill",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/confirmation_status_indicator.dart",
+      "name": "confirmation_status_indicator",
+      "class_name": "ConfirmationStatusIndicator",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/escalation_badge.dart",
+      "name": "escalation_badge",
+      "class_name": "EscalationBadge",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/offline_banner.dart",
+      "name": "offline_banner",
+      "class_name": "OfflineBanner",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/ai_response_preview_sheet.dart",
+      "name": "ai_response_preview_sheet",
+      "class_name": "AIResponsePreviewSheet",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/preference_grid.dart",
+      "name": "preference_grid",
+      "class_name": "PreferenceGrid",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/media_preview_modal.dart",
+      "name": "media_preview_modal",
+      "class_name": "MediaPreviewModal",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/timeline_view.dart",
+      "name": "timeline_view",
+      "class_name": "TimelineActivity",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/audience_selector.dart",
+      "name": "audience_selector",
+      "class_name": "AudienceSegment",
+      "category": "components",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/components/booking_offer_card.dart",
+      "name": "booking_offer_card",
+      "class_name": "BookingOfferCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/components/stripe_status_card.dart",
+      "name": "stripe_status_card",
+      "class_name": "StripeStatusCard",
+      "category": "components",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/frosted_container.dart",
+      "name": "frosted_container",
+      "class_name": "FrostedContainer",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/progress_bar.dart",
+      "name": "progress_bar",
+      "class_name": "SwiftleadProgressBar",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/search_bar.dart",
+      "name": "search_bar",
+      "class_name": "SwiftleadSearchBar",
+      "category": "global",
+      "type": "StatefulWidget"
+    },
+    {
+      "path": "widgets/global/primary_button.dart",
+      "name": "primary_button",
+      "class_name": "PrimaryButton",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/badge.dart",
+      "name": "badge",
+      "class_name": "SwiftleadBadge",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/haptic_feedback.dart",
+      "name": "haptic_feedback",
+      "class_name": "HapticFeedback",
+      "category": "global",
+      "type": "Unknown"
+    },
+    {
+      "path": "widgets/global/skeleton_loader.dart",
+      "name": "skeleton_loader",
+      "class_name": "SkeletonLoader",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/swipe_action.dart",
+      "name": "swipe_action",
+      "class_name": "SwiftleadSwipeAction",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/avatar.dart",
+      "name": "avatar",
+      "class_name": "SwiftleadAvatar",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/frosted_bottom_nav_bar.dart",
+      "name": "frosted_bottom_nav_bar",
+      "class_name": "FrostedBottomNavBar",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/empty_state_card.dart",
+      "name": "empty_state_card",
+      "class_name": "EmptyStateCard",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/context_menu.dart",
+      "name": "context_menu",
+      "class_name": "SwiftleadContextMenu",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/info_banner.dart",
+      "name": "info_banner",
+      "class_name": "InfoBanner",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/chip.dart",
+      "name": "chip",
+      "class_name": "SwiftleadChip",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/tooltip.dart",
+      "name": "tooltip",
+      "class_name": "SwiftleadTooltip",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/bottom_sheet.dart",
+      "name": "bottom_sheet",
+      "class_name": "SwiftleadBottomSheet",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/error_state_card.dart",
+      "name": "error_state_card",
+      "class_name": "ErrorStateCard",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/drawer.dart",
+      "name": "drawer",
+      "class_name": "SwiftleadDrawer",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/frosted_app_bar.dart",
+      "name": "frosted_app_bar",
+      "class_name": "FrostedAppBar",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/confirmation_dialog.dart",
+      "name": "confirmation_dialog",
+      "class_name": "SwiftleadConfirmationDialog",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/loading_spinner.dart",
+      "name": "loading_spinner",
+      "class_name": "LoadingSpinner",
+      "category": "global",
+      "type": "StatelessWidget"
+    },
+    {
+      "path": "widgets/global/toast.dart",
+      "name": "toast",
+      "class_name": "Toast",
+      "category": "global",
+      "type": "Unknown"
+    }
+  ],
+  "models": [
+    {
+      "path": "models/job_timeline_event.dart",
+      "name": "job_timeline_event",
+      "class_name": "JobTimelineEvent",
+      "fields": [
+        {
+          "type": "String",
+          "name": "id"
+        },
+        {
+          "type": "String",
+          "name": "jobId"
+        },
+        {
+          "type": "JobTimelineEventType",
+          "name": "eventType"
+        },
+        {
+          "type": "String",
+          "name": "summary"
+        },
+        {
+          "type": "DateTime",
+          "name": "timestamp"
+        },
+        {
+          "type": "JobTimelineVisibility",
+          "name": "visibility"
+        }
+      ]
+    },
+    {
+      "path": "models/contact.dart",
+      "name": "contact",
+      "class_name": "contact",
+      "fields": []
+    },
+    {
+      "path": "models/job_template.dart",
+      "name": "job_template",
+      "class_name": "JobTemplate",
+      "fields": [
+        {
+          "type": "String",
+          "name": "id"
+        },
+        {
+          "type": "String",
+          "name": "name"
+        },
+        {
+          "type": "int",
+          "name": "usageCount"
+        },
+        {
+          "type": "bool",
+          "name": "isActive"
+        }
+      ]
+    },
+    {
+      "path": "models/message.dart",
+      "name": "message",
+      "class_name": "message",
+      "fields": []
+    },
+    {
+      "path": "models/payment.dart",
+      "name": "payment",
+      "class_name": "payment",
+      "fields": []
+    },
+    {
+      "path": "models/booking.dart",
+      "name": "booking",
+      "class_name": "booking",
+      "fields": []
+    },
+    {
+      "path": "models/job.dart",
+      "name": "job",
+      "class_name": "job",
+      "fields": []
+    },
+    {
+      "path": "models/scheduled_message.dart",
+      "name": "scheduled_message",
+      "class_name": "ScheduledMessage",
+      "fields": [
+        {
+          "type": "String",
+          "name": "id"
+        },
+        {
+          "type": "String",
+          "name": "threadId"
+        },
+        {
+          "type": "MessageChannel",
+          "name": "channel"
+        },
+        {
+          "type": "String",
+          "name": "content"
+        },
+        {
+          "type": "DateTime",
+          "name": "scheduledFor"
+        },
+        {
+          "type": "DateTime",
+          "name": "createdAt"
+        },
+        {
+          "type": "ScheduledMessageStatus",
+          "name": "status"
+        }
+      ]
+    }
+  ],
+  "extraction_metadata": {
+    "modules_count": 16,
+    "screens_count": 77,
+    "widgets_count": 168,
+    "models_count": 8
+  }
+}

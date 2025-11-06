@@ -6,6 +6,7 @@ import '../../widgets/global/skeleton_loader.dart';
 import '../../widgets/global/primary_button.dart';
 import '../../widgets/components/recurring_schedule_card.dart';
 import '../../theme/tokens.dart';
+import '../../utils/profession_config.dart';
 import '../../config/mock_config.dart';
 
 /// RecurringInvoicesScreen - Manage recurring invoices
@@ -77,7 +78,7 @@ class _RecurringInvoicesScreenState extends State<RecurringInvoicesScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
-        title: 'Recurring Invoices',
+        title: 'Recurring ${ProfessionState.config.getLabel('Invoices')}',
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -116,7 +117,7 @@ class _RecurringInvoicesScreenState extends State<RecurringInvoicesScreen> {
   Widget _buildContent() {
     if (_recurringInvoices.isEmpty) {
       return EmptyStateCard(
-        title: 'No recurring invoices',
+          title: 'No recurring ${ProfessionState.config.getLabel('invoices').toLowerCase()}',
         description: 'Create recurring invoices to automatically send invoices on a schedule.',
         icon: Icons.repeat,
         actionLabel: 'Create Recurring Invoice',

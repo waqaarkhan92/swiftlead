@@ -8,6 +8,7 @@ import '../../widgets/global/primary_button.dart';
 import '../../widgets/global/chip.dart';
 import '../../widgets/global/toast.dart';
 import '../../theme/tokens.dart';
+import '../../utils/profession_config.dart';
 
 /// Custom Fields Manager Screen - Manage contact custom fields
 /// Exact specification from UI_Inventory_v2.5.1
@@ -32,29 +33,52 @@ class _CustomFieldsManagerScreenState extends State<CustomFieldsManagerScreen> {
     setState(() => _isLoading = true);
     await Future.delayed(const Duration(seconds: 1));
     
+    // Load profession-specific custom field templates
+    final profession = ProfessionState.currentProfession;
+    final templates = ProfessionConfig.getCustomFieldTemplates(profession);
+    
     setState(() {
-      _fields.addAll([
-        CustomField(
-          id: '1',
-          name: 'Company Size',
-          type: CustomFieldType.dropdown,
+      // Add profession-specific templates
+      for (var i = 0; i < templates.length; i++) {
+        final template = templates[i];
+        _fields.add(CustomField(
+          id: 'profession_${i + 1}',
+          name: template['name'] ?? '',
+          type: template['type'] == 'textarea' 
+              ? CustomFieldType.text
+              : template['type'] == 'file'
+                  ? CustomFieldType.text
+                  : CustomFieldType.text,
           required: false,
-          options: ['1-10', '11-50', '51-200', '200+'],
-        ),
-        CustomField(
-          id: '2',
-          name: 'Annual Budget',
-          type: CustomFieldType.number,
-          required: false,
-        ),
-        CustomField(
-          id: '3',
-          name: 'Preferred Contact Time',
-          type: CustomFieldType.dropdown,
-          required: false,
-          options: ['Morning', 'Afternoon', 'Evening'],
-        ),
-      ]);
+        ));
+      }
+      
+      // Add default fields if no profession-specific templates
+      if (templates.isEmpty) {
+        _fields.addAll([
+          CustomField(
+            id: '1',
+            name: 'Company Size',
+            type: CustomFieldType.dropdown,
+            required: false,
+            options: ['1-10', '11-50', '51-200', '200+'],
+          ),
+          CustomField(
+            id: '2',
+            name: 'Annual Budget',
+            type: CustomFieldType.number,
+            required: false,
+          ),
+          CustomField(
+            id: '3',
+            name: 'Preferred Contact Time',
+            type: CustomFieldType.dropdown,
+            required: false,
+            options: ['Morning', 'Afternoon', 'Evening'],
+          ),
+        ]);
+      }
+      
       _isLoading = false;
     });
   }

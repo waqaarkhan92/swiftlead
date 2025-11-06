@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/global/skeleton_loader.dart';
-import '../../widgets/global/empty_state_card.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/components/ai_insight_banner.dart';
 import '../../widgets/components/trend_tile.dart';
@@ -15,6 +14,14 @@ import 'call_transcript_screen.dart';
 import 'ai_performance_screen.dart';
 import '../main_navigation.dart' as main_nav;
 import '../../widgets/forms/ai_tone_selector_sheet.dart';
+import '../../widgets/forms/ai_quote_assistant_config_sheet.dart';
+import '../../widgets/forms/ai_review_reply_config_sheet.dart';
+import '../../widgets/components/ai_usage_credits_card.dart';
+import '../../widgets/components/animated_counter.dart';
+import '../../widgets/components/smart_collapsible_section.dart';
+import '../../widgets/components/celebration_banner.dart';
+import '../../widgets/components/ai_insight_banner.dart';
+import '../../utils/keyboard_shortcuts.dart' show AppShortcuts, SearchIntent, RefreshIntent, CloseIntent;
 
 /// AI Hub Screen - Central control for AI features
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -30,12 +37,53 @@ class _AIHubScreenState extends State<AIHubScreen> {
   bool _isAIActive = true;
   String _selectedTone = 'Friendly';
   
+  // Phase 2 features
+  final Set<String> _milestonesShown = {};
+  String? _celebrationMessage;
+  
+  // Progressive disclosure states
+  bool _statusExpanded = true;
+  bool _performanceExpanded = true;
+  bool _configurationExpanded = false;
+  
   @override
   void initState() {
     super.initState();
     Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _checkForMilestones();
+      }
     });
+  }
+  
+  // Phase 2: Check for milestones and show celebrations
+  void _checkForMilestones() {
+    // Milestones can be added based on AI performance
+    // For now, placeholder for future implementation
+  }
+  
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.0, 0.1),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            )),
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
   }
 
   void _showToneSelector() {
@@ -56,7 +104,33 @@ class _AIHubScreenState extends State<AIHubScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Shortcuts(
+      shortcuts: AppShortcuts.globalShortcuts,
+      child: Actions(
+        actions: {
+          SearchIntent: CallbackAction<SearchIntent>(
+            onInvoke: (_) {
+              // TODO: Implement search
+              return null;
+            },
+          ),
+          RefreshIntent: CallbackAction<RefreshIntent>(
+            onInvoke: (_) {
+              setState(() => _isLoading = true);
+              Future.delayed(const Duration(milliseconds: 800), () {
+                if (mounted) setState(() => _isLoading = false);
+              });
+              return null;
+            },
+          ),
+          CloseIntent: CallbackAction<CloseIntent>(
+            onInvoke: (_) {
+              Navigator.of(context).pop();
+              return null;
+            },
+          ),
+        },
+        child: Scaffold(
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
@@ -68,9 +142,7 @@ class _AIHubScreenState extends State<AIHubScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const AIConfigurationScreen(),
-                ),
+                _createPageRoute(const AIConfigurationScreen()),
               );
             },
           ),
@@ -103,6 +175,8 @@ class _AIHubScreenState extends State<AIHubScreen> {
       body: _isLoading
           ? _buildLoadingState()
           : _buildContent(),
+        ),
+      ),
     );
   }
 
@@ -165,6 +239,14 @@ class _AIHubScreenState extends State<AIHubScreen> {
         
         // AIPerformanceMetrics - Analytics dashboard
         _buildPerformanceMetrics(),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+        
+        // AI Usage & Credits - Usage tracking
+        const AIUsageCreditsCard(),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+        
+        // AI Feature Configurations - Quote Assistant and Review Reply
+        _buildAIFeatureConfigurations(),
       ],
     );
   }
@@ -290,9 +372,7 @@ class _AIHubScreenState extends State<AIHubScreen> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const FAQManagementScreen(),
-                    ),
+                    _createPageRoute(const FAQManagementScreen()),
                   );
                 },
               ),
@@ -334,12 +414,10 @@ class _AIHubScreenState extends State<AIHubScreen> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CallTranscriptScreen(),
-                        ),
-                      );
+                    Navigator.push(
+                      context,
+                      _createPageRoute(const CallTranscriptScreen()),
+                    );
                     },
                     child: const Text('Transcripts'),
                   ),
@@ -347,9 +425,7 @@ class _AIHubScreenState extends State<AIHubScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const AIPerformanceScreen(),
-                        ),
+                        _createPageRoute(const AIPerformanceScreen()),
                       );
                     },
                     child: const Text('Performance'),
@@ -358,9 +434,7 @@ class _AIHubScreenState extends State<AIHubScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const AIActivityLogScreen(),
-                        ),
+                        _createPageRoute(const AIActivityLogScreen()),
                       );
                     },
                     child: const Text('View All'),
@@ -499,9 +573,7 @@ class _AIHubScreenState extends State<AIHubScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const AITrainingModeScreen(),
-                      ),
+                      _createPageRoute(const AITrainingModeScreen()),
                     );
                   },
                   child: const Text('Train AI'),
@@ -512,9 +584,7 @@ class _AIHubScreenState extends State<AIHubScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const AIConfigurationScreen(),
-                      ),
+                      _createPageRoute(const AIConfigurationScreen()),
                     );
                   },
                   child: const Text('Full Settings'),
@@ -599,6 +669,108 @@ class _AIHubScreenState extends State<AIHubScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAIFeatureConfigurations() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'AI Feature Configurations',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceM),
+        
+        // AI Quote Assistant Config
+        FrostedContainer(
+          padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+          child: InkWell(
+            onTap: () {
+              AIQuoteAssistantConfigSheet.show(context: context);
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.auto_awesome,
+                            size: 20,
+                            color: const Color(SwiftleadTokens.primaryTeal),
+                          ),
+                          const SizedBox(width: SwiftleadTokens.spaceS),
+                          Text(
+                            'AI Quote Assistant',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: SwiftleadTokens.spaceXS),
+                      Text(
+                        'Configure smart pricing, pricing rules, and approval thresholds',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceM),
+        
+        // AI Review Reply Config
+        FrostedContainer(
+          padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+          child: InkWell(
+            onTap: () {
+              AIReviewReplyConfigSheet.show(context: context);
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.reviews,
+                            size: 20,
+                            color: const Color(SwiftleadTokens.primaryTeal),
+                          ),
+                          const SizedBox(width: SwiftleadTokens.spaceS),
+                          Text(
+                            'AI Review Reply',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: SwiftleadTokens.spaceXS),
+                      Text(
+                        'Configure auto-respond, tone, templates, and approval workflow',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

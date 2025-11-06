@@ -11,6 +11,7 @@ import 'team_management_screen.dart';
 import 'twilio_configuration_screen.dart';
 import 'meta_business_setup_screen.dart';
 import 'google_calendar_setup_screen.dart';
+import 'apple_calendar_setup_screen.dart';
 import 'stripe_connection_screen.dart';
 import 'email_configuration_screen.dart';
 import '../notifications/notifications_screen.dart';
@@ -26,11 +27,14 @@ import 'invoice_customization_screen.dart';
 import 'subscription_billing_screen.dart';
 import 'custom_fields_manager_screen.dart';
 import '../../widgets/forms/business_hours_editor_sheet.dart';
+import '../../widgets/components/celebration_banner.dart';
+import '../../utils/keyboard_shortcuts.dart' show AppShortcuts, SearchIntent, RefreshIntent, CloseIntent;
 import '../calendar/service_catalog_screen.dart';
-import '../calendar/service_editor_screen.dart';
 import '../ai_hub/ai_configuration_screen.dart';
 import '../ai_hub/faq_management_screen.dart';
 import '../legal/legal_screen.dart';
+import '../../widgets/global/search_bar.dart';
+import 'profession_configuration_screen.dart';
 
 /// Settings Screen - Organization configuration and preferences
 /// Exact specification from Screen_Layouts_v2.5.1 and UI_Inventory_v2.5.1
@@ -50,21 +54,88 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _profileEmail = 'alex@abcplumbing.co.uk';
   String _profilePhone = '+44 20 1234 5678';
   String _profileCompany = 'ABC Plumbing';
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  
+  // Celebration tracking
+  final Set<String> _milestonesShown = {};
+  String? _celebrationMessage;
   
   ThemeMode get _themeMode => widget.currentThemeMode;
+  
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text.toLowerCase();
+      });
+    });
+  }
+  
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+  
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.0, 0.1),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            )),
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+  }
 
   void _handleHelpTap() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const SupportScreen(),
-      ),
+      _createPageRoute(const SupportScreen()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Shortcuts(
+      shortcuts: AppShortcuts.globalShortcuts,
+      child: Actions(
+        actions: {
+          SearchIntent: CallbackAction<SearchIntent>(
+            onInvoke: (_) {
+              // Focus search field
+              FocusScope.of(context).requestFocus(FocusNode());
+              return null;
+            },
+          ),
+          RefreshIntent: CallbackAction<RefreshIntent>(
+            onInvoke: (_) {
+              // Refresh settings
+              return null;
+            },
+          ),
+          CloseIntent: CallbackAction<CloseIntent>(
+            onInvoke: (_) {
+              Navigator.of(context).pop();
+              return null;
+            },
+          ),
+        },
+        child: Scaffold(
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
@@ -80,6 +151,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: _isLoading
           ? _buildLoadingState()
           : _buildContent(),
+        ),
+      ),
     );
   }
 
@@ -101,6 +174,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return ListView(
       padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       children: [
+        // Celebration banner (if milestone reached)
+        if (_celebrationMessage != null) ...[
+          CelebrationBanner(
+            message: _celebrationMessage!,
+            onDismiss: () {
+              setState(() => _celebrationMessage = null);
+            },
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+        ],
+        
+        // Settings Search
+        SwiftleadSearchBar(
+          hintText: 'Search settings...',
+          controller: _searchController,
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceM),
+        
         // ProfileCard
         _buildProfileCard(),
         const SizedBox(height: SwiftleadTokens.spaceL),
@@ -205,12 +296,63 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildSettingsSectionList() {
+    // Helper to filter items based on search query
+    List<_SettingsItem> filterItems(List<_SettingsItem> items) {
+      if (_searchQuery.isEmpty) return items;
+      return items.where((item) => 
+        item.label.toLowerCase().contains(_searchQuery)
+      ).toList();
+    }
+    
+    final advancedItems = filterItems([
+      _SettingsItem(
+        icon: Icons.work_outline,
+        label: 'Profession Configuration',
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ProfessionConfigurationScreen(),
+            ),
+          );
+        },
+      ),
+      _SettingsItem(
+        icon: Icons.settings_applications_outlined,
+        label: 'Bulk Configuration',
+        onTap: () {
+          _showBulkConfiguration(context);
+        },
+      ),
+      _SettingsItem(
+        icon: Icons.library_books_outlined,
+        label: 'Template Library',
+        onTap: () {
+          _showTemplateLibrary(context);
+        },
+      ),
+      _SettingsItem(
+        icon: Icons.import_export_outlined,
+        label: 'Import/Export Settings',
+        onTap: () {
+          _showImportExportSettings(context);
+        },
+      ),
+    ]);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Advanced Features Section (v2.5.1)
+        if (advancedItems.isNotEmpty)
+          _SettingsSection(
+            title: 'Advanced',
+            items: advancedItems,
+          ),
+        const SizedBox(height: SwiftleadTokens.spaceL),
         _SettingsSection(
           title: 'Account',
-          items: [
+          items: filterItems([
             _SettingsItem(
               icon: Icons.person_outline,
               label: 'Edit Profile',
@@ -293,12 +435,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               },
             ),
-          ],
+          ]),
         ),
         const SizedBox(height: SwiftleadTokens.spaceL),
         _SettingsSection(
           title: 'Business',
-          items: [
+          items: filterItems(<_SettingsItem>[
             _SettingsItem(
               icon: Icons.business_outlined,
               label: 'Organisation Details',
@@ -384,12 +526,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               },
             ),
-          ],
+          ]),
         ),
         const SizedBox(height: SwiftleadTokens.spaceL),
         _SettingsSection(
           title: 'Integrations',
-          items: [
+          items: filterItems(<_SettingsItem>[
             _SettingsItem(
               icon: Icons.chat_bubble_outline,
               label: 'WhatsApp Connect',
@@ -443,6 +585,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
             _SettingsItem(
+              icon: Icons.calendar_month_outlined,
+              label: 'Apple Calendar Sync',
+              trailing: _IntegrationStatus(isConnected: false),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AppleCalendarSetupScreen(),
+                  ),
+                );
+              },
+            ),
+            _SettingsItem(
               icon: Icons.payment_outlined,
               label: 'Stripe Connect',
               trailing: _IntegrationStatus(isConnected: true),
@@ -468,12 +623,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               },
             ),
-          ],
+          ]),
         ),
         const SizedBox(height: SwiftleadTokens.spaceL),
         _SettingsSection(
           title: 'AI Configuration',
-          items: [
+          items: filterItems(<_SettingsItem>[
             _SettingsItem(
               icon: Icons.auto_awesome,
               label: 'AI Receptionist Settings',
@@ -536,12 +691,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               },
             ),
-          ],
+          ]),
         ),
         const SizedBox(height: SwiftleadTokens.spaceL),
         _SettingsSection(
           title: 'Notifications',
-          items: [
+          items: filterItems(<_SettingsItem>[
             _SettingsItem(
               icon: Icons.notifications_outlined,
               label: 'Push Notifications',
@@ -586,12 +741,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               },
             ),
-          ],
+          ]),
         ),
         const SizedBox(height: SwiftleadTokens.spaceL),
         _SettingsSection(
           title: 'Appearance',
-          items: [
+          items: filterItems(<_SettingsItem>[
             _SettingsItem(
               icon: Icons.palette_outlined,
               label: 'Theme',
@@ -661,12 +816,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               },
             ),
-          ],
+          ]),
         ),
         const SizedBox(height: SwiftleadTokens.spaceL),
         _SettingsSection(
           title: 'Data & Privacy',
-          items: [
+          items: filterItems(<_SettingsItem>[
             _SettingsItem(
               icon: Icons.download_outlined,
               label: 'Data Export',
@@ -727,7 +882,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               },
             ),
-          ],
+          ]),
         ),
       ],
     );
@@ -851,6 +1006,292 @@ class _SettingsScreenState extends State<SettingsScreen> {
       case ThemeMode.system:
         return 'Auto';
     }
+  }
+  
+  void _showBulkConfiguration(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Bulk Configuration',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                children: [
+                  FrostedContainer(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Apply Settings to Team Members',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceS),
+                        Text(
+                          'Configure settings for multiple team members at once. Select which members and which settings to apply.',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceM),
+                        TextButton.icon(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            // TODO: Navigate to bulk configuration screen
+                          },
+                          icon: const Icon(Icons.people_outline),
+                          label: const Text('Select Team Members'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: SwiftleadTokens.spaceM),
+                  FrostedContainer(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Available Settings',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceS),
+                        ...['Notification Preferences', 'Business Hours', 'Email Settings', 'AI Configuration'].map((setting) {
+                          return CheckboxListTile(
+                            title: Text(setting),
+                            value: false,
+                            onChanged: (value) {},
+                          );
+                        }).toList(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  void _showTemplateLibrary(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Template Library',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                children: [
+                  Text(
+                    'Pre-built configurations for common professions',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: SwiftleadTokens.spaceL),
+                  ...['Plumbing', 'Electrical', 'HVAC', 'Home Services', 'Professional Services', 'Medical', 'Legal', 'Real Estate'].map((profession) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+                      child: FrostedContainer(
+                        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                            Toast.show(
+                              context,
+                              message: '$profession template applied',
+                              type: ToastType.success,
+                            );
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                profession,
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const Icon(Icons.chevron_right),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  void _showImportExportSettings(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Import/Export Settings',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                children: [
+                  FrostedContainer(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Export Settings',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceS),
+                        Text(
+                          'Export your organization\'s configuration to share or backup.',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceM),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              Toast.show(
+                                context,
+                                message: 'Settings exported successfully',
+                                type: ToastType.success,
+                              );
+                            },
+                            icon: const Icon(Icons.download_outlined),
+                            label: const Text('Export Settings'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: SwiftleadTokens.spaceM),
+                  FrostedContainer(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Import Settings',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceS),
+                        Text(
+                          'Import configuration from another organization or backup file.',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceM),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              Toast.show(
+                                context,
+                                message: 'Settings imported successfully',
+                                type: ToastType.success,
+                              );
+                            },
+                            icon: const Icon(Icons.upload_outlined),
+                            label: const Text('Import Settings'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showThemeSelector(BuildContext context) {
@@ -984,7 +1425,7 @@ class _SettingsSection extends StatelessWidget {
   final String title;
   final List<_SettingsItem> items;
 
-  const _SettingsSection({
+  _SettingsSection({
     required this.title,
     required this.items,
   });

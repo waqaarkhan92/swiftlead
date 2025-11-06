@@ -165,8 +165,12 @@ class _TrendLineChartState extends State<TrendLineChart> {
                       reservedSize: 50,
                       interval: (maxY - minY) / 4,
                       getTitlesWidget: (value, meta) {
+                        // Format for hours (e.g., 8.5h) or whole numbers
+                        final displayValue = value % 1 == 0 
+                            ? value.toInt().toString()
+                            : value.toStringAsFixed(1);
                         return Text(
-                          value.toInt().toString(),
+                          displayValue,
                           style: TextStyle(
                             color: Colors.grey.shade600,
                             fontSize: 10,
@@ -220,8 +224,15 @@ class _TrendLineChartState extends State<TrendLineChart> {
                     fitInsideHorizontally: true,
                     getTooltipItems: (List<LineBarSpot> touchedSpots) {
                       return touchedSpots.map((spot) {
+                        final value = spot.y;
+                        final displayValue = value % 1 == 0 
+                            ? value.toInt().toString()
+                            : value.toStringAsFixed(1);
+                        final label = widget.yAxisLabel.isNotEmpty 
+                            ? '${displayValue}${widget.yAxisLabel}'
+                            : displayValue;
                         return LineTooltipItem(
-                          '${_displayData[spot.x.toInt()].label}\n${widget.yAxisLabel}${spot.y.toInt()}',
+                          '${_displayData[spot.x.toInt()].label}\n$label',
                           const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,

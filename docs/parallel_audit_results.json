@@ -1,0 +1,786 @@
+{
+  "2": {
+    "module_number": "2",
+    "module_name": "AI Receptionist",
+    "purpose": "Automated first-response system that handles incoming inquiries 24/7 and qualifies leads with enhanced intelligence and performance tracking.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  },
+  "5": {
+    "module_number": "5",
+    "module_name": "Money (Quotes, Invoices & Billing)",
+    "purpose": "Complete financial management hub combining professional quote generation, automated invoicing, payment processing, and financial analytics in one unified interface.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  },
+  "3": {
+    "module_number": "3",
+    "module_name": "Jobs (Job Management)",
+    "purpose": "Track jobs from quote to completion with AI insights, smart scheduling, and team coordination.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  },
+  "1": {
+    "module_number": "1",
+    "module_name": "Omni-Inbox (Unified Messaging)",
+    "purpose": "Unified messaging hub for all customer communication channels across SMS, WhatsApp, Facebook, Instagram, and Email with enhanced UX and smart features.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  },
+  "4": {
+    "module_number": "4",
+    "module_name": "Calendar & Bookings",
+    "purpose": "Unified scheduling with availability management, automated confirmations, and multi-calendar sync.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  },
+  "11": {
+    "module_number": "11",
+    "module_name": "AI Hub",
+    "purpose": "Central configuration and monitoring for all AI-powered features in Swiftlead.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  },
+  "7": {
+    "module_number": "7",
+    "module_name": "Reviews (COMPLETE SPECIFICATION)",
+    "purpose": "Comprehensive review management and reputation tracking across multiple platforms with automated request workflows and response management.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  },
+  "10": {
+    "module_number": "10",
+    "module_name": "Dashboard (Home Screen)",
+    "purpose": "At-a-glance business health overview with actionable insights and quick access to key metrics.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  },
+  "8": {
+    "module_number": "8",
+    "module_name": "Notifications System (ENHANCED SPECIFICATION)",
+    "purpose": "Intelligent multi-channel notification delivery with granular preferences and smart batching.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  },
+  "12": {
+    "module_number": "12",
+    "module_name": "Settings & Configuration",
+    "purpose": "Organization-wide settings, team management, integrations, and preferences.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  },
+  "9": {
+    "module_number": "9",
+    "module_name": "Data Import / Export (COMPLETE SPECIFICATION)",
+    "purpose": "Bulk data operations for migration, backups, and integrations.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  },
+  "6": {
+    "module_number": "6",
+    "module_name": "Contacts / CRM (COMPLETE SPECIFICATION)",
+    "purpose": "Comprehensive contact relationship management with lifecycle tracking, segmentation, and 360\u00b0 customer view.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  },
+  "14": {
+    "module_number": "14",
+    "module_name": "Onboarding Flow",
+    "purpose": "Seamless setup wizard for new users to get started quickly.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  },
+  "13": {
+    "module_number": "13",
+    "module_name": "Adaptive Profession System",
+    "purpose": "Configure Swiftlead to match industry-specific terminology and workflows.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  },
+  "15": {
+    "module_number": "15",
+    "module_name": "Platform Integrations",
+    "purpose": "Connect Swiftlead with essential external services for seamless workflow.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  },
+  "16": {
+    "module_number": "16",
+    "module_name": "Reports & Analytics",
+    "purpose": "Comprehensive business intelligence with customizable reports and data visualization.",
+    "capabilities": {
+      "total": 0,
+      "implemented": 0,
+      "missing": 0,
+      "list": []
+    },
+    "screens": {
+      "total": 0,
+      "implemented": 0,
+      "partial": 0,
+      "missing": 0,
+      "list": []
+    },
+    "navigation": {
+      "total_screens": 0,
+      "screens_with_navigation": 0,
+      "issues": []
+    },
+    "buttons_links": {
+      "total_checked": 0,
+      "dead_buttons": 0,
+      "issues": []
+    },
+    "flows": {
+      "total_screens": 0,
+      "screens_with_flows": 0,
+      "flows": []
+    },
+    "state_handling": {
+      "total_screens": 0,
+      "complete_state_handling": 0,
+      "issues": []
+    },
+    "backend_integration": {
+      "wired": 0,
+      "mock": 0,
+      "not_wired": 0,
+      "screens": []
+    },
+    "testing_status": {
+      "test_files_count": 1,
+      "screens_count": 0,
+      "coverage_estimate": "10%"
+    }
+  }
+}

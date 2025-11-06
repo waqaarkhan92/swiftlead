@@ -11,6 +11,8 @@ import '../../widgets/global/badge.dart' show SwiftleadBadge, BadgeVariant, Badg
 import '../../widgets/global/primary_button.dart';
 import '../../widgets/global/bottom_sheet.dart';
 import '../../widgets/components/data_table.dart';
+import '../../widgets/components/celebration_banner.dart';
+import '../../utils/keyboard_shortcuts.dart' show AppShortcuts, SearchIntent, RefreshIntent, CloseIntent;
 import '../../theme/tokens.dart';
 import '../main_navigation.dart' as main_nav;
 import 'review_response_form.dart';
@@ -28,23 +30,91 @@ class ReviewsScreen extends StatefulWidget {
 class _ReviewsScreenState extends State<ReviewsScreen> {
   bool _isLoading = true;
   int _selectedTab = 0;
-  final List<String> _tabs = ['Dashboard', 'Requests', 'All Reviews', 'Analytics', 'NPS'];
+  final List<String> _tabs = ['Dashboard', 'Reviews', 'Analytics'];
+  String _reviewsSubTab = 'All Reviews'; // 'All Reviews' or 'Requests' - sub-navigation within Reviews tab
+  String _analyticsSubTab = 'Analytics'; // 'Analytics' or 'NPS' - sub-navigation within Analytics tab
   String _selectedFilter = 'All';
   final List<String> _filters = ['All', 'Google', 'Facebook', 'Yelp', 'Internal'];
   String _reviewStatusFilter = 'All';
   final List<String> _statusFilters = ['All', 'Pending', 'Sent', 'Received', 'Responded'];
+  
+  // Celebration tracking
+  final Set<String> _milestonesShown = {};
+  String? _celebrationMessage;
+  
+  // Progressive disclosure states
+  bool _recentExpanded = true;
+  bool _thisMonthExpanded = true;
+  bool _olderExpanded = false;
 
   @override
   void initState() {
     super.initState();
     Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _checkForMilestones();
+      }
     });
+  }
+  
+  // Check for milestones and show celebrations
+  void _checkForMilestones() {
+    // Milestones can be added based on review data
+  }
+  
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.0, 0.1),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            )),
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Shortcuts(
+      shortcuts: AppShortcuts.globalShortcuts,
+      child: Actions(
+        actions: {
+          SearchIntent: CallbackAction<SearchIntent>(
+            onInvoke: (_) {
+              // TODO: Implement search
+              return null;
+            },
+          ),
+          RefreshIntent: CallbackAction<RefreshIntent>(
+            onInvoke: (_) {
+              setState(() => _isLoading = true);
+              Future.delayed(const Duration(milliseconds: 800), () {
+                if (mounted) setState(() => _isLoading = false);
+              });
+              return null;
+            },
+          ),
+          CloseIntent: CallbackAction<CloseIntent>(
+            onInvoke: (_) {
+              Navigator.of(context).pop();
+              return null;
+            },
+          ),
+        },
+        child: Scaffold(
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
@@ -71,6 +141,8 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       body: _isLoading
           ? _buildLoadingState()
           : _buildContent(),
+        ),
+      ),
     );
   }
 
@@ -122,10 +194,8 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
             index: _selectedTab,
             children: [
               _buildDashboardTab(),
-              _buildRequestsTab(),
-              _buildAllReviewsTab(),
-              _buildAnalyticsTab(),
-              _buildNPSTab(),
+              _buildReviewsTab(), // Combined Reviews tab with sub-navigation
+              _buildAnalyticsTab(), // Combined Analytics tab with sub-navigation
             ],
           ),
         ),
@@ -148,6 +218,17 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
       child: ListView(
         padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
         children: [
+          // Celebration banner (if milestone reached)
+          if (_celebrationMessage != null) ...[
+            CelebrationBanner(
+              message: _celebrationMessage!,
+              onDismiss: () {
+                setState(() => _celebrationMessage = null);
+              },
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceL),
+          ],
+          
           // Summary Metrics
           FrostedContainer(
             padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
@@ -383,7 +464,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                     ),
               ),
               TextButton(
-                onPressed: () => setState(() => _selectedTab = 2),
+                onPressed: () => setState(() => _selectedTab = 1), // Reviews tab
                 child: const Text('View All'),
               ),
             ],
@@ -467,6 +548,41 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   }
 
   // Requests Tab - Review request list and status
+  Widget _buildReviewsTab() {
+    return Column(
+      children: [
+        // Sub-navigation: All Reviews vs Requests
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SwiftleadTokens.spaceM,
+            vertical: SwiftleadTokens.spaceS,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: SegmentedControl(
+                  segments: const ['All Reviews', 'Requests'],
+                  selectedIndex: _reviewsSubTab == 'All Reviews' ? 0 : 1,
+                  onSelectionChanged: (index) {
+                    setState(() {
+                      _reviewsSubTab = index == 0 ? 'All Reviews' : 'Requests';
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Content based on sub-tab
+        Expanded(
+          child: _reviewsSubTab == 'All Reviews' 
+              ? _buildAllReviewsTab() 
+              : _buildRequestsTab(),
+        ),
+      ],
+    );
+  }
+
   Widget _buildRequestsTab() {
     return Column(
       children: [
@@ -812,6 +928,41 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
 
   // Analytics Tab - Review analytics dashboard
   Widget _buildAnalyticsTab() {
+    return Column(
+      children: [
+        // Sub-navigation: Analytics vs NPS
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SwiftleadTokens.spaceM,
+            vertical: SwiftleadTokens.spaceS,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: SegmentedControl(
+                  segments: const ['Analytics', 'NPS'],
+                  selectedIndex: _analyticsSubTab == 'Analytics' ? 0 : 1,
+                  onSelectionChanged: (index) {
+                    setState(() {
+                      _analyticsSubTab = index == 0 ? 'Analytics' : 'NPS';
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Content based on sub-tab
+        Expanded(
+          child: _analyticsSubTab == 'Analytics' 
+              ? _buildAnalyticsContent() 
+              : _buildNPSTab(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAnalyticsContent() {
     return RefreshIndicator(
       onRefresh: () async {
         await Future.delayed(const Duration(milliseconds: 500));

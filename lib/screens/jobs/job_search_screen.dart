@@ -8,6 +8,7 @@ import '../../models/job.dart';
 import '../../mock/mock_repository.dart';
 import '../../config/mock_config.dart';
 import 'job_detail_screen.dart';
+import '../../utils/profession_config.dart';
 
 /// JobSearchScreen - Search jobs by title, client, service type
 /// Exact specification from UI_Inventory_v2.5.1
@@ -72,7 +73,7 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
-        title: 'Search Jobs',
+        title: 'Search ${ProfessionState.config.getLabel('Jobs')}',
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -85,7 +86,7 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
             padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
             child: SwiftleadSearchBar(
               controller: _searchController,
-              hintText: 'Search jobs by title, client, or service type...',
+              hintText: 'Search ${ProfessionState.config.getLabel('jobs').toLowerCase()} by title, ${ProfessionState.config.getLabel('client').toLowerCase()}, or service type...',
               onChanged: _performSearch,
             ),
           ),
@@ -114,7 +115,7 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
         const SizedBox(height: SwiftleadTokens.spaceM),
         _TipItem(
           icon: Icons.search,
-          tip: 'Search by job title or description',
+          tip: 'Search by ${ProfessionState.config.getLabel('job').toLowerCase()} title or description',
         ),
         const SizedBox(height: SwiftleadTokens.spaceS),
         _TipItem(
@@ -153,7 +154,6 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
             status: job.status.displayName,
             dueDate: job.scheduledDate,
             price: '£${job.value.toStringAsFixed(2)}',
-            teamMemberName: job.assignedTo,
             onTap: () {
               Navigator.push(
                 context,

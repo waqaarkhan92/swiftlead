@@ -239,80 +239,130 @@ class _CreateEditContactScreenState extends State<CreateEditContactScreen> {
               ),
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
+            // iOS-style grouped sections
+            // Section 1: Basic Information
             FrostedContainer(
-              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              padding: EdgeInsets.zero,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Name *',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Name is required';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: SwiftleadTokens.spaceM),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: SwiftleadTokens.spaceM),
-                  TextFormField(
-                    controller: _phoneController,
-                    decoration: const InputDecoration(
-                      labelText: 'Phone',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.phone,
-                  ),
-                  const SizedBox(height: SwiftleadTokens.spaceM),
-                  TextFormField(
-                    controller: _companyController,
-                    decoration: const InputDecoration(
-                      labelText: 'Company',
-                      border: OutlineInputBorder(),
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Text(
+                      'Basic Information',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: SwiftleadTokens.spaceM),
-                  // Stage selection
-                  Text(
-                    'Stage',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: SwiftleadTokens.spaceS),
-                  Wrap(
-                    spacing: SwiftleadTokens.spaceS,
-                    children: ['Lead', 'Contacted', 'Quoted', 'Customer', 'Archived'].map((stage) {
-                      return SwiftleadChip(
-                        label: stage,
-                        isSelected: _selectedStage == stage,
-                        onTap: () {
-                          setState(() {
-                            _selectedStage = stage;
-                          });
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: SwiftleadTokens.spaceL),
-                  PrimaryButton(
-                    label: widget.contactId != null ? 'Update Contact' : 'Create Contact',
-                    onPressed: _isSaving ? null : _saveContact,
-                    isLoading: _isSaving,
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Name *',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Name is required';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceM),
+                        TextFormField(
+                          controller: _companyController,
+                          decoration: const InputDecoration(
+                            labelText: 'Company',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceM),
+                        // Stage selection
+                        Text(
+                          'Stage',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceS),
+                        Wrap(
+                          spacing: SwiftleadTokens.spaceS,
+                          children: ['Lead', 'Contacted', 'Quoted', 'Customer', 'Archived'].map((stage) {
+                            return SwiftleadChip(
+                              label: stage,
+                              isSelected: _selectedStage == stage,
+                              onTap: () {
+                                setState(() {
+                                  _selectedStage = stage;
+                                });
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+            // Section 2: Contact Information
+            FrostedContainer(
+              padding: EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Text(
+                      'Contact Information',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _emailController,
+                          decoration: const InputDecoration(
+                            labelText: 'Email',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceM),
+                        TextFormField(
+                          controller: _phoneController,
+                          decoration: const InputDecoration(
+                            labelText: 'Phone',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.phone,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+            // Sticky save button (iOS pattern)
+            Padding(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: PrimaryButton(
+                label: widget.contactId != null ? 'Update Contact' : 'Create Contact',
+                onPressed: _isSaving ? null : _saveContact,
+                isLoading: _isSaving,
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
           ],
         ),
       ),

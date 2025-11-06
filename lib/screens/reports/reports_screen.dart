@@ -15,15 +15,17 @@ import '../../widgets/components/response_times_chart.dart';
 import '../../widgets/components/ai_insight_card.dart';
 import '../../widgets/components/automation_stats_card.dart';
 import '../../widgets/global/frosted_container.dart';
-import '../../widgets/global/chip.dart';
+import '../../widgets/global/chip.dart' show SwiftleadChip;
 import '../../widgets/global/bottom_sheet.dart';
 import '../../widgets/global/primary_button.dart';
+import '../../widgets/components/animated_counter.dart';
+import '../../widgets/components/smart_collapsible_section.dart';
+import '../../widgets/components/celebration_banner.dart';
+import '../../utils/keyboard_shortcuts.dart' show AppShortcuts, SearchIntent, RefreshIntent, CloseIntent;
 import '../../theme/tokens.dart';
 import '../main_navigation.dart' as main_nav;
-import 'custom_report_builder_screen.dart';
 import 'benchmark_comparison_screen.dart';
 import 'goal_tracking_screen.dart';
-import 'scheduled_reports_screen.dart';
 
 /// Reports & Analytics Screen
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -37,23 +39,81 @@ class ReportsScreen extends StatefulWidget {
 class _ReportsScreenState extends State<ReportsScreen> {
   bool _isLoading = true;
   int _selectedReportType = 0;
-  final List<String> _reportTypes = ['Overview', 'Revenue', 'Jobs', 'Clients', 'AI Performance', 'Team'];
+  final List<String> _reportTypes = ['Overview', 'Business', 'Performance'];
+  String _businessSubTab = 'Revenue'; // 'Revenue', 'Jobs', or 'Clients' - sub-navigation within Business tab
+  String _performanceSubTab = 'AI Performance'; // 'AI Performance' or 'Team' - sub-navigation within Performance tab
   String _automationSearchQuery = '';
   String? _automationFilterType;
   String _selectedDateRange = 'Last 30 days';
-  String _selectedExportFormat = 'PDF'; // For export sheet
+  
+  // Celebration tracking
+  final Set<String> _milestonesShown = {};
+  String? _celebrationMessage;
+  
+  // Progressive disclosure states
+  bool _keyMetricsExpanded = true;
+  bool _chartsExpanded = true;
+  bool _detailsExpanded = false;
   
   @override
   void initState() {
     super.initState();
     Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _checkForMilestones();
+      }
     });
+  }
+
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 200),
+    );
+  }
+
+  // Check for milestones and show celebrations
+  void _checkForMilestones() {
+    // Milestones can be added based on report usage
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Shortcuts(
+      shortcuts: AppShortcuts.globalShortcuts,
+      child: Actions(
+        actions: {
+          SearchIntent: CallbackAction<SearchIntent>(
+            onInvoke: (_) {
+              // TODO: Implement search
+              return null;
+            },
+          ),
+          RefreshIntent: CallbackAction<RefreshIntent>(
+            onInvoke: (_) {
+              setState(() => _isLoading = true);
+              Future.delayed(const Duration(milliseconds: 800), () {
+                if (mounted) setState(() => _isLoading = false);
+              });
+              return null;
+            },
+          ),
+          CloseIntent: CallbackAction<CloseIntent>(
+            onInvoke: (_) {
+              Navigator.of(context).pop();
+              return null;
+            },
+          ),
+        },
+        child: Scaffold(
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
@@ -72,61 +132,73 @@ class _ReportsScreenState extends State<ReportsScreen> {
           ],
         ),
         actions: [
-          // Custom Report Builder (v2.5.1)
-          IconButton(
-            icon: const Icon(Icons.tune_outlined),
-            onPressed: () => _showCustomReportBuilder(context),
-            tooltip: 'Custom Report Builder',
-          ),
-          // Goal Tracking (v2.5.1)
+          // Goal Tracking (v2.5.1) - Primary action
           IconButton(
             icon: const Icon(Icons.track_changes_outlined),
             onPressed: () => _showGoalTracking(context),
             tooltip: 'Goal Tracking',
           ),
-          // Benchmark Comparison (v2.5.1)
-          IconButton(
-            icon: const Icon(Icons.compare_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const BenchmarkComparisonScreen(),
-                ),
-              );
+          // More menu for secondary actions
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            tooltip: 'More',
+            onSelected: (value) {
+              switch (value) {
+                case 'benchmark':
+                  Navigator.push(
+                    context,
+                    _createPageRoute(const BenchmarkComparisonScreen()),
+                  );
+                  break;
+                case 'date_range':
+                  _showDateRangePicker(context);
+                  break;
+              }
             },
-            tooltip: 'Benchmark Comparison',
-          ),
-          // Scheduled Reports (v2.5.1)
-          IconButton(
-            icon: const Icon(Icons.schedule_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ScheduledReportsScreen(),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'benchmark',
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.compare_outlined, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Benchmark Comparison',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              );
-            },
-            tooltip: 'Scheduled Reports',
-          ),
-          // Date range picker
-          IconButton(
-            icon: const Icon(Icons.date_range_outlined),
-            onPressed: () => _showDateRangePicker(context),
-            tooltip: 'Date Range',
-          ),
-          // Export button
-          IconButton(
-            icon: const Icon(Icons.download_outlined),
-            onPressed: () => _showExportSheet(context),
-            tooltip: 'Export',
+              ),
+              PopupMenuItem(
+                value: 'date_range',
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.date_range_outlined, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Date Range',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
       body: _isLoading
           ? _buildLoadingState()
           : _buildContent(),
+        ),
+      ),
     );
   }
 
@@ -174,118 +246,229 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _buildContent() {
-    return ListView(
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+    return Column(
       children: [
-        // ReportTypeTabs - SegmentedControl
-        SegmentedControl(
-          segments: _reportTypes,
-          selectedIndex: _selectedReportType,
-          onSelectionChanged: (index) {
-            setState(() => _selectedReportType = index);
-          },
+        // Celebration banner (if milestone reached)
+        if (_celebrationMessage != null) ...[
+          Padding(
+            padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+            child: CelebrationBanner(
+              message: _celebrationMessage!,
+              onDismiss: () {
+                setState(() => _celebrationMessage = null);
+              },
+            ),
+          ),
+        ],
+        
+        // Date Range Chip - Moved from app bar for better visibility
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+          child: Row(
+            children: [
+              SwiftleadChip(
+                label: _selectedDateRange,
+                icon: Icons.date_range_outlined,
+                onTap: () => _showDateRangePicker(context),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: SwiftleadTokens.spaceL),
+        const SizedBox(height: SwiftleadTokens.spaceM),
+        // ReportTypeTabs - SegmentedControl
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+          child: SegmentedControl(
+            segments: _reportTypes,
+            selectedIndex: _selectedReportType,
+            onSelectionChanged: (index) {
+              setState(() => _selectedReportType = index);
+            },
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceM),
         
         // Tab-specific content
-        IndexedStack(
-          index: _selectedReportType,
-          children: [
-            _buildOverviewTab(),
-            _buildRevenueTab(),
-            _buildJobsTab(),
-            _buildClientsTab(),
-            _buildAIPerformanceTab(),
-            _buildTeamTab(),
-          ],
+        Expanded(
+          child: IndexedStack(
+            index: _selectedReportType,
+            children: [
+              _buildOverviewTab(),
+              _buildBusinessTab(), // Combined Business tab with sub-navigation
+              _buildPerformanceTab(), // Combined Performance tab with sub-navigation
+            ],
+          ),
         ),
-        const SizedBox(height: 96), // Bottom padding for nav bar
       ],
     );
   }
 
   Widget _buildOverviewTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      child: Column(
+        children: [
+          // KPISummaryRow - Top-level metrics
+          _buildKPISummaryRow(),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          
+          // ChartCardGrid - 2×2 or 3×1 chart layout
+          _buildChartCardGrid(),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          
+          // DataTableSection - Detailed breakdowns
+          _buildDataTableSection(),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          
+          // AutomationHistoryTable (v2.5.1)
+          _buildAutomationHistory(),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          
+          // Goal Tracking Section (v2.5.1)
+          _buildGoalTrackingSection(),
+          const SizedBox(height: 96), // Bottom padding for nav bar
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBusinessTab() {
     return Column(
       children: [
-        // KPISummaryRow - Top-level metrics
-        _buildKPISummaryRow(),
-        const SizedBox(height: SwiftleadTokens.spaceL),
-        
-        // ChartCardGrid - 2×2 or 3×1 chart layout
-        _buildChartCardGrid(),
-        const SizedBox(height: SwiftleadTokens.spaceL),
-        
-        // DataTableSection - Detailed breakdowns
-        _buildDataTableSection(),
-        const SizedBox(height: SwiftleadTokens.spaceL),
-        
-        // AutomationHistoryTable (v2.5.1)
-        _buildAutomationHistory(),
-        const SizedBox(height: SwiftleadTokens.spaceL),
-        
-        // Goal Tracking Section (v2.5.1)
-        _buildGoalTrackingSection(),
+        // Sub-navigation: Revenue, Jobs, Clients
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SwiftleadTokens.spaceM,
+            vertical: SwiftleadTokens.spaceS,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: SegmentedControl(
+                  segments: const ['Revenue', 'Jobs', 'Clients'],
+                  selectedIndex: _businessSubTab == 'Revenue' ? 0 : (_businessSubTab == 'Jobs' ? 1 : 2),
+                  onSelectionChanged: (index) {
+                    setState(() {
+                      _businessSubTab = index == 0 ? 'Revenue' : (index == 1 ? 'Jobs' : 'Clients');
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceM),
+        // Content based on sub-tab
+        Expanded(
+          child: _businessSubTab == 'Revenue' 
+              ? _buildRevenueTab() 
+              : (_businessSubTab == 'Jobs' ? _buildJobsTab() : _buildClientsTab()),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPerformanceTab() {
+    return Column(
+      children: [
+        // Sub-navigation: AI Performance, Team
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SwiftleadTokens.spaceM,
+            vertical: SwiftleadTokens.spaceS,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: SegmentedControl(
+                  segments: const ['AI Performance', 'Team'],
+                  selectedIndex: _performanceSubTab == 'AI Performance' ? 0 : 1,
+                  onSelectionChanged: (index) {
+                    setState(() {
+                      _performanceSubTab = index == 0 ? 'AI Performance' : 'Team';
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceM),
+        // Content based on sub-tab
+        Expanded(
+          child: _performanceSubTab == 'AI Performance' 
+              ? _buildAIPerformanceTab() 
+              : _buildTeamTab(),
+        ),
       ],
     );
   }
 
   Widget _buildRevenueTab() {
-    return Column(
-      children: [
-        _buildKPISummaryRow(),
-        const SizedBox(height: SwiftleadTokens.spaceL),
-        TrendLineChart(
-          title: 'Revenue Trends',
-          dataPoints: [
-            ChartDataPoint(label: 'Week 1', value: 5000),
-            ChartDataPoint(label: 'Week 2', value: 6200),
-            ChartDataPoint(label: 'Week 3', value: 5800),
-            ChartDataPoint(label: 'Week 4', value: 7500),
-          ],
-          periodData: {
-            '7D': [
-              ChartDataPoint(label: 'D1', value: 800),
-              ChartDataPoint(label: 'D2', value: 950),
-              ChartDataPoint(label: 'D3', value: 720),
-              ChartDataPoint(label: 'D4', value: 1050),
-              ChartDataPoint(label: 'D5', value: 920),
-              ChartDataPoint(label: 'D6', value: 1100),
-              ChartDataPoint(label: 'D7', value: 1250),
-            ],
-            '30D': [
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      child: Column(
+        children: [
+          _buildKPISummaryRow(),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          TrendLineChart(
+            title: 'Revenue Trends',
+            dataPoints: [
               ChartDataPoint(label: 'Week 1', value: 5000),
               ChartDataPoint(label: 'Week 2', value: 6200),
               ChartDataPoint(label: 'Week 3', value: 5800),
               ChartDataPoint(label: 'Week 4', value: 7500),
             ],
-            '90D': [
-              ChartDataPoint(label: 'Month 1', value: 22000),
-              ChartDataPoint(label: 'Month 2', value: 24800),
-              ChartDataPoint(label: 'Month 3', value: 28500),
-            ],
-          },
-          lineColor: const Color(SwiftleadTokens.primaryTeal),
-          yAxisLabel: '£',
-        ),
-      ],
+            periodData: {
+              '7D': [
+                ChartDataPoint(label: 'D1', value: 800),
+                ChartDataPoint(label: 'D2', value: 950),
+                ChartDataPoint(label: 'D3', value: 720),
+                ChartDataPoint(label: 'D4', value: 1050),
+                ChartDataPoint(label: 'D5', value: 920),
+                ChartDataPoint(label: 'D6', value: 1100),
+                ChartDataPoint(label: 'D7', value: 1250),
+              ],
+              '30D': [
+                ChartDataPoint(label: 'Week 1', value: 5000),
+                ChartDataPoint(label: 'Week 2', value: 6200),
+                ChartDataPoint(label: 'Week 3', value: 5800),
+                ChartDataPoint(label: 'Week 4', value: 7500),
+              ],
+              '90D': [
+                ChartDataPoint(label: 'Month 1', value: 22000),
+                ChartDataPoint(label: 'Month 2', value: 24800),
+                ChartDataPoint(label: 'Month 3', value: 28500),
+              ],
+            },
+            lineColor: const Color(SwiftleadTokens.primaryTeal),
+            yAxisLabel: '£',
+          ),
+          const SizedBox(height: 96), // Bottom padding for nav bar
+        ],
+      ),
     );
   }
 
   Widget _buildJobsTab() {
-    return Column(
-      children: [
-        ConversionFunnelChart(
-          stages: [
-            FunnelStage(label: 'Inquiries', value: 100),
-            FunnelStage(label: 'Quotes', value: 75),
-            FunnelStage(label: 'Bookings', value: 50),
-            FunnelStage(label: 'Completed', value: 42),
-          ],
-          onStageTap: () {},
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceL),
-        _buildJobsDataTable(),
-      ],
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      child: Column(
+        children: [
+          ConversionFunnelChart(
+            stages: [
+              FunnelStage(label: 'Inquiries', value: 100),
+              FunnelStage(label: 'Quotes', value: 75),
+              FunnelStage(label: 'Bookings', value: 50),
+              FunnelStage(label: 'Completed', value: 42),
+            ],
+            onStageTap: () {},
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          _buildJobsDataTable(),
+          const SizedBox(height: 96), // Bottom padding for nav bar
+        ],
+      ),
     );
   }
 
@@ -329,20 +512,24 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _buildClientsTab() {
-    return Column(
-      children: [
-        LeadSourcePieChart(
-          sources: [
-            LeadSourceData(label: 'Website', value: 45, color: const Color(SwiftleadTokens.primaryTeal)),
-            LeadSourceData(label: 'Referral', value: 25, color: const Color(SwiftleadTokens.successGreen)),
-            LeadSourceData(label: 'Social Media', value: 20, color: const Color(SwiftleadTokens.warningYellow)),
-            LeadSourceData(label: 'Other', value: 10, color: Colors.grey),
-          ],
-          onSourceTap: (index) {},
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceL),
-        _buildClientsDataTable(),
-      ],
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      child: Column(
+        children: [
+          LeadSourcePieChart(
+            sources: [
+              LeadSourceData(label: 'Website', value: 45, color: const Color(SwiftleadTokens.primaryTeal)),
+              LeadSourceData(label: 'Referral', value: 25, color: const Color(SwiftleadTokens.successGreen)),
+              LeadSourceData(label: 'Social Media', value: 20, color: const Color(SwiftleadTokens.warningYellow)),
+              LeadSourceData(label: 'Other', value: 10, color: Colors.grey),
+            ],
+            onSourceTap: (index) {},
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          _buildClientsDataTable(),
+          const SizedBox(height: 96), // Bottom padding for nav bar
+        ],
+      ),
     );
   }
 
@@ -390,137 +577,98 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _buildAIPerformanceTab() {
-    return Column(
-      children: [
-        _buildKPISummaryRow(),
-        const SizedBox(height: SwiftleadTokens.spaceL),
-        
-        // AI Insights Cards
-        AIInsightCard(
-          title: 'Revenue Spike Detected',
-          description: 'Your revenue increased by 23% this week compared to last. This is likely due to increased booking conversion rates.',
-          type: InsightType.trend,
-          confidence: 0.92,
-          actionSuggestions: [
-            'Review conversion rates for this week',
-            'Analyze which channels drove the most bookings',
-            'Consider increasing ad spend on top-performing channels',
-          ],
-          onTap: () {
-            // Navigate to detailed analysis
-          },
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceM),
-        
-        AIInsightCard(
-          title: 'Response Time Anomaly',
-          description: 'Average response time for WhatsApp messages increased to 28 minutes (normally 12 minutes). This may impact customer satisfaction.',
-          type: InsightType.anomaly,
-          confidence: 0.85,
-          actionSuggestions: [
-            'Check if team members are available',
-            'Enable auto-reply for WhatsApp',
-            'Review message queue for bottlenecks',
-          ],
-          onTap: () {
-            // Navigate to response times analysis
-          },
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceM),
-        
-        // Automation Stats Card
-        AutomationStatsCard(
-          actionsCompleted: 342,
-          timeSavedHours: 24.5,
-          successRate: 94,
-          costSaved: 850.0,
-          onTap: () {
-            // Navigate to automation details
-          },
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceL),
-        
-        _buildAutomationHistory(),
-      ],
-    );
-  }
-
-  Widget _buildTeamTab() {
-    return Column(
-      children: [
-        EmptyStateCard(
-          title: 'Team Performance',
-          description: 'Individual team member stats (if multi-user)',
-          icon: Icons.people_outline,
-          actionLabel: 'Add Team Members',
-          onAction: () {
-            // Navigate to team management
-          },
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceL),
-        // Mock team members for now
-        ...List.generate(3, (index) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
-            child: TeamPerformanceCard(
-              memberName: ['Alex Johnson', 'Sam Smith', 'Taylor Brown'][index],
-              jobsCompleted: [42, 38, 35][index],
-              revenue: [12500.0, 11200.0, 9800.0][index],
-              rating: 4,
-              trendPercentage: [12.5, 8.3, -2.1][index],
-              isPositiveTrend: index < 2,
-              onTap: () {
-                // Navigate to team member detail
-              },
-            ),
-          );
-        }),
-      ],
-    );
-  }
-
-  void _showCustomReportBuilder(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const CustomReportBuilderScreen(),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      child: Column(
+        children: [
+          _buildKPISummaryRow(),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          
+          // AI Insights Cards
+          AIInsightCard(
+            title: 'Revenue Spike Detected',
+            description: 'Your revenue increased by 23% this week compared to last. This is likely due to increased booking conversion rates.',
+            type: InsightType.trend,
+            confidence: 0.92,
+            actionSuggestions: [
+              'Review conversion rates for this week',
+              'Analyze which channels drove the most bookings',
+              'Consider increasing ad spend on top-performing channels',
+            ],
+            onTap: () {
+              // Navigate to detailed analysis
+            },
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          
+          AIInsightCard(
+            title: 'Response Time Anomaly',
+            description: 'Average response time for WhatsApp messages increased to 28 minutes (normally 12 minutes). This may impact customer satisfaction.',
+            type: InsightType.anomaly,
+            confidence: 0.85,
+            actionSuggestions: [
+              'Check if team members are available',
+              'Enable auto-reply for WhatsApp',
+              'Review message queue for bottlenecks',
+            ],
+            onTap: () {
+              // Navigate to response times analysis
+            },
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          
+          // Automation Stats Card
+          AutomationStatsCard(
+            actionsCompleted: 342,
+            timeSavedHours: 24.5,
+            successRate: 94,
+            costSaved: 850.0,
+            onTap: () {
+              // Navigate to automation details
+            },
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          
+          _buildAutomationHistory(),
+          const SizedBox(height: 96), // Bottom padding for nav bar
+        ],
       ),
     );
   }
 
-  void _showCustomReportBuilderOld(BuildContext context) {
-    SwiftleadBottomSheet.show(
-      context: context,
-      title: 'Custom Report Builder',
-      height: SheetHeight.threeQuarter,
-      child: ListView(
-        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+  Widget _buildTeamTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      child: Column(
         children: [
-          Text(
-            'Build a custom report by selecting metrics and visualizations:',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-          Text(
-            'Available Metrics:',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: SwiftleadTokens.spaceM),
-          ...['Revenue', 'Jobs', 'Clients', 'Conversion Rate', 'Response Time', 'AI Performance'].map((metric) {
-            return ListTile(
-              leading: Checkbox(value: metric == 'Revenue', onChanged: (v) {}),
-              title: Text(metric),
-              trailing: const Icon(Icons.drag_handle),
-            );
-          }).toList(),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-          PrimaryButton(
-            label: 'Create Custom Report',
-            onPressed: () {
-              Navigator.pop(context);
-              // Create custom report
+          EmptyStateCard(
+            title: 'Team Performance',
+            description: 'Individual team member stats (if multi-user)',
+            icon: Icons.people_outline,
+            actionLabel: 'Add Team Members',
+            onAction: () {
+              // Navigate to team management
             },
           ),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          // Mock team members for now
+          ...List.generate(3, (index) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+              child: TeamPerformanceCard(
+                memberName: ['Alex Johnson', 'Sam Smith', 'Taylor Brown'][index],
+                jobsCompleted: [42, 38, 35][index],
+                revenue: [12500.0, 11200.0, 9800.0][index],
+                rating: 4,
+                trendPercentage: [12.5, 8.3, -2.1][index],
+                isPositiveTrend: index < 2,
+                onTap: () {
+                  // Navigate to team member detail
+                },
+              ),
+            );
+          }),
+          const SizedBox(height: 96), // Bottom padding for nav bar
         ],
       ),
     );
@@ -589,78 +737,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
               },
             );
           }).toList(),
-        ],
-      ),
-    );
-  }
-
-  void _showExportSheet(BuildContext context) {
-    SwiftleadBottomSheet.show(
-      context: context,
-      title: 'Export Report',
-      height: SheetHeight.half,
-      child: ListView(
-        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-        children: [
-          Text(
-            'Format',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: SwiftleadTokens.spaceS),
-          Wrap(
-            spacing: SwiftleadTokens.spaceS,
-            children: ['PDF', 'Excel', 'CSV'].map((format) {
-              return SwiftleadChip(
-                label: format,
-                isSelected: format == _selectedExportFormat,
-                onTap: () {
-                  setState(() {
-                    _selectedExportFormat = format;
-                  });
-                },
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-          Text(
-            'Template',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: SwiftleadTokens.spaceS),
-          DropdownButtonFormField<String>(
-            value: 'Summary',
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            items: ['Summary', 'Detailed', 'Tax-Ready'].map((template) {
-              return DropdownMenuItem(
-                value: template,
-                child: Text(template),
-              );
-            }).toList(),
-            onChanged: (value) {},
-          ),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-          Row(
-            children: [
-              Checkbox(value: false, onChanged: (v) {}),
-              const Expanded(
-                child: Text('Email report to me'),
-              ),
-            ],
-          ),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-          PrimaryButton(
-            label: 'Generate Report',
-            onPressed: () {
-              Navigator.pop(context);
-              // Generate export
-            },
-          ),
         ],
       ),
     );

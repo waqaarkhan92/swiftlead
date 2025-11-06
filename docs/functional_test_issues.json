@@ -1,0 +1,1058 @@
+{
+  "dead_buttons": [
+    {
+      "screen": "settings_screen",
+      "line": 999,
+      "issue": "TODO in button handler",
+      "code": "onPressed: () {\n                            Navigator.pop(context);\n                            // T"
+    },
+    {
+      "screen": "invoice_customization_screen",
+      "line": 150,
+      "issue": "TODO in button handler",
+      "code": "onPressed: () {\n                      // TODO"
+    },
+    {
+      "screen": "invoice_customization_screen",
+      "line": 283,
+      "issue": "TODO in button handler",
+      "code": "onPressed: () {\n              // TODO"
+    },
+    {
+      "screen": "subscription_billing_screen",
+      "line": 230,
+      "issue": "TODO in button handler",
+      "code": "onPressed: () {\n              // TODO"
+    },
+    {
+      "screen": "inbox_screen",
+      "line": 776,
+      "issue": "TODO in button handler",
+      "code": "onPressed: () {\n                      // TODO"
+    },
+    {
+      "screen": "inbox_screen",
+      "line": 1031,
+      "issue": "TODO in button handler",
+      "code": "onTap: () {\n          Navigator.pop(context); // Close context menu first\n          ConversationPrev"
+    },
+    {
+      "screen": "ai_configuration_screen",
+      "line": 780,
+      "issue": "TODO in button handler",
+      "code": "onPressed: () {\n                // TODO"
+    },
+    {
+      "screen": "support_screen",
+      "line": 37,
+      "issue": "Empty button handler",
+      "code": "onPressed: () {}"
+    },
+    {
+      "screen": "support_screen",
+      "line": 136,
+      "issue": "Empty button handler",
+      "code": "onPressed: () {}"
+    },
+    {
+      "screen": "recurring_invoices_screen",
+      "line": 85,
+      "issue": "TODO in button handler",
+      "code": "onPressed: () {\n              // TODO"
+    },
+    {
+      "screen": "recurring_invoices_screen",
+      "line": 145,
+      "issue": "TODO in button handler",
+      "code": "onTap: () {\n                    // TODO"
+    },
+    {
+      "screen": "money_screen",
+      "line": 1923,
+      "issue": "Empty button handler",
+      "code": "onPressed: () {}"
+    },
+    {
+      "screen": "deposits_screen",
+      "line": 132,
+      "issue": "TODO in button handler",
+      "code": "onPressed: () {\n                // TODO"
+    },
+    {
+      "screen": "job_detail_screen",
+      "line": 930,
+      "issue": "TODO in button handler",
+      "code": "onPressed: () {\n                      // Show options menu for timeline event\n                      "
+    },
+    {
+      "screen": "job_detail_screen",
+      "line": 957,
+      "issue": "TODO in button handler",
+      "code": "onTap: () {\n                                    Navigator.pop(context);\n                            "
+    }
+  ],
+  "broken_navigation": [
+    {
+      "screen": "home_screen",
+      "line": 83,
+      "issue": "Navigates to SettingsScreen (not found)",
+      "target": "SettingsScreen"
+    },
+    {
+      "screen": "booking_templates_screen",
+      "line": 224,
+      "issue": "Navigates to CreateEditBookingScreen (not found)",
+      "target": "CreateEditBookingScreen"
+    },
+    {
+      "screen": "create_edit_booking_screen",
+      "line": 322,
+      "issue": "Navigates to BookingTemplatesScreen (not found)",
+      "target": "BookingTemplatesScreen"
+    },
+    {
+      "screen": "create_edit_booking_screen",
+      "line": 400,
+      "issue": "Navigates to ServiceCatalogScreen (not found)",
+      "target": "ServiceCatalogScreen"
+    },
+    {
+      "screen": "booking_detail_screen",
+      "line": 42,
+      "issue": "Navigates to CreateEditJobScreen (not found)",
+      "target": "CreateEditJobScreen"
+    },
+    {
+      "screen": "booking_detail_screen",
+      "line": 107,
+      "issue": "Navigates to CreateEditBookingScreen (not found)",
+      "target": "CreateEditBookingScreen"
+    },
+    {
+      "screen": "calendar_search_screen",
+      "line": 171,
+      "issue": "Navigates to BookingDetailScreen (not found)",
+      "target": "BookingDetailScreen"
+    },
+    {
+      "screen": "calendar_screen",
+      "line": 953,
+      "issue": "Navigates to BookingDetailScreen (not found)",
+      "target": "BookingDetailScreen"
+    },
+    {
+      "screen": "calendar_screen",
+      "line": 1029,
+      "issue": "Navigates to JobDetailScreen (not found)",
+      "target": "JobDetailScreen"
+    },
+    {
+      "screen": "inbox_screen",
+      "line": 361,
+      "issue": "Navigates to InboxThreadScreen (not found)",
+      "target": "InboxThreadScreen"
+    },
+    {
+      "screen": "inbox_screen",
+      "line": 804,
+      "issue": "Navigates to InboxThreadScreen (not found)",
+      "target": "InboxThreadScreen"
+    },
+    {
+      "screen": "inbox_screen",
+      "line": 834,
+      "issue": "Navigates to InboxThreadScreen (not found)",
+      "target": "InboxThreadScreen"
+    },
+    {
+      "screen": "inbox_screen",
+      "line": 1040,
+      "issue": "Navigates to InboxThreadScreen (not found)",
+      "target": "InboxThreadScreen"
+    },
+    {
+      "screen": "inbox_thread_screen",
+      "line": 367,
+      "issue": "Navigates to ContactDetailScreen (not found)",
+      "target": "ContactDetailScreen"
+    },
+    {
+      "screen": "inbox_thread_screen",
+      "line": 573,
+      "issue": "Navigates to ThreadSearchScreen (not found)",
+      "target": "ThreadSearchScreen"
+    },
+    {
+      "screen": "inbox_thread_screen",
+      "line": 716,
+      "issue": "Navigates to CreateEditQuoteScreen (not found)",
+      "target": "CreateEditQuoteScreen"
+    },
+    {
+      "screen": "inbox_thread_screen",
+      "line": 747,
+      "issue": "Navigates to CreateEditJobScreen (not found)",
+      "target": "CreateEditJobScreen"
+    },
+    {
+      "screen": "inbox_thread_screen",
+      "line": 778,
+      "issue": "Navigates to CreateEditJobScreen (not found)",
+      "target": "CreateEditJobScreen"
+    },
+    {
+      "screen": "quote_detail_screen",
+      "line": 103,
+      "issue": "Navigates to CreateEditQuoteScreen (not found)",
+      "target": "CreateEditQuoteScreen"
+    },
+    {
+      "screen": "contacts_screen",
+      "line": 233,
+      "issue": "Navigates to ContactDetailScreen (not found)",
+      "target": "ContactDetailScreen"
+    },
+    {
+      "screen": "contact_detail_screen",
+      "line": 413,
+      "issue": "Navigates to CreateEditQuoteScreen (not found)",
+      "target": "CreateEditQuoteScreen"
+    },
+    {
+      "screen": "contact_detail_screen",
+      "line": 438,
+      "issue": "Navigates to InboxThreadScreen (not found)",
+      "target": "InboxThreadScreen"
+    },
+    {
+      "screen": "contact_detail_screen",
+      "line": 453,
+      "issue": "Navigates to CreateEditJobScreen (not found)",
+      "target": "CreateEditJobScreen"
+    },
+    {
+      "screen": "contact_detail_screen",
+      "line": 555,
+      "issue": "Navigates to CreateEditContactScreen (not found)",
+      "target": "CreateEditContactScreen"
+    },
+    {
+      "screen": "contact_detail_screen",
+      "line": 1141,
+      "issue": "Navigates to JobDetailScreen (not found)",
+      "target": "JobDetailScreen"
+    },
+    {
+      "screen": "contact_detail_screen",
+      "line": 1156,
+      "issue": "Navigates to InvoiceDetailScreen (not found)",
+      "target": "InvoiceDetailScreen"
+    },
+    {
+      "screen": "contact_detail_screen",
+      "line": 1169,
+      "issue": "Navigates to InboxThreadScreen (not found)",
+      "target": "InboxThreadScreen"
+    },
+    {
+      "screen": "contact_import_wizard_screen",
+      "line": 438,
+      "issue": "Navigates to ContactImportResultsScreen (not found)",
+      "target": "ContactImportResultsScreen"
+    },
+    {
+      "screen": "money_screen",
+      "line": 727,
+      "issue": "Navigates to InvoiceDetailScreen (not found)",
+      "target": "InvoiceDetailScreen"
+    },
+    {
+      "screen": "money_screen",
+      "line": 1218,
+      "issue": "Navigates to QuoteDetailScreen (not found)",
+      "target": "QuoteDetailScreen"
+    },
+    {
+      "screen": "money_screen",
+      "line": 1759,
+      "issue": "Navigates to PaymentDetailScreen (not found)",
+      "target": "PaymentDetailScreen"
+    },
+    {
+      "screen": "invoice_detail_screen",
+      "line": 170,
+      "issue": "Navigates to CreateEditInvoiceScreen (not found)",
+      "target": "CreateEditInvoiceScreen"
+    },
+    {
+      "screen": "money_search_screen",
+      "line": 198,
+      "issue": "Navigates to InvoiceDetailScreen (not found)",
+      "target": "InvoiceDetailScreen"
+    },
+    {
+      "screen": "money_search_screen",
+      "line": 208,
+      "issue": "Navigates to PaymentDetailScreen (not found)",
+      "target": "PaymentDetailScreen"
+    },
+    {
+      "screen": "jobs_screen",
+      "line": 483,
+      "issue": "Navigates to JobDetailScreen (not found)",
+      "target": "JobDetailScreen"
+    },
+    {
+      "screen": "jobs_screen",
+      "line": 562,
+      "issue": "Navigates to JobDetailScreen (not found)",
+      "target": "JobDetailScreen"
+    },
+    {
+      "screen": "job_detail_screen",
+      "line": 135,
+      "issue": "Navigates to CreateEditQuoteScreen (not found)",
+      "target": "CreateEditQuoteScreen"
+    },
+    {
+      "screen": "job_detail_screen",
+      "line": 159,
+      "issue": "Navigates to InboxThreadScreen (not found)",
+      "target": "InboxThreadScreen"
+    },
+    {
+      "screen": "job_detail_screen",
+      "line": 173,
+      "issue": "Navigates to CreateEditInvoiceScreen (not found)",
+      "target": "CreateEditInvoiceScreen"
+    },
+    {
+      "screen": "job_detail_screen",
+      "line": 348,
+      "issue": "Navigates to CreateEditJobScreen (not found)",
+      "target": "CreateEditJobScreen"
+    },
+    {
+      "screen": "job_search_screen",
+      "line": 159,
+      "issue": "Navigates to JobDetailScreen (not found)",
+      "target": "JobDetailScreen"
+    }
+  ],
+  "empty_handlers": [],
+  "missing_error_handling": [
+    {
+      "screen": "data_export_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "security_settings_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "organization_profile_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "home_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "reminder_settings_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "calendar_search_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "calendar_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "service_editor_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "thread_search_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "scheduled_messages_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "message_search_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "segments_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "segment_builder_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "call_transcript_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "ai_configuration_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "payment_methods_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "recurring_invoices_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "money_search_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "jobs_screen",
+      "issue": "Has async operations but no error handling"
+    },
+    {
+      "screen": "job_search_screen",
+      "issue": "Has async operations but no error handling"
+    }
+  ],
+  "missing_state_handling": [
+    {
+      "screen": "email_configuration_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "data_export_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "security_settings_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "twilio_configuration_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "profession_configuration_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "google_calendar_setup_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "settings_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "app_preferences_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "organization_profile_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "change_password_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "canned_responses_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "apple_calendar_setup_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "custom_fields_manager_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "team_management_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "edit_profile_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "meta_business_setup_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "stripe_connection_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "invoice_customization_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "subscription_billing_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "account_deletion_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "home_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "booking_templates_screen",
+      "missing_states": [
+        "loading",
+        "error"
+      ]
+    },
+    {
+      "screen": "reminder_settings_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "create_edit_booking_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "booking_analytics_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "booking_detail_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "resource_management_screen",
+      "missing_states": [
+        "loading",
+        "error"
+      ]
+    },
+    {
+      "screen": "calendar_search_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "capacity_optimization_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "calendar_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "service_catalog_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "blocked_time_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "service_editor_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "thread_search_screen",
+      "missing_states": [
+        "loading",
+        "error"
+      ]
+    },
+    {
+      "screen": "scheduled_messages_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "message_search_screen",
+      "missing_states": [
+        "loading",
+        "error"
+      ]
+    },
+    {
+      "screen": "inbox_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "inbox_thread_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "create_edit_quote_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "quote_detail_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "segments_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "contacts_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "create_edit_contact_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "contact_detail_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "contact_import_results_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "segment_builder_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "contact_import_wizard_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "contact_export_builder_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "duplicate_detector_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "faq_management_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "call_transcript_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "ai_configuration_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "ai_performance_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "ai_hub_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "ai_activity_log_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "ai_training_mode_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "support_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "payment_methods_screen",
+      "missing_states": [
+        "loading",
+        "error"
+      ]
+    },
+    {
+      "screen": "recurring_invoices_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "money_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "invoice_detail_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "create_edit_invoice_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "deposits_screen",
+      "missing_states": [
+        "loading",
+        "error"
+      ]
+    },
+    {
+      "screen": "money_search_screen",
+      "missing_states": [
+        "loading",
+        "error"
+      ]
+    },
+    {
+      "screen": "payment_detail_screen",
+      "missing_states": [
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "jobs_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "job_detail_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "job_search_screen",
+      "missing_states": [
+        "loading",
+        "error"
+      ]
+    },
+    {
+      "screen": "create_edit_job_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "legal_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "notifications_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "onboarding_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "benchmark_comparison_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "reports_screen",
+      "missing_states": [
+        "error"
+      ]
+    },
+    {
+      "screen": "goal_tracking_screen",
+      "missing_states": [
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "screen": "reviews_screen",
+      "missing_states": [
+        "error"
+      ]
+    }
+  ],
+  "todo_comments": [
+    {
+      "screen": "security_settings_screen",
+      "count": 1,
+      "todos": [
+        "// TODO: Implement 2FA setup flow"
+      ]
+    },
+    {
+      "screen": "settings_screen",
+      "count": 1,
+      "todos": [
+        "// TODO: Navigate to bulk configuration screen"
+      ]
+    },
+    {
+      "screen": "invoice_customization_screen",
+      "count": 2,
+      "todos": [
+        "// TODO: Implement logo upload",
+        "// TODO: Save invoice customization settings"
+      ]
+    },
+    {
+      "screen": "subscription_billing_screen",
+      "count": 1,
+      "todos": [
+        "// TODO: Show plan selection"
+      ]
+    },
+    {
+      "screen": "account_deletion_screen",
+      "count": 1,
+      "todos": [
+        "// TODO: Implement actual account deletion"
+      ]
+    },
+    {
+      "screen": "inbox_screen",
+      "count": 10,
+      "todos": [
+        "// TODO: Load from live backend",
+        "// TODO: Call archive-thread edge function",
+        "// TODO: Call delete thread API",
+        "// TODO: Restore thread (would need to restore from deleted state)",
+        "// TODO: Navigate to contact detail"
+      ]
+    },
+    {
+      "screen": "ai_configuration_screen",
+      "count": 1,
+      "todos": [
+        "// TODO: Save AI configuration"
+      ]
+    },
+    {
+      "screen": "recurring_invoices_screen",
+      "count": 3,
+      "todos": [
+        "// TODO: Navigate to create recurring invoice",
+        "// TODO: Navigate to create",
+        "// TODO: Navigate to recurring invoice detail"
+      ]
+    },
+    {
+      "screen": "money_screen",
+      "count": 2,
+      "todos": [
+        "// TODO: Call backend API to send reminders",
+        "// TODO: Call backend API to download invoices as PDF"
+      ]
+    },
+    {
+      "screen": "invoice_detail_screen",
+      "count": 1,
+      "todos": [
+        "// TODO: Save payment plan to backend"
+      ]
+    },
+    {
+      "screen": "deposits_screen",
+      "count": 1,
+      "todos": [
+        "// TODO: Show request deposit sheet"
+      ]
+    },
+    {
+      "screen": "job_detail_screen",
+      "count": 4,
+      "todos": [
+        "// TODO: Load from live backend",
+        "// TODO: Get phone number from contact",
+        "// TODO: Open edit note sheet",
+        "// TODO: Delete note"
+      ]
+    }
+  ]
+}

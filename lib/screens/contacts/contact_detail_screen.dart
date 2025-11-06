@@ -37,6 +37,61 @@ class ContactDetailScreen extends StatefulWidget {
   State<ContactDetailScreen> createState() => _ContactDetailScreenState();
 }
 
+// Contact timeline event class (moved before state class for proper type resolution)
+class ContactTimelineEvent {
+  final String id;
+  final TimelineEventType type;
+  final String title;
+  final String? subtitle;
+  final DateTime timestamp;
+  final IconData icon;
+  final Map<String, dynamic> metadata;
+
+  ContactTimelineEvent({
+    required this.id,
+    required this.type,
+    required this.title,
+    this.subtitle,
+    required this.timestamp,
+    required this.icon,
+    this.metadata = const {},
+  });
+}
+
+enum TimelineEventType {
+  message,
+  job,
+  booking,
+  quote,
+  invoice,
+  payment,
+  review,
+  note,
+  call,
+  emailTracking,
+}
+
+// Contact note class (moved before state class for proper type resolution)
+class ContactNote {
+  final String id;
+  final String content;
+  final String author;
+  final DateTime timestamp;
+  final List<String> mentions;
+  final bool pinned;
+  final List<String> attachments; // File names/URLs
+
+  ContactNote({
+    required this.id,
+    required this.content,
+    required this.author,
+    required this.timestamp,
+    this.mentions = const [],
+    this.pinned = false,
+    this.attachments = const [],
+  });
+}
+
 class _ContactDetailScreenState extends State<ContactDetailScreen> {
   Contact? _contact;
   bool _isLoading = true;
@@ -624,7 +679,16 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
           ),
         ],
       ),
-      body: _buildContent(),
+      body: Column(
+        children: [
+          // Scrollable content
+          Expanded(
+            child: _buildContent(),
+          ),
+          // iOS-style bottom toolbar (sticky at bottom)
+          _buildBottomToolbar(),
+        ],
+      ),
     );
   }
 
@@ -831,37 +895,7 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
           
           const SizedBox(height: SwiftleadTokens.spaceM),
           
-          // Quick Actions
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _QuickActionButton(
-                icon: Icons.phone,
-                label: 'Call',
-                onTap: _handleCallContact,
-              ),
-              _QuickActionButton(
-                icon: Icons.message,
-                label: 'Message',
-                onTap: _handleMessageContact,
-              ),
-              _QuickActionButton(
-                icon: Icons.email,
-                label: 'Email',
-                onTap: _handleEmailContact,
-              ),
-              _QuickActionButton(
-                icon: Icons.work_outline,
-                label: 'Create Job',
-                onTap: _handleCreateJobFromContact,
-              ),
-              _QuickActionButton(
-                icon: Icons.description,
-                label: 'Create Quote',
-                onTap: _handleCreateQuoteFromContact,
-              ),
-            ],
-          ),
+          // Quick Actions (moved to bottom toolbar for iOS pattern)
         ],
       ),
     );
@@ -1121,7 +1155,7 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                             child: _TimelineItem(
                               icon: event.icon,
                               title: event.title,
-                              subtitle: event.subtitle,
+                              subtitle: event.subtitle ?? '',
                               time: _formatTimeAgo(event.timestamp),
                               onTap: () => _handleTimelineEventTap(event),
                             ),
@@ -1189,7 +1223,7 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(event.subtitle),
+                  Text(event.subtitle ?? ''),
                   if (event.metadata['aiSummary'] != null) ...[
                     const SizedBox(height: SwiftleadTokens.spaceM),
                     Text(
@@ -1582,6 +1616,99 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
       ],
     );
   }
+
+  Widget _buildBottomToolbar() {
+    // iOS-style bottom toolbar: Quick actions (icon + label)
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SwiftleadTokens.spaceM,
+            vertical: SwiftleadTokens.spaceS,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _ToolbarAction(
+                icon: Icons.phone,
+                label: 'Call',
+                onTap: _handleCallContact,
+              ),
+              _ToolbarAction(
+                icon: Icons.message,
+                label: 'Message',
+                onTap: _handleMessageContact,
+              ),
+              _ToolbarAction(
+                icon: Icons.email,
+                label: 'Email',
+                onTap: _handleEmailContact,
+              ),
+              _ToolbarAction(
+                icon: Icons.work_outline,
+                label: 'Job',
+                onTap: _handleCreateJobFromContact,
+              ),
+              _ToolbarAction(
+                icon: Icons.description,
+                label: 'Quote',
+                onTap: _handleCreateQuoteFromContact,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper widget for toolbar actions (iOS pattern: icon + label)
+  Widget _ToolbarAction({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusButton),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: SwiftleadTokens.spaceS,
+            horizontal: SwiftleadTokens.spaceXS,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 24,
+                color: const Color(SwiftleadTokens.primaryTeal),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontSize: 11,
+                  color: const Color(SwiftleadTokens.primaryTeal),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _InfoRow extends StatelessWidget {
@@ -1916,57 +2043,5 @@ class _QuickActionButton extends StatelessWidget {
   }
 }
 
-// Timeline and Notes Data Models
-enum TimelineEventType {
-  message,
-  job,
-  booking,
-  quote,
-  invoice,
-  payment,
-  review,
-  note,
-  call,
-  emailTracking,
-}
-
-class ContactTimelineEvent {
-  final String id;
-  final TimelineEventType type;
-  final String title;
-  final String subtitle;
-  final DateTime timestamp;
-  final IconData icon;
-  final Map<String, dynamic> metadata;
-
-  ContactTimelineEvent({
-    required this.id,
-    required this.type,
-    required this.title,
-    required this.subtitle,
-    required this.timestamp,
-    required this.icon,
-    this.metadata = const {},
-  });
-}
-
-class ContactNote {
-  final String id;
-  final String content;
-  final String author;
-  final DateTime timestamp;
-  final List<String> mentions;
-  final bool pinned;
-  final List<String> attachments; // File names/URLs
-
-  ContactNote({
-    required this.id,
-    required this.content,
-    required this.author,
-    required this.timestamp,
-    this.mentions = const [],
-    this.pinned = false,
-    this.attachments = const [],
-  });
-}
+// Timeline and Notes Data Models (duplicate removed - classes moved to top of file)
 

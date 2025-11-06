@@ -355,27 +355,62 @@ class BookingCard extends StatelessWidget {
               const SizedBox(height: SwiftleadTokens.spaceS),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   Expanded(
                     child: TextButton.icon(
                       onPressed: onMessage,
-                      icon: const Icon(Icons.message, size: 18),
-                      label: const Text('Msg'),
+                      icon: Icon(
+                        Icons.message,
+                        size: 18,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                      ),
+                      label: Text(
+                        'Msg',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: SwiftleadTokens.spaceS),
+                      ),
                     ),
                   ),
                   Expanded(
                     child: TextButton.icon(
                       onPressed: onReschedule,
-                      icon: const Icon(Icons.schedule, size: 18),
-                      label: const Text('Move'),
+                      icon: Icon(
+                        Icons.schedule,
+                        size: 18,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                      ),
+                      label: Text(
+                        'Move',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: SwiftleadTokens.spaceS),
+                      ),
                     ),
                   ),
                   Expanded(
                     child: TextButton.icon(
                       onPressed: onComplete,
-                      icon: const Icon(Icons.check, size: 18),
-                      label: const Text('Done'),
+                      icon: Icon(
+                        Icons.check,
+                        size: 18,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                      ),
+                      label: Text(
+                        'Done',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: SwiftleadTokens.spaceS),
+                      ),
                     ),
                   ),
                 ],

@@ -1079,54 +1079,54 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'react',
-                child: Row(
-                  children: [
-                    Icon(Icons.add_reaction, size: 18),
-                    SizedBox(width: 8),
-                    Text('React'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'details',
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, size: 18),
-                    SizedBox(width: 8),
-                    Text('Details'),
-                  ],
-                ),
-              ),
-              const PopupMenuDivider(),
-              const PopupMenuItem(
+              // Quick Actions (iOS-aligned: 3-4 items max)
+              PopupMenuItem(
                 value: 'view_contact',
-                child: Row(
-                  children: [
-                    Icon(Icons.person, size: 18),
-                    SizedBox(width: 8),
-                    Text('View contact'),
-                  ],
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.person, size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        'View contact',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'search',
-                child: Row(
-                  children: [
-                    Icon(Icons.search, size: 18),
-                    SizedBox(width: 8),
-                    Text('Search in chat'),
-                  ],
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.search, size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Search in chat',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               PopupMenuItem(
                 value: 'internal_notes',
-                child: Row(
-                  children: [
-                    const Icon(Icons.note_add, size: 18),
-                    const SizedBox(width: 8),
-                    const Text('Internal Notes'),
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.note_add, size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Internal Notes',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     if (_noteCount > 0)
                       Padding(
                         padding: const EdgeInsets.only(left: 8),
@@ -1149,39 +1149,12 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
                           ),
                         ),
                       ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-              PopupMenuItem(
-                value: 'mute',
-                child: Row(
-                  children: [
-                    Icon(_isMuted ? Icons.notifications : Icons.notifications_off, size: 18),
-                    const SizedBox(width: 8),
-                    Text(_isMuted ? 'Unmute' : 'Mute'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'archive',
-                child: Row(
-                  children: [
-                    Icon(Icons.archive, size: 18),
-                    SizedBox(width: 8),
-                    Text('Archive'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'block',
-                child: Row(
-                  children: [
-                    Icon(Icons.block, size: 18),
-                    SizedBox(width: 8),
-                    Text('Block'),
-                  ],
-                ),
-              ),
+              // Note: React, Details, Mute, Archive, Block moved to long-press context menu
+              // (iOS pattern: use context menus for secondary actions)
             ],
           ),
         ],

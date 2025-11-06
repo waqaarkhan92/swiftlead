@@ -11,7 +11,6 @@ import '../../widgets/forms/lead_qualification_config_sheet.dart';
 import '../../widgets/forms/smart_handover_config_sheet.dart';
 import '../../widgets/forms/response_delay_config_sheet.dart';
 import '../../widgets/forms/fallback_response_config_sheet.dart';
-import '../../widgets/forms/multi_language_config_sheet.dart';
 import '../../widgets/forms/confidence_threshold_config_sheet.dart';
 import '../../widgets/forms/custom_response_override_sheet.dart';
 import '../../widgets/forms/escalation_rules_config_sheet.dart';
@@ -59,20 +58,22 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'AI Assistant',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'AI Assistant',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    Text(
-                      'Enable AI-powered features',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
+                      Text(
+                        'Enable AI-powered features',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
                 ),
                 Switch(
                   value: _aiEnabled,
@@ -95,20 +96,22 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Auto-Reply',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Auto-Reply',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Automatically respond to messages (Note: Backend verification needed once backend is wired)',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
+                        Text(
+                          'Automatically respond to messages (Note: Backend verification needed once backend is wired)',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
                   ),
                   Switch(
                     value: _autoReplyEnabled,
@@ -130,20 +133,22 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Smart Suggestions',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Smart Suggestions',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'AI-powered reply suggestions',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
+                        Text(
+                          'AI-powered reply suggestions',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
                   ),
                   Switch(
                     value: _smartSuggestionsEnabled,
@@ -165,20 +170,22 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Sentiment Analysis',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Sentiment Analysis',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Analyze customer sentiment',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
+                        Text(
+                          'Analyze customer sentiment',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
                   ),
                   Switch(
                     value: _sentimentAnalysisEnabled,
@@ -309,20 +316,22 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Auto-Reply Template',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Auto-Reply Template',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Edit missed call text template',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
+                          Text(
+                            'Edit missed call text template',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
                     ),
                     const Icon(Icons.chevron_right),
                   ],
@@ -346,20 +355,22 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'After-Hours Response',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'After-Hours Response',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Edit after-hours message',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
+                          Text(
+                            'Edit after-hours message',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
                     ),
                     const Icon(Icons.chevron_right),
                   ],
@@ -511,24 +522,26 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Response Delay',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Response Delay',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        Text(
-                          _responseDelaySeconds == 0 
-                              ? 'Instant'
-                              : _responseDelaySeconds < 60
-                                  ? '${_responseDelaySeconds}s'
-                                  : '${_responseDelaySeconds ~/ 60}m',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
+                          Text(
+                            _responseDelaySeconds == 0 
+                                ? 'Instant'
+                                : _responseDelaySeconds < 60
+                                    ? '${_responseDelaySeconds}s'
+                                    : '${_responseDelaySeconds ~/ 60}m',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
                     ),
                     const Icon(Icons.chevron_right),
                   ],
@@ -555,20 +568,22 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Confidence Threshold',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Confidence Threshold',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        Text(
-                          '${(_confidenceThreshold * 100).toStringAsFixed(0)}% minimum',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
+                          Text(
+                            '${(_confidenceThreshold * 100).toStringAsFixed(0)}% minimum',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
                     ),
                     const Icon(Icons.chevron_right),
                   ],
@@ -587,52 +602,22 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Fallback Response',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Fallback Response',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'When AI is uncertain',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: SwiftleadTokens.spaceM),
-
-            // Multi-Language Support
-            FrostedContainer(
-              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-              child: InkWell(
-                onTap: () async {
-                  await MultiLanguageConfigSheet.show(context: context);
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Supported Languages',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
+                          Text(
+                            'When AI is uncertain',
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
-                        ),
-                        Text(
-                          'Detect and respond in client language',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     const Icon(Icons.chevron_right),
                   ],
@@ -651,20 +636,22 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Custom Response Override',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Custom Response Override',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Set responses for keywords',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
+                          Text(
+                            'Set responses for keywords',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
                     ),
                     const Icon(Icons.chevron_right),
                   ],
@@ -683,20 +670,22 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Escalation Rules',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Escalation Rules',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Configure handover triggers',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
+                          Text(
+                            'Configure handover triggers',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
                     ),
                     const Icon(Icons.chevron_right),
                   ],
@@ -711,20 +700,22 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Two-Way Confirmations',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Two-Way Confirmations',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Handle YES/NO responses automatically',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
+                        Text(
+                          'Handle YES/NO responses automatically',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
                   ),
                   Switch(
                     value: _twoWayConfirmationsEnabled,
@@ -746,20 +737,22 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Context Retention',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Context Retention',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'AI remembers previous conversations',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
+                        Text(
+                          'AI remembers previous conversations',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
                   ),
                   Switch(
                     value: _contextRetentionEnabled,
@@ -785,20 +778,22 @@ class _AIConfigurationScreenState extends State<AIConfigurationScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'AI Response Preview',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'AI Response Preview',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Test AI responses',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
+                          Text(
+                            'Test AI responses',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
                     ),
                     const Icon(Icons.chevron_right),
                   ],

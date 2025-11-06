@@ -1,0 +1,45 @@
+# Build directories
+build/
+ios/build/
+ios/Pods/
+ios/DerivedData/
+
+# Dart tooling
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+
+# Flutter generated files
+**/generated/
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# Logs
+*.log
+flutter_run.log
+ios_build.log
+
+# IDE files
+.idea/
+*.iml
+*.swp
+*.swo
+.DS_Store
+
+# Large binary files
+*.framework/
+*.app/
+*.dSYM/
+*.xcarchive/
+
+# Documentation archive (if too large)
+docs/archive/
+
+
+
+
+
+
+

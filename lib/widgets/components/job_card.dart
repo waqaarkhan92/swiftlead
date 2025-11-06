@@ -14,7 +14,6 @@ class JobCard extends StatelessWidget {
   final String status; // Quoted → Scheduled → In Progress → Completed
   final DateTime? dueDate;
   final String? price;
-  final String? teamMemberName;
   final VoidCallback? onTap;
   final VoidCallback? onSwipeRight; // Quick complete
   final VoidCallback? onLongPress; // Batch selection
@@ -27,7 +26,6 @@ class JobCard extends StatelessWidget {
     required this.status,
     this.dueDate,
     this.price,
-    this.teamMemberName,
     this.onTap,
     this.onSwipeRight,
     this.onLongPress,
@@ -193,36 +191,6 @@ class JobCard extends StatelessWidget {
                     ),
                 ],
               ),
-              if (teamMemberName != null) ...[
-                const SizedBox(height: SwiftleadTokens.spaceS),
-                Row(
-                  children: [
-                    Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Text(
-                          teamMemberName![0].toUpperCase(),
-                          style: const TextStyle(
-                            color: Color(SwiftleadTokens.primaryTeal),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      teamMemberName!,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ],
             ],
           ),
         ),

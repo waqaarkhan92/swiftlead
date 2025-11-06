@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/skeleton_loader.dart';
@@ -18,12 +19,20 @@ import '../jobs/job_detail_screen.dart';
 import '../../widgets/forms/on_my_way_sheet.dart';
 import '../../widgets/forms/calendar_filter_sheet.dart';
 import '../../widgets/global/toast.dart';
+import '../../widgets/components/animated_counter.dart';
+import '../../widgets/components/smart_collapsible_section.dart';
+import '../../widgets/components/celebration_banner.dart';
+import '../../widgets/components/ai_insight_banner.dart';
+import '../../widgets/components/trend_tile.dart';
+import '../../widgets/components/rich_tooltip.dart';
+import '../../utils/keyboard_shortcuts.dart' show AppShortcuts, SearchIntent, CreateIntent, RefreshIntent, CloseIntent;
 import '../main_navigation.dart' as main_nav;
 import 'blocked_time_screen.dart';
 import 'booking_templates_screen.dart';
 import 'booking_analytics_screen.dart';
 import 'capacity_optimization_screen.dart';
 import 'resource_management_screen.dart';
+import 'create_edit_booking_screen.dart';
 
 /// CalendarScreen - Bookings & Scheduling
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -46,6 +55,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
   late DateTime _currentMonth;
   Map<String, dynamic>? _activeFilters; // Active filter state
   double _calendarScale = 1.0; // Pinch-to-zoom scale
+  
+  // Smart prioritization tracking
+  final Map<String, int> _bookingTapCounts = {};
+  final Map<String, DateTime> _bookingLastOpened = {};
+  
+  // Celebration tracking
+  final Set<String> _milestonesShown = {};
+  String? _celebrationMessage;
+  
+  // Progressive disclosure states
+  bool _todayExpanded = true;
+  bool _thisWeekExpanded = true;
+  bool _upcomingExpanded = false;
   
   @override
   void initState() {
@@ -71,6 +93,143 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     if (mounted) {
       setState(() => _isLoading = false);
+      _checkForMilestones();
+    }
+  }
+
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 200),
+    );
+  }
+
+  // Track booking interactions for smart prioritization
+  void _trackBookingInteraction(String bookingId) {
+    setState(() {
+      _bookingTapCounts[bookingId] = (_bookingTapCounts[bookingId] ?? 0) + 1;
+      _bookingLastOpened[bookingId] = DateTime.now();
+    });
+  }
+  
+  // Phase 3: Show rich tooltip for booking
+  void _showRichBookingTooltip(BuildContext context, Booking booking) {
+    final duration = booking.endTime.difference(booking.startTime);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => FrostedContainer(
+        padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
+        margin: const EdgeInsets.all(SwiftleadTokens.spaceM),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Booking Details',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceS),
+            Text(
+              '${booking.contactName} • ${booking.serviceType}',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+            _buildTooltipDetail('Time', '${_formatBookingTime(booking.startTime)} - ${_formatBookingTime(booking.endTime)}'),
+            _buildTooltipDetail('Duration', '${duration.inHours}h ${duration.inMinutes % 60}m'),
+            _buildTooltipDetail('Status', booking.status.displayName),
+            _buildTooltipDetail('Location', booking.address),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildTooltipDetail(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.check_circle_outline,
+            size: 16,
+            color: const Color(SwiftleadTokens.primaryTeal),
+          ),
+          const SizedBox(width: SwiftleadTokens.spaceS),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: Theme.of(context).textTheme.bodySmall,
+                children: [
+                  TextSpan(
+                    text: '$label: ',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  TextSpan(text: value),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  String _formatBookingTime(DateTime time) {
+    final hour = time.hour == 0 ? 12 : (time.hour > 12 ? time.hour - 12 : time.hour);
+    final minute = time.minute.toString().padLeft(2, '0');
+    final ampm = time.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$minute $ampm';
+  }
+
+  // Phase 3: Expanded celebration milestones
+  void _checkForMilestones() {
+    final totalBookings = _allBookings.length;
+    
+    // 100 bookings milestone
+    if (totalBookings >= 100 && !_milestonesShown.contains('100_bookings')) {
+      _milestonesShown.add('100_bookings');
+      setState(() {
+        _celebrationMessage = '🎉 100 bookings milestone reached! Incredible!';
+      });
+    }
+    // 50 bookings milestone
+    else if (totalBookings >= 50 && totalBookings < 100 && !_milestonesShown.contains('50_bookings')) {
+      _milestonesShown.add('50_bookings');
+      setState(() {
+        _celebrationMessage = '🎉 50 bookings scheduled! Great organization!';
+      });
+    }
+    // Phase 3: 25 bookings milestone
+    else if (totalBookings >= 25 && totalBookings < 50 && !_milestonesShown.contains('25_bookings')) {
+      _milestonesShown.add('25_bookings');
+      setState(() {
+        _celebrationMessage = '📅 25 bookings! You\'re staying busy!';
+      });
+    }
+    // Phase 3: 10 bookings milestone
+    else if (totalBookings >= 10 && totalBookings < 25 && !_milestonesShown.contains('10_bookings')) {
+      _milestonesShown.add('10_bookings');
+      setState(() {
+        _celebrationMessage = '✨ 10 bookings! Building momentum!';
+      });
+    }
+    // Phase 3: First booking milestone
+    else if (totalBookings == 1 && !_milestonesShown.contains('first_booking')) {
+      _milestonesShown.add('first_booking');
+      setState(() {
+        _celebrationMessage = '🎯 First booking scheduled! Welcome to Swiftlead!';
+      });
     }
   }
 
@@ -133,146 +292,202 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
+  Future<void> _showFilterSheet(BuildContext context) async {
+    final filters = await CalendarFilterSheet.show(
+      context: context,
+      initialFilters: _activeFilters,
+    );
+    if (filters != null) {
+      setState(() {
+        _activeFilters = filters;
+        _applyFilters();
+      });
+    }
+  }
+
   void _applyFilters() {
     if (_activeFilters == null && !_isTeamView) {
       _filteredBookings = List.from(_allBookings);
-      return;
+    } else {
+      _filteredBookings = _allBookings.where((booking) {
+        // Team view filter - show only bookings assigned to team members
+        if (_isTeamView) {
+          if (booking.assignedTo == null) return false;
+        }
+
+        // Status filter
+        if (_activeFilters != null && _activeFilters!['status'] != null && _activeFilters!['status'] != 'All') {
+          final filterStatus = _activeFilters!['status'] as String;
+          final bookingStatus = booking.status.displayName;
+          if (bookingStatus != filterStatus) return false;
+        }
+
+        // Service type filter
+        if (_activeFilters != null && _activeFilters!['serviceType'] != null && _activeFilters!['serviceType'] != 'All') {
+          final filterService = _activeFilters!['serviceType'] as String;
+          if (booking.serviceType != filterService) return false;
+        }
+
+        // Team member filter
+        if (_activeFilters != null && _activeFilters!['teamMember'] != null && _activeFilters!['teamMember'] != 'All') {
+          final filterMember = _activeFilters!['teamMember'] as String;
+          if (booking.assignedTo != filterMember) return false;
+        }
+
+        return true;
+      }).toList();
     }
-
-    _filteredBookings = _allBookings.where((booking) {
-      // Team view filter - show only bookings assigned to team members
-      if (_isTeamView) {
-        if (booking.assignedTo == null) return false;
+    
+    // Phase 2: Smart prioritization - sort using interaction tracking
+    final now = DateTime.now();
+    _filteredBookings.sort((a, b) {
+      // Upcoming bookings first
+      final aIsUpcoming = a.startTime.isAfter(now);
+      final bIsUpcoming = b.startTime.isAfter(now);
+      if (aIsUpcoming != bIsUpcoming) {
+        return aIsUpcoming ? -1 : 1;
       }
-
-      // Status filter
-      if (_activeFilters != null && _activeFilters!['status'] != null && _activeFilters!['status'] != 'All') {
-        final filterStatus = _activeFilters!['status'] as String;
-        final bookingStatus = booking.status.displayName;
-        if (bookingStatus != filterStatus) return false;
+      
+      // Phase 2: Favor frequently accessed bookings
+      final aTapCount = _bookingTapCounts[a.id] ?? 0;
+      final bTapCount = _bookingTapCounts[b.id] ?? 0;
+      if (aTapCount != bTapCount) {
+        return bTapCount.compareTo(aTapCount);
       }
-
-      // Service type filter
-      if (_activeFilters != null && _activeFilters!['serviceType'] != null && _activeFilters!['serviceType'] != 'All') {
-        final filterService = _activeFilters!['serviceType'] as String;
-        if (booking.serviceType != filterService) return false;
+      
+      // Phase 2: Favor recently opened bookings
+      final aLastOpened = _bookingLastOpened[a.id];
+      final bLastOpened = _bookingLastOpened[b.id];
+      if (aLastOpened != null && bLastOpened != null) {
+        return bLastOpened.compareTo(aLastOpened);
       }
-
-      // Team member filter
-      if (_activeFilters != null && _activeFilters!['teamMember'] != null && _activeFilters!['teamMember'] != 'All') {
-        final filterMember = _activeFilters!['teamMember'] as String;
-        if (booking.assignedTo != filterMember) return false;
-      }
-
-      return true;
+      if (aLastOpened != null) return -1;
+      if (bLastOpened != null) return 1;
+      
+      // Finally by start time
+      return a.startTime.compareTo(b.startTime);
+    });
+    
+    // Phase 2: Contextual hiding - hide past bookings >7 days old (unless recently opened)
+    final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
+    _filteredBookings = _filteredBookings.where((booking) {
+      if (booking.startTime.isAfter(now)) return true; // Always show upcoming
+      if (_bookingLastOpened[booking.id] != null && 
+          _bookingLastOpened[booking.id]!.isAfter(sevenDaysAgo)) return true;
+      if (booking.startTime.isAfter(sevenDaysAgo)) return true;
+      return false; // Hide old past bookings
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: FrostedAppBar(
-        scaffoldKey: main_nav.MainNavigation.scaffoldKey,
-        title: 'Calendar',
-        actions: [
-          // Primary actions - always visible
-          IconButton(
-            icon: const Icon(Icons.search_outlined),
-            tooltip: 'Search',
-            onPressed: () {
+    // Phase 3: Keyboard shortcuts wrapper
+    return Shortcuts(
+      shortcuts: AppShortcuts.globalShortcuts,
+      child: Actions(
+        actions: {
+          SearchIntent: CallbackAction<SearchIntent>(
+            onInvoke: (_) {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const CalendarSearchScreen(),
-                ),
+                _createPageRoute(const CalendarSearchScreen()),
               );
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.filter_list_outlined),
-            tooltip: 'Filter',
-            onPressed: () async {
-              final filters = await CalendarFilterSheet.show(
-                context: context,
-                initialFilters: _activeFilters,
+          CreateIntent: CallbackAction<CreateIntent>(
+            onInvoke: (_) {
+              Navigator.push(
+                context,
+                _createPageRoute(const CreateEditBookingScreen()),
               );
-              if (filters != null) {
-                setState(() {
-                  _activeFilters = filters;
-                  _applyFilters();
-                });
+            },
+          ),
+          RefreshIntent: CallbackAction<RefreshIntent>(
+            onInvoke: (_) {
+              _loadBookings();
+            },
+          ),
+          CloseIntent: CallbackAction<CloseIntent>(
+            onInvoke: (_) {
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
               }
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.today_outlined),
-            tooltip: 'Today',
-            onPressed: () {
-              setState(() {
-                final now = DateTime.now();
-                _selectedDate = now;
-                _currentMonth = DateTime(now.year, now.month, 1);
-              });
-            },
-          ),
+        },
+        child: Focus(
+          autofocus: true,
+          child: Scaffold(
+            extendBody: true,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            appBar: FrostedAppBar(
+        scaffoldKey: main_nav.MainNavigation.scaffoldKey,
+        title: 'Calendar',
+        actions: [
+          // Primary action: Add Booking (iOS-aligned: max 2 icons)
           IconButton(
             icon: const Icon(Icons.add),
             tooltip: 'New Booking',
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const CreateEditBookingScreen(),
-                ),
+                _createPageRoute(const CreateEditBookingScreen()),
               );
             },
           ),
-          // More menu for additional actions
+          // More menu for secondary actions (iOS-aligned: max 2 icons)
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             tooltip: 'More',
             onSelected: (value) {
               switch (value) {
-                case 'templates':
+                case 'today':
+                  // Go to today
+                  setState(() {
+                    final now = DateTime.now();
+                    _selectedDate = now;
+                    _currentMonth = DateTime(now.year, now.month, 1);
+                  });
+                  break;
+                case 'search':
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const BookingTemplatesScreen(),
+                      builder: (context) => const CalendarSearchScreen(),
                     ),
+                  );
+                  break;
+                case 'filter':
+                  _showFilterSheet(context);
+                  break;
+                case 'templates':
+                  Navigator.push(
+                    context,
+                    _createPageRoute(const BookingTemplatesScreen()),
                   );
                   break;
                 case 'blocked_time':
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const BlockedTimeScreen(),
-                    ),
+                    _createPageRoute(const BlockedTimeScreen()),
                   );
                   break;
                 case 'analytics':
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const BookingAnalyticsScreen(),
-                    ),
+                    _createPageRoute(const BookingAnalyticsScreen()),
                   );
                   break;
                 case 'capacity':
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const CapacityOptimizationScreen(),
-                    ),
+                    _createPageRoute(const CapacityOptimizationScreen()),
                   );
                   break;
                 case 'resources':
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const ResourceManagementScreen(),
-                    ),
+                    _createPageRoute(const ResourceManagementScreen()),
                   );
                   break;
                 case 'team_toggle':
@@ -284,73 +499,171 @@ class _CalendarScreenState extends State<CalendarScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              // Quick Actions
+              PopupMenuItem(
+                value: 'today',
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.today_outlined, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Go to Today',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'search',
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.search_outlined, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Search',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'filter',
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.filter_list_outlined, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Filter',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
                 value: 'templates',
-                child: Row(
-                  children: [
-                    Icon(Icons.event_note_outlined, size: 20),
-                    SizedBox(width: 12),
-                    Text('Booking Templates'),
-                  ],
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.event_note_outlined, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Booking Templates',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'blocked_time',
-                child: Row(
-                  children: [
-                    Icon(Icons.event_busy, size: 20),
-                    SizedBox(width: 12),
-                    Text('Blocked Time'),
-                  ],
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.event_busy, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Blocked Time',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'analytics',
-                child: Row(
-                  children: [
-                    Icon(Icons.analytics_outlined, size: 20),
-                    SizedBox(width: 12),
-                    Text('Booking Analytics'),
-                  ],
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.analytics_outlined, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Booking Analytics',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'capacity',
-                child: Row(
-                  children: [
-                    Icon(Icons.tune_outlined, size: 20),
-                    SizedBox(width: 12),
-                    Text('Capacity Optimization'),
-                  ],
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.tune_outlined, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Capacity Optimization',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'resources',
-                child: Row(
-                  children: [
-                    Icon(Icons.construction_outlined, size: 20),
-                    SizedBox(width: 12),
-                    Text('Resource Management'),
-                  ],
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.construction_outlined, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Resource Management',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               PopupMenuItem(
                 value: 'team_toggle',
-                child: Row(
-                  children: [
-                    Icon(_isTeamView ? Icons.person : Icons.people, size: 20),
-                    const SizedBox(width: 12),
-                    Text(_isTeamView ? 'Switch to Personal' : 'Switch to Team'),
-                  ],
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      Icon(_isTeamView ? Icons.person : Icons.people, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        _isTeamView ? 'Switch to Personal' : 'Switch to Team',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
         ],
       ),
-      body: _isLoading
-          ? _buildLoadingState()
-          : _buildContent(),
+            body: _isLoading
+                ? _buildLoadingState()
+                : _buildContent(),
+          ),
+        ),
+      ),
     );
   }
 
@@ -394,6 +707,32 @@ class _CalendarScreenState extends State<CalendarScreen> {
           bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
         ),
         children: [
+          // Celebration banner (if milestone reached)
+          if (_celebrationMessage != null) ...[
+            CelebrationBanner(
+              message: _celebrationMessage!,
+              onDismiss: () {
+                setState(() => _celebrationMessage = null);
+              },
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceL),
+          ],
+          
+          // Phase 2: AI Insight Banner - Predictive insights
+          if (_todayBookings.isNotEmpty && _todayBookings.length > 5) ...[
+            AIInsightBanner(
+              message: 'You have ${_todayBookings.length} bookings today. Consider blocking time for breaks.',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  _createPageRoute(const BlockedTimeScreen()),
+                );
+              },
+              onDismiss: () {},
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+          ],
+          
           // CalendarHeader - Month/week navigation
           _buildCalendarHeader(),
           const SizedBox(height: SwiftleadTokens.spaceM),
@@ -435,10 +774,34 @@ class _CalendarScreenState extends State<CalendarScreen> {
       children: [
         // View toggle (day/week/month)
         SegmentedButton<String>(
-          segments: const [
-            ButtonSegment(value: 'day', label: Text('Day')),
-            ButtonSegment(value: 'week', label: Text('Week')),
-            ButtonSegment(value: 'month', label: Text('Month')),
+          segments: [
+            ButtonSegment(
+              value: 'day',
+              label: Text(
+                'Day',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            ButtonSegment(
+              value: 'week',
+              label: Text(
+                'Week',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            ButtonSegment(
+              value: 'month',
+              label: Text(
+                'Month',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ],
           selected: {_selectedView},
           onSelectionChanged: (Set<String> newSelection) {
@@ -465,12 +828,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   _currentMonth = DateTime(now.year, now.month, 1);
                 });
               },
-              child: const Text('Today'),
+              child: Text(
+                'Today',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
             Text(
               _formatMonthYear(_currentMonth),
-              style: const TextStyle(
-                fontSize: 18,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -554,10 +921,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: 60,
+                    width: 70,
                     child: Text(
                       '${hour.toString().padLeft(2, '0')}:00',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.9),
+                        letterSpacing: 0.2,
+                      ),
+                      textAlign: TextAlign.right,
                     ),
                   ),
                   Flexible(
@@ -925,6 +1297,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     return Column(
       children: [
+        // Phase 3: Enhanced animations - staggered list animations
         // Show bookings (use filtered bookings) with buffer time indicators
         ...List.generate(displayBookings.length, (index) {
           final booking = displayBookings[index];
@@ -938,32 +1311,119 @@ class _CalendarScreenState extends State<CalendarScreen> {
               : null;
           final needsBufferWarning = hasBufferTime && timeBetween != null && timeBetween < bufferTimeMinutes;
           
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
-                child: BookingCard(
-                  bookingId: booking.id,
-                  clientName: booking.contactName,
-                  serviceName: booking.serviceType,
-                  startTime: booking.startTime,
-                  endTime: booking.endTime,
-                  status: booking.status.name,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BookingDetailScreen(
-                          bookingId: booking.id,
-                          clientName: booking.contactName,
-                        ),
+          // Phase 3: Staggered animation
+          return TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: Duration(milliseconds: 300 + (index * 50).clamp(0, 200)),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) {
+              return Opacity(
+                opacity: value,
+                child: Transform.translate(
+                  offset: Offset(0, 20 * (1 - value)),
+                  child: child,
+                ),
+              );
+            },
+            child: Column(
+              children: [
+                Dismissible(
+                key: Key(booking.id),
+                background: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(SwiftleadTokens.successGreen),
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                  ),
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.only(left: SwiftleadTokens.spaceM),
+                  child: const Icon(
+                    Icons.check_circle,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
+                secondaryBackground: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(SwiftleadTokens.errorRed),
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                  ),
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: SwiftleadTokens.spaceM),
+                  child: const Icon(
+                    Icons.delete,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
+                onDismissed: (direction) {
+                  if (direction == DismissDirection.startToEnd) {
+                    // Mark confirmed
+                    // TODO: Implement mark confirmed
+                  } else {
+                    // Cancel/Delete
+                    // TODO: Implement cancel/delete
+                  }
+                  setState(() {
+                    _filteredBookings.removeAt(index);
+                  });
+                },
+                confirmDismiss: (direction) async {
+                  if (direction == DismissDirection.endToStart) {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Cancel Booking'),
+                        content: const Text('Are you sure you want to cancel this booking?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('No'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color(SwiftleadTokens.errorRed),
+                            ),
+                            child: const Text('Cancel Booking'),
+                          ),
+                        ],
                       ),
                     );
+                    return confirmed ?? false;
+                  }
+                  return true;
+                },
+                child: GestureDetector(
+                  onLongPress: () {
+                    HapticFeedback.mediumImpact();
+                    _showRichBookingTooltip(context, booking);
+                    _showBookingContextMenu(context, booking);
                   },
-                  onStatusChange: () {
-                    // Reload bookings after status change
-                    _loadBookings();
-                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+                    child: BookingCard(
+                      bookingId: booking.id,
+                      clientName: booking.contactName,
+                      serviceName: booking.serviceType,
+                      startTime: booking.startTime,
+                      endTime: booking.endTime,
+                      status: booking.status.name,
+                      onTap: () {
+                        _trackBookingInteraction(booking.id);
+                        Navigator.push(
+                          context,
+                          _createPageRoute(BookingDetailScreen(
+                            bookingId: booking.id,
+                            clientName: booking.contactName,
+                          )),
+                        );
+                      },
+                      onStatusChange: () {
+                        // Reload bookings after status change
+                        _loadBookings();
+                      },
+                    ),
+                  ),
                 ),
               ),
               // Buffer time indicator between bookings
@@ -1010,6 +1470,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ),
               ],
             ],
+            ),
           );
         }),
         // Show scheduled jobs
@@ -1024,7 +1485,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
               status: job.status.displayName,
               dueDate: job.scheduledDate,
               price: job.value > 0 ? '£${job.value.toStringAsFixed(2)}' : null,
-              teamMemberName: job.assignedTo,
               onTap: () {
                 Navigator.push(
                   context,
@@ -1073,6 +1533,78 @@ class _CalendarScreenState extends State<CalendarScreen> {
             },
           );
         },
+      ),
+    );
+  }
+
+  void _showBookingContextMenu(BuildContext context, Booking booking) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(SwiftleadTokens.radiusCard),
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit_outlined),
+                title: const Text('Edit Booking'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CreateEditBookingScreen(bookingId: booking.id),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.phone_outlined),
+                title: const Text('Call Client'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Implement call
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.message_outlined),
+                title: const Text('Message Client'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Implement message
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.share_outlined),
+                title: const Text('Share'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Implement share
+                },
+              ),
+              Divider(
+                color: Theme.of(context).brightness == Brightness.light
+                    ? Colors.black.withOpacity(0.08)
+                    : Colors.white.withOpacity(0.08),
+              ),
+              ListTile(
+                leading: const Icon(Icons.cancel_outlined, color: Color(SwiftleadTokens.errorRed)),
+                title: const Text('Cancel Booking', style: TextStyle(color: Color(SwiftleadTokens.errorRed))),
+                onTap: () {
+                  Navigator.pop(context);
+                  // Cancel confirmed via swipe
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

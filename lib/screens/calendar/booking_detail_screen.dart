@@ -161,15 +161,56 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'create_job', child: Text('Create Job')),
+              PopupMenuItem(
+                value: 'create_job',
+                child: Text(
+                  'Create Job',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
               const PopupMenuDivider(),
               if (_status.toLowerCase() == 'confirmed' || _status.toLowerCase() == 'pending')
-                const PopupMenuItem(value: 'mark_no_show', child: Text('Mark as No-Show')),
+                PopupMenuItem(
+                  value: 'mark_no_show',
+                  child: Text(
+                    'Mark as No-Show',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
               const PopupMenuDivider(),
-              const PopupMenuItem(value: 'reminder_settings', child: Text('Reminder Settings')),
+              PopupMenuItem(
+                value: 'reminder_settings',
+                child: Text(
+                  'Reminder Settings',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
               const PopupMenuDivider(),
-              const PopupMenuItem(value: 'reschedule', child: Text('Reschedule')),
-              const PopupMenuItem(value: 'cancel', child: Text('Cancel')),
+              PopupMenuItem(
+                value: 'reschedule',
+                child: Text(
+                  'Reschedule',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'cancel',
+                child: Text(
+                  'Cancel',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: const Color(SwiftleadTokens.errorRed),
+                  ),
+                ),
+              ),
             ],
           ),
         ],

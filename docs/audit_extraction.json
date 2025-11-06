@@ -1,0 +1,1807 @@
+{
+  "modules": {
+    "1": {
+      "number": "1",
+      "name": "Omni-Inbox (Unified Messaging)",
+      "features": [],
+      "capabilities": []
+    },
+    "2": {
+      "number": "2",
+      "name": "AI Receptionist",
+      "features": [],
+      "capabilities": []
+    },
+    "3": {
+      "number": "3",
+      "name": "Jobs (Job Management)",
+      "features": [],
+      "capabilities": []
+    },
+    "4": {
+      "number": "4",
+      "name": "Calendar & Bookings",
+      "features": [],
+      "capabilities": []
+    },
+    "5": {
+      "number": "5",
+      "name": "Money (Quotes, Invoices & Billing)",
+      "features": [],
+      "capabilities": []
+    },
+    "6": {
+      "number": "6",
+      "name": "Contacts / CRM (COMPLETE SPECIFICATION)",
+      "features": [],
+      "capabilities": []
+    },
+    "7": {
+      "number": "7",
+      "name": "Reviews (COMPLETE SPECIFICATION)",
+      "features": [],
+      "capabilities": []
+    },
+    "8": {
+      "number": "8",
+      "name": "Notifications System (ENHANCED SPECIFICATION)",
+      "features": [],
+      "capabilities": []
+    },
+    "9": {
+      "number": "9",
+      "name": "Data Import / Export (COMPLETE SPECIFICATION)",
+      "features": [],
+      "capabilities": []
+    },
+    "10": {
+      "number": "10",
+      "name": "Dashboard (Home Screen)",
+      "features": [],
+      "capabilities": []
+    },
+    "11": {
+      "number": "11",
+      "name": "AI Hub",
+      "features": [],
+      "capabilities": []
+    },
+    "12": {
+      "number": "12",
+      "name": "Settings & Configuration",
+      "features": [],
+      "capabilities": []
+    },
+    "13": {
+      "number": "13",
+      "name": "Adaptive Profession System",
+      "features": [],
+      "capabilities": []
+    },
+    "14": {
+      "number": "14",
+      "name": "Onboarding Flow",
+      "features": [],
+      "capabilities": []
+    },
+    "15": {
+      "number": "15",
+      "name": "Platform Integrations",
+      "features": [],
+      "capabilities": []
+    },
+    "16": {
+      "number": "16",
+      "name": "Reports & Analytics",
+      "features": [],
+      "capabilities": []
+    }
+  },
+  "screens": [
+    {
+      "path": "screens/main_navigation.dart",
+      "name": "main_navigation",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/settings/email_configuration_screen.dart",
+      "name": "email_configuration_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "handle_connectdisconnect"
+      ]
+    },
+    {
+      "path": "screens/settings/data_export_screen.dart",
+      "name": "data_export_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/settings/security_settings_screen.dart",
+      "name": "security_settings_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/settings/twilio_configuration_screen.dart",
+      "name": "twilio_configuration_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "handle_connectdisconnect"
+      ]
+    },
+    {
+      "path": "screens/settings/profession_configuration_screen.dart",
+      "name": "profession_configuration_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/settings/google_calendar_setup_screen.dart",
+      "name": "google_calendar_setup_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "handle_connectdisconnect"
+      ]
+    },
+    {
+      "path": "screens/settings/settings_screen.dart",
+      "name": "settings_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "build_profilecard",
+        "build_settingssectionlist",
+        "build_plancard",
+        "build_dangerzone",
+        "handle_helptap"
+      ]
+    },
+    {
+      "path": "screens/settings/app_preferences_screen.dart",
+      "name": "app_preferences_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/settings/organization_profile_screen.dart",
+      "name": "organization_profile_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "handle_save"
+      ]
+    },
+    {
+      "path": "screens/settings/change_password_screen.dart",
+      "name": "change_password_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/settings/canned_responses_screen.dart",
+      "name": "canned_responses_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content"
+      ]
+    },
+    {
+      "path": "screens/settings/apple_calendar_setup_screen.dart",
+      "name": "apple_calendar_setup_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "handle_connectdisconnect"
+      ]
+    },
+    {
+      "path": "screens/settings/custom_fields_manager_screen.dart",
+      "name": "custom_fields_manager_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_emptystate",
+        "build_fieldslist",
+        "build_fieldcard"
+      ]
+    },
+    {
+      "path": "screens/settings/team_management_screen.dart",
+      "name": "team_management_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content"
+      ]
+    },
+    {
+      "path": "screens/settings/edit_profile_screen.dart",
+      "name": "edit_profile_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/settings/meta_business_setup_screen.dart",
+      "name": "meta_business_setup_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "handle_connectdisconnect"
+      ]
+    },
+    {
+      "path": "screens/settings/stripe_connection_screen.dart",
+      "name": "stripe_connection_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "handle_connectdisconnect"
+      ]
+    },
+    {
+      "path": "screens/settings/invoice_customization_screen.dart",
+      "name": "invoice_customization_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/settings/subscription_billing_screen.dart",
+      "name": "subscription_billing_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/settings/account_deletion_screen.dart",
+      "name": "account_deletion_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/home/home_screen.dart",
+      "name": "home_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "build_metricsrow",
+        "build_chartcard",
+        "build_tilegrid",
+        "build_quickactionchipsrow",
+        "build_activityfeed",
+        "handle_profiletap"
+      ]
+    },
+    {
+      "path": "screens/calendar/booking_templates_screen.dart",
+      "name": "booking_templates_screen",
+      "module": "unknown",
+      "features": [
+        "build_infochip"
+      ]
+    },
+    {
+      "path": "screens/calendar/reminder_settings_screen.dart",
+      "name": "reminder_settings_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/calendar/create_edit_booking_screen.dart",
+      "name": "create_edit_booking_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/calendar/booking_analytics_screen.dart",
+      "name": "booking_analytics_screen",
+      "module": "unknown",
+      "features": [
+        "build_summarycard"
+      ]
+    },
+    {
+      "path": "screens/calendar/booking_detail_screen.dart",
+      "name": "booking_detail_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "build_bookingsummarycard",
+        "build_clientinfo",
+        "build_servicedetails",
+        "build_weatherforecast",
+        "build_statuscard",
+        "build_onmywaybutton",
+        "build_etacountdown",
+        "build_quickactions",
+        "build_reminderstatus",
+        "build_bookingnotes",
+        "build_cancellationpolicy",
+        "build_noshowtracking",
+        "handle_createjobfrombooking",
+        "handle_marknoshow"
+      ]
+    },
+    {
+      "path": "screens/calendar/resource_management_screen.dart",
+      "name": "resource_management_screen",
+      "module": "unknown",
+      "features": [
+        "build_statusbadge"
+      ]
+    },
+    {
+      "path": "screens/calendar/calendar_search_screen.dart",
+      "name": "calendar_search_screen",
+      "module": "unknown",
+      "features": [
+        "build_searchtips",
+        "build_emptystate",
+        "build_searchresults"
+      ]
+    },
+    {
+      "path": "screens/calendar/capacity_optimization_screen.dart",
+      "name": "capacity_optimization_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/calendar/calendar_screen.dart",
+      "name": "calendar_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "build_calendarheader",
+        "build_calendarwidget",
+        "build_dayview",
+        "build_weekview",
+        "build_monthview",
+        "build_bookinglist",
+        "build_onmywaybutton",
+        "handle_dragreschedule"
+      ]
+    },
+    {
+      "path": "screens/calendar/service_catalog_screen.dart",
+      "name": "service_catalog_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content"
+      ]
+    },
+    {
+      "path": "screens/calendar/blocked_time_screen.dart",
+      "name": "blocked_time_screen",
+      "module": "unknown",
+      "features": [
+        "build_content",
+        "build_blockedtimecard",
+        "handle_delete"
+      ]
+    },
+    {
+      "path": "screens/calendar/service_editor_screen.dart",
+      "name": "service_editor_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/inbox/thread_search_screen.dart",
+      "name": "thread_search_screen",
+      "module": "unknown",
+      "features": [
+        "build_searchtips",
+        "build_emptystate",
+        "build_searchresults",
+        "build_highlightedmessagebubble",
+        "build_highlightedtext"
+      ]
+    },
+    {
+      "path": "screens/inbox/scheduled_messages_screen.dart",
+      "name": "scheduled_messages_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "build_scheduledmessagecard"
+      ]
+    },
+    {
+      "path": "screens/inbox/message_search_screen.dart",
+      "name": "message_search_screen",
+      "module": "unknown",
+      "features": [
+        "build_searchtips",
+        "build_emptystate",
+        "build_searchresults",
+        "build_highlightedmessagebubble",
+        "build_highlightedtext"
+      ]
+    },
+    {
+      "path": "screens/inbox/inbox_screen.dart",
+      "name": "inbox_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "build_batchactionbutton",
+        "build_chatlist",
+        "build_contextmenudialog",
+        "handle_batcharchive",
+        "handle_batchmarkread",
+        "handle_batchpin",
+        "handle_batchdelete"
+      ]
+    },
+    {
+      "path": "screens/inbox/inbox_thread_screen.dart",
+      "name": "inbox_thread_screen",
+      "module": "unknown",
+      "features": [
+        "build_messagewidget",
+        "handle_createquotefrominbox",
+        "handle_createjobfrominbox",
+        "handle_aiextractjob"
+      ]
+    },
+    {
+      "path": "screens/quotes/create_edit_quote_screen.dart",
+      "name": "create_edit_quote_screen",
+      "module": "unknown",
+      "features": [
+        "build_lineitemrow"
+      ]
+    },
+    {
+      "path": "screens/quotes/quote_detail_screen.dart",
+      "name": "quote_detail_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "build_quotesummarycard",
+        "build_clientinfo",
+        "build_lineitems",
+        "build_termscard",
+        "build_chaserssection",
+        "build_quoteinsightssection",
+        "build_insightmetric",
+        "build_quickactions",
+        "handle_deletequote",
+        "handle_manualfollowup",
+        "handle_oneclickresend",
+        "handle_acceptquotewithdeposit"
+      ]
+    },
+    {
+      "path": "screens/contacts/segments_screen.dart",
+      "name": "segments_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_emptystate",
+        "build_segmentslist",
+        "build_segmentcard"
+      ]
+    },
+    {
+      "path": "screens/contacts/contacts_screen.dart",
+      "name": "contacts_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content"
+      ]
+    },
+    {
+      "path": "screens/contacts/create_edit_contact_screen.dart",
+      "name": "create_edit_contact_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/contacts/contact_detail_screen.dart",
+      "name": "contact_detail_screen",
+      "module": "unknown",
+      "features": [
+        "build_content",
+        "build_profilecard",
+        "build_stageprogressbar",
+        "build_scoreindicator",
+        "build_overviewtab",
+        "build_timelinetab",
+        "build_notestab",
+        "build_relatedtab",
+        "build_notecontent",
+        "handle_createquotefromcontact",
+        "handle_messagecontact",
+        "handle_createjobfromcontact",
+        "handle_callcontact",
+        "handle_emailcontact",
+        "handle_timelineeventtap"
+      ]
+    },
+    {
+      "path": "screens/contacts/contact_import_results_screen.dart",
+      "name": "contact_import_results_screen",
+      "module": "unknown",
+      "features": [
+        "build_summarycard",
+        "build_statcard",
+        "build_undobutton",
+        "build_errorlist"
+      ]
+    },
+    {
+      "path": "screens/contacts/segment_builder_screen.dart",
+      "name": "segment_builder_screen",
+      "module": "unknown",
+      "features": [
+        "build_filterrule"
+      ]
+    },
+    {
+      "path": "screens/contacts/contact_import_wizard_screen.dart",
+      "name": "contact_import_wizard_screen",
+      "module": "unknown",
+      "features": [
+        "build_stepindicator",
+        "build_stepcontent",
+        "build_uploadstep",
+        "build_mappingstep",
+        "build_reviewstep",
+        "build_importstep",
+        "build_navigationbuttons"
+      ]
+    },
+    {
+      "path": "screens/contacts/contact_export_builder_screen.dart",
+      "name": "contact_export_builder_screen",
+      "module": "unknown",
+      "features": [
+        "build_exportingstate",
+        "build_formatselector",
+        "build_fieldselector",
+        "build_options"
+      ]
+    },
+    {
+      "path": "screens/contacts/duplicate_detector_screen.dart",
+      "name": "duplicate_detector_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_emptystate",
+        "build_duplicateslist",
+        "build_duplicatecard",
+        "build_contactsummary"
+      ]
+    },
+    {
+      "path": "screens/ai_hub/faq_management_screen.dart",
+      "name": "faq_management_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content"
+      ]
+    },
+    {
+      "path": "screens/ai_hub/call_transcript_screen.dart",
+      "name": "call_transcript_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/ai_hub/ai_configuration_screen.dart",
+      "name": "ai_configuration_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/ai_hub/ai_performance_screen.dart",
+      "name": "ai_performance_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/ai_hub/ai_hub_screen.dart",
+      "name": "ai_hub_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "build_aistatuscard",
+        "build_smarttilegrid",
+        "build_aithreadpreview",
+        "build_aiconfigcard",
+        "build_performancemetrics",
+        "build_aifeatureconfigurations"
+      ]
+    },
+    {
+      "path": "screens/ai_hub/ai_activity_log_screen.dart",
+      "name": "ai_activity_log_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content"
+      ]
+    },
+    {
+      "path": "screens/ai_hub/ai_training_mode_screen.dart",
+      "name": "ai_training_mode_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content"
+      ]
+    },
+    {
+      "path": "screens/support/support_screen.dart",
+      "name": "support_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "build_searchbar",
+        "build_statusbanner",
+        "build_quicklinksgrid",
+        "build_faqlist",
+        "build_contactsupportcard",
+        "build_troubleshootingtools"
+      ]
+    },
+    {
+      "path": "screens/money/payment_methods_screen.dart",
+      "name": "payment_methods_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/money/recurring_invoices_screen.dart",
+      "name": "recurring_invoices_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content"
+      ]
+    },
+    {
+      "path": "screens/money/money_screen.dart",
+      "name": "money_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "build_dashboardtab",
+        "build_invoicestab",
+        "build_batchactionbutton",
+        "build_paymentstab",
+        "build_depositstab",
+        "build_quotestab",
+        "build_balanceheader",
+        "build_metricsrow",
+        "build_analyticsmetricssection",
+        "build_analyticsrow",
+        "build_revenuechart",
+        "build_filterchips",
+        "build_paymentlist",
+        "handle_sendinvoicefromdashboard",
+        "handle_requestpaymentfromdashboard",
+        "handle_addpayment",
+        "handle_addinvoice",
+        "handle_addquote",
+        "handle_batchsendreminder",
+        "handle_batchmarkpaid",
+        "handle_batchdownload",
+        "handle_batchdelete"
+      ]
+    },
+    {
+      "path": "screens/money/invoice_detail_screen.dart",
+      "name": "invoice_detail_screen",
+      "module": "unknown",
+      "features": [
+        "build_content",
+        "build_invoicesummarycard",
+        "build_clientinfo",
+        "build_lineitems",
+        "build_paymenthistory",
+        "build_paymentreminderstimeline",
+        "build_bankdetailssection",
+        "build_termscard",
+        "build_smartinvoicetimingsection",
+        "build_timingmetric"
+      ]
+    },
+    {
+      "path": "screens/money/create_edit_invoice_screen.dart",
+      "name": "create_edit_invoice_screen",
+      "module": "unknown",
+      "features": [
+        "build_lineitemrow"
+      ]
+    },
+    {
+      "path": "screens/money/deposits_screen.dart",
+      "name": "deposits_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/money/money_search_screen.dart",
+      "name": "money_search_screen",
+      "module": "unknown",
+      "features": [
+        "build_searchtips",
+        "build_searchresults",
+        "build_emptystate"
+      ]
+    },
+    {
+      "path": "screens/money/payment_detail_screen.dart",
+      "name": "payment_detail_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content"
+      ]
+    },
+    {
+      "path": "screens/jobs/jobs_screen.dart",
+      "name": "jobs_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "build_joblist",
+        "build_kanbanview",
+        "build_kanbancolumn",
+        "handle_quickaction"
+      ]
+    },
+    {
+      "path": "screens/jobs/job_detail_screen.dart",
+      "name": "job_detail_screen",
+      "module": "unknown",
+      "features": [
+        "build_jobsummarycard",
+        "build_actionbuttonsrow",
+        "build_jobtabview",
+        "build_timelinetab",
+        "build_notestab",
+        "build_detailstab",
+        "build_messagestab",
+        "build_mediatab",
+        "build_conflictalert",
+        "build_chaserstab",
+        "build_chaserstab",
+        "handle_createquotefromjob",
+        "handle_messageclient",
+        "handle_sendinvoicefromjob",
+        "handle_callclient",
+        "handle_navigatetoaddress",
+        "handle_synctocalendar"
+      ]
+    },
+    {
+      "path": "screens/jobs/job_search_screen.dart",
+      "name": "job_search_screen",
+      "module": "unknown",
+      "features": [
+        "build_searchtips",
+        "build_emptystate",
+        "build_searchresults"
+      ]
+    },
+    {
+      "path": "screens/jobs/create_edit_job_screen.dart",
+      "name": "create_edit_job_screen",
+      "module": "unknown",
+      "features": []
+    },
+    {
+      "path": "screens/legal/legal_screen.dart",
+      "name": "legal_screen",
+      "module": "unknown",
+      "features": [
+        "build_content"
+      ]
+    },
+    {
+      "path": "screens/notifications/notifications_screen.dart",
+      "name": "notifications_screen",
+      "module": "unknown",
+      "features": [
+        "build_content",
+        "build_preferencestab",
+        "build_centertab",
+        "build_settingstab"
+      ]
+    },
+    {
+      "path": "screens/onboarding/onboarding_screen.dart",
+      "name": "onboarding_screen",
+      "module": "unknown",
+      "features": [
+        "build_progressbar",
+        "build_welcomestep",
+        "build_benefittile",
+        "build_professionstep",
+        "build_businessdetailsstep",
+        "build_businesshoursselector",
+        "build_teammembersstep",
+        "build_integrationsstep",
+        "build_integrationcard",
+        "build_aiconfigstep",
+        "build_bookingsetupstep",
+        "build_finalcheckliststep",
+        "build_checklistitem",
+        "build_navigationbuttons"
+      ]
+    },
+    {
+      "path": "screens/reports/benchmark_comparison_screen.dart",
+      "name": "benchmark_comparison_screen",
+      "module": "unknown",
+      "features": [
+        "build_metricscards",
+        "build_metriccard"
+      ]
+    },
+    {
+      "path": "screens/reports/reports_screen.dart",
+      "name": "reports_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "build_overviewtab",
+        "build_revenuetab",
+        "build_jobstab",
+        "build_jobsdatatable",
+        "build_clientstab",
+        "build_clientsdatatable",
+        "build_aiperformancetab",
+        "build_teamtab",
+        "build_kpisummaryrow",
+        "build_chartcardgrid",
+        "build_datatablesection",
+        "build_busiestdaystable",
+        "build_peakhourstable",
+        "build_automationhistory",
+        "build_goaltrackingsection"
+      ]
+    },
+    {
+      "path": "screens/reports/goal_tracking_screen.dart",
+      "name": "goal_tracking_screen",
+      "module": "unknown",
+      "features": [
+        "build_summarycard",
+        "build_statitem",
+        "build_goalcard"
+      ]
+    },
+    {
+      "path": "screens/reviews/reviews_screen.dart",
+      "name": "reviews_screen",
+      "module": "unknown",
+      "features": [
+        "build_loadingstate",
+        "build_content",
+        "build_dashboardtab",
+        "build_stardistribution",
+        "build_recentreviews",
+        "build_reviewcard",
+        "build_requeststab",
+        "build_requestlist",
+        "build_requestcard",
+        "build_allreviewstab",
+        "build_reviewslist",
+        "build_analyticstab",
+        "build_sentimentchart",
+        "build_sentimentbar",
+        "build_npstab"
+      ]
+    }
+  ],
+  "widgets": [
+    {
+      "path": "widgets/forms/response_delay_config_sheet.dart",
+      "name": "response_delay_config_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/review_request_sheet.dart",
+      "name": "review_request_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/jobs_filter_sheet.dart",
+      "name": "jobs_filter_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/booking_assistance_config_sheet.dart",
+      "name": "booking_assistance_config_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/jobs_quick_actions_sheet.dart",
+      "name": "jobs_quick_actions_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/convert_quote_modal.dart",
+      "name": "convert_quote_modal",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/job_export_sheet.dart",
+      "name": "job_export_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/confidence_threshold_config_sheet.dart",
+      "name": "confidence_threshold_config_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/job_assignment_sheet.dart",
+      "name": "job_assignment_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/on_my_way_sheet.dart",
+      "name": "on_my_way_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/complete_booking_modal.dart",
+      "name": "complete_booking_modal",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/cancel_booking_modal.dart",
+      "name": "cancel_booking_modal",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/refund_modal.dart",
+      "name": "refund_modal",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/calendar_filter_sheet.dart",
+      "name": "calendar_filter_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/custom_field_editor_sheet.dart",
+      "name": "custom_field_editor_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/inbox_filter_sheet.dart",
+      "name": "inbox_filter_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/contact_merge_preview_modal.dart",
+      "name": "contact_merge_preview_modal",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/ai_tone_selector_sheet.dart",
+      "name": "ai_tone_selector_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/send_quote_sheet.dart",
+      "name": "send_quote_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/compose_message_sheet.dart",
+      "name": "compose_message_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/schedule_message_sheet.dart",
+      "name": "schedule_message_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/contacts_filter_sheet.dart",
+      "name": "contacts_filter_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/payment_request_modal.dart",
+      "name": "payment_request_modal",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/booking_confirmation_sheet.dart",
+      "name": "booking_confirmation_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/ai_quote_assistant_config_sheet.dart",
+      "name": "ai_quote_assistant_config_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/auto_reply_template_editor_sheet.dart",
+      "name": "auto_reply_template_editor_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/money_filter_sheet.dart",
+      "name": "money_filter_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/ai_availability_suggestions_sheet.dart",
+      "name": "ai_availability_suggestions_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/link_invoice_to_job_sheet.dart",
+      "name": "link_invoice_to_job_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/smart_reply_suggestions_sheet.dart",
+      "name": "smart_reply_suggestions_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/reschedule_sheet.dart",
+      "name": "reschedule_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/booking_offer_sheet.dart",
+      "name": "booking_offer_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/ai_quote_assistant_sheet.dart",
+      "name": "ai_quote_assistant_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/payment_link_sheet.dart",
+      "name": "payment_link_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/job_template_selector_sheet.dart",
+      "name": "job_template_selector_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/ai_review_reply_config_sheet.dart",
+      "name": "ai_review_reply_config_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/custom_response_override_sheet.dart",
+      "name": "custom_response_override_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/thread_assignment_sheet.dart",
+      "name": "thread_assignment_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/business_hours_editor_sheet.dart",
+      "name": "business_hours_editor_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/contact_stage_change_sheet.dart",
+      "name": "contact_stage_change_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/lead_qualification_config_sheet.dart",
+      "name": "lead_qualification_config_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/smart_handover_config_sheet.dart",
+      "name": "smart_handover_config_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/message_actions_sheet.dart",
+      "name": "message_actions_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/after_hours_response_editor_sheet.dart",
+      "name": "after_hours_response_editor_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/escalation_rules_config_sheet.dart",
+      "name": "escalation_rules_config_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/deposit_request_sheet.dart",
+      "name": "deposit_request_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/contact_selector_sheet.dart",
+      "name": "contact_selector_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/media_upload_sheet.dart",
+      "name": "media_upload_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/forms/fallback_response_config_sheet.dart",
+      "name": "fallback_response_config_sheet",
+      "category": "forms"
+    },
+    {
+      "path": "widgets/components/time_slot_picker.dart",
+      "name": "time_slot_picker",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/payment_status_badge.dart",
+      "name": "payment_status_badge",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/internal_notes_modal.dart",
+      "name": "internal_notes_modal",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/quick_action_chip.dart",
+      "name": "quick_action_chip",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/missed_call_notification.dart",
+      "name": "missed_call_notification",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/response_times_chart.dart",
+      "name": "response_times_chart",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/dnd_schedule_editor.dart",
+      "name": "dnd_schedule_editor",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/trend_line_chart.dart",
+      "name": "trend_line_chart",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/tone_preview_card.dart",
+      "name": "tone_preview_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/stage_progress_bar.dart",
+      "name": "stage_progress_bar",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/reaction_picker.dart",
+      "name": "reaction_picker",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/sms_composer.dart",
+      "name": "sms_composer",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/notification_card.dart",
+      "name": "notification_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/ai_performance_chart.dart",
+      "name": "ai_performance_chart",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/channel_performance_chart.dart",
+      "name": "channel_performance_chart",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/learning_progress_bar.dart",
+      "name": "learning_progress_bar",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/automation_stats_card.dart",
+      "name": "automation_stats_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/voice_note_player.dart",
+      "name": "voice_note_player",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/ai_receptionist_thread.dart",
+      "name": "ai_receptionist_thread",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/settings_section.dart",
+      "name": "settings_section",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/score_breakdown_card.dart",
+      "name": "score_breakdown_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/subscription_card.dart",
+      "name": "subscription_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/segmented_control.dart",
+      "name": "segmented_control",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/team_member_avatar.dart",
+      "name": "team_member_avatar",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/priority_badge.dart",
+      "name": "priority_badge",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/team_member_card.dart",
+      "name": "team_member_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/chase_history_timeline.dart",
+      "name": "chase_history_timeline",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/ai_status_indicator.dart",
+      "name": "ai_status_indicator",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/lead_source_pie_chart.dart",
+      "name": "lead_source_pie_chart",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/settings_row.dart",
+      "name": "settings_row",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/score_indicator.dart",
+      "name": "score_indicator",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/date_separator.dart",
+      "name": "date_separator",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/recurring_schedule_card.dart",
+      "name": "recurring_schedule_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/link_preview_card.dart",
+      "name": "link_preview_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/conflict_warning_card.dart",
+      "name": "conflict_warning_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/message_detail_sheet.dart",
+      "name": "message_detail_sheet",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/chat_title_row.dart",
+      "name": "chat_title_row",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/pinned_chat_row.dart",
+      "name": "pinned_chat_row",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/calendar_widget.dart",
+      "name": "calendar_widget",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/data_table.dart",
+      "name": "data_table",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/team_performance_card.dart",
+      "name": "team_performance_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/typing_indicator.dart",
+      "name": "typing_indicator",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/deposit_badge.dart",
+      "name": "deposit_badge",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/integration_card.dart",
+      "name": "integration_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/eta_countdown.dart",
+      "name": "eta_countdown",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/ai_insight_banner.dart",
+      "name": "ai_insight_banner",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/conversion_funnel_chart.dart",
+      "name": "conversion_funnel_chart",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/on_my_way_button.dart",
+      "name": "on_my_way_button",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/tax_calculator.dart",
+      "name": "tax_calculator",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/faq_card.dart",
+      "name": "faq_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/ai_usage_credits_card.dart",
+      "name": "ai_usage_credits_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/message_composer_bar.dart",
+      "name": "message_composer_bar",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/channel_icon_badge.dart",
+      "name": "channel_icon_badge",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/job_card.dart",
+      "name": "job_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/confidence_indicator.dart",
+      "name": "confidence_indicator",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/payment_tile.dart",
+      "name": "payment_tile",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/goal_progress_ring.dart",
+      "name": "goal_progress_ring",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/recurrence_pattern_picker.dart",
+      "name": "recurrence_pattern_picker",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/conversation_preview_sheet.dart",
+      "name": "conversation_preview_sheet",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/email_composer.dart",
+      "name": "email_composer",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/invoice_card.dart",
+      "name": "invoice_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/digest_schedule_selector.dart",
+      "name": "digest_schedule_selector",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/grouped_notification_card.dart",
+      "name": "grouped_notification_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/media_thumbnail.dart",
+      "name": "media_thumbnail",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/read_receipt_icon.dart",
+      "name": "read_receipt_icon",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/smart_reply_chip.dart",
+      "name": "smart_reply_chip",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/service_tile.dart",
+      "name": "service_tile",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/kpi_card.dart",
+      "name": "kpi_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/line_item_row.dart",
+      "name": "line_item_row",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/unread_badge.dart",
+      "name": "unread_badge",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/template_card.dart",
+      "name": "template_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/ai_insight_card.dart",
+      "name": "ai_insight_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/internal_notes_button.dart",
+      "name": "internal_notes_button",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/contact_profile_card.dart",
+      "name": "contact_profile_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/refund_progress.dart",
+      "name": "refund_progress",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/booking_card.dart",
+      "name": "booking_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/balance_card.dart",
+      "name": "balance_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/contact_card.dart",
+      "name": "contact_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/reminder_toggle.dart",
+      "name": "reminder_toggle",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/ai_summary_card.dart",
+      "name": "ai_summary_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/chat_bubble.dart",
+      "name": "chat_bubble",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/payment_link_button.dart",
+      "name": "payment_link_button",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/trend_tile.dart",
+      "name": "trend_tile",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/business_hours_grid.dart",
+      "name": "business_hours_grid",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/date_chip.dart",
+      "name": "date_chip",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/call_transcript_row.dart",
+      "name": "call_transcript_row",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/progress_pill.dart",
+      "name": "progress_pill",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/confirmation_status_indicator.dart",
+      "name": "confirmation_status_indicator",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/escalation_badge.dart",
+      "name": "escalation_badge",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/offline_banner.dart",
+      "name": "offline_banner",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/ai_response_preview_sheet.dart",
+      "name": "ai_response_preview_sheet",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/preference_grid.dart",
+      "name": "preference_grid",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/media_preview_modal.dart",
+      "name": "media_preview_modal",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/timeline_view.dart",
+      "name": "timeline_view",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/audience_selector.dart",
+      "name": "audience_selector",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/booking_offer_card.dart",
+      "name": "booking_offer_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/components/stripe_status_card.dart",
+      "name": "stripe_status_card",
+      "category": "components"
+    },
+    {
+      "path": "widgets/global/frosted_container.dart",
+      "name": "frosted_container",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/progress_bar.dart",
+      "name": "progress_bar",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/search_bar.dart",
+      "name": "search_bar",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/primary_button.dart",
+      "name": "primary_button",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/badge.dart",
+      "name": "badge",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/haptic_feedback.dart",
+      "name": "haptic_feedback",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/skeleton_loader.dart",
+      "name": "skeleton_loader",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/swipe_action.dart",
+      "name": "swipe_action",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/avatar.dart",
+      "name": "avatar",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/frosted_bottom_nav_bar.dart",
+      "name": "frosted_bottom_nav_bar",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/empty_state_card.dart",
+      "name": "empty_state_card",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/context_menu.dart",
+      "name": "context_menu",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/info_banner.dart",
+      "name": "info_banner",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/chip.dart",
+      "name": "chip",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/tooltip.dart",
+      "name": "tooltip",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/bottom_sheet.dart",
+      "name": "bottom_sheet",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/error_state_card.dart",
+      "name": "error_state_card",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/drawer.dart",
+      "name": "drawer",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/frosted_app_bar.dart",
+      "name": "frosted_app_bar",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/confirmation_dialog.dart",
+      "name": "confirmation_dialog",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/loading_spinner.dart",
+      "name": "loading_spinner",
+      "category": "global"
+    },
+    {
+      "path": "widgets/global/toast.dart",
+      "name": "toast",
+      "category": "global"
+    }
+  ],
+  "models": [
+    {
+      "path": "models/job_timeline_event.dart",
+      "name": "job_timeline_event"
+    },
+    {
+      "path": "models/contact.dart",
+      "name": "contact"
+    },
+    {
+      "path": "models/job_template.dart",
+      "name": "job_template"
+    },
+    {
+      "path": "models/message.dart",
+      "name": "message"
+    },
+    {
+      "path": "models/payment.dart",
+      "name": "payment"
+    },
+    {
+      "path": "models/booking.dart",
+      "name": "booking"
+    },
+    {
+      "path": "models/job.dart",
+      "name": "job"
+    },
+    {
+      "path": "models/scheduled_message.dart",
+      "name": "scheduled_message"
+    }
+  ],
+  "services": []
+}

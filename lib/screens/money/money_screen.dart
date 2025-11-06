@@ -23,10 +23,16 @@ import 'deposits_screen.dart';
 import '../../widgets/forms/job_export_sheet.dart';
 import '../../widgets/forms/money_filter_sheet.dart';
 import '../../widgets/components/trend_line_chart.dart';
+import '../../widgets/components/celebration_banner.dart';
+import '../../widgets/components/ai_insight_banner.dart';
+import '../../widgets/components/trend_tile.dart';
+import '../../widgets/components/animated_counter.dart';
+import '../../utils/keyboard_shortcuts.dart' show AppShortcuts, SearchIntent, CreateIntent, RefreshIntent, CloseIntent, CreateInvoiceIntent;
 import '../../widgets/global/toast.dart';
 import '../../config/mock_config.dart';
 import '../../mock/mock_repository.dart';
 import '../main_navigation.dart' as main_nav;
+import '../../utils/profession_config.dart';
 
 /// MoneyScreen - Payments & Finance
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -39,7 +45,8 @@ class MoneyScreen extends StatefulWidget {
 
 class _MoneyScreenState extends State<MoneyScreen> {
   bool _isLoading = true;
-  int _selectedTab = 0; // 0 = Dashboard, 1 = Invoices, 2 = Quotes, 3 = Payments, 4 = Deposits
+  int _selectedTab = 0; // 0 = Dashboard, 1 = Quotes & Invoices, 2 = Payments
+  String _quotesInvoicesSubTab = 'Quotes'; // 'Quotes' or 'Invoices' - sub-navigation within tab 1
   String _selectedFilter = 'All';
   final List<String> _filters = ['All', 'Paid', 'Pending', 'Overdue', 'Refunded'];
   String _selectedQuoteFilter = 'All';
@@ -76,6 +83,19 @@ class _MoneyScreenState extends State<MoneyScreen> {
   // Feature 39: Batch Actions
   bool _isBatchMode = false;
   Set<String> _selectedInvoiceIds = {};
+  
+  // Smart prioritization tracking
+  final Map<String, int> _invoiceTapCounts = {};
+  final Map<String, DateTime> _invoiceLastOpened = {};
+  
+  // Celebration tracking
+  final Set<String> _milestonesShown = {};
+  String? _celebrationMessage;
+  
+  // Progressive disclosure states
+  bool _overdueExpanded = true;
+  bool _thisMonthExpanded = true;
+  bool _olderExpanded = false;
 
   @override
   void initState() {
@@ -141,18 +161,111 @@ class _MoneyScreenState extends State<MoneyScreen> {
     }
 
     _applyInvoiceFilter();
+    _checkForMilestones();
 
     if (mounted) {
       setState(() => _isLoading = false);
     }
   }
+  
+  // Track invoice interaction for smart prioritization
+  void _trackInvoiceInteraction(String invoiceId) {
+    setState(() {
+      _invoiceTapCounts[invoiceId] = (_invoiceTapCounts[invoiceId] ?? 0) + 1;
+      _invoiceLastOpened[invoiceId] = DateTime.now();
+    });
+  }
+  
+  // Phase 3: Expanded celebration milestones
+  void _checkForMilestones() {
+    // £10k total revenue milestone
+    if (_totalRevenue >= 10000 && !_milestonesShown.contains('10k')) {
+      _milestonesShown.add('10k');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _celebrationMessage = '🎉 £10k revenue milestone! Incredible achievement!';
+          });
+        }
+      });
+    }
+    
+    // £5k this month milestone
+    if (_thisMonthRevenue >= 5000 && !_milestonesShown.contains('5kmonth')) {
+      _milestonesShown.add('5kmonth');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _celebrationMessage = '🚀 £5k this month! Great month!';
+          });
+        }
+      });
+    }
+    
+    // Phase 3: £1k this month milestone
+    if (_thisMonthRevenue >= 1000 && _thisMonthRevenue < 5000 && !_milestonesShown.contains('1kmonth')) {
+      _milestonesShown.add('1kmonth');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _celebrationMessage = '💷 £1k this month! Great start!';
+          });
+        }
+      });
+    }
+    
+    // Phase 3: £500 total revenue milestone
+    if (_totalRevenue >= 500 && _totalRevenue < 10000 && !_milestonesShown.contains('500total')) {
+      _milestonesShown.add('500total');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _celebrationMessage = '💰 £500 revenue! Keep it up!';
+          });
+        }
+      });
+    }
+    
+    // Phase 3: First invoice milestone
+    if (_allInvoices.isNotEmpty && _allInvoices.length == 1 && !_milestonesShown.contains('firstinvoice')) {
+      _milestonesShown.add('firstinvoice');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _celebrationMessage = '🎯 First invoice created! Welcome to Swiftlead!';
+          });
+        }
+      });
+    }
+  }
+  
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.0, 0.1),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            )),
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+  }
 
   void _handleSendInvoiceFromDashboard() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const CreateEditInvoiceScreen(),
-      ),
+      _createPageRoute(const CreateEditInvoiceScreen()),
     );
   }
 
@@ -183,6 +296,46 @@ class _MoneyScreenState extends State<MoneyScreen> {
           .where((i) => i.status == InvoiceStatus.overdue)
           .toList();
     }
+    
+    // Phase 2: Smart prioritization - sort using interaction tracking
+    _filteredInvoices.sort((a, b) {
+      // Overdue first
+      final aIsOverdue = a.status == InvoiceStatus.overdue;
+      final bIsOverdue = b.status == InvoiceStatus.overdue;
+      if (aIsOverdue != bIsOverdue) {
+        return aIsOverdue ? -1 : 1;
+      }
+      
+      // Phase 2: Favor frequently accessed invoices
+      final aTapCount = _invoiceTapCounts[a.id] ?? 0;
+      final bTapCount = _invoiceTapCounts[b.id] ?? 0;
+      if (aTapCount != bTapCount) {
+        return bTapCount.compareTo(aTapCount);
+      }
+      
+      // Phase 2: Favor recently opened invoices
+      final aLastOpened = _invoiceLastOpened[a.id];
+      final bLastOpened = _invoiceLastOpened[b.id];
+      if (aLastOpened != null && bLastOpened != null) {
+        return bLastOpened.compareTo(aLastOpened);
+      }
+      if (aLastOpened != null) return -1;
+      if (bLastOpened != null) return 1;
+      
+      // Finally by due date or creation date
+      return (a.dueDate ?? a.createdAt).compareTo(b.dueDate ?? b.createdAt);
+    });
+    
+    // Phase 2: Contextual hiding - hide paid invoices >90 days old (unless recently opened)
+    final ninetyDaysAgo = DateTime.now().subtract(const Duration(days: 90));
+    _filteredInvoices = _filteredInvoices.where((invoice) {
+      if (invoice.status == InvoiceStatus.overdue || 
+          invoice.status == InvoiceStatus.pending) return true;
+      if (_invoiceLastOpened[invoice.id] != null && 
+          _invoiceLastOpened[invoice.id]!.isAfter(ninetyDaysAgo)) return true;
+      if (invoice.createdAt.isAfter(ninetyDaysAgo)) return true;
+      return false; // Hide old paid invoices
+    }).toList();
   }
 
   List<Map<String, dynamic>> _getFilteredQuotes() {
@@ -204,142 +357,187 @@ class _MoneyScreenState extends State<MoneyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: FrostedAppBar(
-        scaffoldKey: main_nav.MainNavigation.scaffoldKey,
-        title: 'Money',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list_outlined),
-            onPressed: () async {
-              final filters = await MoneyFilterSheet.show(
-                context: context,
-              );
-              if (filters != null) {
-                _applyMoneyFilters(filters);
-              }
-            },
-          ),
-          // Date range filter
-          IconButton(
-            icon: const Icon(Icons.date_range_outlined),
-            onPressed: () {
-              _showDateRangePicker();
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.search_outlined),
-            onPressed: () {
+    // Phase 3: Keyboard shortcuts wrapper
+    return Shortcuts(
+      shortcuts: AppShortcuts.getMoneyShortcuts(() {
+        // Create new invoice
+        Navigator.push(
+          context,
+          _createPageRoute(const CreateEditInvoiceScreen()),
+        );
+      }),
+      child: Actions(
+        actions: {
+          SearchIntent: CallbackAction<SearchIntent>(
+            onInvoke: (_) {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const MoneySearchScreen(),
-                ),
+                _createPageRoute(const MoneySearchScreen()),
               );
             },
           ),
-          // Add menu
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.add),
-            onSelected: (value) {
-              if (value == 'request_payment') {
-                PaymentRequestModal.show(
-                  context: context,
-                  onSendRequest: (amount, method) {
-                    // Handle payment request sent
-                  },
-                );
-                return;
-              }
-              switch (value) {
-                case 'payment':
-                  _handleAddPayment();
-                  break;
-                case 'invoice':
-                  _handleAddInvoice();
-                  break;
-                case 'quote':
-                  _handleAddQuote();
-                  break;
-                case 'recurring':
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const RecurringInvoicesScreen(),
-                    ),
-                  );
-                  break;
-                case 'payment_methods':
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const PaymentMethodsScreen(),
-                    ),
-                  );
-                  break;
+          CreateInvoiceIntent: CallbackAction<CreateInvoiceIntent>(
+            onInvoke: (_) {
+              Navigator.push(
+                context,
+                _createPageRoute(const CreateEditInvoiceScreen()),
+              );
+            },
+          ),
+          RefreshIntent: CallbackAction<RefreshIntent>(
+            onInvoke: (_) {
+              _loadFinancialData();
+            },
+          ),
+          CloseIntent: CallbackAction<CloseIntent>(
+            onInvoke: (_) {
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
               }
             },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem<String>(
-                value: 'payment',
-                child: Row(
-                  children: [
-                    Icon(Icons.payment, size: 20),
-                    SizedBox(width: 12),
-                    Text('Add Payment'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'invoice',
-                child: Row(
-                  children: [
-                    Icon(Icons.receipt, size: 20),
-                    SizedBox(width: 12),
-                    Text('Create Invoice'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'quote',
-                child: Row(
-                  children: [
-                    Icon(Icons.description, size: 20),
-                    SizedBox(width: 12),
-                    Text('Create Quote'),
-                  ],
-                ),
-              ),
-              const PopupMenuDivider(),
-              const PopupMenuItem<String>(
-                value: 'recurring',
-                child: Row(
-                  children: [
-                    Icon(Icons.repeat, size: 20),
-                    SizedBox(width: 12),
-                    Text('Recurring Invoices'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'payment_methods',
-                child: Row(
-                  children: [
-                    Icon(Icons.credit_card, size: 20),
-                    SizedBox(width: 12),
-                    Text('Payment Methods'),
-                  ],
-                ),
-              ),
-            ],
           ),
-        ],
+        },
+        child: Focus(
+          autofocus: true,
+          child: Scaffold(
+            extendBody: true,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            appBar: FrostedAppBar(
+              scaffoldKey: main_nav.MainNavigation.scaffoldKey,
+              title: 'Money',
+              actions: [
+          // Primary action: Add menu (iOS-aligned: 1 icon max)
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.add),
+                  onSelected: (value) {
+                    if (value == 'request_payment') {
+                      PaymentRequestModal.show(
+                        context: context,
+                        onSendRequest: (amount, method) {
+                          // Handle payment request sent
+                        },
+                      );
+                      return;
+                    }
+                    switch (value) {
+                      case 'invoice':
+                        _handleAddInvoice();
+                        break;
+                      case 'quote':
+                        _handleAddQuote();
+                        break;
+                      case 'payment':
+                        _handleAddPayment();
+                        break;
+                      case 'recurring':
+                        Navigator.push(
+                          context,
+                          _createPageRoute(const RecurringInvoicesScreen()),
+                        );
+                        break;
+                      case 'payment_methods':
+                        Navigator.push(
+                          context,
+                          _createPageRoute(const PaymentMethodsScreen()),
+                        );
+                        break;
+                      case 'filter':
+                        _showFilterSheet();
+                        break;
+                      case 'search':
+                        Navigator.push(
+                          context,
+                          _createPageRoute(const MoneySearchScreen()),
+                        );
+                        break;
+                    }
+                  },
+                        itemBuilder: (BuildContext context) => [
+                    // Primary actions first
+                    const PopupMenuItem<String>(
+                      value: 'invoice',
+                      child: Row(
+                        children: [
+                          Icon(Icons.receipt, size: 20),
+                          SizedBox(width: 12),
+                          Text('Create Invoice'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'quote',
+                      child: Row(
+                        children: [
+                          Icon(Icons.description, size: 20),
+                          SizedBox(width: 12),
+                          Text('Create Quote'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuDivider(),
+                    // Secondary actions
+                    const PopupMenuItem<String>(
+                      value: 'payment',
+                      child: Row(
+                        children: [
+                          Icon(Icons.payment, size: 20),
+                          SizedBox(width: 12),
+                          Text('Add Payment'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'recurring',
+                      child: Row(
+                        children: [
+                          Icon(Icons.repeat, size: 20),
+                          SizedBox(width: 12),
+                          Text('Recurring Invoices'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'payment_methods',
+                      child: Row(
+                        children: [
+                          Icon(Icons.credit_card, size: 20),
+                          SizedBox(width: 12),
+                          Text('Payment Methods'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuDivider(),
+                    // Utility actions
+                    const PopupMenuItem<String>(
+                      value: 'filter',
+                      child: Row(
+                        children: [
+                          Icon(Icons.filter_list_outlined, size: 20),
+                          SizedBox(width: 12),
+                          Text('Filter'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'search',
+                      child: Row(
+                        children: [
+                          Icon(Icons.search_outlined, size: 20),
+                          SizedBox(width: 12),
+                          Text('Search'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            body: _isLoading
+                ? _buildLoadingState()
+                : _buildContent(),
+          ),
+        ),
       ),
-      body: _isLoading
-          ? _buildLoadingState()
-          : _buildContent(),
     );
   }
 
@@ -361,16 +559,14 @@ class _MoneyScreenState extends State<MoneyScreen> {
   void _handleAddInvoice() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const CreateEditInvoiceScreen(),
-      ),
+      _createPageRoute(const CreateEditInvoiceScreen()),
     );
   }
 
   void _handleAddQuote() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const CreateEditQuoteScreen()),
+      _createPageRoute(const CreateEditQuoteScreen()),
     );
   }
 
@@ -425,6 +621,15 @@ class _MoneyScreenState extends State<MoneyScreen> {
     } else {
       // Apply preset period filter
       _applyInvoiceFilter();
+    }
+  }
+
+  Future<void> _showFilterSheet() async {
+    final filters = await MoneyFilterSheet.show(
+      context: context,
+    );
+    if (filters != null) {
+      _applyMoneyFilters(filters);
     }
   }
 
@@ -536,7 +741,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
         Padding(
           padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
           child: SegmentedControl(
-            segments: const ['Dashboard', 'Invoices', 'Quotes', 'Payments', 'Deposits'],
+            segments: const ['Dashboard', 'Quotes & Invoices', 'Payments'],
             selectedIndex: _selectedTab,
             onSelectionChanged: (index) {
               setState(() => _selectedTab = index);
@@ -550,10 +755,8 @@ class _MoneyScreenState extends State<MoneyScreen> {
             index: _selectedTab,
             children: [
               _buildDashboardTab(),
-              _buildInvoicesTab(),
-              _buildQuotesTab(), // Quotes tab
-              _buildPaymentsTab(),
-              _buildDepositsTab(),
+              _buildQuotesInvoicesTab(), // Combined Quotes & Invoices tab
+              _buildPaymentsTab(), // Payments includes Deposits
             ],
           ),
         ),
@@ -575,6 +778,43 @@ class _MoneyScreenState extends State<MoneyScreen> {
           bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
         ),
         children: [
+          // Celebration banner (if milestone reached)
+          if (_celebrationMessage != null) ...[
+            CelebrationBanner(
+              message: _celebrationMessage!,
+              onDismiss: () {
+                setState(() => _celebrationMessage = null);
+              },
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceL),
+          ],
+          
+          // Phase 2: AI Insight Banner - Predictive insights
+          if (_overdue > 0) ...[
+            AIInsightBanner(
+              message: 'You have £${_overdue.toStringAsFixed(0)} in overdue invoices. Consider sending payment reminders.',
+              onTap: () {
+                setState(() => _selectedTab = 1);
+                setState(() => _selectedFilter = 'Overdue');
+                _applyInvoiceFilter();
+              },
+              onDismiss: () {},
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+          ] else if (_pendingQuotesCount > 5) ...[
+            AIInsightBanner(
+              message: 'You have $_pendingQuotesCount pending quotes worth £${_pendingQuotesValue.toStringAsFixed(0)}. Follow up to convert them.',
+              onTap: () {
+                setState(() {
+                  _selectedTab = 1; // Quotes & Invoices tab
+                  _quotesInvoicesSubTab = 'Quotes'; // Show Quotes by default
+                });
+              },
+              onDismiss: () {},
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+          ],
+          
           // BalanceHeader - Large numeric display
           _buildBalanceHeader(),
           const SizedBox(height: SwiftleadTokens.spaceL),
@@ -694,7 +934,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
               // Invoice List
               _filteredInvoices.isEmpty
                   ? EmptyStateCard(
-                      title: 'No ${_selectedFilter.toLowerCase()} invoices',
+                      title: 'No ${_selectedFilter.toLowerCase()} ${ProfessionState.config.getLabel('invoices').toLowerCase()}',
                       description: 'Invoices will appear here when they match this filter.',
                       icon: Icons.receipt_outlined,
                     )
@@ -705,7 +945,21 @@ class _MoneyScreenState extends State<MoneyScreen> {
                       itemBuilder: (context, index) {
                         final invoice = _filteredInvoices[index];
                         final isSelected = _selectedInvoiceIds.contains(invoice.id);
-                        return Padding(
+                        // Phase 3: Staggered animation
+                        return TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0.0, end: 1.0),
+                          duration: Duration(milliseconds: 300 + (index * 50).clamp(0, 200)),
+                          curve: Curves.easeOutCubic,
+                          builder: (context, value, child) {
+                            return Opacity(
+                              opacity: value,
+                              child: Transform.translate(
+                                offset: Offset(0, 20 * (1 - value)),
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: Padding(
                           padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
                           child: GestureDetector(
                             onTap: () {
@@ -725,9 +979,8 @@ class _MoneyScreenState extends State<MoneyScreen> {
                                 // Normal tap - open invoice
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
-                                    builder: (context) => InvoiceDetailScreen(
-                                      invoiceId: invoice.id,
+                                  _createPageRoute(InvoiceDetailScreen(
+                                    invoiceId: invoice.id,
                                       invoiceNumber: invoice.id,
                                     ),
                                   ),
@@ -767,6 +1020,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                               },
                             ),
                           ),
+                        ),
                         );
                       },
                     ),
@@ -791,6 +1045,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
+                    // Primary actions (iOS pattern: 2-3 most common)
                     _buildBatchActionButton(
                       icon: Icons.email_outlined,
                       label: 'Send Reminder',
@@ -801,16 +1056,57 @@ class _MoneyScreenState extends State<MoneyScreen> {
                       label: 'Mark Paid',
                       onPressed: _handleBatchMarkPaid,
                     ),
-                    _buildBatchActionButton(
-                      icon: Icons.download_outlined,
-                      label: 'Download',
-                      onPressed: _handleBatchDownload,
-                    ),
-                    _buildBatchActionButton(
-                      icon: Icons.delete_outline,
-                      label: 'Delete',
-                      onPressed: _handleBatchDelete,
-                      isDestructive: true,
+                    // More menu for secondary actions (iOS pattern)
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert),
+                      tooltip: 'More',
+                      onSelected: (value) {
+                        switch (value) {
+                          case 'download':
+                            _handleBatchDownload();
+                            break;
+                          case 'delete':
+                            _handleBatchDelete();
+                            break;
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 'download',
+                          child: Builder(
+                            builder: (context) => Row(
+                              children: [
+                                const Icon(Icons.download_outlined, size: 20),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Download',
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Builder(
+                            builder: (context) => Row(
+                              children: [
+                                const Icon(Icons.delete_outline, size: 20, color: Color(SwiftleadTokens.errorRed)),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Delete',
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: const Color(SwiftleadTokens.errorRed),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -921,6 +1217,84 @@ class _MoneyScreenState extends State<MoneyScreen> {
   }
 
   // Feature 39: Batch Actions - Download
+  void _showInvoiceContextMenu(BuildContext context, Invoice invoice) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(SwiftleadTokens.radiusCard),
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit_outlined),
+                title: const Text('Edit Invoice'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    _createPageRoute(CreateEditInvoiceScreen(invoiceId: invoice.id)),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.email_outlined),
+                title: const Text('Send Reminder'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Implement send reminder
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.download_outlined),
+                title: const Text('Download PDF'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Implement download
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.share_outlined),
+                title: const Text('Share'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Implement share
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.content_copy),
+                title: const Text('Duplicate'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Implement duplicate
+                },
+              ),
+              Divider(
+                color: Theme.of(context).brightness == Brightness.light
+                    ? Colors.black.withOpacity(0.08)
+                    : Colors.white.withOpacity(0.08),
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: Color(SwiftleadTokens.errorRed)),
+                title: const Text('Delete', style: TextStyle(color: Color(SwiftleadTokens.errorRed))),
+                onTap: () {
+                  Navigator.pop(context);
+                  // Delete confirmed via swipe or batch mode
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _handleBatchDownload() {
     if (_selectedInvoiceIds.isEmpty) return;
     
@@ -949,7 +1323,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
     
     SwiftleadConfirmationDialog.show(
       context: context,
-      title: 'Delete $count invoice${count == 1 ? '' : 's'}?',
+      title: 'Delete $count ${ProfessionState.config.getLabel('invoice').toLowerCase()}${count == 1 ? '' : 's'}?',
       description: 'Are you sure you want to delete these invoices? This action cannot be undone.',
       primaryActionLabel: 'Delete',
       isDestructive: true,
@@ -976,6 +1350,31 @@ class _MoneyScreenState extends State<MoneyScreen> {
   }
 
   Widget _buildPaymentsTab() {
+    // Mock deposits data - in real app would come from backend
+    final deposits = [
+      {
+        'jobTitle': 'Bathroom Renovation',
+        'clientName': 'Sarah Williams',
+        'amount': 500.0,
+        'status': 'Pending',
+        'dueDate': DateTime.now().add(const Duration(days: 5)),
+      },
+      {
+        'jobTitle': 'Kitchen Sink Install',
+        'clientName': 'Emily Chen',
+        'amount': 150.0,
+        'status': 'Collected',
+        'collectedDate': DateTime.now().subtract(const Duration(days: 8)),
+      },
+      {
+        'jobTitle': 'Heating System Installation',
+        'clientName': 'David Brown',
+        'amount': 2000.0,
+        'status': 'Collected',
+        'collectedDate': DateTime.now().subtract(const Duration(days: 28)),
+      },
+    ];
+
     return RefreshIndicator(
       onRefresh: () async {
         await _loadFinancialData();
@@ -988,12 +1387,123 @@ class _MoneyScreenState extends State<MoneyScreen> {
           bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
         ),
         children: [
+          // Payment History Section
           Text(
             'Payment History',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
           _buildPaymentList(),
+          
+          // Deposits Section
+          const SizedBox(height: SwiftleadTokens.spaceXL),
+          Text(
+            'Deposits',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          if (deposits.isEmpty)
+            EmptyStateCard(
+              title: 'No deposits yet',
+              description: 'Deposits will appear here when requested',
+              icon: Icons.payment,
+            )
+          else
+            ...deposits.map((deposit) {
+              Color statusColor;
+              IconData statusIcon;
+              switch (deposit['status']) {
+                case 'Pending':
+                  statusColor = const Color(SwiftleadTokens.warningYellow);
+                  statusIcon = Icons.pending;
+                  break;
+                case 'Collected':
+                  statusColor = const Color(SwiftleadTokens.successGreen);
+                  statusIcon = Icons.check_circle;
+                  break;
+                default:
+                  statusColor = Colors.grey;
+                  statusIcon = Icons.undo;
+              }
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceM),
+                child: FrostedContainer(
+                  padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  deposit['jobTitle'] as String,
+                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  deposit['clientName'] as String,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '£${(deposit['amount'] as double).toStringAsFixed(2)}',
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    statusIcon,
+                                    size: 16,
+                                    color: statusColor,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    deposit['status'] as String,
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: statusColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: SwiftleadTokens.spaceM),
+                      if (deposit['status'] == 'Pending' && deposit['dueDate'] != null)
+                        Text(
+                          'Due: ${_formatDate(deposit['dueDate'] as DateTime)}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                          ),
+                        )
+                      else if (deposit['status'] == 'Collected' && deposit['collectedDate'] != null)
+                        Text(
+                          'Collected: ${_formatDate(deposit['collectedDate'] as DateTime)}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
         ],
       ),
     );
@@ -1157,6 +1667,41 @@ class _MoneyScreenState extends State<MoneyScreen> {
     return '${date.day}/${date.month}/${date.year}';
   }
 
+  Widget _buildQuotesInvoicesTab() {
+    return Column(
+      children: [
+        // Sub-navigation: Quotes vs Invoices
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SwiftleadTokens.spaceM,
+            vertical: SwiftleadTokens.spaceS,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: SegmentedControl(
+                  segments: const ['Quotes', 'Invoices'],
+                  selectedIndex: _quotesInvoicesSubTab == 'Quotes' ? 0 : 1,
+                  onSelectionChanged: (index) {
+                    setState(() {
+                      _quotesInvoicesSubTab = index == 0 ? 'Quotes' : 'Invoices';
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Content based on sub-tab
+        Expanded(
+          child: _quotesInvoicesSubTab == 'Quotes' 
+              ? _buildQuotesTab() 
+              : _buildInvoicesTab(),
+        ),
+      ],
+    );
+  }
+
   Widget _buildQuotesTab() {
     return RefreshIndicator(
       onRefresh: () async {
@@ -1194,7 +1739,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
           // Quotes List
           _getFilteredQuotes().isEmpty
               ? EmptyStateCard(
-                  title: 'No ${_selectedQuoteFilter.toLowerCase()} quotes',
+                  title: 'No ${_selectedQuoteFilter.toLowerCase()} ${ProfessionState.config.getLabel('quotes').toLowerCase()}',
                   description: 'Quotes will appear here when they match this filter.',
                   icon: Icons.description_outlined,
                 )
@@ -1216,12 +1761,10 @@ class _MoneyScreenState extends State<MoneyScreen> {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => QuoteDetailScreen(
-                                quoteId: 'quote_${quote['index']}',
-                                quoteNumber: quote['number'] as String,
-                              ),
-                            ),
+                            _createPageRoute(QuoteDetailScreen(
+                              quoteId: 'quote_${quote['index']}',
+                              quoteNumber: quote['number'] as String,
+                            )),
                           );
                         },
                       ),
@@ -1271,9 +1814,12 @@ class _MoneyScreenState extends State<MoneyScreen> {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 8),
-              Text(
-                '£${_totalRevenue.toStringAsFixed(2)}',
-                style: Theme.of(context).textTheme.displayLarge,
+              // Phase 2: AnimatedCounter for total revenue
+              AnimatedCounter(
+                value: _totalRevenue,
+                prefix: '£',
+                decimals: 2,
+                textStyle: Theme.of(context).textTheme.displayLarge,
               ),
               const SizedBox(height: SwiftleadTokens.spaceM),
               // StripeConnectionStatus
@@ -1379,6 +1925,15 @@ class _MoneyScreenState extends State<MoneyScreen> {
   }
 
   Widget _buildMetricsRow() {
+    // Phase 2: Calculate previous period comparisons
+    final outstandingTrend = _lastMonthRevenue > 0 
+        ? ((_outstanding - (_lastMonthRevenue * 0.2)) / (_lastMonthRevenue * 0.2) * 100)
+        : 0.0;
+    final thisMonthTrend = _lastMonthRevenue > 0
+        ? ((_thisMonthRevenue - _lastMonthRevenue) / _lastMonthRevenue * 100)
+        : 0.0;
+    final overdueCount = _allInvoices.where((i) => i.status == InvoiceStatus.overdue).length;
+    
     return Column(
       children: [
         Row(
@@ -1386,20 +1941,24 @@ class _MoneyScreenState extends State<MoneyScreen> {
             Expanded(
               child: TrendTile(
                 label: 'Outstanding',
-                value: '£450',
-                trend: '5 invoices',
-                isPositive: false,
-                tooltip: 'Amount not yet paid',
+                value: '£${_outstanding.toStringAsFixed(0)}',
+                trend: outstandingTrend != 0 
+                    ? '${outstandingTrend > 0 ? '+' : ''}${outstandingTrend.toStringAsFixed(1)}% vs last month'
+                    : null,
+                isPositive: outstandingTrend <= 0,
+                tooltip: 'Amount not yet paid. Phase 2: Previous period comparison calculated.',
               ),
             ),
             const SizedBox(width: SwiftleadTokens.spaceS),
             Expanded(
               child: TrendTile(
                 label: 'Paid This Month',
-                value: '£2,000',
-                trend: '+15% vs last month',
-                isPositive: true,
-                tooltip: 'Total received this month vs last month (£1,740)',
+                value: '£${_thisMonthRevenue.toStringAsFixed(0)}',
+                trend: thisMonthTrend != 0
+                    ? '${thisMonthTrend > 0 ? '+' : ''}${thisMonthTrend.toStringAsFixed(1)}% vs last month'
+                    : null,
+                isPositive: thisMonthTrend >= 0,
+                tooltip: 'Total received this month vs last month (${_lastMonthRevenue.toStringAsFixed(0)})',
               ),
             ),
           ],
@@ -1410,7 +1969,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
             Expanded(
               child: TrendTile(
                 label: 'Pending',
-                value: '£120',
+                value: '£${(_outstanding - _overdue).toStringAsFixed(0)}',
                 trend: 'In processing',
                 isPositive: true,
                 tooltip: 'Payments in processing',
@@ -1420,8 +1979,8 @@ class _MoneyScreenState extends State<MoneyScreen> {
             Expanded(
               child: TrendTile(
                 label: 'Overdue',
-                value: '£80',
-                trend: '2 invoices',
+                value: '£${_overdue.toStringAsFixed(0)}',
+                trend: overdueCount > 0 ? '$overdueCount invoices' : null,
                 isPositive: false,
                 tooltip: 'Late payments',
               ),
@@ -1492,7 +2051,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
           _buildAnalyticsRow(
             label: 'Pending Quotes',
             value: '£${_pendingQuotesValue.toStringAsFixed(2)}',
-            subtitle: '$_pendingQuotesCount quotes',
+            subtitle: '$_pendingQuotesCount ${ProfessionState.config.getLabel('quotes').toLowerCase()}',
             icon: Icons.description,
           ),
           const Divider(),
@@ -1757,12 +2316,10 @@ class _MoneyScreenState extends State<MoneyScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => PaymentDetailScreen(
-                    paymentId: payment.id,
-                    paymentNumber: 'PAY-${1000 + index}',
-                  ),
-                ),
+                _createPageRoute(PaymentDetailScreen(
+                  paymentId: payment.id,
+                  paymentNumber: 'PAY-${1000 + index}',
+                )),
               );
             },
           ),

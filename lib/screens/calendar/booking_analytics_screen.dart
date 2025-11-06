@@ -60,10 +60,42 @@ class _BookingAnalyticsScreenState extends State<BookingAnalyticsScreen> {
               });
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'week', child: Text('This Week')),
-              const PopupMenuItem(value: 'month', child: Text('This Month')),
-              const PopupMenuItem(value: 'quarter', child: Text('This Quarter')),
-              const PopupMenuItem(value: 'year', child: Text('This Year')),
+              PopupMenuItem(
+                value: 'week',
+                child: Text(
+                  'This Week',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'month',
+                child: Text(
+                  'This Month',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'quarter',
+                child: Text(
+                  'This Quarter',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'year',
+                child: Text(
+                  'This Year',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
             ],
           ),
         ],

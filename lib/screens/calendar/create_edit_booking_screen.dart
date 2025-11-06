@@ -366,7 +366,28 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                   },
                 ),
               ),
-
+            const SizedBox(height: SwiftleadTokens.spaceM),
+            // iOS-style grouped sections
+            // Section 1: Client & Service Information
+            FrostedContainer(
+              padding: EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Text(
+                      'Client & Service Information',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Column(
+                      children: [
             // Client Selector
             TextFormField(
               controller: _clientController,
@@ -386,7 +407,6 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
               },
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
-
             // Service Selector
             Text(
               'Service *',
@@ -420,10 +440,35 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
               ),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 52),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
-
+            // Section 2: Scheduling & Time
+            FrostedContainer(
+              padding: EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Text(
+                      'Scheduling & Time',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Column(
+                      children: [
             // Date Picker
             Text(
               'Date *',
@@ -458,7 +503,6 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
               ),
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
-
             // Multi-Day Booking Toggle
             SwitchListTile(
               title: const Text('Multi-Day Booking'),
@@ -552,13 +596,23 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                     }
                   },
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'round_robin',
-                      child: Text('Round-Robin Assignment'),
+                      child: Text(
+                        'Round-Robin Assignment',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'skill_based',
-                      child: Text('Skill-Based Assignment'),
+                      child: Text(
+                        'Skill-Based Assignment',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -777,7 +831,8 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
+                              Flexible(
+                                child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -790,8 +845,10 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                       Text(
                         'Request deposit payment',
                         style: Theme.of(context).textTheme.bodySmall,
+                                      overflow: TextOverflow.ellipsis,
                       ),
                     ],
+                                ),
                   ),
                   Switch(
                     value: _requiresDeposit,
@@ -812,11 +869,13 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
             if (_requiresDeposit && _depositAmount != null) ...[
               const SizedBox(height: SwiftleadTokens.spaceS),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                              Flexible(
+                                child: Text(
                     'Deposit Amount: £${_depositAmount!.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.bodyMedium,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                   ),
                   TextButton.icon(
                     onPressed: () {
@@ -863,7 +922,8 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
+                              Flexible(
+                                child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -876,8 +936,10 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                       Text(
                         'Repeat this booking',
                         style: Theme.of(context).textTheme.bodySmall,
+                                      overflow: TextOverflow.ellipsis,
                       ),
                     ],
+                                ),
                   ),
                   Switch(
                     value: _isRecurring,
@@ -907,7 +969,8 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
+                              Flexible(
+                                child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -920,8 +983,11 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                       Text(
                         'Add client to waitlist if slot is full',
                         style: Theme.of(context).textTheme.bodySmall,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
                       ),
                     ],
+                                ),
                   ),
                   Switch(
                     value: _addToWaitlist,
@@ -946,7 +1012,8 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
+                                  Flexible(
+                                    child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
@@ -959,8 +1026,11 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                           Text(
                             'Auto-calculate travel/prep time between appointments',
                             style: Theme.of(context).textTheme.bodySmall,
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 2,
                           ),
                         ],
+                                    ),
                       ),
                       Switch(
                         value: _showBufferTime,
@@ -978,10 +1048,11 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                     const SizedBox(height: SwiftleadTokens.spaceM),
                     Row(
                       children: [
-                        Expanded(
+                                    Flexible(
                           child: Text(
                             'Buffer: ${_bufferTimeMinutes} minutes',
                             style: Theme.of(context).textTheme.bodyMedium,
+                                        overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         IconButton(
@@ -1016,11 +1087,36 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                       ),
                     ],
                   ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
-
+            // Section 3: Additional Options & Notes
+            FrostedContainer(
+              padding: EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Text(
+                      'Additional Options & Notes',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Column(
+                      children: [
             // Notes
             TextFormField(
               controller: _notesController,
@@ -1033,9 +1129,14 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: SwiftleadTokens.spaceL),
-
-            // Save Button
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+            // Sticky save button (iOS pattern)
             if (_isSaving)
               const SwiftleadProgressBar()
             else

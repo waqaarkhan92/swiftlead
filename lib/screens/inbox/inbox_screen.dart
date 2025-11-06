@@ -25,6 +25,13 @@ import '../../widgets/forms/thread_assignment_sheet.dart';
 import '../../widgets/global/confirmation_dialog.dart';
 import '../../widgets/components/conversation_preview_sheet.dart';
 import '../../widgets/components/priority_badge.dart';
+import '../../widgets/global/search_bar.dart';
+import '../../widgets/components/animated_counter.dart';
+import '../../widgets/components/smart_collapsible_section.dart';
+import '../../widgets/components/celebration_banner.dart';
+import '../../widgets/components/ai_insight_banner.dart';
+import '../../widgets/components/rich_tooltip.dart';
+import '../../utils/keyboard_shortcuts.dart' show AppShortcuts, SearchIntent, CreateIntent, RefreshIntent, CloseIntent;
 import 'scheduled_messages_screen.dart';
 import '../main_navigation.dart' as main_nav;
 
@@ -48,6 +55,19 @@ class _InboxScreenState extends State<InboxScreen> {
   InboxFilters? _currentFilters;
   bool _isBatchMode = false;
   Set<String> _selectedThreadIds = {};
+  
+  // Smart prioritization tracking
+  final Map<String, int> _threadTapCounts = {};
+  final Map<String, DateTime> _threadLastOpened = {};
+  
+  // Celebration tracking
+  final Set<String> _milestonesShown = {};
+  String? _celebrationMessage;
+  
+  // Progressive disclosure states
+  bool _todayExpanded = true;
+  bool _thisWeekExpanded = true;
+  bool _olderExpanded = false;
 
   @override
   void initState() {
@@ -69,9 +89,153 @@ class _InboxScreenState extends State<InboxScreen> {
     }
 
     _applyFilter();
+    _checkForMilestones();
 
     if (mounted) {
       setState(() => _isLoading = false);
+    }
+  }
+  
+  // Track thread interaction for smart prioritization
+  void _trackThreadInteraction(String threadId) {
+    setState(() {
+      _threadTapCounts[threadId] = (_threadTapCounts[threadId] ?? 0) + 1;
+      _threadLastOpened[threadId] = DateTime.now();
+    });
+  }
+  
+  // Phase 3: Expanded celebration milestones
+  void _checkForMilestones() {
+    // 100 conversations milestone
+    if (_threads.length >= 100 && !_milestonesShown.contains('100threads')) {
+      _milestonesShown.add('100threads');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _celebrationMessage = '🎉 100 conversations! Keep the momentum going!';
+          });
+        }
+      });
+    }
+    
+    // Inbox zero milestone
+    if (_unreadCount == 0 && _threads.isNotEmpty && !_milestonesShown.contains('inboxzero')) {
+      _milestonesShown.add('inboxzero');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _celebrationMessage = '✨ Inbox zero! All caught up! Amazing work!';
+          });
+        }
+      });
+    }
+    
+    // Phase 3: 50 conversations milestone
+    if (_threads.length >= 50 && _threads.length < 100 && !_milestonesShown.contains('50threads')) {
+      _milestonesShown.add('50threads');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _celebrationMessage = '🌟 50 conversations! You\'re building great relationships!';
+          });
+        }
+      });
+    }
+    
+    // Phase 3: 25 conversations milestone
+    if (_threads.length >= 25 && _threads.length < 50 && !_milestonesShown.contains('25threads')) {
+      _milestonesShown.add('25threads');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _celebrationMessage = '💬 25 conversations! Great start!';
+          });
+        }
+      });
+    }
+    
+    // Phase 3: First conversation milestone
+    if (_threads.length == 1 && !_milestonesShown.contains('firstthread')) {
+      _milestonesShown.add('firstthread');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _celebrationMessage = '🎯 First conversation! Welcome to Swiftlead!';
+          });
+        }
+      });
+    }
+  }
+  
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.0, 0.1),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            )),
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+  }
+  
+  // Group threads by time period
+  Map<String, List<MessageThread>> _groupThreadsByTime() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final thisWeek = today.subtract(Duration(days: now.weekday - 1));
+    
+    final todayThreads = <MessageThread>[];
+    final thisWeekThreads = <MessageThread>[];
+    final olderThreads = <MessageThread>[];
+    
+    for (final thread in _filteredThreads) {
+      final threadDate = thread.lastMessageTime;
+      if (threadDate.isAfter(today)) {
+        todayThreads.add(thread);
+      } else if (threadDate.isAfter(thisWeek)) {
+        thisWeekThreads.add(thread);
+      } else {
+        olderThreads.add(thread);
+      }
+    }
+    
+    return {
+      'today': todayThreads,
+      'thisWeek': thisWeekThreads,
+      'older': olderThreads,
+    };
+  }
+
+  Future<void> _handleFilterTap(BuildContext context) async {
+    final filters = await InboxFilterSheet.show(
+      context: context,
+      initialFilters: _currentFilters,
+    );
+    if (filters != null && mounted) {
+      setState(() {
+        _currentFilters = filters;
+        _activeFilters = filters.activeFilterCount;
+        _applyAdvancedFilters(filters);
+      });
+    } else if (mounted) {
+      // User cancelled - clear filters
+      setState(() {
+        _currentFilters = null;
+        _activeFilters = 0;
+        _applyFilter();
+      });
     }
   }
 
@@ -123,9 +287,38 @@ class _InboxScreenState extends State<InboxScreen> {
         return a.unreadCount > 0 ? -1 : 1;
       }
       
+      // Phase 2: Smart prioritization - favor frequently accessed threads
+      final aTapCount = _threadTapCounts[a.id] ?? 0;
+      final bTapCount = _threadTapCounts[b.id] ?? 0;
+      if (aTapCount != bTapCount) {
+        return bTapCount.compareTo(aTapCount); // Higher tap count first
+      }
+      
+      // Phase 2: Favor recently opened threads
+      final aLastOpened = _threadLastOpened[a.id];
+      final bLastOpened = _threadLastOpened[b.id];
+      if (aLastOpened != null && bLastOpened != null) {
+        return bLastOpened.compareTo(aLastOpened);
+      }
+      if (aLastOpened != null) return -1; // a was opened, b wasn't
+      if (bLastOpened != null) return 1;  // b was opened, a wasn't
+      
       // Finally by recency
       return b.lastMessageTime.compareTo(a.lastMessageTime);
     });
+    
+    // Phase 2: Contextual hiding - hide threads inactive for >30 days (unless unread or recently opened)
+    final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
+    _filteredThreads = _filteredThreads.where((thread) {
+      // Always show: unread, pinned, recently opened, or updated in last 30 days
+      if (thread.unreadCount > 0) return true;
+      if (thread.isPinned) return true;
+      if (_threadLastOpened[thread.id] != null && 
+          _threadLastOpened[thread.id]!.isAfter(thirtyDaysAgo)) return true;
+      if (thread.lastMessageTime.isAfter(thirtyDaysAgo)) return true;
+      // Hide: inactive for >30 days and not recently opened
+      return false;
+    }).toList();
   }
 
   void _applyAdvancedFilters(InboxFilters filters) {
@@ -256,80 +449,54 @@ class _InboxScreenState extends State<InboxScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: FrostedAppBar(
+    // Phase 3: Keyboard shortcuts wrapper
+    return Shortcuts(
+      shortcuts: AppShortcuts.getInboxShortcuts(() {
+        // Compose new message
+        ComposeMessageSheet.show(context: context);
+      }),
+      child: Actions(
+        actions: {
+          SearchIntent: CallbackAction<SearchIntent>(
+            onInvoke: (_) {
+              // Focus search bar
+              Navigator.push(
+                context,
+                _createPageRoute(const MessageSearchScreen()),
+              );
+            },
+          ),
+          CreateIntent: CallbackAction<CreateIntent>(
+            onInvoke: (_) {
+              ComposeMessageSheet.show(context: context);
+            },
+          ),
+          RefreshIntent: CallbackAction<RefreshIntent>(
+            onInvoke: (_) {
+              _loadMessages();
+            },
+          ),
+          CloseIntent: CallbackAction<CloseIntent>(
+            onInvoke: (_) {
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
+            },
+          ),
+        },
+        child: Focus(
+          autofocus: true,
+          child: Scaffold(
+            extendBody: true,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            appBar: FrostedAppBar(
         scaffoldKey: main_nav.MainNavigation.scaffoldKey,
         title: _isBatchMode 
             ? '${_selectedThreadIds.length} selected'
             : 'Inbox',
+        notificationBadgeCount: _isBatchMode ? null : (_unreadCount > 0 ? _unreadCount : null),
+        // Phase 2: AnimatedCounter for unread count (if displayed elsewhere)
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MessageSearchScreen(),
-                ),
-              );
-            },
-          ),
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.filter_list_outlined),
-                onPressed: () async {
-                  final filters = await InboxFilterSheet.show(
-                    context: context,
-                    initialFilters: _currentFilters,
-                  );
-                  if (filters != null) {
-                    setState(() {
-                      _currentFilters = filters;
-                      _activeFilters = filters.activeFilterCount;
-                      // Apply filters inside setState to ensure UI updates
-                      _applyAdvancedFilters(filters);
-                    });
-                  } else {
-                    // User cancelled - clear filters
-                    setState(() {
-                      _currentFilters = null;
-                      _activeFilters = 0;
-                      _applyFilter(); // Reapply default filter
-                    });
-                  }
-                },
-              ),
-              if (_activeFilters > 0)
-                Positioned(
-                  right: 8,
-                  top: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Color(SwiftleadTokens.primaryTeal),
-                      shape: BoxShape.circle,
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    child: Text(
-                      '$_activeFilters',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-            ],
-          ),
           if (_isBatchMode)
             IconButton(
               icon: const Icon(Icons.close),
@@ -342,40 +509,85 @@ class _InboxScreenState extends State<InboxScreen> {
             ),
           if (!_isBatchMode)
           IconButton(
-            icon: const Icon(Icons.schedule_outlined),
-            tooltip: 'Scheduled Messages',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ScheduledMessagesScreen(),
-                ),
-              );
-            },
-          ),
-          IconButton(
             icon: const Icon(Icons.edit),
+            tooltip: 'Compose',
             onPressed: () async {
               final result = await ComposeMessageSheet.show(context: context);
               if (result != null && mounted) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => InboxThreadScreen(
-                      contactName: result.contactName,
-                      channel: result.channel,
-                      contactId: result.contactId,
-                    ),
-                  ),
+                  _createPageRoute(InboxThreadScreen(
+                    contactName: result.contactName,
+                    channel: result.channel,
+                    contactId: result.contactId,
+                  )),
                 );
               }
             },
           ),
+          if (!_isBatchMode)
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            tooltip: 'More',
+            onSelected: (value) {
+              switch (value) {
+                case 'scheduled':
+                  Navigator.push(
+                    context,
+                    _createPageRoute(const ScheduledMessagesScreen()),
+                  );
+                  break;
+                case 'filter':
+                  // Show filter sheet
+                  _handleFilterTap(context);
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'scheduled',
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.schedule_outlined, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Scheduled Messages',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'filter',
+                child: Builder(
+                  builder: (context) => Row(
+                    children: [
+                      const Icon(Icons.filter_list_outlined, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Filter',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
-      body: _isLoading
-          ? _buildLoadingState()
-          : _buildContent(),
+            body: _isLoading
+                ? _buildLoadingState()
+                : _buildContent(),
+          ),
+        ),
+      ),
     );
   }
 
@@ -404,6 +616,60 @@ class _InboxScreenState extends State<InboxScreen> {
   Widget _buildContent() {
     return Column(
       children: [
+        // Celebration banner (if milestone reached)
+        if (_celebrationMessage != null) ...[
+          Padding(
+            padding: const EdgeInsets.only(
+              left: SwiftleadTokens.spaceM,
+              right: SwiftleadTokens.spaceM,
+              top: SwiftleadTokens.spaceM,
+            ),
+            child: CelebrationBanner(
+              message: _celebrationMessage!,
+              onDismiss: () {
+                setState(() => _celebrationMessage = null);
+              },
+            ),
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
+        ],
+        
+        // Phase 2: AI Insight Banner - Predictive insights
+        if (_threads.isNotEmpty && _unreadCount > 5) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+            child: AIInsightBanner(
+              message: 'You have $_unreadCount unread messages. Consider batching replies to similar inquiries.',
+              onTap: () {
+                // Navigate to filtered view of unread
+              },
+              onDismiss: () {
+                // Store dismissal preference
+              },
+            ),
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+        ],
+        
+        // Search Bar - iOS pattern: integrated into content
+        Padding(
+          padding: EdgeInsets.only(
+            left: SwiftleadTokens.spaceM,
+            right: SwiftleadTokens.spaceM,
+            top: _celebrationMessage == null ? SwiftleadTokens.spaceM : 0,
+          ),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                _createPageRoute(const MessageSearchScreen()),
+              );
+            },
+            child: SwiftleadSearchBar(
+              hintText: 'Search messages...',
+            ),
+          ),
+        ),
         // ChannelFilterChipsRow - Horizontal scrollable chips
         Container(
           padding: const EdgeInsets.symmetric(vertical: SwiftleadTokens.spaceM),
@@ -466,6 +732,7 @@ class _InboxScreenState extends State<InboxScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  // Primary actions (iOS pattern: 2-3 most common)
                   _buildBatchActionButton(
                     icon: Icons.archive_outlined,
                     label: 'Archive',
@@ -476,16 +743,42 @@ class _InboxScreenState extends State<InboxScreen> {
                     label: 'Mark Read',
                     onPressed: _handleBatchMarkRead,
                   ),
-                  _buildBatchActionButton(
-                    icon: Icons.push_pin_outlined,
-                    label: 'Pin',
-                    onPressed: _handleBatchPin,
-                  ),
-                  _buildBatchActionButton(
-                    icon: Icons.delete_outline,
-                    label: 'Delete',
-                    onPressed: _handleBatchDelete,
-                    isDestructive: true,
+                  // More menu for secondary actions (iOS pattern)
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert),
+                    tooltip: 'More',
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'pin':
+                          _handleBatchPin();
+                          break;
+                        case 'delete':
+                          _handleBatchDelete();
+                          break;
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'pin',
+                        child: Row(
+                          children: [
+                            Icon(Icons.push_pin_outlined, size: 20),
+                            SizedBox(width: 12),
+                            Text('Pin'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete_outline, size: 20, color: Color(SwiftleadTokens.errorRed)),
+                            SizedBox(width: 12),
+                            Text('Delete', style: TextStyle(color: Color(SwiftleadTokens.errorRed))),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -665,6 +958,7 @@ class _InboxScreenState extends State<InboxScreen> {
       );
     }
 
+    // Phase 3: Enhanced animations - staggered list animations
     return ListView.builder(
       padding: const EdgeInsets.only(
         left: SwiftleadTokens.spaceM,
@@ -674,12 +968,51 @@ class _InboxScreenState extends State<InboxScreen> {
       itemCount: _filteredThreads.length,
       itemBuilder: (context, index) {
         final thread = _filteredThreads[index];
-        final isPinned = MockMessages.isThreadPinned(thread.id) || thread.isPinned; // Check both set and original value
-        final isUnread = thread.unreadCount > 0;
-        final isMuted = MockMessages.isThreadMuted(thread.id);
-        final channelName = thread.channel.displayName;
-        
-        return Dismissible(
+        // Phase 3: Staggered animation delay for smooth appearance
+        return TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.0, end: 1.0),
+          duration: Duration(milliseconds: 300 + (index * 50).clamp(0, 200)),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, 20 * (1 - value)),
+                child: child,
+              ),
+            );
+          },
+          child: _buildThreadItem(thread, index),
+        );
+      },
+    );
+  }
+  
+  Widget _buildSectionHeader(String title, int count) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: SwiftleadTokens.spaceM,
+        bottom: SwiftleadTokens.spaceS,
+      ),
+      child: Text(
+        '$title ($count)',
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: Theme.of(context).brightness == Brightness.light
+              ? Colors.black.withOpacity(0.6)
+              : Colors.white.withOpacity(0.6),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildThreadItem(MessageThread thread, int index) {
+    final isPinned = MockMessages.isThreadPinned(thread.id) || thread.isPinned;
+    final isUnread = thread.unreadCount > 0;
+    final isMuted = MockMessages.isThreadMuted(thread.id);
+    final channelName = thread.channel.displayName;
+    
+    return Dismissible(
           key: Key('chat_${thread.id}'),
           direction: DismissDirection.horizontal,
           background: Container(
@@ -801,16 +1134,15 @@ class _InboxScreenState extends State<InboxScreen> {
                 });
               } else {
                 // Normal tap - open thread
+                _trackThreadInteraction(thread.id);
                 final result = await Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => InboxThreadScreen(
-                      contactName: thread.contactName,
-                      channel: channelName,
-                      contactId: thread.contactId,
-                      threadId: thread.id,
-                    ),
-                  ),
+                  _createPageRoute(InboxThreadScreen(
+                    contactName: thread.contactName,
+                    channel: channelName,
+                    contactId: thread.contactId,
+                    threadId: thread.id,
+                  )),
                 );
                 
                 // If mute/archive state changed, refresh the list
@@ -821,6 +1153,8 @@ class _InboxScreenState extends State<InboxScreen> {
             },
             onLongPress: () {
               HapticFeedback.mediumImpact();
+              // Phase 3: Rich tooltip on long-press
+              _showRichThreadTooltip(context, thread);
               if (!_isBatchMode) {
                 // Show conversation preview (v2.5.1 enhancement)
                 ConversationPreviewSheet.show(
@@ -831,16 +1165,15 @@ class _InboxScreenState extends State<InboxScreen> {
                     switch (action) {
                       case 'open':
                         // Open full conversation
+                        _trackThreadInteraction(thread.id);
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => InboxThreadScreen(
-                              contactName: thread.contactName,
-                              channel: thread.channel.displayName,
-                              contactId: thread.contactId,
-                              threadId: thread.id,
-                            ),
-                          ),
+                          _createPageRoute(InboxThreadScreen(
+                            contactName: thread.contactName,
+                            channel: thread.channel.displayName,
+                            contactId: thread.contactId,
+                            threadId: thread.id,
+                          )),
                         );
                         break;
                       case 'view_contact':
@@ -1017,8 +1350,6 @@ class _InboxScreenState extends State<InboxScreen> {
             ),
           ),
         );
-      },
-    );
   }
 
   void _showContextMenu(BuildContext context, MessageThread thread) {
@@ -1241,6 +1572,48 @@ class _InboxScreenState extends State<InboxScreen> {
       context: context,
       barrierColor: Colors.transparent,
       builder: (dialogContext) => _buildContextMenuDialog(dialogContext, menuItems),
+    );
+  }
+
+  void _showRichThreadTooltip(BuildContext context, MessageThread thread) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => FrostedContainer(
+        padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
+        margin: const EdgeInsets.all(SwiftleadTokens.spaceM),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              thread.contactName,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: SwiftleadTokens.spaceS),
+            Text(
+              'Channel: ${thread.channel.displayName}',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            if (thread.unreadCount > 0) ...[
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              Text(
+                'Unread: ${thread.unreadCount} messages',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: const Color(SwiftleadTokens.primaryTeal),
+                ),
+              ),
+            ],
+            const SizedBox(height: SwiftleadTokens.spaceM),
+            Text(
+              'Last message: ${thread.lastMessage}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
     );
   }
 

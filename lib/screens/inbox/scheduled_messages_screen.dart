@@ -264,35 +264,57 @@ class _ScheduledMessagesScreenState extends State<ScheduledMessagesScreen> {
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'edit',
-                    child: Row(
-                      children: [
-                        Icon(Icons.edit, size: 18),
-                        SizedBox(width: 8),
-                        Text('Edit'),
-                      ],
+                    child: Builder(
+                      builder: (context) => Row(
+                        children: [
+                          const Icon(Icons.edit, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Edit',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'cancel',
-                    child: Row(
-                      children: [
-                        Icon(Icons.cancel_outlined, size: 18),
-                        SizedBox(width: 8),
-                        Text('Cancel'),
-                      ],
+                    child: Builder(
+                      builder: (context) => Row(
+                        children: [
+                          const Icon(Icons.cancel_outlined, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Cancel',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const PopupMenuDivider(),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Delete', style: TextStyle(color: Colors.red)),
-                      ],
+                    child: Builder(
+                      builder: (context) => Row(
+                        children: [
+                          const Icon(Icons.delete_outline, size: 18, color: Color(SwiftleadTokens.errorRed)),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Delete',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: const Color(SwiftleadTokens.errorRed),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],

@@ -29,6 +29,7 @@ import 'create_edit_job_screen.dart';
 import '../quotes/create_edit_quote_screen.dart';
 import '../money/create_edit_invoice_screen.dart';
 import '../inbox/inbox_thread_screen.dart';
+import '../../utils/profession_config.dart';
 
 /// JobDetailScreen - Comprehensive job view
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -191,7 +192,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     
     final confirmed = await SwiftleadConfirmationDialog.show(
       context: context,
-      title: 'Mark Job Complete',
+      title: 'Mark ${ProfessionState.config.getLabel('Job')} Complete',
       description: 'Are you sure you want to mark "${_job!.title}" as complete?',
       primaryActionLabel: 'Mark Complete',
       secondaryActionLabel: 'Cancel',
@@ -323,7 +324,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         ),
         body: Center(
           child: EmptyStateCard(
-            title: _error ?? 'Job not found',
+            title: _error ?? '${ProfessionState.config.getLabel('Job')} not found',
             description: 'Unable to load job details',
             icon: Icons.error_outline,
           ),
@@ -393,7 +394,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 case 'delete':
                   SwiftleadConfirmationDialog.show(
                     context: context,
-                    title: 'Delete Job',
+                    title: 'Delete ${ProfessionState.config.getLabel('Job')}',
                     description: 'Are you sure you want to delete this job? This action cannot be undone.',
                     primaryActionLabel: 'Delete',
                     isDestructive: true,
@@ -413,26 +414,48 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'assign', child: Text('Assign')),
-              const PopupMenuItem(value: 'export', child: Text('Export')),
-              const PopupMenuItem(value: 'delete', child: Text('Delete')),
+              PopupMenuItem(
+                value: 'assign',
+                child: Text(
+                  'Assign',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'export',
+                child: Text(
+                  'Export',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Text(
+                  'Delete',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: const Color(SwiftleadTokens.errorRed),
+                  ),
+                ),
+              ),
             ],
           ),
         ],
       ),
       body: Column(
         children: [
-          // Scrollable header section
-          Flexible(
+          // Scrollable content section
+          Expanded(
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // JobSummaryCard - Key information at top
                   _buildJobSummaryCard(),
-                  
-                  // ActionButtonsRow - Sticky on scroll
-                  _buildActionButtonsRow(),
                 ],
               ),
             ),
@@ -440,6 +463,9 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           
           // JobTabView - Horizontal tabs (fixed at bottom)
           _buildJobTabView(),
+          
+          // iOS-style bottom toolbar (sticky at bottom)
+          _buildBottomToolbar(),
         ],
       ),
     );
@@ -593,43 +619,100 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     );
   }
 
-  Widget _buildActionButtonsRow() {
+  Widget _buildBottomToolbar() {
+    // iOS-style bottom toolbar: Secondary actions in toolbar, primary action below
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: SwiftleadTokens.spaceM,
-        vertical: SwiftleadTokens.spaceS,
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Wrap(
-            spacing: SwiftleadTokens.spaceS,
-            runSpacing: SwiftleadTokens.spaceS,
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Secondary actions toolbar (iOS pattern: icon + label)
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SwiftleadTokens.spaceM,
+                vertical: SwiftleadTokens.spaceS,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _ToolbarAction(
+                    icon: Icons.message,
+                    label: 'Message',
+                    onTap: _handleMessageClient,
+                  ),
+                  _ToolbarAction(
+                    icon: Icons.request_quote,
+                    label: 'Quote',
+                    onTap: _handleCreateQuoteFromJob,
+                  ),
+                  _ToolbarAction(
+                    icon: Icons.receipt,
+                    label: 'Invoice',
+                    onTap: _handleSendInvoiceFromJob,
+                  ),
+                ],
+              ),
+            ),
+            // Primary action: Full-width button at bottom (iOS pattern)
+            Container(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: PrimaryButton(
+                label: 'Mark Complete',
+                onPressed: _job != null && _job!.status != JobStatus.completed ? _handleMarkComplete : null,
+                icon: Icons.check_circle,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  // Helper widget for toolbar actions (iOS pattern: icon + label)
+  Widget _ToolbarAction({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusButton),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: SwiftleadTokens.spaceS,
+            horizontal: SwiftleadTokens.spaceXS,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              OutlinedButton.icon(
-                onPressed: _handleMessageClient,
-                icon: const Icon(Icons.message),
-                label: const Text('Message Client'),
+              Icon(
+                icon,
+                size: 24,
+                color: const Color(SwiftleadTokens.primaryTeal),
               ),
-              OutlinedButton.icon(
-                onPressed: _handleCreateQuoteFromJob,
-                icon: const Icon(Icons.request_quote),
-                label: const Text('Send Quote'),
-              ),
-              OutlinedButton.icon(
-                onPressed: _handleSendInvoiceFromJob,
-                icon: const Icon(Icons.receipt),
-                label: const Text('Send Invoice'),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontSize: 11,
+                  color: const Color(SwiftleadTokens.primaryTeal),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: SwiftleadTokens.spaceS),
-          PrimaryButton(
-            label: 'Mark Complete',
-            onPressed: _job != null && _job!.status != JobStatus.completed ? _handleMarkComplete : null,
-            icon: Icons.check_circle,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -706,7 +789,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                           else
                             const SizedBox(width: 18),
                           const SizedBox(width: SwiftleadTokens.spaceS),
-                          Text(option),
+                          Text(
+                            option,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ],
                       ),
                     );

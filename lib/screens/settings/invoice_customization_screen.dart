@@ -3,6 +3,7 @@ import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/primary_button.dart';
 import '../../theme/tokens.dart';
+import '../../utils/profession_config.dart';
 
 /// InvoiceCustomizationScreen - Customize invoice templates and branding
 /// Exact specification from UI_Inventory_v2.5.1
@@ -14,6 +15,20 @@ class InvoiceCustomizationScreen extends StatefulWidget {
 }
 
 class _InvoiceCustomizationScreenState extends State<InvoiceCustomizationScreen> {
+  String _getProfessionDisplayName(ProfessionType profession) {
+    switch (profession) {
+      case ProfessionType.trade:
+        return 'trades';
+      case ProfessionType.homeServices:
+        return 'home services';
+      case ProfessionType.professionalServices:
+        return 'professional services';
+      case ProfessionType.autoServices:
+        return 'auto services';
+      case ProfessionType.custom:
+        return 'your profession';
+    }
+  }
   String _logoUrl = '';
   String _companyName = 'Swiftlead Plumbing';
   String _companyAddress = '123 Business Street, London SW1A 1AA';
@@ -32,12 +47,45 @@ class _InvoiceCustomizationScreenState extends State<InvoiceCustomizationScreen>
     return Scaffold(
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: const FrostedAppBar(
-        title: 'Invoice Customization',
+      appBar: FrostedAppBar(
+        title: '${ProfessionState.config.getLabel('Invoice')} Customization',
       ),
       body: ListView(
         padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
         children: [
+          // Profession-specific template info
+          FrostedContainer(
+            padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: const Color(SwiftleadTokens.infoBlue),
+                      size: 20,
+                    ),
+                    const SizedBox(width: SwiftleadTokens.spaceS),
+                    Expanded(
+                      child: Text(
+                        'Template: ${ProfessionState.currentProfession.name}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: SwiftleadTokens.spaceS),
+                Text(
+                  'This ${ProfessionState.config.getLabel('invoice').toLowerCase()} template is customized for ${_getProfessionDisplayName(ProfessionState.currentProfession)}.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
           // Logo Section
           FrostedContainer(
             padding: const EdgeInsets.all(SwiftleadTokens.spaceM),

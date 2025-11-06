@@ -12,6 +12,7 @@ import '../../mock/mock_payments.dart';
 import '../../widgets/components/chase_history_timeline.dart';
 import '../../widgets/forms/link_invoice_to_job_sheet.dart';
 import '../../theme/tokens.dart';
+import '../../utils/profession_config.dart';
 import 'create_edit_invoice_screen.dart';
 
 /// InvoiceDetailScreen - Comprehensive invoice view
@@ -60,7 +61,7 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
   Future<void> _handleMarkPaid() async {
     final confirmed = await SwiftleadConfirmationDialog.show(
       context: context,
-      title: 'Mark Invoice as Paid',
+      title: 'Mark ${ProfessionState.config.getLabel('Invoice')} as Paid',
       description: 'Are you sure you want to mark this invoice as paid?',
       primaryActionLabel: 'Mark as Paid',
       secondaryActionLabel: 'Cancel',
@@ -89,7 +90,7 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
   Future<void> _handleDeleteInvoice() async {
     final confirmed = await SwiftleadConfirmationDialog.show(
       context: context,
-      title: 'Delete Invoice',
+      title: 'Delete ${ProfessionState.config.getLabel('Invoice')}',
       description: 'Are you sure you want to delete this invoice? This action cannot be undone.',
       primaryActionLabel: 'Delete',
       secondaryActionLabel: 'Cancel',
@@ -119,7 +120,7 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
   Future<void> _handleSendInvoice() async {
     final confirmed = await SwiftleadConfirmationDialog.show(
       context: context,
-      title: 'Send Invoice',
+      title: 'Send ${ProfessionState.config.getLabel('Invoice')}',
       description: 'Send invoice #${widget.invoiceNumber} to the client?',
       primaryActionLabel: 'Send',
       secondaryActionLabel: 'Cancel',
@@ -157,7 +158,7 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
-        title: 'Invoice #${widget.invoiceNumber}',
+        title: '${ProfessionState.config.getLabel('Invoice')} #${widget.invoiceNumber}',
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -204,31 +205,66 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'send', child: Text('Send Invoice')),
-              const PopupMenuItem(value: 'request_payment', child: Text('Request Payment')),
-              const PopupMenuItem(value: 'link_job', child: Text('Link to Job')),
-              const PopupMenuItem(value: 'mark_paid', child: Text('Mark as Paid')),
-              const PopupMenuItem(value: 'delete', child: Text('Delete')),
+              PopupMenuItem(
+                value: 'send',
+                child: Text(
+                  'Send Invoice',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'request_payment',
+                child: Text(
+                  'Request Payment',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'link_job',
+                child: Text(
+                  'Link to Job',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'mark_paid',
+                child: Text(
+                  'Mark as Paid',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Text(
+                  'Delete',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: const Color(SwiftleadTokens.errorRed),
+                  ),
+                ),
+              ),
             ],
           ),
         ],
       ),
-      body: _buildContent(),
-      floatingActionButton: _status == 'Pending' || _status == 'Overdue'
-          ? FloatingActionButton.extended(
-              onPressed: () {
-                PaymentLinkSheet.show(
-                  context: context,
-                  invoiceId: widget.invoiceId,
-                  invoiceNumber: widget.invoiceNumber,
-                  amount: _total,
-                );
-              },
-              icon: const Icon(Icons.payment),
-              label: const Text('Request Payment'),
-              backgroundColor: const Color(SwiftleadTokens.primaryTeal),
-            )
-          : null,
+      body: Column(
+        children: [
+          // Scrollable content
+          Expanded(
+            child: _buildContent(),
+          ),
+          // iOS-style bottom toolbar (sticky at bottom)
+          if (_status == 'Pending' || _status == 'Overdue') _buildBottomToolbar(),
+        ],
+      ),
     );
   }
 
@@ -248,62 +284,7 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
         _buildLineItems(),
         const SizedBox(height: SwiftleadTokens.spaceL),
 
-        // Payment Link Button
-        if (_status == 'Pending' || _status == 'Overdue')
-          PaymentLinkButton(
-            paymentLink: 'https://swiftlead.app/pay/${widget.invoiceId}',
-            showCopyButton: true,
-            onShare: () {
-              PaymentLinkSheet.show(
-                context: context,
-                invoiceId: widget.invoiceId,
-                invoiceNumber: widget.invoiceNumber,
-                amount: _total,
-              );
-            },
-          ),
-        if (_status == 'Pending' || _status == 'Overdue')
-          const SizedBox(height: SwiftleadTokens.spaceM),
-        // Split Payment Button
-        if (_status == 'Pending' || _status == 'Overdue')
-          OutlinedButton.icon(
-            onPressed: () {
-              _showSplitPaymentDialog();
-            },
-            icon: const Icon(Icons.account_balance_wallet),
-            label: const Text('Record Split Payment'),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 48),
-            ),
-          ),
-        if (_status == 'Pending' || _status == 'Overdue')
-          const SizedBox(height: SwiftleadTokens.spaceM),
-        // Feature 36: Payment Plans
-        if (_status == 'Pending' || _status == 'Overdue')
-          OutlinedButton.icon(
-            onPressed: () {
-              _showPaymentPlanDialog();
-            },
-            icon: const Icon(Icons.calendar_today),
-            label: const Text('Set Up Payment Plan'),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 48),
-            ),
-          ),
-        if (_status == 'Pending' || _status == 'Overdue')
-          const SizedBox(height: SwiftleadTokens.spaceM),
-        // Feature 38: Offline Payment
-        if (_status == 'Pending' || _status == 'Overdue')
-          OutlinedButton.icon(
-            onPressed: () {
-              _showOfflinePaymentDialog();
-            },
-            icon: const Icon(Icons.payment),
-            label: const Text('Record Offline Payment'),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 48),
-            ),
-          ),
+        // Payment Link Button (moved to bottom toolbar for pending/overdue)
         if (_status == 'Pending' || _status == 'Overdue')
           const SizedBox(height: SwiftleadTokens.spaceL),
 
@@ -1231,6 +1212,128 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
         return const Color(SwiftleadTokens.textSecondaryLight);
     }
   }
+
+  Widget _buildBottomToolbar() {
+    // iOS-style bottom toolbar: Secondary actions in toolbar, primary action below
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Secondary actions toolbar (iOS pattern: icon + label)
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SwiftleadTokens.spaceM,
+                vertical: SwiftleadTokens.spaceS,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _ToolbarAction(
+                    icon: Icons.account_balance_wallet,
+                    label: 'Split',
+                    onTap: _showSplitPaymentDialog,
+                  ),
+                  _ToolbarAction(
+                    icon: Icons.calendar_today,
+                    label: 'Plan',
+                    onTap: _showPaymentPlanDialog,
+                  ),
+                  _ToolbarAction(
+                    icon: Icons.payment,
+                    label: 'Offline',
+                    onTap: _showOfflinePaymentDialog,
+                  ),
+                ],
+              ),
+            ),
+            // Primary action: Full-width button at bottom (iOS pattern)
+            Container(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        PaymentLinkSheet.show(
+                          context: context,
+                          invoiceId: widget.invoiceId,
+                          invoiceNumber: widget.invoiceNumber,
+                          amount: _total,
+                        );
+                      },
+                      icon: const Icon(Icons.payment),
+                      label: const Text('Request Payment'),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 48),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: SwiftleadTokens.spaceS),
+                  Expanded(
+                    child: PrimaryButton(
+                      label: 'Mark Paid',
+                      onPressed: _handleMarkPaid,
+                      icon: Icons.check_circle,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helper widget for toolbar actions (iOS pattern: icon + label)
+  Widget _ToolbarAction({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusButton),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: SwiftleadTokens.spaceS,
+            horizontal: SwiftleadTokens.spaceXS,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 24,
+                color: const Color(SwiftleadTokens.primaryTeal),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontSize: 11,
+                  color: const Color(SwiftleadTokens.primaryTeal),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _InvoiceLineItemRow extends StatelessWidget {
@@ -1380,6 +1483,7 @@ class _PaymentHistoryItem extends StatelessWidget {
       ],
     );
   }
+
 }
 
 class _InfoRow extends StatelessWidget {

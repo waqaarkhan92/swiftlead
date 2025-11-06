@@ -10,6 +10,7 @@ import '../../widgets/forms/send_quote_sheet.dart';
 import '../../widgets/forms/convert_quote_modal.dart';
 import '../../widgets/global/toast.dart';
 import '../../theme/tokens.dart';
+import '../../utils/profession_config.dart';
 import 'create_edit_quote_screen.dart';
 
 /// QuoteDetailScreen - Comprehensive quote view
@@ -63,7 +64,7 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
   void _handleDeleteQuote() async {
     final confirmed = await SwiftleadConfirmationDialog.show(
       context: context,
-      title: 'Delete Quote',
+      title: 'Delete ${ProfessionState.config.getLabel('Quote')}',
       description: 'Are you sure you want to delete ${widget.quoteNumber}? This action cannot be undone.',
       isDestructive: true,
       icon: Icons.delete_outline,
@@ -90,7 +91,7 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
-        title: 'Quote #${widget.quoteNumber}',
+        title: '${ProfessionState.config.getLabel('Quote')} #${widget.quoteNumber}',
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -149,21 +150,70 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'send', child: Text('Send Quote')),
+              PopupMenuItem(
+                value: 'send',
+                child: Text(
+                  'Send Quote',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
               // Feature 33: One-Click Resend
               if (_status == 'Sent' || _status == 'Viewed')
-                const PopupMenuItem(value: 'resend', child: Text('Resend with Updated Expiry')),
-              const PopupMenuItem(value: 'convert_job', child: Text('Convert to Job')),
-              const PopupMenuItem(value: 'convert_invoice', child: Text('Convert to Invoice')),
-              const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                PopupMenuItem(
+                  value: 'resend',
+                  child: Text(
+                    'Resend with Updated Expiry',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              PopupMenuItem(
+                value: 'convert_job',
+                child: Text(
+                  'Convert to Job',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'convert_invoice',
+                child: Text(
+                  'Convert to Invoice',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Text(
+                  'Delete',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: const Color(SwiftleadTokens.errorRed),
+                  ),
+                ),
+              ),
             ],
           ),
         ],
       ),
-      body: _isLoading
-          ? _buildLoadingState()
-          : _buildContent(),
-      floatingActionButton: _buildQuickActions(),
+      body: Column(
+        children: [
+          // Scrollable content
+          Expanded(
+            child: _isLoading
+                ? _buildLoadingState()
+                : _buildContent(),
+          ),
+          // iOS-style bottom toolbar (sticky at bottom)
+          if (_status == 'Draft' || _status == 'Sent' || _status == 'Viewed') _buildBottomToolbar(),
+        ],
+      ),
     );
   }
 
@@ -651,6 +701,63 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
       );
     }
     return const SizedBox.shrink();
+  }
+
+  Widget _buildBottomToolbar() {
+    // iOS-style bottom toolbar: Primary action based on status
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Container(
+          padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+          child: _status == 'Draft'
+              ? PrimaryButton(
+                  label: 'Send Quote',
+                  onPressed: () {
+                    SendQuoteSheet.show(
+                      context: context,
+                      quoteId: widget.quoteId,
+                      quoteNumber: widget.quoteNumber,
+                      clientName: 'John Smith',
+                      amount: _total,
+                    );
+                  },
+                  icon: Icons.send,
+                )
+              : _status == 'Sent' || _status == 'Viewed'
+                  ? PrimaryButton(
+                      label: 'Accept Quote',
+                      onPressed: _handleAcceptQuoteWithDeposit,
+                      icon: Icons.check,
+                    )
+                  : _status == 'Accepted'
+                      ? PrimaryButton(
+                          label: 'Convert',
+                          onPressed: () {
+                            ConvertQuoteModal.show(
+                              context: context,
+                              quoteId: widget.quoteId,
+                              quoteNumber: widget.quoteNumber,
+                              clientName: 'John Smith',
+                              amount: _total,
+                            );
+                          },
+                          icon: Icons.arrow_forward,
+                        )
+                      : const SizedBox.shrink(),
+        ),
+      ),
+    );
   }
 
   // Feature 33: One-Click Resend with updated expiry

@@ -31,7 +31,6 @@ class _DataExportScreenState extends State<DataExportScreen> {
     'bookings': 'Calendar & Bookings',
     'quotes': 'Quotes & Estimates',
     'reviews': 'Reviews & Feedback',
-    'campaigns': 'Marketing Campaigns',
     'settings': 'Settings & Preferences',
     'analytics': 'Analytics & Reports',
   };

@@ -9,6 +9,7 @@ import '../../widgets/global/toast.dart';
 import '../../widgets/forms/ai_quote_assistant_sheet.dart';
 import 'package:flutter/services.dart';
 import '../../theme/tokens.dart';
+import '../../utils/profession_config.dart';
 
 /// Create/Edit Quote Form - Create or edit a quote
 /// Exact specification from UI_Inventory_v2.5.1
@@ -114,7 +115,7 @@ class _CreateEditQuoteScreenState extends State<CreateEditQuoteScreen> {
         HapticFeedback.mediumImpact();
         Toast.show(
           context,
-          message: widget.quoteId != null ? 'Quote updated' : 'Quote created',
+          message: widget.quoteId != null ? '${ProfessionState.config.getLabel('Quote')} updated' : '${ProfessionState.config.getLabel('Quote')} created',
           type: ToastType.success,
         );
         Navigator.of(context).pop();
@@ -142,7 +143,7 @@ class _CreateEditQuoteScreenState extends State<CreateEditQuoteScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: FrostedAppBar(
-        title: widget.quoteId != null ? 'Edit Quote' : 'Create Quote',
+        title: widget.quoteId != null ? 'Edit ${ProfessionState.config.getLabel('Quote')}' : 'Create ${ProfessionState.config.getLabel('Quote')}',
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -203,106 +204,140 @@ class _CreateEditQuoteScreenState extends State<CreateEditQuoteScreen> {
               const SizedBox(height: SwiftleadTokens.spaceM),
             ],
 
-            // Client Selector
-            TextFormField(
-              controller: _clientController,
-              decoration: InputDecoration(
-                labelText: 'Client *',
-                hintText: 'Select or enter client name',
-                suffixIcon: const Icon(Icons.person),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-                ),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please select a client';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: SwiftleadTokens.spaceM),
-
-            // Valid Until Date
-            Text(
-              'Valid Until *',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: SwiftleadTokens.spaceS),
-            OutlinedButton.icon(
-              onPressed: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _validUntil ?? DateTime.now(),
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 365)),
-                );
-                if (picked != null) {
-                  setState(() {
-                    _validUntil = picked;
-                  });
-                }
-              },
-              icon: const Icon(Icons.event),
-              label: Text(
-                _validUntil != null
-                    ? '${_validUntil!.day}/${_validUntil!.month}/${_validUntil!.year}'
-                    : 'Select Date',
-              ),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 52),
-              ),
-            ),
-            const SizedBox(height: SwiftleadTokens.spaceM),
-
-            // Tax Rate
-            Text(
-              'Tax Rate',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: SwiftleadTokens.spaceS),
-            Row(
-              children: [
-                Expanded(
-                  child: Slider(
-                    value: _taxRate,
-                    min: 0,
-                    max: 30,
-                    divisions: 30,
-                    label: '${_taxRate.toStringAsFixed(0)}%',
-                    onChanged: (value) {
-                      setState(() {
-                        _taxRate = value;
-                      });
-                    },
-                  ),
-                ),
-                SizedBox(
-                  width: 60,
-                  child: Text(
-                    '${_taxRate.toStringAsFixed(0)}%',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
+            // iOS-style grouped sections
+            // Section 1: Client Information
+            FrostedContainer(
+              padding: EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Text(
+                      'Client Information',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    textAlign: TextAlign.right,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: SwiftleadTokens.spaceM),
-
-            // Line Items
-            Text(
-              'Line Items *',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _clientController,
+                          decoration: InputDecoration(
+                            labelText: 'Client *',
+                            hintText: 'Select or enter client name',
+                            suffixIcon: const Icon(Icons.person),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select a client';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceM),
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: _validUntil ?? DateTime.now(),
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime.now().add(const Duration(days: 365)),
+                            );
+                            if (picked != null) {
+                              setState(() {
+                                _validUntil = picked;
+                              });
+                            }
+                          },
+                          icon: const Icon(Icons.event),
+                          label: Text(
+                            _validUntil != null
+                                ? 'Valid Until: ${_validUntil!.day}/${_validUntil!.month}/${_validUntil!.year}'
+                                : 'Select Valid Until Date',
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(double.infinity, 52),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: SwiftleadTokens.spaceS),
+            const SizedBox(height: SwiftleadTokens.spaceM),
+            // Section 2: Pricing & Line Items
+            FrostedContainer(
+              padding: EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Text(
+                      'Pricing & Line Items',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Column(
+                      children: [
+                                    Text(
+                          'Tax Rate',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceS),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Slider(
+                                value: _taxRate,
+                                min: 0,
+                                max: 30,
+                                divisions: 30,
+                                label: '${_taxRate.toStringAsFixed(0)}%',
+                                onChanged: (value) {
+                                  setState(() {
+                                    _taxRate = value;
+                                  });
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              width: 60,
+                              child: Text(
+                                '${_taxRate.toStringAsFixed(0)}%',
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceM),
+                        // Line Items
+                        Text(
+                          'Line Items *',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceS),
             // Feature 31: Visual Quote Editor - Drag-drop line items
             _lineItems.length <= 1
                 ? _buildLineItemRow(0)
@@ -337,25 +372,44 @@ class _CreateEditQuoteScreenState extends State<CreateEditQuoteScreen> {
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
 
-            // Totals Preview
-            FrostedContainer(
-              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-              child: Column(
-                children: [
-                  _TotalRow(label: 'Subtotal', amount: _subtotal),
-                  _TotalRow(label: 'Tax (${_taxRate.toStringAsFixed(0)}%)', amount: _tax),
-                  const Divider(),
-                  _TotalRow(
-                    label: 'Total',
-                    amount: _total,
-                    isTotal: true,
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
-
-            // Service Category
+            // Section 3: Totals & Additional Info
+            FrostedContainer(
+              padding: EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Text(
+                      'Totals & Additional Info',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                    child: Column(
+                      children: [
+                        // Totals Preview
+                        _TotalRow(label: 'Subtotal', amount: _subtotal),
+                        _TotalRow(label: 'Tax (${_taxRate.toStringAsFixed(0)}%)', amount: _tax),
+                        const Divider(),
+                        _TotalRow(
+                          label: 'Total',
+                          amount: _total,
+                          isTotal: true,
+                        ),
+                        const SizedBox(height: SwiftleadTokens.spaceM),
+                        // Service Category
             DropdownButtonFormField<String>(
               value: _serviceCategory,
               decoration: InputDecoration(
@@ -445,21 +499,26 @@ class _CreateEditQuoteScreenState extends State<CreateEditQuoteScreen> {
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
 
-            // Notes
-            TextFormField(
-              controller: _notesController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                labelText: 'Additional Notes (Optional)',
-                hintText: 'Add any additional notes...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-                ),
+                        // Notes
+                        TextFormField(
+                          controller: _notesController,
+                          maxLines: 3,
+                          decoration: InputDecoration(
+                            labelText: 'Additional Notes (Optional)',
+                            hintText: 'Add any additional notes...',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: SwiftleadTokens.spaceL),
-
-            // Save Button
+            const SizedBox(height: SwiftleadTokens.spaceM),
+            // Sticky save button (iOS pattern)
             if (_isSaving)
               const SwiftleadProgressBar()
             else
@@ -468,6 +527,7 @@ class _CreateEditQuoteScreenState extends State<CreateEditQuoteScreen> {
                 onPressed: _saveQuote,
                 icon: widget.quoteId != null ? Icons.save : Icons.add,
               ),
+            const SizedBox(height: SwiftleadTokens.spaceM),
           ],
         ),
       ),

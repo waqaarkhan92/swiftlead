@@ -60,13 +60,11 @@ class FrostedAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           child: AppBar(
             title: titleWidget ?? (title != null ? Text(title!) : null),
-            leading: leading ?? (automaticallyImplyLeading
+            leading: leading ?? (automaticallyImplyLeading && scaffoldKey != null
                 ? Builder(
                     builder: (context) => IconButton(
                       icon: const Icon(Icons.menu),
-                      onPressed: scaffoldKey != null 
-                          ? () => scaffoldKey!.currentState?.openDrawer()
-                          : () => Scaffold.of(context).openDrawer(),
+                      onPressed: () => scaffoldKey!.currentState?.openDrawer(),
                     ),
                   )
                 : null),
