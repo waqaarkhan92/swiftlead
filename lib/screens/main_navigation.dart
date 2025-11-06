@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/global/frosted_bottom_nav_bar.dart';
+import '../widgets/global/desktop_sidebar.dart';
 import '../widgets/global/drawer.dart';
 import 'home/home_screen.dart';
 import 'inbox/inbox_screen.dart';
@@ -15,6 +16,7 @@ import 'legal/legal_screen.dart';
 import 'contacts/contacts_screen.dart';
 import '../theme/tokens.dart';
 import '../utils/profession_config.dart';
+import '../utils/responsive_layout.dart';
 
 /// Main Navigation - Bottom tab navigation with drawer
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -113,7 +115,150 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = ResponsiveLayout.isDesktop(context);
+    
+    // Desktop layout: Sidebar + content
+    if (isDesktop) {
       return Scaffold(
+        key: MainNavigation.scaffoldKey,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        drawer: SwiftleadDrawer(
+          userName: 'Alex Johnson',
+          organizationName: 'ABC Plumbing',
+          planBadge: 'Swiftlead Pro',
+          onProfileTap: () {
+            Navigator.pop(context);
+            // Navigate to profile
+          },
+          items: [
+            DrawerItem(
+              icon: Icons.auto_awesome,
+              label: 'AI Hub',
+              isSelected: false,
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _drawerScreen = _drawerScreenMap['ai_hub']);
+              },
+            ),
+            DrawerItem(
+              icon: Icons.people_outline,
+              label: 'Contacts',
+              isSelected: false,
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _drawerScreen = _drawerScreenMap['contacts']);
+              },
+            ),
+            DrawerItem(
+              icon: Icons.analytics_outlined,
+              label: 'Reports & Analytics',
+              isSelected: false,
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _drawerScreen = _drawerScreenMap['reports']);
+              },
+            ),
+            DrawerItem(
+              icon: Icons.star_outline,
+              label: 'Reviews',
+              isSelected: false,
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _drawerScreen = _drawerScreenMap['reviews']);
+              },
+            ),
+            DrawerItem(
+              icon: Icons.settings_outlined,
+              label: 'Settings',
+              isSelected: false,
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _drawerScreen = _drawerScreenMap['settings']);
+              },
+            ),
+            DrawerItem(
+              icon: Icons.help_outline,
+              label: 'Support & Help',
+              isSelected: false,
+              badge: '2',
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _drawerScreen = _drawerScreenMap['support']);
+              },
+            ),
+            DrawerItem(
+              icon: Icons.privacy_tip_outlined,
+              label: 'Legal / Privacy',
+              isSelected: false,
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _drawerScreen = _drawerScreenMap['legal']);
+              },
+            ),
+          ],
+          footer: Column(
+            children: [
+              Text(
+                'Version 2.5.1',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).brightness == Brightness.light
+                      ? const Color(0xFF707070)
+                      : Colors.white.withOpacity(0.65),
+                ),
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: const Color(SwiftleadTokens.successGreen),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: SwiftleadTokens.spaceXS),
+                  Text(
+                    'Online',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              TextButton(
+                onPressed: () {
+                  // Logout
+                },
+                child: const Text('Logout'),
+              ),
+            ],
+          ),
+        ),
+        body: Row(
+          children: [
+            // Persistent sidebar on desktop
+            DesktopSidebar(
+              currentIndex: _drawerScreen != null ? -1 : _currentIndex,
+              onTap: (index) {
+                setState(() {
+                  _currentIndex = index;
+                  _drawerScreen = null; // Clear drawer screen when switching tabs
+                });
+              },
+              items: _navItems,
+            ),
+            // Main content
+            Expanded(
+              child: _drawerScreen ?? _screens[_currentIndex],
+            ),
+          ],
+        ),
+      );
+    }
+    
+    // Mobile/Tablet layout: Bottom nav (original behavior)
+    return Scaffold(
       key: MainNavigation.scaffoldKey,
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

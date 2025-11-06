@@ -68,21 +68,19 @@ class _AITrainingModeScreenState extends State<AITrainingModeScreen> {
     return Scaffold(
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: const FrostedAppBar(
+      appBar: FrostedAppBar(
         title: 'Train AI',
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => _showAddTrainingExampleSheet(context),
+            tooltip: 'Add Example',
+          ),
+        ],
       ),
       body: _isLoading
           ? _buildLoadingState()
           : _buildContent(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddTrainingExampleSheet(context),
-        backgroundColor: const Color(SwiftleadTokens.primaryTeal),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Add Example',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
     );
   }
 
@@ -106,7 +104,7 @@ class _AITrainingModeScreenState extends State<AITrainingModeScreen> {
       children: [
         // InfoBanner
         FrostedContainer(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
           child: Row(
             children: [
               const Icon(
@@ -181,7 +179,7 @@ class _AITrainingModeScreenState extends State<AITrainingModeScreen> {
           )
         else
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
             decoration: BoxDecoration(
               color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
               borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
@@ -315,7 +313,7 @@ class _TrainingExampleCard extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.4),
                 ),
                 child: Text(
                   category,

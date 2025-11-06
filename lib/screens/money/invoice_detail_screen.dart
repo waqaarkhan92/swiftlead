@@ -58,6 +58,29 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
     }
   }
 
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0.0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          )),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+  }
+
   Future<void> _handleMarkPaid() async {
     final confirmed = await SwiftleadConfirmationDialog.show(
       context: context,
@@ -164,20 +187,25 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
+          Semantics(
+            label: 'Edit invoice',
+            button: true,
+            child: IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => CreateEditInvoiceScreen(
-                    invoiceId: widget.invoiceId,
-                  ),
-                ),
+                _createPageRoute(CreateEditInvoiceScreen(
+                  invoiceId: widget.invoiceId,
+                )),
               );
             },
+            ),
           ),
-          PopupMenuButton<String>(
+          Semantics(
+            label: 'More options',
+            button: true,
+            child: PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (value) {
               switch (value) {
@@ -252,6 +280,7 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
                 ),
               ),
             ],
+            ),
           ),
         ],
       ),
@@ -1240,20 +1269,32 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _ToolbarAction(
-                    icon: Icons.account_balance_wallet,
-                    label: 'Split',
-                    onTap: _showSplitPaymentDialog,
+                  Semantics(
+                    label: 'Split payment',
+                    button: true,
+                    child: _ToolbarAction(
+                      icon: Icons.account_balance_wallet,
+                      label: 'Split',
+                      onTap: _showSplitPaymentDialog,
+                    ),
                   ),
-                  _ToolbarAction(
-                    icon: Icons.calendar_today,
-                    label: 'Plan',
-                    onTap: _showPaymentPlanDialog,
+                  Semantics(
+                    label: 'Payment plan',
+                    button: true,
+                    child: _ToolbarAction(
+                      icon: Icons.calendar_today,
+                      label: 'Plan',
+                      onTap: _showPaymentPlanDialog,
+                    ),
                   ),
-                  _ToolbarAction(
-                    icon: Icons.payment,
-                    label: 'Offline',
-                    onTap: _showOfflinePaymentDialog,
+                  Semantics(
+                    label: 'Offline payment',
+                    button: true,
+                    child: _ToolbarAction(
+                      icon: Icons.payment,
+                      label: 'Offline',
+                      onTap: _showOfflinePaymentDialog,
+                    ),
                   ),
                 ],
               ),

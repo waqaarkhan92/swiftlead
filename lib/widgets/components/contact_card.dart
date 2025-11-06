@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/tokens.dart';
 import '../global/frosted_container.dart';
 import '../global/badge.dart';
+import '../global/spring_animation.dart';
 import 'score_indicator.dart';
 
 /// ContactCard - List item showing contact summary
@@ -38,28 +39,51 @@ class ContactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: 'Contact ${contactName}${isVip ? ", VIP" : ""}${stage != null ? ", $stage" : ""}${score != null ? ", score $score" : ""}',
+      button: true,
+      child: SpringCard(
       onTap: onTap,
       child: FrostedContainer(
         padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
         margin: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
         child: Row(
           children: [
-            // Avatar
-            Container(
+              // Avatar - Enhanced with subtle animation
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: 0.9 + (0.1 * value),
+                    child: Opacity(
+                      opacity: value,
+                      child: child,
+                    ),
+                  );
+                },
+                child: Container(
               width: 48,
               height: 48,
               decoration: BoxDecoration(
                 color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
                 shape: BoxShape.circle,
+                    border: isVip
+                        ? Border.all(
+                            color: const Color(SwiftleadTokens.warningYellow),
+                            width: 2,
+                          )
+                        : null,
               ),
               child: Center(
                 child: Text(
                   _getInitials(contactName),
-                  style: const TextStyle(
-                    fontSize: 18,
+                      style: TextStyle(
+                        fontSize: Theme.of(context).textTheme.titleMedium?.fontSize ?? 18,
                     fontWeight: FontWeight.w600,
-                    color: Color(SwiftleadTokens.primaryTeal),
+                        color: const Color(SwiftleadTokens.primaryTeal),
+                      ),
                   ),
                 ),
               ),
@@ -195,6 +219,7 @@ class ContactCard extends StatelessWidget {
               ),
             ],
           ],
+        ),
         ),
       ),
     );

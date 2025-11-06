@@ -43,10 +43,10 @@ class ErrorStateCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(SwiftleadTokens.spaceXL),
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
           decoration: BoxDecoration(
             color: errorBg,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.8),
             border: Border.all(
               color: errorBorder,
               width: 1,

@@ -107,12 +107,6 @@ class _CustomFieldsManagerScreenState extends State<CustomFieldsManagerScreen> {
           : _fields.isEmpty
               ? _buildEmptyState()
               : _buildFieldsList(),
-      floatingActionButton: _fields.isEmpty
-          ? null
-          : FloatingActionButton(
-              onPressed: () => _showAddFieldSheet(),
-              child: const Icon(Icons.add),
-            ),
     );
   }
 
@@ -177,10 +171,10 @@ class _CustomFieldsManagerScreenState extends State<CustomFieldsManagerScreen> {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: SwiftleadTokens.spaceM),
         decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.2),
+          color: const Color(SwiftleadTokens.errorRed).withOpacity(0.2),
           borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
         ),
-        child: const Icon(Icons.delete_outline, color: Colors.red),
+        child: const Icon(Icons.delete_outline, color: Color(SwiftleadTokens.errorRed)),
       ),
       confirmDismiss: (direction) async {
         return await showDialog<bool>(
@@ -195,7 +189,7 @@ class _CustomFieldsManagerScreenState extends State<CustomFieldsManagerScreen> {
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                style: TextButton.styleFrom(foregroundColor: const Color(SwiftleadTokens.errorRed)),
                 child: const Text('Delete'),
               ),
             ],
@@ -244,13 +238,13 @@ class _CustomFieldsManagerScreenState extends State<CustomFieldsManagerScreen> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(4),
+                                color: const Color(SwiftleadTokens.errorRed).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.2),
                               ),
                               child: Text(
                                 'Required',
                                 style: TextStyle(
-                                  color: Colors.red,
+                                  color: const Color(SwiftleadTokens.errorRed),
                                   fontSize: 10,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -263,7 +257,7 @@ class _CustomFieldsManagerScreenState extends State<CustomFieldsManagerScreen> {
                       Text(
                         _getFieldTypeLabel(field.type),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey,
+                              color: Theme.of(context).textTheme.bodySmall?.color,
                             ),
                       ),
                       if (field.options != null && field.options!.isNotEmpty) ...[
@@ -271,7 +265,7 @@ class _CustomFieldsManagerScreenState extends State<CustomFieldsManagerScreen> {
                         Text(
                           '${field.options!.length} options',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey,
+                                color: Theme.of(context).textTheme.bodySmall?.color,
                               ),
                         ),
                       ],
@@ -477,7 +471,7 @@ class _CustomFieldsManagerScreenState extends State<CustomFieldsManagerScreen> {
                       Text(
                         'This field must be filled when creating contacts',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey,
+                              color: Theme.of(context).textTheme.bodySmall?.color,
                             ),
                       ),
                     ],

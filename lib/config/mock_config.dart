@@ -10,6 +10,14 @@
 /// When false: Services connect to live Supabase backend
 const bool kUseMockData = true;
 
+/// Test Mode Toggle
+///
+/// When true: Shows test buttons in Settings (reset onboarding, view login)
+/// When false: Hides test features - app behaves normally for clients
+/// 
+/// IMPORTANT: Set to false before production release!
+const bool kTestMode = true;
+
 /// Mock configuration class for additional settings
 class MockConfig {
   /// Whether to use mock data globally

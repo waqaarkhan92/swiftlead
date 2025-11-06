@@ -42,7 +42,7 @@ class LinkInvoiceToJobSheet {
               ? filteredJobs
               : filteredJobs.where((job) =>
                   job.title.toLowerCase().contains(searchQuery) ||
-                  job.contactName.toLowerCase().contains(searchQuery)).toList();
+                  (job.contactName?.toLowerCase().contains(searchQuery) ?? false)).toList();
 
           return Column(
             children: [
@@ -113,7 +113,7 @@ class LinkInvoiceToJobSheet {
                                                 ),
                                               ),
                                               Text(
-                                                job.contactName,
+                                                job.contactName ?? '',
                                                 style: Theme.of(context).textTheme.bodySmall,
                                               ),
                                             ],

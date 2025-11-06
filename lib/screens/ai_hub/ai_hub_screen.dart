@@ -21,6 +21,7 @@ import '../../widgets/components/animated_counter.dart';
 import '../../widgets/components/smart_collapsible_section.dart';
 import '../../widgets/components/celebration_banner.dart';
 import '../../widgets/components/ai_insight_banner.dart';
+import '../../widgets/global/spring_animation.dart';
 import '../../utils/keyboard_shortcuts.dart' show AppShortcuts, SearchIntent, RefreshIntent, CloseIntent;
 
 /// AI Hub Screen - Central control for AI features
@@ -225,28 +226,56 @@ class _AIHubScreenState extends State<AIHubScreen> {
         ),
         const SizedBox(height: SwiftleadTokens.spaceL),
         
-        // SmartTileGrid - 2×2 feature tiles
-        _buildSmartTileGrid(),
+        // Core Features Section
+        SmartCollapsibleSection(
+          title: 'Core Features',
+          initiallyExpanded: true,
+          child: Column(
+            children: [
+              _buildSmartTileGrid(),
+            ],
+          ),
+        ),
         const SizedBox(height: SwiftleadTokens.spaceL),
         
-        // AIReceptionistThread - Simulated conversation
-        _buildAIThreadPreview(),
+        // AI Activity Section
+        SmartCollapsibleSection(
+          title: 'AI Activity',
+          initiallyExpanded: true,
+          child: Column(
+            children: [
+              _buildAIThreadPreview(),
+            ],
+          ),
+        ),
         const SizedBox(height: SwiftleadTokens.spaceL),
         
-        // AIConfigurationCard - Settings quick access
-        _buildAIConfigCard(),
+        // Configuration & Settings Section
+        SmartCollapsibleSection(
+          title: 'Configuration & Settings',
+          initiallyExpanded: false,
+          child: Column(
+            children: [
+              _buildAIConfigCard(),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              _buildAIFeatureConfigurations(),
+            ],
+          ),
+        ),
         const SizedBox(height: SwiftleadTokens.spaceL),
         
-        // AIPerformanceMetrics - Analytics dashboard
-        _buildPerformanceMetrics(),
-        const SizedBox(height: SwiftleadTokens.spaceL),
-        
-        // AI Usage & Credits - Usage tracking
-        const AIUsageCreditsCard(),
-        const SizedBox(height: SwiftleadTokens.spaceL),
-        
-        // AI Feature Configurations - Quote Assistant and Review Reply
-        _buildAIFeatureConfigurations(),
+        // Analytics & Usage Section
+        SmartCollapsibleSection(
+          title: 'Analytics & Usage',
+          initiallyExpanded: false,
+          child: Column(
+            children: [
+              _buildPerformanceMetrics(),
+              const SizedBox(height: SwiftleadTokens.spaceM),
+              const AIUsageCreditsCard(),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -339,24 +368,38 @@ class _AIHubScreenState extends State<AIHubScreen> {
         Row(
           children: [
             Expanded(
+              child: Semantics(
+                label: 'Auto-Reply feature, 24 active',
+                button: true,
               child: _AIFeatureTile(
                 label: 'Auto-Reply',
                 icon: Icons.reply_all,
                 badge: '24',
                 onTap: () {
-                  // Configure auto-reply
+                    Navigator.push(
+                      context,
+                      _createPageRoute(const AIConfigurationScreen()),
+                    );
                 },
+                ),
               ),
             ),
             const SizedBox(width: SwiftleadTokens.spaceS),
             Expanded(
+              child: Semantics(
+                label: 'Smart Replies feature, 12 active',
+                button: true,
               child: _AIFeatureTile(
                 label: 'Smart Replies',
                 icon: Icons.auto_awesome,
                 badge: '12',
                 onTap: () {
-                  // View smart replies
+                    Navigator.push(
+                      context,
+                      _createPageRoute(const AIConfigurationScreen()),
+                    );
                 },
+                ),
               ),
             ),
           ],
@@ -365,6 +408,9 @@ class _AIHubScreenState extends State<AIHubScreen> {
         Row(
           children: [
             Expanded(
+              child: Semantics(
+                label: 'FAQ Manager feature, 8 active',
+                button: true,
               child: _AIFeatureTile(
                 label: 'FAQ Manager',
                 icon: Icons.help_outline,
@@ -375,17 +421,25 @@ class _AIHubScreenState extends State<AIHubScreen> {
                     _createPageRoute(const FAQManagementScreen()),
                   );
                 },
+                ),
               ),
             ),
             const SizedBox(width: SwiftleadTokens.spaceS),
             Expanded(
+              child: Semantics(
+                label: 'Booking Assistant feature, 5 active',
+                button: true,
               child: _AIFeatureTile(
                 label: 'Booking Assistant',
                 icon: Icons.event_available,
                 badge: '5',
                 onTap: () {
-                  // Configure booking assistant
+                    Navigator.push(
+                      context,
+                      _createPageRoute(const AIConfigurationScreen()),
+                    );
                 },
+                ),
               ),
             ),
           ],
@@ -819,7 +873,7 @@ class _AIFeatureTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return SpringCard(
       onTap: onTap,
       child: Container(
         height: 120,
@@ -834,6 +888,13 @@ class _AIFeatureTile extends StatelessWidget {
             ],
           ),
           borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

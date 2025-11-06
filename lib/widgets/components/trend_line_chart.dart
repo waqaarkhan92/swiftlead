@@ -115,14 +115,18 @@ class _TrendLineChartState extends State<TrendLineChart> {
                   verticalInterval: 1,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: Colors.grey.shade300,
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? Colors.grey.shade200
+                          : Colors.grey.shade700,
                       strokeWidth: 1,
                       dashArray: [5, 5],
                     );
                   },
                   getDrawingVerticalLine: (value) {
                     return FlLine(
-                      color: Colors.grey.shade300,
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? Colors.grey.shade200
+                          : Colors.grey.shade700,
                       strokeWidth: 1,
                       dashArray: [5, 5],
                     );
@@ -182,7 +186,12 @@ class _TrendLineChartState extends State<TrendLineChart> {
                 ),
                 borderData: FlBorderData(
                   show: true,
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? Colors.grey.shade200
+                        : Colors.grey.shade700,
+                    width: 1,
+                  ),
                 ),
                 minX: 0,
                 maxX: _displayData.length.toDouble() - 1,
@@ -203,17 +212,33 @@ class _TrendLineChartState extends State<TrendLineChart> {
                     color: chartColor,
                     barWidth: 3,
                     isStrokeCapRound: true,
-                    dotData: const FlDotData(show: true),
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (spot, percent, barData, index) =>
+                          FlDotCirclePainter(
+                        radius: 4,
+                        color: chartColor,
+                        strokeWidth: 2,
+                        strokeColor: Colors.white,
+                      ),
+                    ),
                     belowBarData: BarAreaData(
                       show: true,
                       gradient: LinearGradient(
                         colors: [
-                          chartColor.withValues(alpha: 0.3),
-                          chartColor.withValues(alpha: 0.05),
+                          chartColor.withValues(alpha: 0.4),
+                          chartColor.withValues(alpha: 0.1),
+                          chartColor.withValues(alpha: 0.0),
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
+                        stops: const [0.0, 0.5, 1.0],
                       ),
+                    ),
+                    shadow: Shadow(
+                      color: chartColor.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
                     ),
                   ),
                 ],
@@ -270,11 +295,15 @@ class _TrendLineChartState extends State<TrendLineChart> {
                     }).toList();
                   },
                   touchCallback: (FlTouchEvent event, LineTouchResponse? response) {
-                    if (response != null && response.lineBarSpots != null) {
+                    if (response != null && response.lineBarSpots != null && response.lineBarSpots!.isNotEmpty) {
                       final spot = response.lineBarSpots!.first;
+                      // Tap to drill down
+                      if (event is FlTapUpEvent) {
                       widget.onDataPointTap?.call(_displayData[spot.x.toInt()]);
+                      }
                     }
                   },
+                  enabled: true,
                 ),
               ),
             ),

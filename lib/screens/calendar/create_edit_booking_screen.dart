@@ -78,6 +78,29 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
     }
   }
 
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0.0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          )),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+  }
+
   @override
   void dispose() {
     _clientController.dispose();
@@ -321,9 +344,7 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => BookingTemplatesScreen(),
-                    ),
+                    _createPageRoute(BookingTemplatesScreen()),
                   );
                 },
                 icon: const Icon(Icons.event_note_outlined),
@@ -419,12 +440,11 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
               onPressed: () async {
                 final result = await Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => ServiceCatalogScreen(
-                      onServiceSelected: (serviceId, serviceName) {
-                        setState(() {
-                          _selectedServiceId = serviceId;
-                          _selectedServiceName = serviceName;
+                  _createPageRoute(ServiceCatalogScreen(
+                    onServiceSelected: (serviceId, serviceName) {
+                      setState(() {
+                        _selectedServiceId = serviceId;
+                        _selectedServiceName = serviceName;
                           // Could fetch duration and price from service
                           _duration = 60; // Default
                           _price = 150.0; // Default
@@ -602,7 +622,7 @@ class _CreateEditBookingScreenState extends State<CreateEditBookingScreen> {
                         'Round-Robin Assignment',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
-                        ),
+                    ),
                       ),
                     ),
                     PopupMenuItem(

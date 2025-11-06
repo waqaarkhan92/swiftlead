@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/primary_button.dart' show PrimaryButton, ButtonSize;
 import '../../widgets/components/segmented_control.dart';
@@ -17,23 +18,34 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   int _currentStep = 0;
-  final int _totalSteps = 8;
+  final int _totalSteps = 4; // Simplified from 8 to 4 steps
   final PageController _pageController = PageController();
 
-  // Step 2: Profession Selection
+  // Step 1: Profession Selection (combined with welcome)
   String? _selectedProfession;
 
-  // Step 3: Business Details
+  // Step 2: Business Name (simplified - just name)
   final TextEditingController _businessNameController = TextEditingController();
+
+  // Step 3: Quick Setup (one integration or AI defaults)
+  String? _selectedQuickIntegration; // User picks one or skips
+  bool _aiEnabled = true; // AI enabled by default
+
+  // Old variables (kept for old step builders that are no longer used but still in code)
+  // These can be removed once old step builders are fully removed
   String? _businessLogo;
   String? _serviceArea;
   Map<String, bool> _businessHours = {};
-
-  // Step 4: Team Members
   final List<String> _teamEmails = [];
   final TextEditingController _teamEmailController = TextEditingController();
-
-  // Step 5: Integrations
+  final TextEditingController _aiGreetingController = TextEditingController(
+    text: 'Hi! Thanks for reaching out. How can we help you today?',
+  );
+  final List<Map<String, dynamic>> _services = [];
+  final TextEditingController _serviceNameController = TextEditingController();
+  final TextEditingController _serviceDurationController = TextEditingController();
+  final TextEditingController _servicePriceController = TextEditingController();
+  bool _demoDataEnabled = false;
   Map<String, bool> _integrations = {
     'Google Calendar': false,
     'Apple Calendar': false,
@@ -43,22 +55,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     'WhatsApp': false,
     'Email': false,
   };
-
-  // Step 6: AI Configuration
-  bool _aiEnabled = true;
   String _aiTone = 'Friendly';
-  final TextEditingController _aiGreetingController = TextEditingController(
-    text: 'Hi! Thanks for reaching out. How can we help you today?',
-  );
-
-  // Step 7: Booking Setup
-  final List<Map<String, dynamic>> _services = [];
-  final TextEditingController _serviceNameController = TextEditingController();
-  final TextEditingController _serviceDurationController = TextEditingController();
-  final TextEditingController _servicePriceController = TextEditingController();
-
-  // Step 8: Checklist
-  bool _demoDataEnabled = false;
 
   @override
   void dispose() {
@@ -70,6 +67,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _serviceDurationController.dispose();
     _servicePriceController.dispose();
     super.dispose();
+  }
+
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.0, 0.1),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            )),
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
   }
 
   @override
@@ -99,14 +119,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 controller: _pageController,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  _buildWelcomeStep(),
-                  _buildProfessionStep(),
-                  _buildBusinessDetailsStep(),
-                  _buildTeamMembersStep(),
-                  _buildIntegrationsStep(),
-                  _buildAIConfigStep(),
-                  _buildBookingSetupStep(),
-                  _buildFinalChecklistStep(),
+                  _buildWelcomeAndProfessionStep(), // Step 1: Combined welcome + profession
+                  _buildBusinessNameStep(), // Step 2: Just business name
+                  _buildQuickSetupStep(), // Step 3: Quick setup (one integration or AI)
+                  _buildDoneStep(), // Step 4: Done screen
                 ],
               ),
             ),
@@ -123,19 +139,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: SwiftleadTokens.spaceM,
-        vertical: SwiftleadTokens.spaceS,
+        vertical: SwiftleadTokens.spaceL,
       ),
       child: Column(
         children: [
+          // Enhanced Step Indicator
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Step ${_currentStep + 1} of $_totalSteps',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).brightness == Brightness.light
-                          ? Colors.black.withOpacity(0.6)
-                          : Colors.white.withOpacity(0.6),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
               ),
               if (_currentStep > 0)
@@ -145,7 +160,68 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
             ],
           ),
-          const SizedBox(height: SwiftleadTokens.spaceS),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          // iOS-style Step Indicator
+          Row(
+            children: List.generate(_totalSteps, (index) {
+              final isActive = index == _currentStep;
+              final isCompleted = index < _currentStep;
+              
+              return Expanded(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: isCompleted
+                                  ? const Color(SwiftleadTokens.successGreen)
+                                  : isActive
+                                      ? const Color(SwiftleadTokens.primaryTeal)
+                                      : Theme.of(context).brightness == Brightness.light
+                                          ? Colors.black.withOpacity(0.1)
+                                          : Colors.white.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: isCompleted
+                                  ? const Icon(Icons.check, color: Colors.white, size: 18)
+                                  : Text(
+                                      '${index + 1}',
+                                      style: TextStyle(
+                                        color: isActive ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color,
+                                        fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (index < _totalSteps - 1)
+                      Expanded(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          height: 2,
+                          color: index < _currentStep
+                              ? const Color(SwiftleadTokens.primaryTeal)
+                              : Theme.of(context).brightness == Brightness.light
+                                  ? Colors.black.withOpacity(0.1)
+                                  : Colors.white.withOpacity(0.1),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          // Progress Bar
           ClipRRect(
             borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
             child: LinearProgressIndicator(
@@ -164,7 +240,132 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  // Step 1: Welcome & Value Prop
+  // Step 1: Welcome & Profession Selection (Combined)
+  Widget _buildWelcomeAndProfessionStep() {
+    final professions = ['Trade', 'Salon / Clinic', 'Professional'];
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: SwiftleadTokens.spaceXL),
+          // Logo/Illustration
+          Container(
+            width: 150,
+            height: 150,
+            decoration: BoxDecoration(
+              color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.auto_awesome,
+              size: 80,
+              color: Color(SwiftleadTokens.primaryTeal),
+            ),
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceXL),
+          Text(
+            'Welcome to Swiftlead',
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          Text(
+            'Let\'s get you set up in just a few steps',
+            style: Theme.of(context).textTheme.bodyLarge,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceXXL),
+          // Profession Selection
+          Text(
+            'What\'s your profession?',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          Text(
+            'We\'ll customize Swiftlead for your industry',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          // Profession Cards
+          ...professions.map((profession) {
+            final isSelected = _selectedProfession == profession;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceM),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() => _selectedProfession = profession);
+                },
+                child: FrostedContainer(
+                  padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(SwiftleadTokens.primaryTeal).withOpacity(0.2)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                          border: Border.all(
+                            color: isSelected
+                                ? const Color(SwiftleadTokens.primaryTeal)
+                                : Colors.grey.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                        child: isSelected
+                            ? const Icon(
+                                Icons.check,
+                                color: Color(SwiftleadTokens.primaryTeal),
+                                size: 20,
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: SwiftleadTokens.spaceM),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              profession,
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _getProfessionDescription(profession),
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).textTheme.bodySmall?.color,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+          const SizedBox(height: SwiftleadTokens.spaceXL),
+        ],
+      ),
+    );
+  }
+
+  // OLD Step 1: Welcome & Value Prop (replaced by combined step)
   Widget _buildWelcomeStep() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
@@ -382,7 +583,285 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  // Step 3: Business Details
+  // Step 2: Business Name (Simplified)
+  Widget _buildBusinessNameStep() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: SwiftleadTokens.spaceXL),
+          Text(
+            'What\'s your business name?',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
+          Text(
+            'You can add more details later in Settings',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceXXL),
+          // Business Name
+          FrostedContainer(
+            child: TextField(
+              controller: _businessNameController,
+              decoration: InputDecoration(
+                labelText: 'Business Name',
+                hintText: 'e.g., Smith Plumbing',
+                border: InputBorder.none,
+                prefixIcon: const Icon(Icons.business),
+              ),
+              textCapitalization: TextCapitalization.words,
+            ),
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceXL),
+        ],
+      ),
+    );
+  }
+
+  // Step 3: Quick Setup (One integration or AI defaults)
+  Widget _buildQuickSetupStep() {
+    final quickIntegrations = [
+      {'name': 'Google Calendar', 'icon': Icons.calendar_today},
+      {'name': 'Apple Calendar', 'icon': Icons.calendar_month},
+      {'name': 'SMS', 'icon': Icons.message},
+      {'name': 'Skip for now', 'icon': Icons.arrow_forward},
+    ];
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: SwiftleadTokens.spaceXL),
+          Text(
+            'Quick Setup',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
+          Text(
+            'Connect one integration now, or skip and set up later',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceXXL),
+          // AI Enabled by default
+          FrostedContainer(
+            padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.auto_awesome,
+                  color: _aiEnabled
+                      ? const Color(SwiftleadTokens.primaryTeal)
+                      : Theme.of(context).textTheme.bodySmall?.color,
+                ),
+                const SizedBox(width: SwiftleadTokens.spaceM),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'AI Assistant',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Enabled by default - helps with responses',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: _aiEnabled,
+                  onChanged: (value) {
+                    setState(() => _aiEnabled = value);
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          Text(
+            'Connect an integration (optional)',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          // Integration Options
+          ...quickIntegrations.map((integration) {
+            final isSelected = _selectedQuickIntegration == integration['name'];
+            final isSkip = integration['name'] == 'Skip for now';
+            return Padding(
+              padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceM),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    if (isSkip) {
+                      _selectedQuickIntegration = null;
+                    } else {
+                      _selectedQuickIntegration = integration['name'] as String;
+                    }
+                  });
+                },
+                child: FrostedContainer(
+                  padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(SwiftleadTokens.primaryTeal).withOpacity(0.2)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                          border: Border.all(
+                            color: isSelected
+                                ? const Color(SwiftleadTokens.primaryTeal)
+                                : Colors.grey.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                        child: isSelected
+                            ? const Icon(
+                                Icons.check,
+                                color: Color(SwiftleadTokens.primaryTeal),
+                                size: 20,
+                              )
+                            : Icon(
+                                integration['icon'] as IconData,
+                                size: 20,
+                                color: isSkip
+                                    ? Theme.of(context).textTheme.bodySmall?.color
+                                    : const Color(SwiftleadTokens.primaryTeal),
+                              ),
+                      ),
+                      const SizedBox(width: SwiftleadTokens.spaceM),
+                      Expanded(
+                        child: Text(
+                          integration['name'] as String,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: isSkip
+                                    ? Theme.of(context).textTheme.bodySmall?.color
+                                    : null,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+          const SizedBox(height: SwiftleadTokens.spaceXL),
+        ],
+      ),
+    );
+  }
+
+  // Step 4: Done Screen
+  Widget _buildDoneStep() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: SwiftleadTokens.spaceXXL),
+          // Success Icon
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: const Color(SwiftleadTokens.successGreen).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.check_circle,
+              size: 80,
+              color: Color(SwiftleadTokens.successGreen),
+            ),
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceXXL),
+          Text(
+            'You\'re all set!',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          Text(
+            'Welcome to Swiftlead. You can customize more settings anytime in Settings.',
+            style: Theme.of(context).textTheme.bodyLarge,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceXXL),
+          // Summary
+          FrostedContainer(
+            padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (_selectedProfession != null)
+                  _buildSummaryItem('Profession', _selectedProfession!),
+                if (_businessNameController.text.isNotEmpty)
+                  _buildSummaryItem('Business', _businessNameController.text),
+                if (_selectedQuickIntegration != null)
+                  _buildSummaryItem('Integration', _selectedQuickIntegration!),
+                _buildSummaryItem('AI Assistant', _aiEnabled ? 'Enabled' : 'Disabled'),
+              ],
+            ),
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceXL),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+          ),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // OLD Step 3: Business Details (kept for reference, not used)
   Widget _buildBusinessDetailsStep() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
@@ -428,7 +907,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: _businessLogo != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-                            child: Image.network(_businessLogo!, fit: BoxFit.cover),
+                            child: Semantics(
+                              label: 'Business logo',
+                              child: Image.network(_businessLogo!, fit: BoxFit.cover),
+                            ),
                           )
                         : const Icon(Icons.add_photo_alternate_outlined),
                   ),
@@ -1118,7 +1600,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             flex: 2,
             child: PrimaryButton(
               label: _currentStep == _totalSteps - 1 ? 'Launch Swiftlead' : 'Next',
-              onPressed: () => _currentStep == _totalSteps - 1 ? _finishOnboarding() : _nextStep(),
+              onPressed: () {
+                // Validate required fields before proceeding
+                if (_currentStep == 0 && _selectedProfession == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please select your profession')),
+                  );
+                  return;
+                }
+                if (_currentStep == _totalSteps - 1) {
+                  _finishOnboarding();
+                } else {
+                  _nextStep();
+                }
+              },
             ),
           ),
         ],
@@ -1146,37 +1641,49 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  void _skipOnboarding() {
-    // Navigate to main app
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const MainNavigation(),
-      ),
-    );
+  void _skipOnboarding() async {
+    // Mark onboarding as completed
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_completed', true);
+    
+    // Navigate to main app - need to restart app to refresh state
+    // Use Navigator to go back to root and let main.dart handle navigation
+    if (mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        _createPageRoute(const MainNavigation()),
+        (route) => false,
+      );
+    }
   }
 
   void _saveAndContinueLater() {
     // Save progress and navigate to main app
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Progress saved. You can continue later in Settings.')),
-    );
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const MainNavigation(),
-      ),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Progress saved. You can continue later in Settings.')),
+      );
+      Navigator.of(context).pushAndRemoveUntil(
+        _createPageRoute(const MainNavigation()),
+        (route) => false,
+      );
+    }
   }
 
-  void _finishOnboarding() {
-    // Complete onboarding and launch app
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Welcome to Swiftlead!')),
-    );
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const MainNavigation(),
-      ),
-    );
+  void _finishOnboarding() async {
+    // Mark onboarding as completed
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_completed', true);
+    
+    // Complete onboarding and launch app - need to restart app to refresh state
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Welcome to Swiftlead!')),
+      );
+      Navigator.of(context).pushAndRemoveUntil(
+        _createPageRoute(const MainNavigation()),
+        (route) => false,
+      );
+    }
   }
 
   void _uploadLogo() {

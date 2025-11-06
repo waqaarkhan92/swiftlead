@@ -17,6 +17,29 @@ class BookingTemplatesScreen extends StatefulWidget {
 }
 
 class _BookingTemplatesScreenState extends State<BookingTemplatesScreen> {
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0.0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          )),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+  }
+
   // Mock templates data
   List<BookingTemplate> _templates = [
     BookingTemplate(
@@ -116,7 +139,7 @@ class _BookingTemplatesScreenState extends State<BookingTemplatesScreen> {
                                       value: 'use',
                                       child: Builder(
                                         builder: (context) => Row(
-                                          children: [
+                                        children: [
                                             const Icon(Icons.play_arrow, size: 20),
                                             const SizedBox(width: SwiftleadTokens.spaceS),
                                             Text(
@@ -125,15 +148,15 @@ class _BookingTemplatesScreenState extends State<BookingTemplatesScreen> {
                                                 fontWeight: FontWeight.w500,
                                               ),
                                             ),
-                                          ],
-                                        ),
+                                        ],
                                       ),
+                                    ),
                                     ),
                                     PopupMenuItem(
                                       value: 'edit',
                                       child: Builder(
                                         builder: (context) => Row(
-                                          children: [
+                                        children: [
                                             const Icon(Icons.edit, size: 20),
                                             const SizedBox(width: SwiftleadTokens.spaceS),
                                             Text(
@@ -142,15 +165,15 @@ class _BookingTemplatesScreenState extends State<BookingTemplatesScreen> {
                                                 fontWeight: FontWeight.w500,
                                               ),
                                             ),
-                                          ],
-                                        ),
+                                        ],
                                       ),
+                                    ),
                                     ),
                                     PopupMenuItem(
                                       value: 'delete',
                                       child: Builder(
                                         builder: (context) => Row(
-                                          children: [
+                                        children: [
                                             const Icon(Icons.delete, color: Color(SwiftleadTokens.errorRed), size: 20),
                                             const SizedBox(width: SwiftleadTokens.spaceS),
                                             Text(
@@ -160,7 +183,7 @@ class _BookingTemplatesScreenState extends State<BookingTemplatesScreen> {
                                                 color: const Color(SwiftleadTokens.errorRed),
                                               ),
                                             ),
-                                          ],
+                                        ],
                                         ),
                                       ),
                                     ),
@@ -245,12 +268,11 @@ class _BookingTemplatesScreenState extends State<BookingTemplatesScreen> {
   void _useTemplate(BookingTemplate template) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => CreateEditBookingScreen(
-          initialData: {
-            'clientName': '',
-            'serviceName': template.serviceName,
-            'duration': template.duration,
+      _createPageRoute(CreateEditBookingScreen(
+        initialData: {
+          'clientName': '',
+          'serviceName': template.serviceName,
+          'duration': template.duration,
             'price': template.price,
             'notes': template.notes ?? '',
             'requiresDeposit': template.requiresDeposit,

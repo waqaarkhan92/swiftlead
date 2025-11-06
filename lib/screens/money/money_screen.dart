@@ -27,8 +27,12 @@ import '../../widgets/components/celebration_banner.dart';
 import '../../widgets/components/ai_insight_banner.dart';
 import '../../widgets/components/trend_tile.dart';
 import '../../widgets/components/animated_counter.dart';
+import '../../widgets/components/active_filter_chips.dart' show ActiveFilter, ActiveFilterChipsRow;
 import '../../utils/keyboard_shortcuts.dart' show AppShortcuts, SearchIntent, CreateIntent, RefreshIntent, CloseIntent, CreateInvoiceIntent;
+import '../../utils/responsive_layout.dart';
 import '../../widgets/global/toast.dart';
+import '../../widgets/global/hoverable_widget.dart';
+import 'package:flutter/foundation.dart';
 import '../../config/mock_config.dart';
 import '../../mock/mock_repository.dart';
 import '../main_navigation.dart' as main_nav;
@@ -52,6 +56,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
   String _selectedQuoteFilter = 'All';
   final List<String> _quoteFilters = ['All', 'Draft', 'Sent', 'Viewed', 'Accepted', 'Declined', 'Expired'];
   String _selectedPeriod = '30D'; // For dashboard chart (can be 'Custom')
+  Map<String, dynamic>? _currentMoneyFilters; // Active filter state
 
   // Financial data from mock
   double _totalRevenue = 0;
@@ -83,6 +88,9 @@ class _MoneyScreenState extends State<MoneyScreen> {
   // Feature 39: Batch Actions
   bool _isBatchMode = false;
   Set<String> _selectedInvoiceIds = {};
+  
+  // Chart type selection
+  String _selectedChartType = 'line'; // 'line', 'bar', 'donut'
   
   // Smart prioritization tracking
   final Map<String, int> _invoiceTapCounts = {};
@@ -407,8 +415,11 @@ class _MoneyScreenState extends State<MoneyScreen> {
               title: 'Money',
               actions: [
           // Primary action: Add menu (iOS-aligned: 1 icon max)
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.add),
+          Semantics(
+            label: 'Add invoice, quote, or payment',
+            button: true,
+            child: PopupMenuButton<String>(
+              icon: const Icon(Icons.add),
                   onSelected: (value) {
                     if (value == 'request_payment') {
                       PaymentRequestModal.show(
@@ -459,7 +470,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                       child: Row(
                         children: [
                           Icon(Icons.receipt, size: 20),
-                          SizedBox(width: 12),
+                          SizedBox(width: SwiftleadTokens.spaceS),
                           Text('Create Invoice'),
                         ],
                       ),
@@ -469,7 +480,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                       child: Row(
                         children: [
                           Icon(Icons.description, size: 20),
-                          SizedBox(width: 12),
+                          SizedBox(width: SwiftleadTokens.spaceS),
                           Text('Create Quote'),
                         ],
                       ),
@@ -481,7 +492,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                       child: Row(
                         children: [
                           Icon(Icons.payment, size: 20),
-                          SizedBox(width: 12),
+                          SizedBox(width: SwiftleadTokens.spaceS),
                           Text('Add Payment'),
                         ],
                       ),
@@ -491,7 +502,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                       child: Row(
                         children: [
                           Icon(Icons.repeat, size: 20),
-                          SizedBox(width: 12),
+                          SizedBox(width: SwiftleadTokens.spaceS),
                           Text('Recurring Invoices'),
                         ],
                       ),
@@ -501,7 +512,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                       child: Row(
                         children: [
                           Icon(Icons.credit_card, size: 20),
-                          SizedBox(width: 12),
+                          SizedBox(width: SwiftleadTokens.spaceS),
                           Text('Payment Methods'),
                         ],
                       ),
@@ -513,7 +524,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                       child: Row(
                         children: [
                           Icon(Icons.filter_list_outlined, size: 20),
-                          SizedBox(width: 12),
+                          SizedBox(width: SwiftleadTokens.spaceS),
                           Text('Filter'),
                         ],
                       ),
@@ -523,15 +534,16 @@ class _MoneyScreenState extends State<MoneyScreen> {
                       child: Row(
                         children: [
                           Icon(Icons.search_outlined, size: 20),
-                          SizedBox(width: 12),
+                          SizedBox(width: SwiftleadTokens.spaceS),
                           Text('Search'),
                         ],
                       ),
                     ),
                   ],
                 ),
-              ],
             ),
+          ],
+        ),
             body: _isLoading
                 ? _buildLoadingState()
                 : _buildContent(),
@@ -624,12 +636,94 @@ class _MoneyScreenState extends State<MoneyScreen> {
     }
   }
 
+  Widget _buildActiveFilterChips() {
+    if (_currentMoneyFilters == null) {
+      return const SizedBox.shrink();
+    }
+
+    final activeFilters = <ActiveFilter>[];
+
+    // Type filter
+    if (_currentMoneyFilters!['type'] != null && _currentMoneyFilters!['type'] != 'All') {
+      activeFilters.add(ActiveFilter(
+        label: 'Type',
+        value: _currentMoneyFilters!['type'],
+        onRemove: () {
+          setState(() {
+            _currentMoneyFilters!['type'] = 'All';
+            if (_currentMoneyFilters!['status'] == 'All' && 
+                _currentMoneyFilters!['dateRange'] == 'All') {
+              _currentMoneyFilters = null;
+            }
+            _applyMoneyFilters(_currentMoneyFilters ?? {});
+          });
+        },
+      ));
+    }
+
+    // Status filter
+    if (_currentMoneyFilters!['status'] != null && _currentMoneyFilters!['status'] != 'All') {
+      activeFilters.add(ActiveFilter(
+        label: 'Status',
+        value: _currentMoneyFilters!['status'],
+        onRemove: () {
+          setState(() {
+            _currentMoneyFilters!['status'] = 'All';
+            _selectedFilter = 'All';
+            if (_currentMoneyFilters!['type'] == 'All' && 
+                _currentMoneyFilters!['dateRange'] == 'All') {
+              _currentMoneyFilters = null;
+            }
+            _applyMoneyFilters(_currentMoneyFilters ?? {});
+          });
+        },
+      ));
+    }
+
+    // Date range filter
+    if (_currentMoneyFilters!['dateRange'] != null && _currentMoneyFilters!['dateRange'] != 'All') {
+      activeFilters.add(ActiveFilter(
+        label: 'Date',
+        value: _currentMoneyFilters!['dateRange'],
+        onRemove: () {
+          setState(() {
+            _currentMoneyFilters!['dateRange'] = 'All';
+            if (_currentMoneyFilters!['type'] == 'All' && 
+                _currentMoneyFilters!['status'] == 'All') {
+              _currentMoneyFilters = null;
+            }
+            _applyMoneyFilters(_currentMoneyFilters ?? {});
+          });
+        },
+      ));
+    }
+
+    return ActiveFilterChipsRow(
+      filters: activeFilters,
+      onClearAll: () {
+        setState(() {
+          _currentMoneyFilters = null;
+          _selectedFilter = 'All';
+          _applyMoneyFilters({});
+        });
+      },
+    );
+  }
+
   Future<void> _showFilterSheet() async {
     final filters = await MoneyFilterSheet.show(
       context: context,
+      initialFilters: _currentMoneyFilters,
     );
     if (filters != null) {
       _applyMoneyFilters(filters);
+    } else {
+      // Clear filters if cancelled
+      setState(() {
+        _currentMoneyFilters = null;
+        _selectedFilter = 'All';
+        _applyMoneyFilters({});
+      });
     }
   }
 
@@ -819,7 +913,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
           _buildBalanceHeader(),
           const SizedBox(height: SwiftleadTokens.spaceL),
           
-          // MetricsRow - 4 key financial metrics
+          // MetricsRow - 4 key financial metrics (responsive grid on desktop)
           _buildMetricsRow(),
           const SizedBox(height: SwiftleadTokens.spaceL),
           
@@ -894,7 +988,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
               bottom: _isBatchMode ? 96 : 96, // Extra space for batch action bar
             ),
             children: [
-              // Filter Chips
+              // Quick Filter Chips (Status)
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -921,6 +1015,10 @@ class _MoneyScreenState extends State<MoneyScreen> {
                   }).toList(),
                 ),
               ),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+              // Active Filter Chips (from filter sheet)
+              if (_currentMoneyFilters != null)
+                _buildActiveFilterChips(),
               const SizedBox(height: SwiftleadTokens.spaceM),
               
               // Batch Mode Info Banner
@@ -938,7 +1036,9 @@ class _MoneyScreenState extends State<MoneyScreen> {
                       description: 'Invoices will appear here when they match this filter.',
                       icon: Icons.receipt_outlined,
                     )
-                  : ListView.builder(
+                  : ResponsiveLayout.isDesktop(context)
+                      ? _buildDesktopInvoiceGrid()
+                      : ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _filteredInvoices.length,
@@ -961,10 +1061,14 @@ class _MoneyScreenState extends State<MoneyScreen> {
                           },
                           child: Padding(
                           padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
-                          child: GestureDetector(
-                            onTap: () {
-                              if (_isBatchMode) {
-                                // Toggle selection in batch mode
+                          child: Semantics(
+                            label: _isBatchMode 
+                              ? 'Invoice ${invoice.invoiceNumber}. Tap to ${isSelected ? 'deselect' : 'select'}.'
+                              : 'Invoice ${invoice.invoiceNumber}. Tap to view details.',
+                            child: GestureDetector(
+                              onTap: () {
+                                if (_isBatchMode) {
+                                  // Toggle selection in batch mode
                                 setState(() {
                                   if (isSelected) {
                                     _selectedInvoiceIds.remove(invoice.id);
@@ -976,13 +1080,30 @@ class _MoneyScreenState extends State<MoneyScreen> {
                                   }
                                 });
                               } else {
-                                // Normal tap - open invoice
+                                // Normal tap - open invoice with enhanced animation
                                 Navigator.push(
                                   context,
-                                  _createPageRoute(InvoiceDetailScreen(
-                                    invoiceId: invoice.id,
+                                  PageRouteBuilder(
+                                    pageBuilder: (context, animation, secondaryAnimation) => InvoiceDetailScreen(
+                                      invoiceId: invoice.id,
                                       invoiceNumber: invoice.id,
                                     ),
+                                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                      return SlideTransition(
+                                        position: Tween<Offset>(
+                                          begin: const Offset(1.0, 0.0),
+                                          end: Offset.zero,
+                                        ).animate(CurvedAnimation(
+                                          parent: animation,
+                                          curve: Curves.easeOutCubic,
+                                        )),
+                                        child: FadeTransition(
+                                          opacity: animation,
+                                          child: child,
+                                        ),
+                                      );
+                                    },
+                                    transitionDuration: const Duration(milliseconds: 300),
                                   ),
                                 );
                               }
@@ -1008,9 +1129,13 @@ class _MoneyScreenState extends State<MoneyScreen> {
                                 });
                               }
                             },
+                            onSecondaryTap: kIsWeb ? () {
+                              app_haptics.HapticFeedback.medium();
+                              _showInvoiceContextMenu(context, invoice);
+                            } : null,
                             child: _InvoiceCard(
                               invoiceNumber: invoice.id,
-                              clientName: invoice.contactName,
+                              clientName: invoice.contactName ?? '',
                               amount: invoice.amount,
                               status: invoice.status.displayName,
                               isSelected: isSelected,
@@ -1019,6 +1144,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                                 // Handled by GestureDetector
                               },
                             ),
+                          ),
                           ),
                         ),
                         );
@@ -1077,7 +1203,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                             builder: (context) => Row(
                               children: [
                                 const Icon(Icons.download_outlined, size: 20),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: SwiftleadTokens.spaceS),
                                 Text(
                                   'Download',
                                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -1094,7 +1220,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                             builder: (context) => Row(
                               children: [
                                 const Icon(Icons.delete_outline, size: 20, color: Color(SwiftleadTokens.errorRed)),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: SwiftleadTokens.spaceS),
                                 Text(
                                   'Delete',
                                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -1114,6 +1240,92 @@ class _MoneyScreenState extends State<MoneyScreen> {
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildDesktopInvoiceGrid() {
+    return ResponsiveGrid(
+      children: _filteredInvoices.map((invoice) {
+        final isSelected = _selectedInvoiceIds.contains(invoice.id);
+        return GestureDetector(
+          onTap: () {
+            if (_isBatchMode) {
+              setState(() {
+                if (isSelected) {
+                  _selectedInvoiceIds.remove(invoice.id);
+                  if (_selectedInvoiceIds.isEmpty) {
+                    _isBatchMode = false;
+                  }
+                } else {
+                  _selectedInvoiceIds.add(invoice.id);
+                }
+              });
+            } else {
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) => InvoiceDetailScreen(
+                    invoiceId: invoice.id,
+                    invoiceNumber: invoice.id,
+                  ),
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    return SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(1.0, 0.0),
+                        end: Offset.zero,
+                      ).animate(CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutCubic,
+                      )),
+                      child: FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      ),
+                    );
+                  },
+                  transitionDuration: const Duration(milliseconds: 300),
+                ),
+              );
+            }
+          },
+          onLongPress: () {
+            app_haptics.HapticFeedback.medium();
+            if (!_isBatchMode) {
+              setState(() {
+                _isBatchMode = true;
+                _selectedInvoiceIds.add(invoice.id);
+              });
+            } else {
+              setState(() {
+                if (isSelected) {
+                  _selectedInvoiceIds.remove(invoice.id);
+                  if (_selectedInvoiceIds.isEmpty) {
+                    _isBatchMode = false;
+                  }
+                } else {
+                  _selectedInvoiceIds.add(invoice.id);
+                }
+              });
+            }
+          },
+          onSecondaryTap: kIsWeb ? () {
+            app_haptics.HapticFeedback.medium();
+            _showInvoiceContextMenu(context, invoice);
+          } : null,
+          child: _InvoiceCard(
+            invoiceNumber: invoice.id,
+            clientName: invoice.contactName ?? '',
+            amount: invoice.amount,
+            status: invoice.status.displayName,
+            onTap: () {},
+            isSelected: isSelected || _isBatchMode,
+            isBatchMode: _isBatchMode,
+          ),
+        );
+      }).toList(),
+      childAspectRatio: 1.1,
+      crossAxisSpacing: ResponsiveLayout.getGutter(context),
+      mainAxisSpacing: ResponsiveLayout.getGutter(context),
     );
   }
 
@@ -1140,7 +1352,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                   ? const Color(SwiftleadTokens.errorRed)
                   : Theme.of(context).iconTheme.color,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: SwiftleadTokens.spaceXS),
             Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -1189,9 +1401,12 @@ class _MoneyScreenState extends State<MoneyScreen> {
           // Create new Invoice with paid status
           return Invoice(
             id: invoice.id,
+            orgId: invoice.orgId,
             contactId: invoice.contactId,
             contactName: invoice.contactName,
+            invoiceNumber: invoice.invoiceNumber,
             amount: invoice.amount,
+            taxRate: invoice.taxRate,
             status: InvoiceStatus.paid,
             dueDate: invoice.dueDate,
             paidDate: DateTime.now(),
@@ -1276,9 +1491,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                 },
               ),
               Divider(
-                color: Theme.of(context).brightness == Brightness.light
-                    ? Colors.black.withOpacity(0.08)
-                    : Colors.white.withOpacity(0.08),
+                color: Theme.of(context).dividerColor,
               ),
               ListTile(
                 leading: const Icon(Icons.delete_outline, color: Color(SwiftleadTokens.errorRed)),
@@ -1422,7 +1635,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                   statusIcon = Icons.check_circle;
                   break;
                 default:
-                  statusColor = Colors.grey;
+                  statusColor = Theme.of(context).textTheme.bodySmall?.color ?? Theme.of(context).textTheme.bodyMedium?.color ?? const Color(SwiftleadTokens.textSecondaryLight);
                   statusIcon = Icons.undo;
               }
 
@@ -1461,7 +1674,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: SwiftleadTokens.spaceXS),
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -1572,7 +1785,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                   statusIcon = Icons.check_circle;
                   break;
                 default:
-                  statusColor = Colors.grey;
+                  statusColor = Theme.of(context).textTheme.bodySmall?.color ?? Theme.of(context).textTheme.bodyMedium?.color ?? const Color(SwiftleadTokens.textSecondaryLight);
                   statusIcon = Icons.undo;
               }
 
@@ -1611,7 +1824,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: SwiftleadTokens.spaceXS),
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -1802,7 +2015,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
 
   Widget _buildBalanceHeader() {
     return FrostedContainer(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       child: Stack(
         children: [
           Column(
@@ -1827,7 +2040,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: const Color(SwiftleadTokens.successGreen).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1837,7 +2050,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                       size: 16,
                       color: Color(SwiftleadTokens.successGreen),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: SwiftleadTokens.spaceXXS),
                     Text(
                       'Connected to Stripe',
                       style: TextStyle(
@@ -1897,7 +2110,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: const Color(SwiftleadTokens.successGreen).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.4),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -2152,7 +2365,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
 
   Widget _buildRevenueChart() {
     return FrostedContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2166,11 +2379,35 @@ class _MoneyScreenState extends State<MoneyScreen> {
               // ChartTypeSwitcher: Line / Bar / Donut toggle
               Row(
                 children: [
-                  _ChartTypeButton(icon: Icons.show_chart, isSelected: true),
+                  _ChartTypeButton(
+                    icon: Icons.show_chart,
+                    isSelected: _selectedChartType == 'line',
+                    onPressed: () {
+                      setState(() {
+                        _selectedChartType = 'line';
+                      });
+                    },
+                  ),
                   const SizedBox(width: 8),
-                  _ChartTypeButton(icon: Icons.bar_chart, isSelected: false),
+                  _ChartTypeButton(
+                    icon: Icons.bar_chart,
+                    isSelected: _selectedChartType == 'bar',
+                    onPressed: () {
+                      setState(() {
+                        _selectedChartType = 'bar';
+                      });
+                    },
+                  ),
                   const SizedBox(width: 8),
-                  _ChartTypeButton(icon: Icons.pie_chart, isSelected: false),
+                  _ChartTypeButton(
+                    icon: Icons.pie_chart,
+                    isSelected: _selectedChartType == 'donut',
+                    onPressed: () {
+                      setState(() {
+                        _selectedChartType = 'donut';
+                      });
+                    },
+                  ),
                 ],
               ),
             ],
@@ -2210,8 +2447,10 @@ class _MoneyScreenState extends State<MoneyScreen> {
             ),
           ),
           const SizedBox(height: SwiftleadTokens.spaceL),
-          TrendLineChart(
-            title: '',
+          Semantics(
+            label: 'Revenue chart. Tap on data points to see details.',
+            child: TrendLineChart(
+              title: '',
             dataPoints: [
               ChartDataPoint(label: 'Week 1', value: 5000),
               ChartDataPoint(label: 'Week 2', value: 6200),
@@ -2258,6 +2497,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                 ),
               );
             },
+            ),
           ),
         ],
       ),
@@ -2293,7 +2533,12 @@ class _MoneyScreenState extends State<MoneyScreen> {
         description: 'Send your first invoice to get paid for your work.',
         icon: Icons.receipt_outlined,
         actionLabel: 'Send Invoice',
-        onAction: () {},
+        onAction: () {
+          Navigator.push(
+            context,
+            _createPageRoute(const CreateEditInvoiceScreen()),
+          );
+        },
       );
     }
 
@@ -2386,12 +2631,12 @@ class _PaymentCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: SwiftleadTokens.spaceXS),
                   Text(
                     clientName,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: SwiftleadTokens.spaceXS),
                   Text(
                     '${_formatDate(date)} • $method',
                     style: Theme.of(context).textTheme.bodySmall,
@@ -2408,7 +2653,7 @@ class _PaymentCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: SwiftleadTokens.spaceXS),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -2416,7 +2661,7 @@ class _PaymentCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: _getStatusColor(status).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
                   ),
                   child: Text(
                     status,
@@ -2463,9 +2708,11 @@ class _QuickActionButton extends StatelessWidget {
 class _ChartTypeButton extends StatelessWidget {
   final IconData icon;
   final bool isSelected;
+  final VoidCallback onPressed;
   
   const _ChartTypeButton({
     required this.icon,
+    required this.onPressed,
     this.isSelected = false,
   });
 
@@ -2476,7 +2723,7 @@ class _ChartTypeButton extends StatelessWidget {
       color: isSelected
           ? const Color(SwiftleadTokens.primaryTeal)
           : Theme.of(context).textTheme.bodySmall?.color,
-      onPressed: () {},
+      onPressed: onPressed,
     );
   }
 }
@@ -2516,7 +2763,7 @@ class _InvoiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FrostedContainer(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -2538,7 +2785,7 @@ class _InvoiceCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: SwiftleadTokens.spaceXS),
                 Text(
                   clientName,
                   style: Theme.of(context).textTheme.bodyMedium,
@@ -2555,7 +2802,7 @@ class _InvoiceCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: SwiftleadTokens.spaceXS),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 8,
@@ -2563,7 +2810,7 @@ class _InvoiceCard extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: _getStatusColor(status).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
                 ),
                 child: Text(
                   status,
@@ -2624,7 +2871,7 @@ class _QuoteCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: FrostedContainer(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -2641,7 +2888,7 @@ class _QuoteCard extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: SwiftleadTokens.spaceXS),
                       Text(
                         clientName,
                         style: Theme.of(context).textTheme.bodyMedium,
@@ -2656,7 +2903,7 @@ class _QuoteCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: _getStatusColor(status).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
                   ),
                   child: Text(
                     status,

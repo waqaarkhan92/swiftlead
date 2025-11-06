@@ -13,6 +13,7 @@ import '../../mock/mock_services.dart';
 import '../../widgets/forms/job_template_selector_sheet.dart';
 import '../../models/job_template.dart';
 import '../../utils/profession_config.dart';
+import '../../widgets/components/smart_collapsible_section.dart';
 
 /// Create/Edit Job Form - Create or edit a job
 /// Exact specification from UI_Inventory_v2.5.1
@@ -205,27 +206,13 @@ class _CreateEditJobScreenState extends State<CreateEditJobScreen> {
               const SizedBox(height: SwiftleadTokens.spaceM),
             ],
 
-            // iOS-style grouped sections
-            // Section 1: Basic Information
-            FrostedContainer(
-              padding: EdgeInsets.zero,
+            // iOS-style grouped sections with collapsible sections
+            // Section 1: Basic Information (always visible)
+            SmartCollapsibleSection(
+              title: 'Basic Information',
+              initiallyExpanded: true,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-                    child: Text(
-                      'Basic Information',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  Padding(
-                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-                    child: Column(
-                      children: [
                         // Job Title
                         TextFormField(
               controller: _titleController,
@@ -371,282 +358,97 @@ class _CreateEditJobScreenState extends State<CreateEditJobScreen> {
                 );
               }).toList(),
             ),
-            const SizedBox(height: SwiftleadTokens.spaceM),
-
-            // Due Date
-            Text(
-              'Due Date',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: SwiftleadTokens.spaceS),
-            OutlinedButton.icon(
-              onPressed: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _dueDate ?? DateTime.now().add(const Duration(days: 7)),
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 365)),
-                );
-                if (picked != null) {
-                  setState(() {
-                    _dueDate = picked;
-                  });
-                }
-              },
-              icon: const Icon(Icons.calendar_today),
-              label: Text(
-                _dueDate != null
-                    ? '${_dueDate!.day}/${_dueDate!.month}/${_dueDate!.year}'
-                    : 'Select Due Date',
-              ),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 52),
+                ],
               ),
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
-
-            // Job Value
-            TextFormField(
-              controller: _valueController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Estimated Value',
-                hintText: '£0.00',
-                prefixText: '£',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-                ),
-                suffixIcon: _valueController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.payments),
-                        tooltip: 'Request Deposit',
-                        onPressed: () {
-                          final jobValue = double.tryParse(_valueController.text) ?? 0.0;
-                          if (jobValue > 0) {
-                            DepositRequestSheet.show(
-                              context: context,
-                              jobId: widget.jobId,
-                              jobTitle: _titleController.text.isNotEmpty
-                                  ? _titleController.text
-                                  : 'Job',
-                              jobAmount: jobValue,
-                              onSend: (amount, dueDate, message) {
-                                // Handle deposit request sent
-                              },
-                            );
-                          }
-                        },
-                      )
-                    : null,
-              ),
-            ),
-                        const SizedBox(height: SwiftleadTokens.spaceM),
-                        // Description
-                        TextFormField(
-                          controller: _descriptionController,
-                          maxLines: 5,
-                          decoration: InputDecoration(
-                            labelText: 'Description',
-                            hintText: 'Add details about the job...',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-                            ),
-                          ),
-                        ),
-                      ],
+            // Section 2: Details (collapsed by default)
+            SmartCollapsibleSection(
+              title: 'Details',
+              initiallyExpanded: false,
+              child: Column(
+                children: [
+                  // Description
+                  TextFormField(
+                    controller: _descriptionController,
+                    maxLines: 5,
+                    decoration: InputDecoration(
+                      labelText: 'Description',
+                      hintText: 'Add details about the job...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
-            // Section 2: Job Details
-            FrostedContainer(
-              padding: EdgeInsets.zero,
+            // Section 3: Scheduling & Value (collapsed by default)
+            SmartCollapsibleSection(
+              title: 'Scheduling & Value',
+              initiallyExpanded: false,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-                    child: Text(
-                      'Job Details',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                  // Due Date
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _dueDate ?? DateTime.now().add(const Duration(days: 7)),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          _dueDate = picked;
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.calendar_today),
+                    label: Text(
+                      _dueDate != null
+                          ? 'Due Date: ${_dueDate!.day}/${_dueDate!.month}/${_dueDate!.year}'
+                          : 'Select Due Date',
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 52),
                     ),
                   ),
-                  const Divider(height: 1),
-                  Padding(
-                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-                    child: Column(
-                      children: [
-                        // Service Type
-                        Text(
-                          'Service Type',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: SwiftleadTokens.spaceS),
-                        _servicesLoaded
-                            ? Wrap(
-                                spacing: SwiftleadTokens.spaceS,
-                                runSpacing: SwiftleadTokens.spaceS,
-                                children: _availableServices.map((service) {
-                                  final isSelected = _selectedServiceType == service.name;
-                                  return SwiftleadChip(
-                                    label: service.name,
-                                    isSelected: isSelected,
-                                    onTap: () {
-                                      setState(() {
-                                        _selectedServiceType = isSelected ? null : service.name;
-                                      });
+                  const SizedBox(height: SwiftleadTokens.spaceM),
+                  // Job Value
+                  TextFormField(
+                    controller: _valueController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Estimated Value',
+                      hintText: '£0.00',
+                      prefixText: '£',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                      ),
+                      suffixIcon: _valueController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.payments),
+                              tooltip: 'Request Deposit',
+                              onPressed: () {
+                                final jobValue = double.tryParse(_valueController.text) ?? 0.0;
+                                if (jobValue > 0) {
+                                  DepositRequestSheet.show(
+                                    context: context,
+                                    jobId: widget.jobId,
+                                    jobTitle: _titleController.text.isNotEmpty
+                                        ? _titleController.text
+                                        : 'Job',
+                                    jobAmount: jobValue,
+                                    onSend: (amount, dueDate, message) {
+                                      // Handle deposit request sent
                                     },
                                   );
-                                }).toList(),
-                              )
-                            : const SizedBox(
-                                height: 40,
-                                child: Center(child: CircularProgressIndicator()),
-                              ),
-                        const SizedBox(height: SwiftleadTokens.spaceM),
-                        // Status
-                        Text(
-                          'Status',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: SwiftleadTokens.spaceS),
-                        Wrap(
-                          spacing: SwiftleadTokens.spaceS,
-                          children: ['Lead', 'Quote', 'Booked', 'In Progress', 'Complete'].map((status) {
-                            final isSelected = _selectedStatus == status;
-                            return SwiftleadChip(
-                              label: status,
-                              isSelected: isSelected,
-                              onTap: () {
-                                setState(() {
-                                  _selectedStatus = isSelected ? null : status;
-                                });
+                                }
                               },
-                            );
-                          }).toList(),
-                        ),
-                        const SizedBox(height: SwiftleadTokens.spaceM),
-                        // Priority
-                        Text(
-                          'Priority',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: SwiftleadTokens.spaceS),
-                        Wrap(
-                          spacing: SwiftleadTokens.spaceS,
-                          children: ['Low', 'Medium', 'High', 'Urgent'].map((priority) {
-                            final isSelected = _selectedPriority == priority;
-                            return SwiftleadChip(
-                              label: priority,
-                              isSelected: isSelected,
-                              onTap: () {
-                                setState(() {
-                                  _selectedPriority = isSelected ? null : priority;
-                                });
-                              },
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: SwiftleadTokens.spaceM),
-            // Section 3: Scheduling & Value
-            FrostedContainer(
-              padding: EdgeInsets.zero,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-                    child: Text(
-                      'Scheduling & Value',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  Padding(
-                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-                    child: Column(
-                      children: [
-                        OutlinedButton.icon(
-                          onPressed: () async {
-                            final picked = await showDatePicker(
-                              context: context,
-                              initialDate: _dueDate ?? DateTime.now().add(const Duration(days: 7)),
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime.now().add(const Duration(days: 365)),
-                            );
-                            if (picked != null) {
-                              setState(() {
-                                _dueDate = picked;
-                              });
-                            }
-                          },
-                          icon: const Icon(Icons.calendar_today),
-                          label: Text(
-                            _dueDate != null
-                                ? 'Due Date: ${_dueDate!.day}/${_dueDate!.month}/${_dueDate!.year}'
-                                : 'Select Due Date',
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 52),
-                          ),
-                        ),
-                        const SizedBox(height: SwiftleadTokens.spaceM),
-                        // Job Value
-                        TextFormField(
-                          controller: _valueController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText: 'Estimated Value',
-                            hintText: '£0.00',
-                            prefixText: '£',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-                            ),
-                            suffixIcon: _valueController.text.isNotEmpty
-                                ? IconButton(
-                                    icon: const Icon(Icons.payments),
-                                    tooltip: 'Request Deposit',
-                                    onPressed: () {
-                                      final jobValue = double.tryParse(_valueController.text) ?? 0.0;
-                                      if (jobValue > 0) {
-                                        DepositRequestSheet.show(
-                                          context: context,
-                                          jobId: widget.jobId,
-                                          jobTitle: _titleController.text.isNotEmpty
-                                              ? _titleController.text
-                                              : 'Job',
-                                          jobAmount: jobValue,
-                                          onSend: (amount, dueDate, message) {
-                                            // Handle deposit request sent
-                                          },
-                                        );
-                                      }
-                                    },
-                                  )
-                                : null,
-                          ),
-                        ),
-                      ],
+                            )
+                          : null,
                     ),
                   ),
                 ],

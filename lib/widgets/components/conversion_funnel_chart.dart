@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/tokens.dart';
 import '../global/frosted_container.dart';
+import '../global/haptic_feedback.dart';
 
 /// ConversionFunnelChart - Visual funnel showing drop-off at each stage
 /// Exact specification from UI_Inventory_v2.5.1
@@ -40,7 +41,16 @@ class ConversionFunnelChart extends StatelessWidget {
             final percentage = (stage.value / stages.first.value) * 100;
             
             return GestureDetector(
-              onTap: () => onStageTap?.call(),
+              onTap: () {
+                // Haptic feedback for tap
+                HapticFeedback.light();
+                onStageTap?.call();
+              },
+              onLongPress: () {
+                // Long press to drill down
+                HapticFeedback.longPress();
+                onStageTap?.call();
+              },
               child: _FunnelBar(
                 label: stage.label,
                 value: stage.value,

@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../theme/tokens.dart';
 import 'haptic_feedback.dart';
@@ -19,15 +20,18 @@ class SwiftleadContextMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: () => _showContextMenu(context),
+      onSecondaryTap: kIsWeb ? () => _showContextMenu(context) : null,
       child: child,
     );
   }
 
-  void _showContextMenu(BuildContext context) {
+  static void show({
+    required BuildContext context,
+    required Offset position,
+    required List<ContextMenuItem> items,
+  }) {
     final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
-
-    final position = renderBox.localToGlobal(Offset.zero);
 
     showDialog(
       context: context,
@@ -44,7 +48,7 @@ class SwiftleadContextMenu extends StatelessWidget {
           // Menu
           Positioned(
             left: position.dx,
-            top: position.dy + renderBox.size.height + 8,
+            top: position.dy + (renderBox.size.height) + 8,
             child: Material(
               color: Colors.transparent,
               child: ClipRRect(
@@ -108,6 +112,18 @@ class SwiftleadContextMenu extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showContextMenu(BuildContext context) {
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    final position = renderBox.localToGlobal(Offset.zero);
+    SwiftleadContextMenu.show(
+      context: context,
+      position: position,
+      items: items,
     );
   }
 }

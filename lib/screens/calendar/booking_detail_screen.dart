@@ -41,14 +41,29 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   void _handleCreateJobFromBooking() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => CreateEditJobScreen(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => CreateEditJobScreen(
           initialData: {
             'clientName': widget.clientName,
             'notes': 'Job created from booking: ${widget.bookingId}',
             'scheduledDate': _bookingTime,
           },
         ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(1.0, 0.0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            )),
+            child: FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
+          );
+        },
       ),
     ).then((_) {
       Toast.show(
@@ -101,23 +116,45 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
+          Semantics(
+            label: 'Edit booking',
+            button: true,
+            child: IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => CreateEditBookingScreen(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) => CreateEditBookingScreen(
                     bookingId: widget.bookingId,
                     initialDate: _bookingTime,
                   ),
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    return SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(1.0, 0.0),
+                        end: Offset.zero,
+                      ).animate(CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutCubic,
+                      )),
+                      child: FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      ),
+                    );
+                  },
                 ),
               );
             },
+            ),
           ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            onSelected: (value) {
+          Semantics(
+            label: 'More options',
+            button: true,
+            child: PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert),
+              onSelected: (value) {
               switch (value) {
                 case 'create_job':
                   _handleCreateJobFromBooking();
@@ -128,8 +165,23 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 case 'reminder_settings':
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const ReminderSettingsScreen(),
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) => const ReminderSettingsScreen(),
+                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(1.0, 0.0),
+                            end: Offset.zero,
+                          ).animate(CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
+                          )),
+                          child: FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          ),
+                        );
+                      },
                     ),
                   );
                   break;
@@ -212,13 +264,21 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 ),
               ),
             ],
+            ),
           ),
         ],
       ),
-      body: _isLoading
-          ? _buildLoadingState()
-          : _buildContent(),
-      floatingActionButton: _buildQuickActions(),
+      body: Column(
+        children: [
+          Expanded(
+            child: _isLoading
+                ? _buildLoadingState()
+                : _buildContent(),
+          ),
+          // iOS-style bottom toolbar (sticky at bottom)
+          _buildBottomToolbar(),
+        ],
+      ),
     );
   }
 
@@ -275,7 +335,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Widget _buildBookingSummaryCard() {
     return FrostedContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -305,7 +365,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: _getStatusColor(_status).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.6),
                 ),
                 child: Text(
                   _status,
@@ -365,7 +425,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Widget _buildClientInfo() {
     return FrostedContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -411,47 +471,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   ],
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.phone),
-                onPressed: () async {
-                  final phoneNumber = '+44 7700 900123';
-                  final uri = Uri.parse('tel:$phoneNumber');
-                  if (await canLaunchUrl(uri)) {
-                    await launchUrl(uri);
-                  } else {
-                    if (mounted) {
-                      Toast.show(
-                        context,
-                        message: 'Could not launch phone dialer',
-                        type: ToastType.error,
-                      );
-                    }
-                  }
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.message),
-                onPressed: () {
-                  // Navigate to inbox and filter by contact name
-                  // In a real app, would find thread by contact ID/name
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const InboxScreen(),
-                    ),
-                  );
-                  // Show a toast to indicate which contact to look for
-                  Future.delayed(const Duration(milliseconds: 300), () {
-                    if (mounted) {
-                      Toast.show(
-                        context,
-                        message: 'Navigate to conversation with ${widget.clientName}',
-                        type: ToastType.info,
-                      );
-                    }
-                  });
-                },
-              ),
+              // Call and Message buttons removed - available in bottom toolbar
             ],
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
@@ -474,7 +494,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Widget _buildServiceDetails() {
     return FrostedContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -508,7 +528,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     };
 
     return FrostedContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -584,7 +604,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Widget _buildStatusCard() {
     return FrostedContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -686,7 +706,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Widget _buildOnMyWayButton() {
     return FrostedContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       child: PrimaryButton(
         label: 'On My Way',
         onPressed: () {
@@ -706,7 +726,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Widget _buildETACountdown() {
     return FrostedContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       child: Column(
         children: [
           Row(
@@ -744,32 +764,173 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     );
   }
 
-  Widget _buildQuickActions() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        FloatingActionButton(
-          heroTag: 'complete',
-          onPressed: () {
-            CompleteBookingModal.show(
-              context: context,
-              bookingId: widget.bookingId,
-              clientName: widget.clientName,
-              serviceName: 'Kitchen Sink Repair',
-            );
-          },
-          backgroundColor: const Color(SwiftleadTokens.successGreen),
-          child: const Icon(Icons.check),
+  Widget _buildBottomToolbar() {
+    // iOS-style bottom toolbar: Secondary actions in toolbar, primary action below
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Secondary actions toolbar (iOS pattern: icon + label)
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SwiftleadTokens.spaceM,
+                vertical: SwiftleadTokens.spaceS,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Semantics(
+                    label: 'Call client',
+                    button: true,
+                    child: _ToolbarAction(
+                      icon: Icons.phone,
+                      label: 'Call',
+                      onTap: () async {
+                      final phoneNumber = '+44 7700 900123';
+                      final uri = Uri.parse('tel:$phoneNumber');
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri);
+                      } else {
+                        if (mounted) {
+                          Toast.show(
+                            context,
+                            message: 'Could not launch phone dialer',
+                            type: ToastType.error,
+                          );
+                        }
+                      }
+                    },
+                      ),
+                    ),
+                  Semantics(
+                    label: 'Message client',
+                    button: true,
+                    child: _ToolbarAction(
+                      icon: Icons.message,
+                      label: 'Message',
+                      onTap: () {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation, secondaryAnimation) => const InboxScreen(),
+                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                            return SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(1.0, 0.0),
+                                end: Offset.zero,
+                              ).animate(CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeOutCubic,
+                              )),
+                              child: FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                      Future.delayed(const Duration(milliseconds: 300), () {
+                        if (mounted) {
+                          Toast.show(
+                            context,
+                            message: 'Navigate to conversation with ${widget.clientName}',
+                            type: ToastType.info,
+                          );
+                        }
+                      });
+                    },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            // Primary action: Full-width button at bottom (iOS pattern)
+            Container(
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+              child: PrimaryButton(
+                label: _status == 'Confirmed' && !_onMyWay
+                    ? 'On My Way'
+                    : _status == 'In Progress'
+                        ? 'Mark Complete'
+                        : 'Complete',
+                onPressed: () {
+                  if (_status == 'Confirmed' && !_onMyWay) {
+                    OnMyWaySheet.show(
+                      context: context,
+                      onSendETA: (minutes) {
+                        setState(() {
+                          _onMyWay = true;
+                        });
+                      },
+                    );
+                  } else {
+                    CompleteBookingModal.show(
+                      context: context,
+                      bookingId: widget.bookingId,
+                      clientName: widget.clientName,
+                      serviceName: 'Kitchen Sink Repair',
+                    );
+                  }
+                },
+                icon: _status == 'Confirmed' && !_onMyWay
+                    ? Icons.directions_run
+                    : Icons.check_circle,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: SwiftleadTokens.spaceS),
-        FloatingActionButton(
-          heroTag: 'message',
-          onPressed: () {
-            // Message client
-          },
-          child: const Icon(Icons.message),
+      ),
+    );
+  }
+
+  // Helper widget for toolbar actions (iOS pattern: icon + label)
+  Widget _ToolbarAction({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusButton),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: SwiftleadTokens.spaceS,
+            horizontal: SwiftleadTokens.spaceXS,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 24,
+                color: const Color(SwiftleadTokens.primaryTeal),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontSize: 11,
+                  color: const Color(SwiftleadTokens.primaryTeal),
+                ),
+              ),
+            ],
+          ),
         ),
-      ],
+      ),
     );
   }
 
@@ -796,7 +957,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Widget _buildReminderStatus() {
     return FrostedContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -853,7 +1014,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Widget _buildBookingNotes() {
     return FrostedContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -885,7 +1046,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Widget _buildCancellationPolicy() {
     return FrostedContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -948,7 +1109,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     final noShowCount = 3;
 
     return FrostedContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -977,7 +1138,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: const Color(SwiftleadTokens.errorRed).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.4),
                   ),
                   child: Text(
                     'High-Risk Client',

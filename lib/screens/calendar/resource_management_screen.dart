@@ -179,7 +179,7 @@ class _ResourceManagementScreenState extends State<ResourceManagementScreen> {
                                             value: 'edit',
                                             child: Builder(
                                               builder: (context) => Row(
-                                                children: [
+                                              children: [
                                                   const Icon(Icons.edit, size: 20),
                                                   const SizedBox(width: SwiftleadTokens.spaceS),
                                                   Text(
@@ -188,15 +188,15 @@ class _ResourceManagementScreenState extends State<ResourceManagementScreen> {
                                                       fontWeight: FontWeight.w500,
                                                     ),
                                                   ),
-                                                ],
-                                              ),
+                                              ],
                                             ),
+                                          ),
                                           ),
                                           PopupMenuItem(
                                             value: 'delete',
                                             child: Builder(
                                               builder: (context) => Row(
-                                                children: [
+                                              children: [
                                                   const Icon(Icons.delete, color: Color(SwiftleadTokens.errorRed), size: 20),
                                                   const SizedBox(width: SwiftleadTokens.spaceS),
                                                   Text(
@@ -206,7 +206,7 @@ class _ResourceManagementScreenState extends State<ResourceManagementScreen> {
                                                       color: const Color(SwiftleadTokens.errorRed),
                                                     ),
                                                   ),
-                                                ],
+                                              ],
                                               ),
                                             ),
                                           ),

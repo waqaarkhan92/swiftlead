@@ -16,13 +16,18 @@ import 'create_edit_job_screen.dart';
 import '../../widgets/forms/jobs_filter_sheet.dart';
 import '../../widgets/forms/jobs_quick_actions_sheet.dart';
 import '../../widgets/global/toast.dart';
+import '../../widgets/global/haptic_feedback.dart' as app_haptics;
+import '../../widgets/global/spring_animation.dart';
 import '../../widgets/components/animated_counter.dart';
 import '../../widgets/components/smart_collapsible_section.dart';
 import '../../widgets/components/celebration_banner.dart';
 import '../../widgets/components/ai_insight_banner.dart';
 import '../../widgets/components/trend_tile.dart';
+import '../../widgets/components/active_filter_chips.dart';
 import '../../utils/keyboard_shortcuts.dart' show AppShortcuts, SearchIntent, CreateIntent, RefreshIntent, CloseIntent, CreateJobIntent;
 import '../../utils/profession_config.dart';
+import '../../utils/responsive_layout.dart';
+import '../../models/job.dart';
 import '../calendar/create_edit_booking_screen.dart';
 import '../money/create_edit_invoice_screen.dart';
 import '../contacts/create_edit_contact_screen.dart';
@@ -55,6 +60,9 @@ class _JobsScreenState extends State<JobsScreen> {
   final Set<String> _milestonesShown = {};
   String? _celebrationMessage;
   
+  // AI Insight Banner dismissal tracking
+  bool _aiInsightDismissed = false;
+  
   // Progressive disclosure states
   bool _todayExpanded = true;
   bool _thisWeekExpanded = true;
@@ -76,7 +84,7 @@ class _JobsScreenState extends State<JobsScreen> {
       _tabCounts = [
         _allJobs.length, // All
         (statusCounts[JobStatus.inProgress] ?? 0) +
-            (statusCounts[JobStatus.scheduled] ?? 0), // Active
+            (statusCounts[JobStatus.booked] ?? 0), // Active
         statusCounts[JobStatus.completed] ?? 0, // Completed
         statusCounts[JobStatus.cancelled] ?? 0, // Cancelled
       ];
@@ -101,7 +109,7 @@ class _JobsScreenState extends State<JobsScreen> {
   // Phase 3: Expanded celebration milestones
   void _checkForMilestones() {
     final activeJobs = _filteredJobs.where((j) => 
-      j.status == JobStatus.inProgress || j.status == JobStatus.scheduled
+      j.status == JobStatus.inProgress || j.status == JobStatus.booked
     ).length;
     
     // 100 total jobs milestone
@@ -198,7 +206,7 @@ class _JobsScreenState extends State<JobsScreen> {
       baseList = _allJobs
           .where((j) =>
               j.status == JobStatus.inProgress ||
-              j.status == JobStatus.scheduled)
+              j.status == JobStatus.booked)
           .toList();
     } else if (_selectedTabIndex == 2) {
       // Completed
@@ -224,8 +232,8 @@ class _JobsScreenState extends State<JobsScreen> {
     // Phase 2: Smart prioritization - sort using interaction tracking
     _filteredJobs.sort((a, b) {
       // Active jobs first
-      final aIsActive = a.status == JobStatus.inProgress || a.status == JobStatus.scheduled;
-      final bIsActive = b.status == JobStatus.inProgress || b.status == JobStatus.scheduled;
+      final aIsActive = a.status == JobStatus.inProgress || a.status == JobStatus.booked;
+      final bIsActive = b.status == JobStatus.inProgress || b.status == JobStatus.booked;
       if (aIsActive != bIsActive) {
         return aIsActive ? -1 : 1;
       }
@@ -255,7 +263,7 @@ class _JobsScreenState extends State<JobsScreen> {
     // Phase 2: Contextual hiding - hide completed jobs >30 days old (unless recently opened)
     final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
     _filteredJobs = _filteredJobs.where((job) {
-      if (job.status == JobStatus.inProgress || job.status == JobStatus.scheduled) return true;
+      if (job.status == JobStatus.inProgress || job.status == JobStatus.booked) return true;
       if (_jobLastOpened[job.id] != null && 
           _jobLastOpened[job.id]!.isAfter(thirtyDaysAgo)) return true;
       final jobDate = job.completedAt ?? job.createdAt;
@@ -362,9 +370,7 @@ class _JobsScreenState extends State<JobsScreen> {
                   Navigator.pop(context);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => CreateEditJobScreen(jobId: job.id),
-                    ),
+                    _createPageRoute(CreateEditJobScreen(jobId: job.id)),
                   );
                 },
               ),
@@ -393,9 +399,7 @@ class _JobsScreenState extends State<JobsScreen> {
                 },
               ),
               Divider(
-                color: Theme.of(context).brightness == Brightness.light
-                    ? Colors.black.withOpacity(0.08)
-                    : Colors.white.withOpacity(0.08),
+                color: Theme.of(context).dividerColor.withOpacity(0.5),
               ),
               ListTile(
                 leading: const Icon(Icons.delete_outline, color: Color(SwiftleadTokens.errorRed)),
@@ -409,6 +413,91 @@ class _JobsScreenState extends State<JobsScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildActiveFilterChips() {
+    if (_currentFilters == null || _activeFilters == 0) {
+      return const SizedBox.shrink();
+    }
+
+    final activeFilters = <ActiveFilter>[];
+
+    // Status filters
+    if (_currentFilters!.statusFilters.isNotEmpty && 
+        !_currentFilters!.statusFilters.contains('All')) {
+      for (final status in _currentFilters!.statusFilters) {
+        activeFilters.add(ActiveFilter(
+          label: 'Status',
+          value: status,
+          onRemove: () {
+            setState(() {
+              _currentFilters!.statusFilters.remove(status);
+              if (_currentFilters!.statusFilters.isEmpty) {
+                _currentFilters!.statusFilters.add('All');
+              }
+              _activeFilters = _countActiveFilters(_currentFilters!);
+              if (_activeFilters == 0) {
+                _currentFilters = null;
+              }
+              _applyFilter();
+            });
+          },
+        ));
+      }
+    }
+
+    // Service type filters
+    if (_currentFilters!.serviceTypeFilters.isNotEmpty && 
+        !_currentFilters!.serviceTypeFilters.contains('All')) {
+      for (final type in _currentFilters!.serviceTypeFilters) {
+        activeFilters.add(ActiveFilter(
+          label: 'Service',
+          value: type,
+          onRemove: () {
+            setState(() {
+              _currentFilters!.serviceTypeFilters.remove(type);
+              if (_currentFilters!.serviceTypeFilters.isEmpty) {
+                _currentFilters!.serviceTypeFilters.add('All');
+              }
+              _activeFilters = _countActiveFilters(_currentFilters!);
+              if (_activeFilters == 0) {
+                _currentFilters = null;
+              }
+              _applyFilter();
+            });
+          },
+        ));
+      }
+    }
+
+    // Date range filter
+    if (_currentFilters!.dateRange != 'All Time') {
+      activeFilters.add(ActiveFilter(
+        label: 'Date',
+        value: _currentFilters!.dateRange,
+        onRemove: () {
+          setState(() {
+            _currentFilters!.dateRange = 'All Time';
+            _activeFilters = _countActiveFilters(_currentFilters!);
+            if (_activeFilters == 0) {
+              _currentFilters = null;
+            }
+            _applyFilter();
+          });
+        },
+      ));
+    }
+
+    return ActiveFilterChipsRow(
+      filters: activeFilters,
+      onClearAll: () {
+        setState(() {
+          _currentFilters = null;
+          _activeFilters = 0;
+          _applyFilter();
+        });
+      },
     );
   }
 
@@ -602,21 +691,28 @@ class _JobsScreenState extends State<JobsScreen> {
         title: ProfessionState.config.getLabel('Jobs'),
         actions: [
           // Primary action: Add Job
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'Add Job',
-            onPressed: () async {
-              final action = await JobsQuickActionsSheet.show(context: context);
-              if (action != null && mounted) {
-                _handleQuickAction(action);
-              }
-            },
+          Semantics(
+            label: 'Add job',
+            button: true,
+            child: IconButton(
+              icon: const Icon(Icons.add),
+              tooltip: 'Add Job',
+              onPressed: () async {
+                final action = await JobsQuickActionsSheet.show(context: context);
+                if (action != null && mounted) {
+                  _handleQuickAction(action);
+                }
+              },
+            ),
           ),
           // More menu for secondary actions (iOS-aligned: max 2 icons)
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            tooltip: 'More',
-            onSelected: (value) {
+          Semantics(
+            label: 'More options',
+            button: true,
+            child: PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert),
+              tooltip: 'More',
+              onSelected: (value) {
               switch (value) {
                 case 'filter':
                   _showFilterSheet(context);
@@ -624,19 +720,13 @@ class _JobsScreenState extends State<JobsScreen> {
                 case 'search':
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const JobSearchScreen(),
-                    ),
+                    _createPageRoute(const JobSearchScreen()),
                   );
                   break;
                 case 'sort':
                   _showSortMenu(context);
                   break;
-                case 'view_toggle':
-                  setState(() {
-                    _viewMode = _viewMode == 'list' ? 'kanban' : 'list';
-                  });
-                  break;
+                // Kanban view removed - keeping list view as primary
               }
             },
             itemBuilder: (context) => [
@@ -653,7 +743,7 @@ class _JobsScreenState extends State<JobsScreen> {
                             right: -4,
                             top: -4,
                             child: Container(
-                              padding: const EdgeInsets.all(3),
+                              padding: const EdgeInsets.all(SwiftleadTokens.spaceXXS),
                               decoration: const BoxDecoration(
                                 color: Color(SwiftleadTokens.primaryTeal),
                                 shape: BoxShape.circle,
@@ -675,7 +765,7 @@ class _JobsScreenState extends State<JobsScreen> {
                           ),
                       ],
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: SwiftleadTokens.spaceS),
                     Text(
                       'Filter${_activeFilters > 0 ? ' ($_activeFilters)' : ''}',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -689,16 +779,16 @@ class _JobsScreenState extends State<JobsScreen> {
                 value: 'search',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
+                  children: [
                       const Icon(Icons.search_outlined, size: 20),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: SwiftleadTokens.spaceS),
                       Text(
                         'Search',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
+                  ],
                   ),
                 ),
               ),
@@ -707,40 +797,22 @@ class _JobsScreenState extends State<JobsScreen> {
                 value: 'sort',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
+                  children: [
                       const Icon(Icons.sort, size: 20),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: SwiftleadTokens.spaceS),
                       Text(
                         'Sort',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
+                  ],
                   ),
                 ),
               ),
-              PopupMenuItem(
-                value: 'view_toggle',
-                child: Builder(
-                  builder: (context) => Row(
-                    children: [
-                      Icon(
-                        _viewMode == 'list' ? Icons.view_module : Icons.view_list,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        _viewMode == 'list' ? 'Switch to Kanban' : 'Switch to List',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              // Kanban view toggle removed - list view is the primary view
             ],
+            ),
           ),
         ],
       ),
@@ -792,14 +864,27 @@ class _JobsScreenState extends State<JobsScreen> {
           const SizedBox(height: SwiftleadTokens.spaceS),
         ],
         
-        // Phase 2: AI Insight Banner - Predictive insights
+        // Quick Stats Summary (Visual Enhancement)
         if (_filteredJobs.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+            child: _buildQuickStatsSummary(),
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+        ],
+        
+        // Active Filter Chips Row
+        if (_currentFilters != null && _activeFilters > 0)
+          _buildActiveFilterChips(),
+        
+        // Phase 2: AI Insight Banner - Predictive insights
+        if (_filteredJobs.isNotEmpty && !_aiInsightDismissed) ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
             child: Builder(
               builder: (context) {
                 final activeJobs = _filteredJobs.where((j) => 
-                  j.status == JobStatus.inProgress || j.status == JobStatus.scheduled
+                  j.status == JobStatus.inProgress || j.status == JobStatus.booked
                 ).length;
                 final overdueJobs = _filteredJobs.where((j) => 
                   j.status == JobStatus.inProgress && 
@@ -824,7 +909,11 @@ class _JobsScreenState extends State<JobsScreen> {
                   return AIInsightBanner(
                     message: insight,
                     onTap: onTap,
-                    onDismiss: () {},
+                    onDismiss: () {
+                      setState(() {
+                        _aiInsightDismissed = true;
+                      });
+                    },
                   );
                 }
                 return const SizedBox.shrink();
@@ -834,29 +923,8 @@ class _JobsScreenState extends State<JobsScreen> {
           const SizedBox(height: SwiftleadTokens.spaceM),
         ],
         
-        // View Mode Toggle - Moved from app bar for better UX
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: SwiftleadTokens.spaceM,
-            vertical: SwiftleadTokens.spaceS,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: SegmentedControl(
-                  segments: const ['List', 'Kanban'],
-                  selectedIndex: _viewMode == 'list' ? 0 : 1,
-                  onSelectionChanged: (index) {
-                    HapticFeedback.selectionClick();
-                    setState(() {
-                      _viewMode = index == 0 ? 'list' : 'kanban';
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
+        // View Mode Toggle - Hidden by default, can be enabled in settings if needed
+        // Removed to simplify UI - List view is the default and primary view
         // PipelineTabs - SegmentedControl with counts
         Padding(
           padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
@@ -875,12 +943,15 @@ class _JobsScreenState extends State<JobsScreen> {
         ),
         
         // JobCardList - Card grid with rich information OR Kanban board
+        // Desktop: Always show grid, Mobile: Respect view mode
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
               await _loadJobs();
             },
-            child: _viewMode == 'kanban' ? _buildKanbanView() : _buildJobList(),
+            child: ResponsiveLayout.isDesktop(context)
+                ? _buildDesktopGridView()
+                : _buildJobList(),
           ),
         ),
       ],
@@ -898,7 +969,12 @@ class _JobsScreenState extends State<JobsScreen> {
             : 'Jobs will appear here when their status matches this filter.',
         icon: Icons.work_outline,
         actionLabel: _selectedTabIndex == 0 ? 'Create Job' : null,
-        onAction: _selectedTabIndex == 0 ? () {} : null,
+        onAction: _selectedTabIndex == 0 ? () {
+          Navigator.push(
+            context,
+            _createPageRoute(const CreateEditJobScreen()),
+          );
+        } : null,
       );
     }
 
@@ -910,13 +986,14 @@ class _JobsScreenState extends State<JobsScreen> {
         bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
       ),
       itemCount: _filteredJobs.length,
+      cacheExtent: 200, // Cache items for better performance
       itemBuilder: (context, index) {
         final job = _filteredJobs[index];
-        // Phase 3: Staggered animation delay for smooth appearance
+        // Phase 3: Staggered animation delay with spring physics
         return TweenAnimationBuilder<double>(
           tween: Tween(begin: 0.0, end: 1.0),
           duration: Duration(milliseconds: 300 + (index * 50).clamp(0, 200)),
-          curve: Curves.easeOutCubic,
+          curve: SpringAnimation.smooth,
           builder: (context, value, child) {
             return Opacity(
               opacity: value,
@@ -993,17 +1070,23 @@ class _JobsScreenState extends State<JobsScreen> {
               }
               return true;
             },
-          child: GestureDetector(
-            onLongPress: () {
-              HapticFeedback.mediumImpact();
-              _showJobContextMenu(context, job);
-            },
-            child: Padding(
+          child: Semantics(
+            label: 'Job ${job.title}. Long press for options.',
+            child: GestureDetector(
+              onLongPress: () {
+                HapticFeedback.mediumImpact();
+                _showJobContextMenu(context, job);
+              },
+              onSecondaryTap: () {
+                HapticFeedback.mediumImpact();
+                _showJobContextMenu(context, job);
+              },
+              child: Padding(
               padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
               child: JobCard(
                 jobTitle: job.title,
-                clientName: job.contactName,
-                serviceType: job.serviceType,
+                clientName: job.contactName ?? '',
+                serviceType: job.serviceType ?? '',
                 status: job.status.displayName,
                 dueDate: job.scheduledDate,
                 price: '£${job.value.toStringAsFixed(2)}',
@@ -1019,17 +1102,69 @@ class _JobsScreenState extends State<JobsScreen> {
                 },
               ),
             ),
+            ),
           ),
-        ),
-      );
+          ),
+        );
       },
+    );
+  }
+
+  /// Desktop Grid View - Responsive grid layout for desktop
+  Widget _buildDesktopGridView() {
+    if (_filteredJobs.isEmpty) {
+      return EmptyStateCard(
+        title: _selectedTabIndex == 0
+            ? 'Create your first job'
+            : 'No ${_tabs[_selectedTabIndex].toLowerCase()} jobs',
+        description: _selectedTabIndex == 0
+            ? 'Start tracking work and managing payments.'
+            : 'Jobs will appear here when their status matches this filter.',
+        icon: Icons.work_outline,
+        actionLabel: _selectedTabIndex == 0 ? 'Create Job' : null,
+        onAction: _selectedTabIndex == 0 ? () {
+          Navigator.push(
+            context,
+            _createPageRoute(const CreateEditJobScreen()),
+          );
+        } : null,
+      );
+    }
+
+    final columnCount = ResponsiveLayout.getColumnCount(context);
+    final gutter = ResponsiveLayout.getGutter(context);
+
+    return ResponsiveGrid(
+      children: _filteredJobs.map((job) {
+        return JobCard(
+          jobTitle: job.title,
+          clientName: job.contactName ?? '',
+          serviceType: job.serviceType ?? '',
+          status: job.status.displayName,
+          dueDate: job.scheduledDate,
+          price: '£${job.value.toStringAsFixed(2)}',
+          onTap: () {
+            _trackJobInteraction(job.id);
+            Navigator.push(
+              context,
+              _createPageRoute(JobDetailScreen(
+                jobId: job.id,
+                jobTitle: job.title,
+              )),
+            );
+          },
+        );
+      }).toList(),
+      childAspectRatio: 1.1,
+      crossAxisSpacing: gutter,
+      mainAxisSpacing: gutter,
     );
   }
 
   Widget _buildKanbanView() {
     // Group jobs by status
-    final quotedJobs = _filteredJobs.where((j) => j.status == JobStatus.quoted).toList();
-    final scheduledJobs = _filteredJobs.where((j) => j.status == JobStatus.scheduled).toList();
+    final proposedJobs = _filteredJobs.where((j) => j.status == JobStatus.proposed).toList();
+    final bookedJobs = _filteredJobs.where((j) => j.status == JobStatus.booked).toList();
     final inProgressJobs = _filteredJobs.where((j) => j.status == JobStatus.inProgress).toList();
     final completedJobs = _filteredJobs.where((j) => j.status == JobStatus.completed).toList();
 
@@ -1040,21 +1175,38 @@ class _JobsScreenState extends State<JobsScreen> {
           child: SizedBox(
             height: constraints.maxHeight,
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildKanbanColumn('Quoted', quotedJobs, constraints.maxHeight),
-                _buildKanbanColumn('Scheduled', scheduledJobs, constraints.maxHeight),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+                _buildKanbanColumn('Proposed', proposedJobs, constraints.maxHeight),
+                _buildKanbanColumn('Booked', bookedJobs, constraints.maxHeight),
                 _buildKanbanColumn('In Progress', inProgressJobs, constraints.maxHeight),
                 _buildKanbanColumn('Completed', completedJobs, constraints.maxHeight),
-              ],
+      ],
             ),
           ),
-        );
+    );
       },
     );
   }
 
   Widget _buildKanbanColumn(String title, List<Job> jobs, double maxHeight) {
+    // Determine target status based on column title
+    JobStatus? targetStatus;
+    switch (title) {
+      case 'Proposed':
+        targetStatus = JobStatus.proposed;
+        break;
+      case 'Booked':
+        targetStatus = JobStatus.booked;
+        break;
+      case 'In Progress':
+        targetStatus = JobStatus.inProgress;
+        break;
+      case 'Completed':
+        targetStatus = JobStatus.completed;
+        break;
+    }
+
     return SizedBox(
       width: 320, // Wider to accommodate card content with padding
       child: Container(
@@ -1074,9 +1226,9 @@ class _JobsScreenState extends State<JobsScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1090,35 +1242,136 @@ class _JobsScreenState extends State<JobsScreen> {
                 ],
               ),
             ),
-            // Jobs in this column
+            // Jobs in this column with drag-drop support
             Flexible(
-              child: SizedBox(
-                height: maxHeight - 80, // Subtract header height
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 4), // Reduced padding
-                  itemCount: jobs.length,
-                  itemBuilder: (context, index) {
-                    final job = jobs[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          return SizedBox(
-                            width: constraints.maxWidth,
-                            child: JobCard(
-                              jobTitle: job.title,
-                              clientName: job.contactName,
-                              serviceType: job.serviceType,
-                              status: job.status.displayName,
-                              dueDate: job.scheduledDate,
-                              price: job.value > 0 ? '£${job.value.toStringAsFixed(2)}' : null,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => JobDetailScreen(
-                                      jobId: job.id,
-                                      jobTitle: job.title,
+              child: DragTarget<Job>(
+                onWillAccept: (data) {
+                  // Haptic feedback when dragging over column
+                  if (data != null && targetStatus != null && data.status != targetStatus) {
+                    app_haptics.HapticFeedback.light();
+                  }
+                  return data != null && targetStatus != null;
+                },
+                onAccept: (draggedJob) {
+                  // Update job status when dropped on column
+                  if (targetStatus != null && draggedJob.status != targetStatus) {
+                    setState(() {
+                      final jobIndex = _allJobs.indexWhere((j) => j.id == draggedJob.id);
+                      if (jobIndex != -1) {
+                        // Create updated job with new status
+                        _allJobs[jobIndex] = Job(
+                          id: draggedJob.id,
+                          orgId: draggedJob.orgId,
+                          title: draggedJob.title,
+                          contactId: draggedJob.contactId,
+                          contactName: draggedJob.contactName,
+                          jobType: draggedJob.jobType,
+                          serviceType: draggedJob.serviceType,
+                          description: draggedJob.description,
+                          status: targetStatus!,
+                          priority: draggedJob.priority,
+                          priceEstimate: draggedJob.priceEstimate,
+                          startTime: draggedJob.startTime,
+                          endTime: draggedJob.endTime,
+                          location: draggedJob.location,
+                          createdAt: draggedJob.createdAt,
+                          completedAt: draggedJob.completedAt,
+                          assignedTo: draggedJob.assignedTo,
+                        );
+                        _applyFilter();
+                        app_haptics.HapticFeedback.success();
+                        Toast.show(
+                          context,
+                          message: 'Job moved to $title',
+                          type: ToastType.success,
+                        );
+                      }
+                    });
+                  }
+                },
+                builder: (context, candidateData, rejectedData) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: candidateData.isNotEmpty
+                          ? const Color(SwiftleadTokens.primaryTeal).withOpacity(0.05)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+                    ),
+                    child: SizedBox(
+                      height: maxHeight - 80, // Subtract header height
+              child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 4), // Reduced padding
+                itemCount: jobs.length,
+                        cacheExtent: 200, // Cache items for better performance
+                itemBuilder: (context, index) {
+                  final job = jobs[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                return Draggable<Job>(
+                                  data: job,
+                                  feedback: Material(
+                                    color: Colors.transparent,
+                                    child: Opacity(
+                                      opacity: 0.9,
+                                      child: Container(
+                                        width: constraints.maxWidth,
+                                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                    child: JobCard(
+                      jobTitle: job.title,
+                      clientName: job.contactName ?? '',
+                      serviceType: job.serviceType ?? '',
+                      status: job.status.displayName,
+                      dueDate: job.scheduledDate,
+                      price: job.value > 0 ? '£${job.value.toStringAsFixed(2)}' : null,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  childWhenDragging: Opacity(
+                                    opacity: 0.3,
+                                    child: SizedBox(
+                                      width: constraints.maxWidth,
+                                      child: JobCard(
+                                        jobTitle: job.title,
+                                        clientName: job.contactName ?? '',
+                                        serviceType: job.serviceType ?? '',
+                                        status: job.status.displayName,
+                                        dueDate: job.scheduledDate,
+                                        price: job.value > 0 ? '£${job.value.toStringAsFixed(2)}' : null,
+                                      ),
+                                    ),
+                                  ),
+                                  onDragStarted: () {
+                                    app_haptics.HapticFeedback.dragStart();
+                                  },
+                                  onDragEnd: (details) {
+                                    app_haptics.HapticFeedback.dragEnd();
+                                  },
+                                  child: Semantics(
+                                    label: 'Job ${job.title}, ${job.contactName ?? ''}, ${job.status.displayName}${job.value > 0 ? ", £${job.value.toStringAsFixed(2)}" : ""}',
+                                    button: true,
+                                    child: SizedBox(
+                                      width: constraints.maxWidth,
+                                      child: JobCard(
+                                        jobTitle: job.title,
+                                        clientName: job.contactName ?? '',
+                                        serviceType: job.serviceType ?? '',
+                                        status: job.status.displayName,
+                                        dueDate: job.scheduledDate,
+                                        price: job.value > 0 ? '£${job.value.toStringAsFixed(2)}' : null,
+                      onTap: () {
+                                          _trackJobInteraction(job.id);
+                        Navigator.push(
+                          context,
+                          _createPageRoute(JobDetailScreen(
+                            jobId: job.id,
+                            jobTitle: job.title,
+                          )),
+                        );
+                      },
+                                      ),
                                     ),
                                   ),
                                 );
@@ -1127,14 +1380,250 @@ class _JobsScreenState extends State<JobsScreen> {
                           );
                         },
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildQuickStatsSummary() {
+    final activeJobs = _filteredJobs.where((j) => 
+      j.status == JobStatus.inProgress || j.status == JobStatus.booked
+    ).length;
+    final completedJobs = _filteredJobs.where((j) => 
+      j.status == JobStatus.completed
+    ).length;
+    final totalValue = _filteredJobs.fold<double>(
+      0.0,
+      (sum, job) => sum + (job.value ?? 0.0),
+    );
+
+    return Container(
+      height: 161, // Slightly increased to prevent overflow
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF1E88E5), // Rich blue
+            Color(SwiftleadTokens.infoBlue),
+            Color(SwiftleadTokens.successGreen),
+          ],
+          stops: [0.0, 0.5, 1.0],
+        ),
+        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(SwiftleadTokens.infoBlue).withOpacity(0.4),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: const Color(SwiftleadTokens.infoBlue).withOpacity(0.15),
+            blurRadius: 40,
+            offset: const Offset(0, 16),
+            spreadRadius: -4,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Jobs Overview',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: SwiftleadTokens.spaceXS),
+                    Text(
+                      'Track your work pipeline',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white.withOpacity(0.95),
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 2,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(SwiftleadTokens.spaceS),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.25),
+                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.6),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.white.withOpacity(0.3),
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.work_outline,
+                  color: Colors.white,
+                  size: 22,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatItem(
+                  'Total',
+                  '${_filteredJobs.length}',
+                  Icons.work_outline,
+                  Colors.white,
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 50,
+                margin: const EdgeInsets.symmetric(horizontal: 6),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white.withOpacity(0.0),
+                      Colors.white.withOpacity(0.3),
+                      Colors.white.withOpacity(0.0),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: _buildStatItem(
+                  'Active',
+                  '$activeJobs',
+                  Icons.play_circle_outline,
+                  Colors.white,
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 50,
+                margin: const EdgeInsets.symmetric(horizontal: 6),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white.withOpacity(0.0),
+                      Colors.white.withOpacity(0.3),
+                      Colors.white.withOpacity(0.0),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: _buildStatItem(
+                  'Value',
+                  '£${totalValue.toStringAsFixed(0)}',
+                  Icons.attach_money,
+                  Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value, IconData icon, Color color) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white.withOpacity(0.1),
+                blurRadius: 4,
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: Icon(
+            icon,
+            color: color,
+            size: 20,
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceXS),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 1),
+        Text(
+          label,
+          style: TextStyle(
+            color: color.withOpacity(0.95),
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.3,
+            shadows: [
+              Shadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 2,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

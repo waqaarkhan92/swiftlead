@@ -20,6 +20,7 @@ import '../jobs/job_detail_screen.dart';
 import '../money/invoice_detail_screen.dart';
 import 'create_edit_contact_screen.dart';
 import '../../widgets/components/score_breakdown_card.dart';
+import '../../widgets/components/smart_collapsible_section.dart';
 import '../../widgets/forms/contact_stage_change_sheet.dart';
 import '../../widgets/global/primary_button.dart';
 
@@ -108,6 +109,29 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
     super.initState();
     _loadContact();
     _loadNotes();
+  }
+
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0.0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          )),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
   }
 
   Future<void> _loadContact() async {
@@ -467,14 +491,12 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
     
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => CreateEditQuoteScreen(
-          initialData: {
-            'clientName': _contact!.name,
-            'taxRate': 20.0,
-          },
-        ),
-      ),
+      _createPageRoute(CreateEditQuoteScreen(
+        initialData: {
+          'clientName': _contact!.name,
+          'taxRate': 20.0,
+        },
+      )),
     ).then((_) {
       Toast.show(
         context,
@@ -492,13 +514,11 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
     
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => InboxThreadScreen(
-          contactName: _contact!.name,
-          channel: channel,
-          contactId: _contact!.id,
-        ),
-      ),
+      _createPageRoute(InboxThreadScreen(
+        contactName: _contact!.name,
+        channel: channel,
+        contactId: _contact!.id,
+      )),
     );
   }
 
@@ -507,13 +527,11 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
     
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => CreateEditJobScreen(
-          initialData: {
-            'clientName': _contact!.name,
-          },
-        ),
-      ),
+      _createPageRoute(CreateEditJobScreen(
+        initialData: {
+          'clientName': _contact!.name,
+        },
+      )),
     );
   }
 
@@ -604,27 +622,32 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
       appBar: FrostedAppBar(
         title: _isLoading ? 'Loading...' : (_contact?.name ?? 'Contact Details'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: _contact != null ? () {
+          Semantics(
+            label: 'Edit contact',
+            button: true,
+            child: IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: _contact != null ? () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => CreateEditContactScreen(
-                    contactId: _contact!.id,
-                    initialContact: _contact,
-                  ),
-                ),
+                _createPageRoute(CreateEditContactScreen(
+                  contactId: _contact!.id,
+                  initialContact: _contact,
+                )),
               ).then((result) {
                 if (result == true) {
                   _loadContact();
                 }
               });
             } : null,
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: _contact != null ? () {
+          Semantics(
+            label: 'More options',
+            button: true,
+            child: IconButton(
+              icon: const Icon(Icons.more_vert),
+              onPressed: _contact != null ? () {
               showModalBottomSheet(
                 context: context,
                 backgroundColor: Colors.transparent,
@@ -676,6 +699,7 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
       ),
     );
   } : null,
+            ),
           ),
         ],
       ),
@@ -724,34 +748,29 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
       );
     }
 
-    return DefaultTabController(
-      length: 4,
+    return SingleChildScrollView(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           // ContactProfileCard
           _buildProfileCard(),
+          const SizedBox(height: SwiftleadTokens.spaceL),
           
-          // TabBar
-          const TabBar(
-            tabs: [
-              Tab(text: 'Overview'),
-              Tab(text: 'Timeline'),
-              Tab(text: 'Notes'),
-              Tab(text: 'Related'),
-            ],
-          ),
+          // Overview Section
+          _buildOverviewSection(),
+          const SizedBox(height: SwiftleadTokens.spaceL),
           
-          // Tab Content
-          Expanded(
-            child: TabBarView(
-              children: [
-                _buildOverviewTab(),
-                _buildTimelineTab(),
-                _buildNotesTab(),
-                _buildRelatedTab(),
-              ],
-            ),
-          ),
+          // Timeline Section
+          _buildTimelineSection(),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          
+          // Notes Section
+          _buildNotesSection(),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+          
+          // Related Section
+          _buildRelatedSection(),
+          const SizedBox(height: SwiftleadTokens.spaceL),
         ],
       ),
     );
@@ -840,7 +859,7 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: const Color(SwiftleadTokens.warningYellow).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.6),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -878,7 +897,7 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.6),
                   ),
                   child: Text(
                     tag,
@@ -1038,47 +1057,54 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
     );
   }
 
-  Widget _buildOverviewTab() {
-    return ListView(
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-      children: [
-        FrostedContainer(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Contact Information',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: SwiftleadTokens.spaceM),
-              if (_contact!.email != null) ...[
-                _InfoRow(label: 'Email', value: _contact!.email!),
-                const SizedBox(height: SwiftleadTokens.spaceS),
-              ],
-              if (_contact!.phone != null) ...[
-                _InfoRow(label: 'Phone', value: _contact!.phone!),
-                const SizedBox(height: SwiftleadTokens.spaceS),
-              ],
-              if (_contact!.company != null) ...[
-                _InfoRow(label: 'Company', value: _contact!.company!),
-                const SizedBox(height: SwiftleadTokens.spaceS),
-              ],
-              if (_contact!.source != null) ...[
-                _InfoRow(label: 'Source', value: _contact!.source!),
-                const SizedBox(height: SwiftleadTokens.spaceS),
-              ],
-              _InfoRow(label: 'Stage', value: _contact!.stage.displayName),
+  // Section-based methods for single scrollable view (replaces tab view)
+  
+  Widget _buildOverviewSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+      child: SmartCollapsibleSection(
+        title: 'Contact Information',
+        initiallyExpanded: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_contact!.email != null) ...[
+              _InfoRow(label: 'Email', value: _contact!.email!),
               const SizedBox(height: SwiftleadTokens.spaceS),
-              _InfoRow(label: 'Tags', value: _contact!.tags.isEmpty ? 'None' : _contact!.tags.join(', ')),
             ],
-          ),
+            if (_contact!.phone != null) ...[
+              _InfoRow(label: 'Phone', value: _contact!.phone!),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+            ],
+            if (_contact!.company != null) ...[
+              _InfoRow(label: 'Company', value: _contact!.company!),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+            ],
+            if (_contact!.source != null) ...[
+              _InfoRow(label: 'Source', value: _contact!.source!),
+              const SizedBox(height: SwiftleadTokens.spaceS),
+            ],
+            _InfoRow(label: 'Stage', value: _contact!.stage.displayName),
+            const SizedBox(height: SwiftleadTokens.spaceS),
+            _InfoRow(label: 'Tags', value: _contact!.tags.isEmpty ? 'None' : _contact!.tags.join(', ')),
+          ],
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildTimelineTab() {
+  Widget _buildTimelineSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+      child: SmartCollapsibleSection(
+        title: 'Timeline',
+        initiallyExpanded: true,
+        child: _buildTimelineContent(),
+      ),
+    );
+  }
+
+  Widget _buildTimelineContent() {
     TimelineEventType? selectedActivityFilter;
     final List<TimelineEventType?> activityTypes = [
       null, // All
@@ -1099,74 +1125,148 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
       builder: (context, setState) => Column(
         children: [
           // Filter chips
-          Padding(
-            padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: activityTypes.map((type) {
-                  final label = type == null ? 'All' : type.name.toUpperCase();
-                  final isSelected = selectedActivityFilter == type;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: SwiftleadTokens.spaceS),
-                    child: SwiftleadChip(
-                      label: label,
-                      isSelected: isSelected,
-                      onTap: () {
-                        setState(() {
-                          selectedActivityFilter = type;
-                        });
-                      },
-                    ),
-                  );
-                }).toList(),
-              ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: activityTypes.map((type) {
+                final label = type == null ? 'All' : type.name.toUpperCase();
+                final isSelected = selectedActivityFilter == type;
+                return Padding(
+                  padding: const EdgeInsets.only(right: SwiftleadTokens.spaceS),
+                  child: SwiftleadChip(
+                    label: label,
+                    isSelected: isSelected,
+                    onTap: () {
+                      setState(() {
+                        selectedActivityFilter = type;
+                      });
+                    },
+                  ),
+                );
+              }).toList(),
             ),
           ),
-          // Timeline list
-          Expanded(
-            child: _isLoadingTimeline
-                ? ListView(
-                    padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-                    children: List.generate(3, (i) => Padding(
-                      padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceM),
-                      child: SkeletonLoader(
-                        width: double.infinity,
-                        height: 80,
-                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-                      ),
-                    )),
-                  )
-                : filteredEvents.isEmpty
-                    ? Center(
-                        child: EmptyStateCard(
-                          title: 'No activity yet',
-                          description: 'Activity will appear here as you interact with this contact',
-                          icon: Icons.timeline,
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-                        itemCount: filteredEvents.length,
-                        itemBuilder: (context, index) {
-                          final event = filteredEvents[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceM),
-                            child: _TimelineItem(
-                              icon: event.icon,
-                              title: event.title,
-                              subtitle: event.subtitle ?? '',
-                              time: _formatTimeAgo(event.timestamp),
-                              onTap: () => _handleTimelineEventTap(event),
-                            ),
-                          );
-                        },
-                      ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          // Timeline list (show first 5)
+          if (_isLoadingTimeline)
+            const Center(child: CircularProgressIndicator())
+          else if (filteredEvents.isEmpty)
+            EmptyStateCard(
+              title: 'No activity yet',
+              description: 'Activity will appear here as you interact with this contact',
+              icon: Icons.timeline,
+            )
+          else
+            ...filteredEvents.take(5).map((event) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceM),
+                child: _TimelineItem(
+                  icon: event.icon,
+                  title: event.title,
+                  subtitle: event.subtitle ?? '',
+                  time: _formatTimeAgo(event.timestamp),
+                  onTap: () => _handleTimelineEventTap(event),
+                ),
+              );
+            }).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotesSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+      child: Column(
+        children: [
+          SmartCollapsibleSection(
+            title: 'Notes',
+            initiallyExpanded: true,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: PrimaryButton(
+                    label: 'Add Note',
+                    onPressed: () => _showAddNoteSheet(context),
+                    icon: Icons.add,
+                    size: ButtonSize.small,
+                  ),
+                ),
+                _buildNotesContent(),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildNotesContent() {
+    if (_isLoadingNotes) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_filteredNotes.isEmpty) {
+      return EmptyStateCard(
+        title: _notesSearchQuery.isNotEmpty ? 'No notes found' : 'No notes yet',
+        description: _notesSearchQuery.isNotEmpty
+            ? 'Try a different search term'
+            : 'Add notes to track important information about this contact',
+        icon: Icons.note_add,
+        actionLabel: _notesSearchQuery.isNotEmpty ? null : 'Add First Note',
+        onAction: _notesSearchQuery.isNotEmpty ? null : () => _showAddNoteSheet(context),
+      );
+    }
+
+    return Column(
+      children: _filteredNotes.take(3).map((note) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceM),
+          child: _NoteCard(
+            note: note,
+            onPinToggle: () {
+              setState(() {
+                final noteIndex = _notes.indexWhere((n) => n.id == note.id);
+                if (noteIndex != -1) {
+                  _notes[noteIndex] = ContactNote(
+                    id: note.id,
+                    content: note.content,
+                    author: note.author,
+                    timestamp: note.timestamp,
+                    mentions: note.mentions,
+                    pinned: !note.pinned,
+                    attachments: note.attachments,
+                  );
+                  _notes.sort((a, b) {
+                    if (a.pinned != b.pinned) return b.pinned ? 1 : -1;
+                    return b.timestamp.compareTo(a.timestamp);
+                  });
+                }
+              });
+            },
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildRelatedSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+      child: SmartCollapsibleSection(
+        title: 'Related Items',
+        initiallyExpanded: true,
+        child: Text(
+          'Jobs, Quotes, Invoices related to this contact',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ),
+    );
+  }
+
+  // Old tab methods removed - using section-based layout instead
 
   void _handleTimelineEventTap(ContactTimelineEvent event) {
     switch (event.type) {
@@ -1174,12 +1274,10 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
         if (event.metadata['jobId'] != null) {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => JobDetailScreen(
-                jobId: event.metadata['jobId'] as String,
-                jobTitle: event.title,
-              ),
-            ),
+            _createPageRoute(JobDetailScreen(
+              jobId: event.metadata['jobId'] as String,
+              jobTitle: event.title,
+            )),
           );
         }
         break;
@@ -1189,12 +1287,10 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
           final invoiceId = event.metadata['invoiceId'] as String;
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => InvoiceDetailScreen(
-                invoiceId: invoiceId,
-                invoiceNumber: invoiceId.startsWith('INV-') ? invoiceId : 'INV-$invoiceId',
-              ),
-            ),
+            _createPageRoute(InvoiceDetailScreen(
+              invoiceId: invoiceId,
+              invoiceNumber: invoiceId.startsWith('INV-') ? invoiceId : 'INV-$invoiceId',
+            )),
           );
         }
         break;
@@ -1202,13 +1298,11 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
         if (event.metadata['threadId'] != null) {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => InboxThreadScreen(
-                contactName: _contact?.name ?? 'Contact',
-                contactId: _contact?.id ?? '',
-                channel: event.metadata['channel'] ?? 'SMS',
-              ),
-            ),
+            _createPageRoute(InboxThreadScreen(
+              contactName: _contact?.name ?? 'Contact',
+              contactId: _contact?.id ?? '',
+              channel: event.metadata['channel'] ?? 'SMS',
+            )),
           );
         }
         break;
@@ -1312,119 +1406,7 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
     }
   }
 
-  Widget _buildNotesTab() {
-    return Column(
-      children: [
-        // Add Note Button and Search
-        Padding(
-          padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Notes',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  PrimaryButton(
-                    label: 'Add Note',
-                    onPressed: () => _showAddNoteSheet(context),
-                    icon: Icons.add,
-                    size: ButtonSize.small,
-                  ),
-                ],
-              ),
-              const SizedBox(height: SwiftleadTokens.spaceM),
-              // Search Bar
-              TextField(
-                controller: _notesSearchController,
-                decoration: InputDecoration(
-                  hintText: 'Search notes...',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _notesSearchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _notesSearchController.clear();
-                            setState(() => _notesSearchQuery = '');
-                          },
-                        )
-                      : null,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-                  ),
-                ),
-                onChanged: (value) {
-                  setState(() => _notesSearchQuery = value);
-                },
-              ),
-            ],
-          ),
-        ),
-        // Notes List
-        Expanded(
-          child: _isLoadingNotes
-              ? ListView(
-                  padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-                  children: List.generate(2, (i) => Padding(
-                    padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceM),
-                    child: SkeletonLoader(
-                      width: double.infinity,
-                      height: 120,
-                      borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-                    ),
-                  )),
-                )
-              : _filteredNotes.isEmpty
-                  ? Center(
-                      child: EmptyStateCard(
-                        title: _notesSearchQuery.isNotEmpty ? 'No notes found' : 'No notes yet',
-                        description: _notesSearchQuery.isNotEmpty
-                            ? 'Try a different search term'
-                            : 'Add notes to track important information about this contact',
-                        icon: Icons.note_add,
-                        actionLabel: _notesSearchQuery.isNotEmpty ? null : 'Add First Note',
-                        onAction: _notesSearchQuery.isNotEmpty ? null : () => _showAddNoteSheet(context),
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-                      itemCount: _filteredNotes.length,
-                      itemBuilder: (context, index) {
-                        final note = _filteredNotes[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceM),
-                          child: _NoteCard(
-                            note: note,
-                            onPinToggle: () {
-                              setState(() {
-                                final noteIndex = _notes.indexWhere((n) => n.id == note.id);
-                                if (noteIndex != -1) {
-                                  _notes[noteIndex] = ContactNote(
-                                    id: note.id,
-                                    content: note.content,
-                                    author: note.author,
-                                    timestamp: note.timestamp,
-                                    mentions: note.mentions,
-                                    pinned: !note.pinned,
-                                    attachments: note.attachments,
-                                  );
-                                  _notes.sort((a, b) {
-                                    if (a.pinned != b.pinned) return b.pinned ? 1 : -1;
-                                    return b.timestamp.compareTo(a.timestamp);
-                                  });
-                                }
-                              });
-                            },
-                          ),
-                        );
-                      },
-                    ),
-        ),
-      ],
-    );
-  }
+  // Old tab methods removed - using section-based layout instead
 
   void _showAddNoteSheet(BuildContext context) {
     final TextEditingController noteController = TextEditingController();
@@ -1592,30 +1574,7 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
     );
   }
 
-  Widget _buildRelatedTab() {
-    return ListView(
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-      children: [
-        FrostedContainer(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Related Items',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: SwiftleadTokens.spaceM),
-              Text(
-                'Jobs, Quotes, Invoices related to this contact',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  // Old tab methods removed - using section-based layout instead
 
   Widget _buildBottomToolbar() {
     // iOS-style bottom toolbar: Quick actions (icon + label)
@@ -1640,30 +1599,50 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _ToolbarAction(
-                icon: Icons.phone,
-                label: 'Call',
-                onTap: _handleCallContact,
+              Semantics(
+                label: 'Call contact',
+                button: true,
+                child: _ToolbarAction(
+                  icon: Icons.phone,
+                  label: 'Call',
+                  onTap: _handleCallContact,
+                ),
               ),
-              _ToolbarAction(
-                icon: Icons.message,
-                label: 'Message',
-                onTap: _handleMessageContact,
+              Semantics(
+                label: 'Message contact',
+                button: true,
+                child: _ToolbarAction(
+                  icon: Icons.message,
+                  label: 'Message',
+                  onTap: _handleMessageContact,
+                ),
               ),
-              _ToolbarAction(
-                icon: Icons.email,
-                label: 'Email',
-                onTap: _handleEmailContact,
+              Semantics(
+                label: 'Email contact',
+                button: true,
+                child: _ToolbarAction(
+                  icon: Icons.email,
+                  label: 'Email',
+                  onTap: _handleEmailContact,
+                ),
               ),
-              _ToolbarAction(
-                icon: Icons.work_outline,
-                label: 'Job',
-                onTap: _handleCreateJobFromContact,
+              Semantics(
+                label: 'Create job',
+                button: true,
+                child: _ToolbarAction(
+                  icon: Icons.work_outline,
+                  label: 'Job',
+                  onTap: _handleCreateJobFromContact,
+                ),
               ),
-              _ToolbarAction(
-                icon: Icons.description,
-                label: 'Quote',
-                onTap: _handleCreateQuoteFromContact,
+              Semantics(
+                label: 'Create quote',
+                button: true,
+                child: _ToolbarAction(
+                  icon: Icons.description,
+                  label: 'Quote',
+                  onTap: _handleCreateQuoteFromContact,
+                ),
               ),
             ],
           ),

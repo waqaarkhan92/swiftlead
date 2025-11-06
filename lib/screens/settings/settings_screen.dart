@@ -5,6 +5,9 @@ import '../../widgets/global/toast.dart';
 import '../../widgets/global/skeleton_loader.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../theme/tokens.dart';
+import '../../config/mock_config.dart';
+import '../onboarding/onboarding_screen.dart';
+import '../auth/login_screen.dart';
 import 'canned_responses_screen.dart';
 import 'organization_profile_screen.dart';
 import 'team_management_screen.dart';
@@ -28,6 +31,8 @@ import 'subscription_billing_screen.dart';
 import 'custom_fields_manager_screen.dart';
 import '../../widgets/forms/business_hours_editor_sheet.dart';
 import '../../widgets/components/celebration_banner.dart';
+import '../../widgets/components/smart_collapsible_section.dart';
+import '../../widgets/global/spring_animation.dart';
 import '../../utils/keyboard_shortcuts.dart' show AppShortcuts, SearchIntent, RefreshIntent, CloseIntent;
 import '../calendar/service_catalog_screen.dart';
 import '../ai_hub/ai_configuration_screen.dart';
@@ -311,9 +316,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const ProfessionConfigurationScreen(),
-            ),
+            _createPageRoute(const ProfessionConfigurationScreen()),
           );
         },
       ),
@@ -340,16 +343,124 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     ]);
     
+    // Test Mode Section (only shown when kTestMode is true)
+    final List<_SettingsItem> testItems = kTestMode ? filterItems(<_SettingsItem>[
+      _SettingsItem(
+        icon: Icons.refresh_outlined,
+        label: 'Reset Onboarding',
+        onTap: () async {
+          final confirmed = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Reset Onboarding'),
+              content: const Text('This will reset onboarding so you can see it again on next app launch. Continue?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Reset'),
+                ),
+              ],
+            ),
+          );
+          
+          if (confirmed == true) {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('onboarding_completed', false);
+            Toast.show(
+              context,
+              message: 'Onboarding reset. Restart app to see onboarding screen.',
+              type: ToastType.success,
+            );
+          }
+        },
+      ),
+      _SettingsItem(
+        icon: Icons.login,
+        label: 'View Login Screen',
+        onTap: () {
+          Navigator.push(
+            context,
+            _createPageRoute(const LoginScreen()),
+          );
+        },
+      ),
+      _SettingsItem(
+        icon: Icons.logout,
+        label: 'Logout (Test)',
+        onTap: () async {
+          final confirmed = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Logout'),
+              content: const Text('This will log you out. You\'ll need to login again. Continue?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Logout'),
+                ),
+              ],
+            ),
+          );
+          
+          if (confirmed == true) {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('user_authenticated', false);
+            Toast.show(
+              context,
+              message: 'Logged out. Restart app to see login screen.',
+              type: ToastType.success,
+            );
+          }
+        },
+      ),
+    ]) : <_SettingsItem>[];
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Advanced Features Section (v2.5.1)
-        if (advancedItems.isNotEmpty)
+        // Test Mode Section (only in test mode)
+        if (testItems.isNotEmpty) ...[
           _SettingsSection(
-            title: 'Advanced',
-            items: advancedItems,
+            title: 'Testing (Test Mode Only)',
+            items: testItems,
           ),
-        const SizedBox(height: SwiftleadTokens.spaceL),
+          const SizedBox(height: SwiftleadTokens.spaceL),
+        ],
+        // Advanced Features Section (v2.5.1) - Collapsible
+        if (advancedItems.isNotEmpty)
+          SmartCollapsibleSection(
+            title: 'Advanced (${advancedItems.length})',
+            initiallyExpanded: false,
+            child: Column(
+              children: [
+                FrostedContainer(
+                  padding: EdgeInsets.zero,
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: advancedItems.length,
+                    separatorBuilder: (context, index) => Divider(
+                      height: 1,
+                      indent: SwiftleadTokens.spaceXL,
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? Colors.black.withOpacity(0.06)
+                          : Colors.white.withOpacity(0.08),
+                    ),
+                    itemBuilder: (context, index) => advancedItems[index],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        if (advancedItems.isNotEmpty) const SizedBox(height: SwiftleadTokens.spaceL),
         _SettingsSection(
           title: 'Account',
           items: filterItems([
@@ -359,9 +470,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () async {
                 final result = await Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const EditProfileScreen(),
-                  ),
+                  _createPageRoute(const EditProfileScreen()),
                 );
                 if (result != null && mounted) {
                   setState(() {
@@ -380,9 +489,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const ChangePasswordScreen(),
-                  ),
+                  _createPageRoute(const ChangePasswordScreen()),
                 );
               },
             ),
@@ -392,9 +499,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const SecuritySettingsScreen(),
-                  ),
+                  _createPageRoute(const SecuritySettingsScreen()),
                 );
               },
             ),
@@ -404,9 +509,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const EmailConfigurationScreen(),
-                  ),
+                  _createPageRoute(const EmailConfigurationScreen()),
                 );
               },
             ),
@@ -416,9 +519,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const NotificationsScreen(),
-                  ),
+                  _createPageRoute(const NotificationsScreen()),
                 );
               },
             ),
@@ -429,9 +530,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 // Navigate to security settings for privacy options
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const SecuritySettingsScreen(),
-                  ),
+                  _createPageRoute(const SecuritySettingsScreen()),
                 );
               },
             ),
@@ -447,9 +546,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const OrganizationProfileScreen(),
-                  ),
+                  _createPageRoute(const OrganizationProfileScreen()),
                 );
               },
             ),
@@ -459,9 +556,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const TeamManagementScreen(),
-                  ),
+                  _createPageRoute(const TeamManagementScreen()),
                 );
               },
             ),
@@ -471,9 +566,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const CustomFieldsManagerScreen(),
-                  ),
+                  _createPageRoute(const CustomFieldsManagerScreen()),
                 );
               },
             ),
@@ -500,9 +593,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const ServiceCatalogScreen(),
-                  ),
+                  _createPageRoute(const ServiceCatalogScreen()),
                 );
               },
             ),
@@ -539,9 +630,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const TwilioConfigurationScreen(),
-                  ),
+                  _createPageRoute(const TwilioConfigurationScreen()),
                 );
               },
             ),
@@ -552,9 +641,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const MetaBusinessSetupScreen(),
-                  ),
+                  _createPageRoute(const MetaBusinessSetupScreen()),
                 );
               },
             ),
@@ -565,9 +652,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const MetaBusinessSetupScreen(),
-                  ),
+                  _createPageRoute(const MetaBusinessSetupScreen()),
                 );
               },
             ),
@@ -578,9 +663,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const GoogleCalendarSetupScreen(),
-                  ),
+                  _createPageRoute(const GoogleCalendarSetupScreen()),
                 );
               },
             ),
@@ -591,9 +674,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const AppleCalendarSetupScreen(),
-                  ),
+                  _createPageRoute(const AppleCalendarSetupScreen()),
                 );
               },
             ),
@@ -604,9 +685,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const StripeConnectionScreen(),
-                  ),
+                  _createPageRoute(const StripeConnectionScreen()),
                 );
               },
             ),
@@ -617,9 +696,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const EmailConfigurationScreen(),
-                  ),
+                  _createPageRoute(const EmailConfigurationScreen()),
                 );
               },
             ),
@@ -635,9 +712,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const AIConfigurationScreen(),
-                  ),
+                  _createPageRoute(const AIConfigurationScreen()),
                 );
               },
             ),
@@ -648,9 +723,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 // Navigate to AI Configuration screen (tone is configured there)
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const AIConfigurationScreen(),
-                  ),
+                  _createPageRoute(const AIConfigurationScreen()),
                 );
               },
             ),
@@ -661,9 +734,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 // Navigate to AI Configuration screen (auto-response rules are there)
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const AIConfigurationScreen(),
-                  ),
+                  _createPageRoute(const AIConfigurationScreen()),
                 );
               },
             ),
@@ -673,9 +744,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const FAQManagementScreen(),
-                  ),
+                  _createPageRoute(const FAQManagementScreen()),
                 );
               },
             ),
@@ -685,9 +754,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const CannedResponsesScreen(),
-                  ),
+                  _createPageRoute(const CannedResponsesScreen()),
                 );
               },
             ),
@@ -810,9 +877,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const AppPreferencesScreen(),
-                  ),
+                  _createPageRoute(const AppPreferencesScreen()),
                 );
               },
             ),
@@ -828,9 +893,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const DataExportScreen(),
-                  ),
+                  _createPageRoute(const DataExportScreen()),
                 );
               },
             ),
@@ -840,9 +903,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const InvoiceCustomizationScreen(),
-                  ),
+                  _createPageRoute(const InvoiceCustomizationScreen()),
                 );
               },
             ),
@@ -852,9 +913,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const AccountDeletionScreen(),
-                  ),
+                  _createPageRoute(const AccountDeletionScreen()),
                 );
               },
             ),
@@ -864,9 +923,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const LegalScreen(),
-                  ),
+                  _createPageRoute(const LegalScreen()),
                 );
               },
             ),
@@ -876,9 +933,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const LegalScreen(),
-                  ),
+                  _createPageRoute(const LegalScreen()),
                 );
               },
             ),
@@ -921,9 +976,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const SubscriptionBillingScreen(),
-                    ),
+                    _createPageRoute(const SubscriptionBillingScreen()),
                   );
                 },
                 child: const Text('Manage Plan'),
@@ -1484,7 +1537,12 @@ class _SettingsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
+    return Semantics(
+      label: label,
+      button: onTap != null,
+      child: SpringCard(
+        onTap: onTap,
+        child: ListTile(
       leading: Icon(
         icon,
         color: Theme.of(context).brightness == Brightness.light
@@ -1493,7 +1551,8 @@ class _SettingsItem extends StatelessWidget {
       ),
       title: Text(label),
       trailing: trailing ?? const Icon(Icons.chevron_right),
-      onTap: onTap,
+        ),
+      ),
     );
   }
 }

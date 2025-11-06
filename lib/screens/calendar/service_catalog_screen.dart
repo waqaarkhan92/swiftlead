@@ -30,6 +30,29 @@ class _ServiceCatalogScreenState extends State<ServiceCatalogScreen> {
   String? _selectedCategory;
   String? _selectedServiceId;
 
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0.0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          )),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+  }
+
   List<String> get _categories => ['All', 'Repairs', 'Installation', 'Maintenance', 'Consultation'];
   
   // Get profession-specific service templates
@@ -154,9 +177,7 @@ class _ServiceCatalogScreenState extends State<ServiceCatalogScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const ServiceEditorScreen(),
-                ),
+                _createPageRoute(const ServiceEditorScreen()),
               ).then((_) {
                 setState(() {});
               });
@@ -198,9 +219,7 @@ class _ServiceCatalogScreenState extends State<ServiceCatalogScreen> {
         onAction: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const ServiceEditorScreen(),
-            ),
+            _createPageRoute(const ServiceEditorScreen()),
           ).then((_) {
             // Reload services if needed
             setState(() {});

@@ -172,9 +172,12 @@ class BookingCard extends StatelessWidget {
         }
         return false;
       },
-      child: GestureDetector(
-        onTap: onTap,
-        onLongPress: () {
+      child: Semantics(
+        label: 'Booking: $clientName, $serviceName, ${_formatTime(startTime)} to ${_formatTime(endTime)}, $status',
+        button: true,
+        child: GestureDetector(
+          onTap: onTap,
+          onLongPress: () {
           // Long-press actions: call, message, directions, cancel
           showModalBottomSheet(
             context: context,
@@ -418,7 +421,8 @@ class BookingCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
+          ),
+        ),
     );
   }
 }

@@ -6,14 +6,18 @@ import '../../widgets/global/empty_state_card.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/search_bar.dart';
 import '../../widgets/global/chip.dart';
+import '../../widgets/global/spring_animation.dart';
 import '../../widgets/components/animated_counter.dart';
 import '../../widgets/components/smart_collapsible_section.dart';
 import '../../widgets/components/celebration_banner.dart';
 import '../../widgets/components/ai_insight_banner.dart';
 import '../../widgets/components/trend_tile.dart';
+import '../../widgets/components/active_filter_chips.dart';
 import '../../utils/keyboard_shortcuts.dart' show AppShortcuts, SearchIntent, CreateIntent, RefreshIntent, CloseIntent;
+import '../../utils/responsive_layout.dart';
 import '../../theme/tokens.dart';
 import '../../mock/mock_contacts.dart';
+import 'package:flutter/foundation.dart';
 import 'contact_detail_screen.dart';
 import 'contact_import_wizard_screen.dart';
 import 'contact_export_builder_screen.dart';
@@ -51,6 +55,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
   bool _vipExpanded = true;
   bool _recentExpanded = true;
   bool _allExpanded = false;
+  
+  // Desktop split-screen: Selected contact
+  String? _selectedContactId;
 
   @override
   void initState() {
@@ -245,14 +252,21 @@ class _ContactsScreenState extends State<ContactsScreen> {
               title: 'Contacts',
               actions: [
                 // Primary action: Add Contact (iOS-aligned: max 2 icons)
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () => _showAddContactSheet(context),
+                Semantics(
+                  label: 'Add contact',
+                  button: true,
+                  child: IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () => _showAddContactSheet(context),
+                  ),
                 ),
                 // More menu for secondary actions (iOS-aligned: max 2 icons)
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert),
-                  onSelected: (value) {
+                Semantics(
+                  label: 'More options',
+                  button: true,
+                  child: PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert),
+                    onSelected: (value) {
                     switch (value) {
                       case 'filter':
                         _showFilterSheet(context);
@@ -288,7 +302,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       value: 'filter',
                       child: Builder(
                         builder: (context) => Row(
-                          children: [
+                        children: [
                             const Icon(Icons.filter_list_outlined, size: 20),
                             const SizedBox(width: SwiftleadTokens.spaceS),
                             Text(
@@ -297,7 +311,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ],
+                        ],
                         ),
                       ),
                     ),
@@ -306,7 +320,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       value: 'duplicates',
                       child: Builder(
                         builder: (context) => Row(
-                          children: [
+                        children: [
                             const Icon(Icons.find_in_page, size: 20),
                             const SizedBox(width: SwiftleadTokens.spaceS),
                             Text(
@@ -315,15 +329,15 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ],
-                        ),
+                        ],
                       ),
+                    ),
                     ),
                     PopupMenuItem(
                       value: 'segments',
                       child: Builder(
                         builder: (context) => Row(
-                          children: [
+                        children: [
                             const Icon(Icons.category, size: 20),
                             const SizedBox(width: SwiftleadTokens.spaceS),
                             Text(
@@ -332,7 +346,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ],
+                        ],
                         ),
                       ),
                     ),
@@ -341,7 +355,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       value: 'import',
                       child: Builder(
                         builder: (context) => Row(
-                          children: [
+                        children: [
                             const Icon(Icons.upload_file, size: 20),
                             const SizedBox(width: SwiftleadTokens.spaceS),
                             Text(
@@ -350,15 +364,15 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ],
-                        ),
+                        ],
                       ),
+                    ),
                     ),
                     PopupMenuItem(
                       value: 'export',
                       child: Builder(
                         builder: (context) => Row(
-                          children: [
+                        children: [
                             const Icon(Icons.download, size: 20),
                             const SizedBox(width: SwiftleadTokens.spaceS),
                             Text(
@@ -367,17 +381,20 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ],
+                        ],
                         ),
                       ),
                     ),
                   ],
                 ),
-              ],
+            ),
+          ],
             ),
             body: _isLoading
                 ? _buildLoadingState()
-                : _buildContent(),
+                : ResponsiveLayout.isDesktop(context)
+                    ? _buildDesktopSplitView()
+                    : _buildContent(),
           ),
         ),
       ),
@@ -395,6 +412,77 @@ class _ContactsScreenState extends State<ContactsScreen> {
           borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
         ),
       )),
+    );
+  }
+
+  /// Desktop Split View: List (30%) + Detail (70%)
+  Widget _buildDesktopSplitView() {
+    Contact? selectedContact;
+    if (_selectedContactId != null) {
+      try {
+        selectedContact = _filteredContacts.firstWhere(
+          (c) => c.id == _selectedContactId,
+        );
+      } catch (e) {
+        // Contact not found, select first if available
+        selectedContact = _filteredContacts.isNotEmpty ? _filteredContacts.first : null;
+        if (selectedContact != null) {
+          setState(() {
+            _selectedContactId = selectedContact!.id;
+          });
+        }
+      }
+    } else if (_filteredContacts.isNotEmpty) {
+      // Auto-select first contact if none selected
+      selectedContact = _filteredContacts.first;
+      setState(() {
+        _selectedContactId = selectedContact!.id;
+      });
+    }
+    
+    return Row(
+      children: [
+        // Contact List (30% width)
+        Container(
+          width: MediaQuery.of(context).size.width * 0.3,
+          decoration: BoxDecoration(
+            border: Border(
+              right: BorderSide(
+                color: Theme.of(context).dividerColor,
+                width: 1,
+              ),
+            ),
+          ),
+          child: _buildContent(),
+        ),
+        
+        // Contact Detail (70% width)
+        Expanded(
+          child: selectedContact != null
+              ? ContactDetailScreen(
+                  contactId: selectedContact.id,
+                )
+              : Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.person_outline,
+                        size: 64,
+                        color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.3),
+                      ),
+                      const SizedBox(height: SwiftleadTokens.spaceM),
+                      Text(
+                        'Select a contact',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+        ),
+      ],
     );
   }
 
@@ -452,7 +540,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
           
-          // Filter Chips
+          // Quick Filter Chips (Score-based)
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -471,6 +559,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
               }).toList(),
             ),
           ),
+          const SizedBox(height: SwiftleadTokens.spaceS),
+          // Active Filter Chips (from filter sheet)
+          if (_currentFilters != null)
+            _buildActiveFilterChips(),
           const SizedBox(height: SwiftleadTokens.spaceM),
           
           // Contact List
@@ -487,13 +579,14 @@ class _ContactsScreenState extends State<ContactsScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: _filteredContacts.length,
+              cacheExtent: 200, // Cache items for better performance
               itemBuilder: (context, index) {
                 final contact = _filteredContacts[index];
-                // Phase 3: Staggered animation
+                // Phase 3: Staggered animation with spring physics
                 return TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0.0, end: 1.0),
                   duration: Duration(milliseconds: 300 + (index * 50).clamp(0, 200)),
-                  curve: Curves.easeOutCubic,
+                  curve: SpringAnimation.smooth,
                   builder: (context, value, child) {
                     return Opacity(
                       opacity: value,
@@ -512,9 +605,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     ),
                     alignment: Alignment.centerLeft,
                     padding: const EdgeInsets.only(left: SwiftleadTokens.spaceM),
-                    child: const Icon(
+                    child: Icon(
                       Icons.phone,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                       size: 32,
                     ),
                   ),
@@ -525,9 +618,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     ),
                     alignment: Alignment.centerRight,
                     padding: const EdgeInsets.only(right: SwiftleadTokens.spaceM),
-                    child: const Icon(
+                    child: Icon(
                       Icons.delete,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onError,
                       size: 32,
                     ),
                   ),
@@ -566,35 +659,51 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     }
                     return false;
                   },
-                  child: GestureDetector(
-                    onLongPress: () {
-                      HapticFeedback.mediumImpact();
-                      _showContactContextMenu(context, contact);
-                    },
-                    child: Padding(
+                  child: Semantics(
+                    label: 'Contact ${contact.firstName} ${contact.lastName}. Long press for options.',
+                    child: GestureDetector(
+                      onLongPress: () {
+                        HapticFeedback.mediumImpact();
+                        _showContactContextMenu(context, contact);
+                      },
+                      onSecondaryTap: () {
+                        HapticFeedback.mediumImpact();
+                        _showContactContextMenu(context, contact);
+                      },
+                      child: Padding(
                       padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
                       child: _ContactCard(
                         contact: contact,
+                        isSelected: ResponsiveLayout.isDesktop(context) && _selectedContactId == contact.id,
                         onTap: () {
                           _trackContactInteraction(contact.id);
-                          Navigator.push(
-                            context,
-                            _createPageRoute(ContactDetailScreen(
-                              contactId: contact.id,
-                            )),
-                          ).then((result) {
-                            if (result == true) {
-                              _loadContacts(); // Refresh list if contact was updated
-                            }
-                          });
+                          
+                          // Desktop: Show in split view, Mobile: Navigate
+                          if (ResponsiveLayout.isDesktop(context)) {
+                            setState(() {
+                              _selectedContactId = contact.id;
+                            });
+                          } else {
+                            Navigator.push(
+                              context,
+                              _createPageRoute(ContactDetailScreen(
+                                contactId: contact.id,
+                              )),
+                            ).then((result) {
+                              if (result == true) {
+                                _loadContacts(); // Refresh list if contact was updated
+                              }
+                            });
+                          }
                         },
                       ),
                     ),
+                    ),
                   ),
-                ),
+                  ),
                 );
               },
-            ),
+          ),
         ],
       ),
     );
@@ -678,13 +787,150 @@ class _ContactsScreenState extends State<ContactsScreen> {
     );
   }
 
+  Widget _buildActiveFilterChips() {
+    if (_currentFilters == null) {
+      return const SizedBox.shrink();
+    }
+
+    final activeFilters = <ActiveFilter>[];
+
+    // Stage filters
+    if (_currentFilters!.stageFilters.isNotEmpty) {
+      for (final stage in _currentFilters!.stageFilters) {
+        activeFilters.add(ActiveFilter(
+          label: 'Stage',
+          value: stage.displayName,
+          onRemove: () {
+            setState(() {
+              _currentFilters!.stageFilters.remove(stage);
+              if (_currentFilters!.stageFilters.isEmpty &&
+                  _currentFilters!.scoreFilters.isEmpty &&
+                  _currentFilters!.sourceFilters.isEmpty &&
+                  _currentFilters!.tagFilters.isEmpty &&
+                  _currentFilters!.dateRange == null) {
+                _currentFilters = null;
+              }
+              _applyFilters(_currentFilters ?? ContactsFilters());
+            });
+          },
+        ));
+      }
+    }
+
+    // Score filters
+    if (_currentFilters!.scoreFilters.isNotEmpty) {
+      for (final score in _currentFilters!.scoreFilters) {
+        activeFilters.add(ActiveFilter(
+          label: 'Score',
+          value: score,
+          onRemove: () {
+            setState(() {
+              _currentFilters!.scoreFilters.remove(score);
+              if (_currentFilters!.stageFilters.isEmpty &&
+                  _currentFilters!.scoreFilters.isEmpty &&
+                  _currentFilters!.sourceFilters.isEmpty &&
+                  _currentFilters!.tagFilters.isEmpty &&
+                  _currentFilters!.dateRange == null) {
+                _currentFilters = null;
+              }
+              _applyFilters(_currentFilters ?? ContactsFilters());
+            });
+          },
+        ));
+      }
+    }
+
+    // Source filters
+    if (_currentFilters!.sourceFilters.isNotEmpty) {
+      for (final source in _currentFilters!.sourceFilters) {
+        activeFilters.add(ActiveFilter(
+          label: 'Source',
+          value: source,
+          onRemove: () {
+            setState(() {
+              _currentFilters!.sourceFilters.remove(source);
+              if (_currentFilters!.stageFilters.isEmpty &&
+                  _currentFilters!.scoreFilters.isEmpty &&
+                  _currentFilters!.sourceFilters.isEmpty &&
+                  _currentFilters!.tagFilters.isEmpty &&
+                  _currentFilters!.dateRange == null) {
+                _currentFilters = null;
+              }
+              _applyFilters(_currentFilters ?? ContactsFilters());
+            });
+          },
+        ));
+      }
+    }
+
+    // Tag filters
+    if (_currentFilters!.tagFilters.isNotEmpty) {
+      for (final tag in _currentFilters!.tagFilters) {
+        activeFilters.add(ActiveFilter(
+          label: 'Tag',
+          value: tag,
+          onRemove: () {
+            setState(() {
+              _currentFilters!.tagFilters.remove(tag);
+              if (_currentFilters!.stageFilters.isEmpty &&
+                  _currentFilters!.scoreFilters.isEmpty &&
+                  _currentFilters!.sourceFilters.isEmpty &&
+                  _currentFilters!.tagFilters.isEmpty &&
+                  _currentFilters!.dateRange == null) {
+                _currentFilters = null;
+              }
+              _applyFilters(_currentFilters ?? ContactsFilters());
+            });
+          },
+        ));
+      }
+    }
+
+    // Date range filter
+    if (_currentFilters!.dateRange != null) {
+      activeFilters.add(ActiveFilter(
+        label: 'Date',
+        value: '${_currentFilters!.dateRange!.start.day}/${_currentFilters!.dateRange!.start.month} - ${_currentFilters!.dateRange!.end.day}/${_currentFilters!.dateRange!.end.month}',
+        onRemove: () {
+          setState(() {
+            _currentFilters!.dateRange = null;
+            if (_currentFilters!.stageFilters.isEmpty &&
+                _currentFilters!.scoreFilters.isEmpty &&
+                _currentFilters!.sourceFilters.isEmpty &&
+                _currentFilters!.tagFilters.isEmpty) {
+              _currentFilters = null;
+            }
+            _applyFilters(_currentFilters ?? ContactsFilters());
+          });
+        },
+      ));
+    }
+
+    return ActiveFilterChipsRow(
+      filters: activeFilters,
+      onClearAll: () {
+        setState(() {
+          _currentFilters = null;
+          _applyFilters(ContactsFilters());
+        });
+      },
+    );
+  }
+
   void _showFilterSheet(BuildContext context) async {
     final filters = await ContactsFilterSheet.show(
       context: context,
+      initialFilters: _currentFilters,
     );
     if (filters != null) {
       // Apply filters to contact list
       _applyFilters(filters);
+    } else {
+      // Clear filters if cancelled
+      setState(() {
+        _currentFilters = null;
+        _applyFilters(ContactsFilters());
+      });
     }
   }
 
@@ -764,10 +1010,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
 class _ContactCard extends StatelessWidget {
   final Contact contact;
   final VoidCallback onTap;
+  final bool isSelected;
 
   const _ContactCard({
     required this.contact,
     required this.onTap,
+    this.isSelected = false,
   });
 
   String _getScoreClassification(int score) {
@@ -788,11 +1036,26 @@ class _ContactCard extends StatelessWidget {
     final scoreColor = _getScoreColor(contact.score);
     final isVIP = contact.tags.contains('VIP');
 
-    return GestureDetector(
-      onTap: onTap,
-      child: FrostedContainer(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+    return Container(
+      decoration: BoxDecoration(
+        color: isSelected
+            ? const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1)
+            : Colors.transparent,
+        border: isSelected
+            ? Border(
+                left: BorderSide(
+                  color: const Color(SwiftleadTokens.primaryTeal),
+                  width: 3,
+                ),
+              )
+            : null,
+        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+      ),
+      child: GestureDetector(
+        onTap: onTap,
+        child: FrostedContainer(
+          padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -834,12 +1097,12 @@ class _ContactCard extends StatelessWidget {
                             ),
                           ),
                           if (isVIP) ...[
-                            const SizedBox(width: 6),
+                            const SizedBox(width: SwiftleadTokens.spaceXXS),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: const Color(SwiftleadTokens.warningYellow).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.4),
                               ),
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -880,7 +1143,7 @@ class _ContactCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.4),
                               ),
                               child: Text(
                                 tag,
@@ -909,7 +1172,7 @@ class _ContactCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: scoreColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.6),
                       ),
                       child: Text(
                         classification,
@@ -931,6 +1194,7 @@ class _ContactCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

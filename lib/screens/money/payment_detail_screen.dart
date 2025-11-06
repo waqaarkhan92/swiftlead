@@ -68,7 +68,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                 value: 'request_payment',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
+                  children: [
                       const Icon(Icons.request_quote, size: 20),
                       const SizedBox(width: SwiftleadTokens.spaceS),
                       Text(
@@ -77,7 +77,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
+                  ],
                   ),
                 ),
               ),

@@ -135,9 +135,7 @@ class _ContactImportResultsScreenState extends State<ContactImportResultsScreen>
           const SizedBox(height: 4),
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey,
-                ),
+            style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
       ),
@@ -230,9 +228,7 @@ class _ContactImportResultsScreenState extends State<ContactImportResultsScreen>
                       ),
                       Text(
                         error.message,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey,
-                            ),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ),
@@ -245,9 +241,7 @@ class _ContactImportResultsScreenState extends State<ContactImportResultsScreen>
               padding: const EdgeInsets.only(top: SwiftleadTokens.spaceS),
               child: Text(
                 'And ${widget.errors.length - 10} more errors...',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey,
-                    ),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
         ],

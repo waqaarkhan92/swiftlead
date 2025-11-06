@@ -61,8 +61,8 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
       _isSearching = true;
       _searchResults = _allJobs.where((job) {
         return job.title.toLowerCase().contains(query.toLowerCase()) ||
-            job.contactName.toLowerCase().contains(query.toLowerCase()) ||
-            job.serviceType.toLowerCase().contains(query.toLowerCase());
+            (job.contactName?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
+            (job.serviceType?.toLowerCase().contains(query.toLowerCase()) ?? false);
       }).toList();
     });
   }
@@ -149,19 +149,34 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
           padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
           child: JobCard(
             jobTitle: job.title,
-            clientName: job.contactName,
-            serviceType: job.serviceType,
+            clientName: job.contactName ?? '',
+            serviceType: job.serviceType ?? '',
             status: job.status.displayName,
             dueDate: job.scheduledDate,
             price: '£${job.value.toStringAsFixed(2)}',
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => JobDetailScreen(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) => JobDetailScreen(
                     jobId: job.id,
                     jobTitle: job.title,
                   ),
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    return SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(1.0, 0.0),
+                        end: Offset.zero,
+                      ).animate(CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutCubic,
+                      )),
+                      child: FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      ),
+                    );
+                  },
                 ),
               );
             },

@@ -42,17 +42,19 @@ class _BlockedTimeScreenState extends State<BlockedTimeScreen> {
     return Scaffold(
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: const FrostedAppBar(
+      appBar: FrostedAppBar(
         title: 'Blocked Time',
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => _showAddBlockedTimeSheet(),
+            tooltip: 'Block Time',
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _buildContent(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddBlockedTimeSheet(),
-        backgroundColor: const Color(SwiftleadTokens.primaryTeal),
-        child: const Icon(Icons.add),
-      ),
     );
   }
 
@@ -135,7 +137,7 @@ class _BlockedTimeScreenState extends State<BlockedTimeScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.4),
                   ),
                   child: Text(
                     'Recurring',

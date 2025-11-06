@@ -44,21 +44,19 @@ class _CannedResponsesScreenState extends State<CannedResponsesScreen> {
     return Scaffold(
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: const FrostedAppBar(
+      appBar: FrostedAppBar(
         title: 'Canned Responses',
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => _showAddResponseSheet(context),
+            tooltip: 'Add Response',
+          ),
+        ],
       ),
       body: _isLoading
           ? _buildLoadingState()
           : _buildContent(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddResponseSheet(context),
-        backgroundColor: const Color(SwiftleadTokens.primaryTeal),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Add Response',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
     );
   }
 
@@ -228,7 +226,7 @@ class _CannedResponseCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: FrostedContainer(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -253,7 +251,7 @@ class _CannedResponseCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.4),
                         ),
                         child: Text(
                           response.category,

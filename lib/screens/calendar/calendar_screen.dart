@@ -25,7 +25,10 @@ import '../../widgets/components/celebration_banner.dart';
 import '../../widgets/components/ai_insight_banner.dart';
 import '../../widgets/components/trend_tile.dart';
 import '../../widgets/components/rich_tooltip.dart';
+import '../../widgets/components/active_filter_chips.dart';
 import '../../utils/keyboard_shortcuts.dart' show AppShortcuts, SearchIntent, CreateIntent, RefreshIntent, CloseIntent;
+import '../../utils/responsive_layout.dart';
+import 'package:flutter/foundation.dart';
 import '../main_navigation.dart' as main_nav;
 import 'blocked_time_screen.dart';
 import 'booking_templates_screen.dart';
@@ -147,7 +150,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             _buildTooltipDetail('Time', '${_formatBookingTime(booking.startTime)} - ${_formatBookingTime(booking.endTime)}'),
             _buildTooltipDetail('Duration', '${duration.inHours}h ${duration.inMinutes % 60}m'),
             _buildTooltipDetail('Status', booking.status.displayName),
-            _buildTooltipDetail('Location', booking.address),
+            _buildTooltipDetail('Location', booking.location ?? ''),
           ],
         ),
       ),
@@ -259,13 +262,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 if (index != -1) {
                   _allBookings[index] = Booking(
                     id: booking.id,
+                    orgId: booking.orgId,
                     contactId: booking.contactId,
                     contactName: booking.contactName,
+                    serviceId: booking.serviceId,
                     serviceType: booking.serviceType,
+                    title: booking.title,
+                    description: booking.description,
                     startTime: newStartTime,
                     endTime: newEndTime,
+                    durationMinutes: booking.durationMinutes,
                     status: booking.status,
-                    address: booking.address,
+                    confirmationStatus: booking.confirmationStatus,
+                    location: booking.location,
                     notes: booking.notes,
                     reminderSent: booking.reminderSent,
                     depositRequired: booking.depositRequired,
@@ -292,6 +301,78 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
+  Widget _buildActiveFilterChips() {
+    if (_activeFilters == null) {
+      return const SizedBox.shrink();
+    }
+
+    final activeFilters = <ActiveFilter>[];
+
+    // Status filter
+    if (_activeFilters!['status'] != null && _activeFilters!['status'] != 'All') {
+      activeFilters.add(ActiveFilter(
+        label: 'Status',
+        value: _activeFilters!['status'],
+        onRemove: () {
+          setState(() {
+            _activeFilters!['status'] = 'All';
+            if (_activeFilters!['serviceType'] == 'All' && 
+                _activeFilters!['teamMember'] == 'All') {
+              _activeFilters = null;
+            }
+            _applyFilters();
+          });
+        },
+      ));
+    }
+
+    // Service type filter
+    if (_activeFilters!['serviceType'] != null && _activeFilters!['serviceType'] != 'All') {
+      activeFilters.add(ActiveFilter(
+        label: 'Service',
+        value: _activeFilters!['serviceType'],
+        onRemove: () {
+          setState(() {
+            _activeFilters!['serviceType'] = 'All';
+            if (_activeFilters!['status'] == 'All' && 
+                _activeFilters!['teamMember'] == 'All') {
+              _activeFilters = null;
+            }
+            _applyFilters();
+          });
+        },
+      ));
+    }
+
+    // Team member filter
+    if (_activeFilters!['teamMember'] != null && _activeFilters!['teamMember'] != 'All') {
+      activeFilters.add(ActiveFilter(
+        label: 'Team',
+        value: _activeFilters!['teamMember'],
+        onRemove: () {
+          setState(() {
+            _activeFilters!['teamMember'] = 'All';
+            if (_activeFilters!['status'] == 'All' && 
+                _activeFilters!['serviceType'] == 'All') {
+              _activeFilters = null;
+            }
+            _applyFilters();
+          });
+        },
+      ));
+    }
+
+    return ActiveFilterChipsRow(
+      filters: activeFilters,
+      onClearAll: () {
+        setState(() {
+          _activeFilters = null;
+          _applyFilters();
+        });
+      },
+    );
+  }
+
   Future<void> _showFilterSheet(BuildContext context) async {
     final filters = await CalendarFilterSheet.show(
       context: context,
@@ -300,6 +381,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
     if (filters != null) {
       setState(() {
         _activeFilters = filters;
+        _applyFilters();
+      });
+    } else {
+      // Clear filters if cancelled
+      setState(() {
+        _activeFilters = null;
         _applyFilters();
       });
     }
@@ -425,20 +512,27 @@ class _CalendarScreenState extends State<CalendarScreen> {
         title: 'Calendar',
         actions: [
           // Primary action: Add Booking (iOS-aligned: max 2 icons)
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'New Booking',
-            onPressed: () {
-              Navigator.push(
-                context,
-                _createPageRoute(const CreateEditBookingScreen()),
-              );
-            },
+          Semantics(
+            label: 'New booking',
+            button: true,
+            child: IconButton(
+              icon: const Icon(Icons.add),
+              tooltip: 'New Booking',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  _createPageRoute(const CreateEditBookingScreen()),
+                );
+              },
+            ),
           ),
           // More menu for secondary actions (iOS-aligned: max 2 icons)
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            tooltip: 'More',
+          Semantics(
+            label: 'More options',
+            button: true,
+            child: PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert),
+              tooltip: 'More',
             onSelected: (value) {
               switch (value) {
                 case 'today':
@@ -452,9 +546,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 case 'search':
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const CalendarSearchScreen(),
-                    ),
+                    _createPageRoute(const CalendarSearchScreen()),
                   );
                   break;
                 case 'filter':
@@ -504,50 +596,50 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 value: 'today',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
-                      const Icon(Icons.today_outlined, size: 20),
-                      const SizedBox(width: 12),
+                  children: [
+                    const Icon(Icons.today_outlined, size: 20),
+                    const SizedBox(width: SwiftleadTokens.spaceS),
                       Text(
                         'Go to Today',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
+              ),
               ),
               PopupMenuItem(
                 value: 'search',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
+                  children: [
                       const Icon(Icons.search_outlined, size: 20),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: SwiftleadTokens.spaceS),
                       Text(
                         'Search',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
+              ),
               ),
               PopupMenuItem(
                 value: 'filter',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
+                  children: [
                       const Icon(Icons.filter_list_outlined, size: 20),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: SwiftleadTokens.spaceS),
                       Text(
                         'Filter',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
+                  ],
                   ),
                 ),
               ),
@@ -556,84 +648,84 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 value: 'templates',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
+                  children: [
                       const Icon(Icons.event_note_outlined, size: 20),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: SwiftleadTokens.spaceS),
                       Text(
                         'Booking Templates',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
+              ),
               ),
               PopupMenuItem(
                 value: 'blocked_time',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
+                  children: [
                       const Icon(Icons.event_busy, size: 20),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: SwiftleadTokens.spaceS),
                       Text(
                         'Blocked Time',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
+              ),
               ),
               PopupMenuItem(
                 value: 'analytics',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
+                  children: [
                       const Icon(Icons.analytics_outlined, size: 20),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: SwiftleadTokens.spaceS),
                       Text(
                         'Booking Analytics',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
+              ),
               ),
               PopupMenuItem(
                 value: 'capacity',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
+                  children: [
                       const Icon(Icons.tune_outlined, size: 20),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: SwiftleadTokens.spaceS),
                       Text(
                         'Capacity Optimization',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
+              ),
               ),
               PopupMenuItem(
                 value: 'resources',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
+                  children: [
                       const Icon(Icons.construction_outlined, size: 20),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: SwiftleadTokens.spaceS),
                       Text(
                         'Resource Management',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
+                  ],
                   ),
                 ),
               ),
@@ -641,23 +733,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 value: 'team_toggle',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
-                      Icon(_isTeamView ? Icons.person : Icons.people, size: 20),
-                      const SizedBox(width: 12),
+                  children: [
+                    Icon(_isTeamView ? Icons.person : Icons.people, size: 20),
+                    const SizedBox(width: SwiftleadTokens.spaceS),
                       Text(
                         _isTeamView ? 'Switch to Personal' : 'Switch to Team',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
+                  ],
                   ),
                 ),
               ),
             ],
           ),
-        ],
-      ),
+            ),
+          ],
+        ),
             body: _isLoading
                 ? _buildLoadingState()
                 : _buildContent(),
@@ -732,6 +825,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             const SizedBox(height: SwiftleadTokens.spaceM),
           ],
+          
+          // Active Filter Chips Row
+          if (_activeFilters != null)
+            _buildActiveFilterChips(),
           
           // CalendarHeader - Month/week navigation
           _buildCalendarHeader(),
@@ -879,7 +976,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }).toList();
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
@@ -944,7 +1041,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             color: candidateData.isNotEmpty
                                 ? const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1)
                                 : Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.4),
                             border: candidateData.isNotEmpty
                                 ? Border.all(color: const Color(SwiftleadTokens.primaryTeal), width: 2, style: BorderStyle.solid)
                                 : null,
@@ -960,14 +1057,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   child: Opacity(
                                     opacity: 0.8,
                                     child: Container(
-                                      padding: const EdgeInsets.all(8),
+                                      padding: const EdgeInsets.all(SwiftleadTokens.spaceS),
                                       decoration: BoxDecoration(
                                         color: const Color(SwiftleadTokens.primaryTeal),
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.4),
                                       ),
                                       child: Text(
                                         '${booking.startTime.hour.toString().padLeft(2, '0')}:${booking.startTime.minute.toString().padLeft(2, '0')} - ${booking.serviceType}',
-                                        style: const TextStyle(color: Colors.white),
+                                        style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
                                       ),
                                     ),
                                   ),
@@ -979,7 +1076,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
                                       color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.4),
                                     ),
                                     child: Text(
                                       '${booking.startTime.hour.toString().padLeft(2, '0')}:${booking.startTime.minute.toString().padLeft(2, '0')} - ${booking.serviceType}',
@@ -992,7 +1089,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
                                     color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.4),
                                   ),
                                   child: Row(
                                     children: [
@@ -1039,7 +1136,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final weekDays = List.generate(7, (i) => weekStart.add(Duration(days: i)));
     
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
@@ -1125,15 +1222,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final selectedDateOnly = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
     
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).shadowColor.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          // WeekdayLabels with current day highlighted
-          Row(
+          // WeekdayLabels with current day highlighted - iOS-level polish
+          Semantics(
+            label: 'Calendar weekdays',
+            child: Row(
             children: ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) {
               return Expanded(
                 child: Center(
@@ -1141,11 +1247,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     day,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w600,
+                        fontSize: (Theme.of(context).textTheme.bodySmall?.fontSize ?? 12) * MediaQuery.of(context).textScaler.scale(1.0),
+                        letterSpacing: 0.5,
                     ),
                   ),
                 ),
               );
             }).toList(),
+            ),
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
           // DayCell grid - Shows date + event dots
@@ -1209,7 +1318,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
               });
               final hasEvent = hasBooking || hasJob;
               
-              return GestureDetector(
+              return Semantics(
+                label: '${isToday ? 'Today, ' : ''}${_formatDateShort(cellDate)}${hasEvent ? ', has ${hasBooking ? "booking" : "job"}' : ''}',
+                button: true,
+                child: GestureDetector(
                 onTap: () {
                   setState(() {
                     _selectedDate = cellDate;
@@ -1218,15 +1330,31 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1)
-                        : null,
+                          ? const Color(SwiftleadTokens.primaryTeal).withOpacity(0.15)
+                          : (isToday
+                              ? const Color(SwiftleadTokens.primaryTeal).withOpacity(0.08)
+                              : null),
                     border: isToday
                         ? Border.all(
                             color: const Color(SwiftleadTokens.primaryTeal),
-                            width: 2,
+                              width: 2.5,
+                            )
+                          : (isSelected
+                              ? Border.all(
+                                  color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.3),
+                                  width: 1.5,
                           )
+                              : null),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: isToday
+                          ? [
+                              BoxShadow(
+                                color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.2),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
                         : null,
-                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -1240,6 +1368,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   ? Theme.of(context).textTheme.bodyLarge?.color
                                   : Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.3)),
                           fontWeight: isToday || isSelected ? FontWeight.w700 : FontWeight.normal,
+                            fontSize: (Theme.of(context).textTheme.bodyLarge?.fontSize ?? 16) * MediaQuery.of(context).textScaler.scale(1.0),
                         ),
                       ),
                       if (hasEvent)
@@ -1259,6 +1388,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           ],
                         ),
                     ],
+                    ),
                   ),
                 ),
               );
@@ -1281,6 +1411,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return '${months[date.month - 1]} ${date.year}';
   }
 
+  String _formatDateShort(DateTime date) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${months[date.month - 1]} ${date.day}';
+  }
+
   Widget _buildBookingList() {
     // Use filtered bookings for display
     final displayBookings = _filteredBookings.isEmpty ? _allBookings : _filteredBookings;
@@ -1291,7 +1427,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
         description: 'Your calendar is clear. Start booking appointments.',
         icon: Icons.calendar_today_outlined,
         actionLabel: 'Book Appointment',
-        onAction: () {},
+        onAction: () {
+          Navigator.push(
+            context,
+            _createPageRoute(const CreateEditBookingScreen()),
+          );
+        },
       );
     }
 
@@ -1336,9 +1477,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
                   alignment: Alignment.centerLeft,
                   padding: const EdgeInsets.only(left: SwiftleadTokens.spaceM),
-                  child: const Icon(
+                  child: Icon(
                     Icons.check_circle,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     size: 32,
                   ),
                 ),
@@ -1349,9 +1490,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.only(right: SwiftleadTokens.spaceM),
-                  child: const Icon(
+                  child: Icon(
                     Icons.delete,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onError,
                     size: 32,
                   ),
                 ),
@@ -1399,12 +1540,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     _showRichBookingTooltip(context, booking);
                     _showBookingContextMenu(context, booking);
                   },
+                  onSecondaryTap: () {
+                    HapticFeedback.mediumImpact();
+                    _showRichBookingTooltip(context, booking);
+                    _showBookingContextMenu(context, booking);
+                  },
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
                     child: BookingCard(
                       bookingId: booking.id,
-                      clientName: booking.contactName,
-                      serviceName: booking.serviceType,
+                      clientName: booking.contactName ?? '',
+                      serviceName: booking.serviceType ?? '',
                       startTime: booking.startTime,
                       endTime: booking.endTime,
                       status: booking.status.name,
@@ -1414,7 +1560,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           context,
                           _createPageRoute(BookingDetailScreen(
                             bookingId: booking.id,
-                            clientName: booking.contactName,
+                            clientName: booking.contactName ?? '',
                           )),
                         );
                       },
@@ -1453,7 +1599,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             ? const Color(SwiftleadTokens.warningYellow)
                             : const Color(SwiftleadTokens.successGreen),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: SwiftleadTokens.spaceXXS),
                       Text(
                         needsBufferWarning
                             ? 'Only ${timeBetween}min gap - consider ${bufferTimeMinutes - timeBetween}min buffer'
@@ -1480,20 +1626,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
             padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
             child: JobCard(
               jobTitle: job.title,
-              clientName: job.contactName,
-              serviceType: job.serviceType,
+              clientName: job.contactName ?? '',
+              serviceType: job.serviceType ?? '',
               status: job.status.displayName,
               dueDate: job.scheduledDate,
               price: job.value > 0 ? '£${job.value.toStringAsFixed(2)}' : null,
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => JobDetailScreen(
-                      jobId: job.id,
-                      jobTitle: job.title,
-                    ),
-                  ),
+                  _createPageRoute(JobDetailScreen(
+                    jobId: job.id,
+                    jobTitle: job.title,
+                  )),
                 );
               },
             ),
@@ -1559,9 +1703,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   Navigator.pop(context);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => CreateEditBookingScreen(bookingId: booking.id),
-                    ),
+                    _createPageRoute(CreateEditBookingScreen(bookingId: booking.id)),
                   );
                 },
               ),

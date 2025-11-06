@@ -74,8 +74,10 @@ class _BenchmarkComparisonScreenState extends State<BenchmarkComparisonScreen> {
                 const SizedBox(height: SwiftleadTokens.spaceM),
                 SizedBox(
                   height: 300,
-                  child: TrendLineChart(
-                    title: 'Performance vs Benchmark',
+                  child: Semantics(
+                    label: 'Performance vs Benchmark chart. Tap on data points to see details.',
+                    child: TrendLineChart(
+                      title: 'Performance vs Benchmark',
                     dataPoints: [
                       ChartDataPoint(label: 'Week 1', value: 8500),
                       ChartDataPoint(label: 'Week 2', value: 9200),
@@ -84,6 +86,7 @@ class _BenchmarkComparisonScreenState extends State<BenchmarkComparisonScreen> {
                     ],
                     lineColor: const Color(SwiftleadTokens.primaryTeal),
                     onDataPointTap: (point) {},
+                    ),
                   ),
                 ),
                 const SizedBox(height: SwiftleadTokens.spaceS),

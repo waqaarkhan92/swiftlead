@@ -12,6 +12,8 @@ import '../../widgets/global/primary_button.dart';
 import '../../widgets/global/bottom_sheet.dart';
 import '../../widgets/components/data_table.dart';
 import '../../widgets/components/celebration_banner.dart';
+import '../../widgets/components/animated_counter.dart';
+import '../../widgets/components/smart_collapsible_section.dart';
 import '../../utils/keyboard_shortcuts.dart' show AppShortcuts, SearchIntent, RefreshIntent, CloseIntent;
 import '../../theme/tokens.dart';
 import '../main_navigation.dart' as main_nav;
@@ -60,7 +62,39 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   
   // Check for milestones and show celebrations
   void _checkForMilestones() {
-    // Milestones can be added based on review data
+    // 100 reviews milestone
+    if (!_milestonesShown.contains('100reviews')) {
+      _milestonesShown.add('100reviews');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _celebrationMessage = '🎉 100 reviews! Amazing reputation!';
+          });
+        }
+      });
+    }
+    // 50 reviews milestone
+    else if (!_milestonesShown.contains('50reviews')) {
+      _milestonesShown.add('50reviews');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _celebrationMessage = '🌟 50 reviews! Building great reputation!';
+          });
+        }
+      });
+    }
+    // 5-star rating milestone
+    else if (!_milestonesShown.contains('5star')) {
+      _milestonesShown.add('5star');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _celebrationMessage = '⭐ Perfect 5-star rating! Outstanding!';
+          });
+        }
+      });
+    }
   }
   
   // Smooth page route transitions
@@ -203,6 +237,18 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     );
   }
 
+  // Smart prioritization tracking
+  final Map<String, int> _reviewTapCounts = {};
+  final Map<String, DateTime> _reviewLastOpened = {};
+  
+  // Track review interaction for smart prioritization
+  void _trackReviewInteraction(String reviewId) {
+    setState(() {
+      _reviewTapCounts[reviewId] = (_reviewTapCounts[reviewId] ?? 0) + 1;
+      _reviewLastOpened[reviewId] = DateTime.now();
+    });
+  }
+
   // Dashboard Tab - Overview metrics and recent reviews
   Widget _buildDashboardTab() {
     final averageRating = 4.7;
@@ -253,9 +299,12 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(
-                              averageRating.toStringAsFixed(1),
-                              style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                            AnimatedCounter(
+                              value: averageRating,
+                              duration: const Duration(milliseconds: 1500),
+                              curve: Curves.easeOutCubic,
+                              decimals: 1,
+                              textStyle: Theme.of(context).textTheme.displayMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: const Color(SwiftleadTokens.primaryTeal),
                                   ),
@@ -284,16 +333,22 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                               ),
                         ),
                         const SizedBox(height: SwiftleadTokens.spaceXS),
-                        Text(
-                          totalReviews.toString(),
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        AnimatedCounter(
+                          value: totalReviews.toDouble(),
+                          duration: const Duration(milliseconds: 1500),
+                          curve: Curves.easeOutCubic,
+                          textStyle: Theme.of(context).textTheme.headlineMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
                         const SizedBox(height: SwiftleadTokens.spaceXS),
-                        Text(
-                          '+$thisMonth this month',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        AnimatedCounter(
+                          value: thisMonth.toDouble(),
+                          duration: const Duration(milliseconds: 1500),
+                          curve: Curves.easeOutCubic,
+                          prefix: '+',
+                          suffix: ' this month',
+                          textStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: const Color(SwiftleadTokens.successGreen),
                               ),
                         ),
@@ -309,40 +364,43 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
           // Rating Trend Chart
-          TrendLineChart(
-            title: 'Rating Trend',
-            dataPoints: [
-              ChartDataPoint(label: 'Jan', value: 4.5),
-              ChartDataPoint(label: 'Feb', value: 4.6),
-              ChartDataPoint(label: 'Mar', value: 4.7),
-              ChartDataPoint(label: 'Apr', value: 4.8),
-              ChartDataPoint(label: 'May', value: 4.7),
-              ChartDataPoint(label: 'Jun', value: 4.7),
-            ],
-            periodData: {
-              '7D': [
-                ChartDataPoint(label: 'Mon', value: 4.6),
-                ChartDataPoint(label: 'Tue', value: 4.7),
-                ChartDataPoint(label: 'Wed', value: 4.8),
-                ChartDataPoint(label: 'Thu', value: 4.7),
-                ChartDataPoint(label: 'Fri', value: 4.6),
-                ChartDataPoint(label: 'Sat', value: 4.7),
-                ChartDataPoint(label: 'Sun', value: 4.8),
+          Semantics(
+            label: 'Rating Trend chart showing average rating over time. Tap on data points to see details.',
+            child: TrendLineChart(
+              title: 'Rating Trend',
+              dataPoints: [
+                ChartDataPoint(label: 'Jan', value: 4.5),
+                ChartDataPoint(label: 'Feb', value: 4.6),
+                ChartDataPoint(label: 'Mar', value: 4.7),
+                ChartDataPoint(label: 'Apr', value: 4.8),
+                ChartDataPoint(label: 'May', value: 4.7),
+                ChartDataPoint(label: 'Jun', value: 4.7),
               ],
-              '30D': [
-                ChartDataPoint(label: 'Week 1', value: 4.6),
-                ChartDataPoint(label: 'Week 2', value: 4.7),
-                ChartDataPoint(label: 'Week 3', value: 4.8),
-                ChartDataPoint(label: 'Week 4', value: 4.7),
-              ],
-              '90D': [
-                ChartDataPoint(label: 'Month 1', value: 4.6),
-                ChartDataPoint(label: 'Month 2', value: 4.7),
-                ChartDataPoint(label: 'Month 3', value: 4.8),
-              ],
-            },
-            lineColor: const Color(SwiftleadTokens.primaryTeal),
-            yAxisLabel: 'Rating',
+              periodData: {
+                '7D': [
+                  ChartDataPoint(label: 'Mon', value: 4.6),
+                  ChartDataPoint(label: 'Tue', value: 4.7),
+                  ChartDataPoint(label: 'Wed', value: 4.8),
+                  ChartDataPoint(label: 'Thu', value: 4.7),
+                  ChartDataPoint(label: 'Fri', value: 4.6),
+                  ChartDataPoint(label: 'Sat', value: 4.7),
+                  ChartDataPoint(label: 'Sun', value: 4.8),
+                ],
+                '30D': [
+                  ChartDataPoint(label: 'Week 1', value: 4.6),
+                  ChartDataPoint(label: 'Week 2', value: 4.7),
+                  ChartDataPoint(label: 'Week 3', value: 4.8),
+                  ChartDataPoint(label: 'Week 4', value: 4.7),
+                ],
+                '90D': [
+                  ChartDataPoint(label: 'Month 1', value: 4.6),
+                  ChartDataPoint(label: 'Month 2', value: 4.7),
+                  ChartDataPoint(label: 'Month 3', value: 4.8),
+                ],
+              },
+              lineColor: const Color(SwiftleadTokens.primaryTeal),
+              yAxisLabel: 'Rating',
+            ),
           ),
           const SizedBox(height: SwiftleadTokens.spaceM),
           // Recent Reviews

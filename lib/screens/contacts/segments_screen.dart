@@ -19,6 +19,29 @@ class _SegmentsScreenState extends State<SegmentsScreen> {
   bool _isLoading = true;
   final List<ContactSegment> _segments = [];
 
+  // Smooth page route transitions
+  PageRoute<T> _createPageRoute<T>(Widget page) {
+    return PageRouteBuilder<T>(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0.0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          )),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -84,12 +107,6 @@ class _SegmentsScreenState extends State<SegmentsScreen> {
           : _segments.isEmpty
               ? _buildEmptyState()
               : _buildSegmentsList(),
-      floatingActionButton: _segments.isEmpty
-          ? null
-          : FloatingActionButton(
-              onPressed: _createSegment,
-              child: const Icon(Icons.add),
-            ),
     );
   }
 
@@ -146,10 +163,10 @@ class _SegmentsScreenState extends State<SegmentsScreen> {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: SwiftleadTokens.spaceM),
         decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.2),
+          color: const Color(SwiftleadTokens.errorRed).withOpacity(0.2),
           borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
         ),
-        child: const Icon(Icons.delete_outline, color: Colors.red),
+        child: const Icon(Icons.delete_outline, color: Color(SwiftleadTokens.errorRed)),
       ),
       confirmDismiss: (direction) async {
         return await showDialog<bool>(
@@ -164,7 +181,7 @@ class _SegmentsScreenState extends State<SegmentsScreen> {
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                style: TextButton.styleFrom(foregroundColor: const Color(SwiftleadTokens.errorRed)),
                 child: const Text('Delete'),
               ),
             ],
@@ -202,7 +219,7 @@ class _SegmentsScreenState extends State<SegmentsScreen> {
                       Text(
                         'Created ${_formatDate(segment.createdAt)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey,
+                              color: Theme.of(context).textTheme.bodySmall?.color,
                             ),
                       ),
                     ],
@@ -215,7 +232,7 @@ class _SegmentsScreenState extends State<SegmentsScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.6),
                   ),
                   child: Text(
                     '${segment.count}',
@@ -252,9 +269,7 @@ class _SegmentsScreenState extends State<SegmentsScreen> {
   Future<void> _createSegment() async {
     final created = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => const SegmentBuilderScreen(),
-      ),
+      _createPageRoute(const SegmentBuilderScreen()),
     );
     
     if (created == true) {
@@ -265,9 +280,7 @@ class _SegmentsScreenState extends State<SegmentsScreen> {
   Future<void> _editSegment(ContactSegment segment) async {
     final updated = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => SegmentBuilderScreen(segmentId: segment.id),
-      ),
+      _createPageRoute(SegmentBuilderScreen(segmentId: segment.id)),
     );
     
     if (updated == true) {

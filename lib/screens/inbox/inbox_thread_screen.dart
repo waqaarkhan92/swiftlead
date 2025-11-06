@@ -27,6 +27,7 @@ import '../../widgets/components/missed_call_notification.dart';
 import '../../widgets/components/offline_banner.dart';
 import '../../widgets/forms/message_actions_sheet.dart';
 import '../../services/offline_queue_manager.dart';
+import '../../utils/responsive_layout.dart';
 import 'thread_search_screen.dart';
 
 /// Helper class to represent different item types in the thread list
@@ -81,6 +82,7 @@ class InboxThreadScreen extends StatefulWidget {
   final String channel; // Display name like "SMS", "WhatsApp"
   final String? contactId; // Optional contact ID for direct lookup
   final String? threadId; // Optional thread ID for search and other operations
+  final VoidCallback? onThreadUpdated; // Callback when thread is updated (for desktop split view)
   
   const InboxThreadScreen({
     super.key,
@@ -88,6 +90,7 @@ class InboxThreadScreen extends StatefulWidget {
     required this.channel,
     this.contactId,
     this.threadId,
+    this.onThreadUpdated,
   });
 
   @override
@@ -117,6 +120,29 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
   int _totalMessageCount = 0;
   static const int _pageSize = 20;
   
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0.0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          )),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+  }
+
   MessageChannel get _messageChannel {
     switch (widget.channel.toLowerCase()) {
       case 'sms':
@@ -366,11 +392,9 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
         print('[InboxThreadScreen] Thread contactId: ${widget.contactId}, Thread contactName: ${widget.contactName}');
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => ContactDetailScreen(
-              contactId: contact!.id,
-            ),
-          ),
+          _createPageRoute(ContactDetailScreen(
+            contactId: contact!.id,
+          )),
         );
       } else {
         // If contact not found, show error toast
@@ -572,13 +596,11 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
     if (threadId != null && mounted) {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => ThreadSearchScreen(
-            threadId: threadId!,
-            contactName: widget.contactName,
-            channel: widget.channel,
-          ),
-        ),
+        _createPageRoute(ThreadSearchScreen(
+          threadId: threadId!,
+          contactName: widget.contactName,
+          channel: widget.channel,
+        )),
       );
     } else {
       if (mounted) {
@@ -715,16 +737,14 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
                       Navigator.pop(context);
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => CreateEditQuoteScreen(
-                            initialData: {
-                              'clientName': widget.contactName,
-                              'description': descriptionController.text,
-                              'amount': amount,
-                              'notes': 'Quick quote from ${widget.channel} conversation',
-                            },
-                          ),
-                        ),
+                        _createPageRoute(CreateEditQuoteScreen(
+                          initialData: {
+                            'clientName': widget.contactName,
+                            'description': descriptionController.text,
+                            'amount': amount,
+                            'notes': 'Quick quote from ${widget.channel} conversation',
+                          },
+                        )),
                       ).then((_) {
                         Toast.show(
                           context,
@@ -746,15 +766,13 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
   void _handleCreateJobFromInbox() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => CreateEditJobScreen(
-          initialData: {
-            'clientName': widget.contactName,
-            'contactId': widget.contactId,
-            'notes': 'Job created from ${widget.channel} conversation',
-          },
-        ),
-      ),
+      _createPageRoute(CreateEditJobScreen(
+        initialData: {
+          'clientName': widget.contactName,
+          'contactId': widget.contactId,
+          'notes': 'Job created from ${widget.channel} conversation',
+        },
+      )),
     ).then((_) {
       Toast.show(
         context,
@@ -777,17 +795,15 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
       if (mounted) {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => CreateEditJobScreen(
-              initialData: {
-                'clientName': widget.contactName,
-                'contactId': widget.contactId,
-                'notes': 'Job details extracted from ${widget.channel} conversation using AI',
-                'serviceType': 'Service Type', // AI would extract this from messages
-                'description': 'AI-extracted job description', // AI would extract this
-              },
-            ),
-          ),
+          _createPageRoute(CreateEditJobScreen(
+            initialData: {
+              'clientName': widget.contactName,
+              'contactId': widget.contactId,
+              'notes': 'Job details extracted from ${widget.channel} conversation using AI',
+              'serviceType': 'Service Type', // AI would extract this from messages
+              'description': 'AI-extracted job description', // AI would extract this
+            },
+          )),
         ).then((_) {
           Toast.show(
             context,
@@ -886,9 +902,11 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
     // Debug: Check if attachment exists
     final hasAttachment = message.hasAttachment && message.attachmentUrl != null;
     
-    return GestureDetector(
-      onLongPress: () async {
-        final action = await MessageActionsSheet.show(
+    return Semantics(
+      label: 'Message from ${message.isInbound ? widget.contactName : 'You'}. Long press for options.',
+      child: GestureDetector(
+        onLongPress: () async {
+          final action = await MessageActionsSheet.show(
           context: context,
           messageId: message.id,
           channel: _messageChannel,
@@ -965,6 +983,7 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
           ),
         ],
       ),
+      ),
     );
   }
 
@@ -1037,14 +1056,22 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = ResponsiveLayout.isDesktop(context);
+    final isInSplitView = widget.onThreadUpdated != null; // If callback provided, we're in split view
+    
     return Scaffold(
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: FrostedAppBar(
+      appBar: isInSplitView ? null : FrostedAppBar(
         title: widget.contactName,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context).pop(true), // Return true to indicate possible mute state change
+            onPressed: () {
+              if (widget.onThreadUpdated != null) {
+                widget.onThreadUpdated!();
+              }
+              Navigator.of(context).pop(true); // Return true to indicate possible mute state change
+            },
           ),
         actions: [
           ChannelIconBadge(channel: widget.channel, size: 24),
@@ -1084,7 +1111,7 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
                 value: 'view_contact',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
+                  children: [
                       const Icon(Icons.person, size: 18),
                       const SizedBox(width: 8),
                       Text(
@@ -1093,15 +1120,15 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
+              ),
               ),
               PopupMenuItem(
                 value: 'search',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
+                  children: [
                       const Icon(Icons.search, size: 18),
                       const SizedBox(width: 8),
                       Text(
@@ -1110,7 +1137,7 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
+                  ],
                   ),
                 ),
               ),
@@ -1118,9 +1145,9 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
                 value: 'internal_notes',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
-                      const Icon(Icons.note_add, size: 18),
-                      const SizedBox(width: 8),
+                  children: [
+                    const Icon(Icons.note_add, size: 18),
+                    const SizedBox(width: 8),
                       Text(
                         'Internal Notes',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -1149,7 +1176,7 @@ class _InboxThreadScreenState extends State<InboxThreadScreen> {
                           ),
                         ),
                       ),
-                    ],
+                  ],
                   ),
                 ),
               ),

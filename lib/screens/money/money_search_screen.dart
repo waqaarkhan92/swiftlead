@@ -74,9 +74,9 @@ class _MoneySearchScreenState extends State<MoneySearchScreen> {
       
       // Search in invoices and convert to Payment-like results
       final invoiceResults = invoices.where((invoice) {
-        return invoice.contactName.toLowerCase().contains(query.toLowerCase()) ||
+        return (invoice.contactName?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
             invoice.id.toLowerCase().contains(query.toLowerCase()) ||
-            invoice.serviceDescription.toLowerCase().contains(query.toLowerCase());
+            (invoice.serviceDescription?.toLowerCase().contains(query.toLowerCase()) ?? false);
       }).toList();
       
       // Combine results - use payments directly, create payment-like objects from invoices
@@ -92,7 +92,7 @@ class _MoneySearchScreenState extends State<MoneySearchScreen> {
               ? PaymentStatus.completed 
               : PaymentStatus.pending,
           timestamp: invoice.createdAt,
-          contactName: invoice.contactName,
+          contactName: invoice.contactName ?? '',
         ));
       }
     });
@@ -168,13 +168,13 @@ class _MoneySearchScreenState extends State<MoneySearchScreen> {
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: payment.status == PaymentStatus.completed
-                  ? Colors.green
-                  : Colors.orange,
+                  ? const Color(SwiftleadTokens.successGreen)
+                  : const Color(SwiftleadTokens.warningYellow),
               child: Icon(
                 payment.status == PaymentStatus.completed
                     ? Icons.check
                     : Icons.pending,
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
               ),
             ),
             title: Text(payment.contactName),
@@ -196,22 +196,52 @@ class _MoneySearchScreenState extends State<MoneySearchScreen> {
               
               if (invoice != null) {
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => InvoiceDetailScreen(
-                      invoiceId: payment.invoiceId,
-                      invoiceNumber: invoice!.id,
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) => InvoiceDetailScreen(
+                        invoiceId: payment.invoiceId,
+                        invoiceNumber: invoice!.id,
+                      ),
+                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(1.0, 0.0),
+                            end: Offset.zero,
+                          ).animate(CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
+                          )),
+                          child: FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          ),
+                        );
+                      },
                     ),
-                  ),
                 );
               } else {
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PaymentDetailScreen(
-                      paymentId: payment.id,
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) => PaymentDetailScreen(
+                        paymentId: payment.id,
+                      ),
+                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(1.0, 0.0),
+                            end: Offset.zero,
+                          ).animate(CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
+                          )),
+                          child: FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          ),
+                        );
+                      },
                     ),
-                  ),
                 );
               }
             },

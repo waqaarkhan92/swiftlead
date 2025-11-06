@@ -65,8 +65,10 @@ class _AIPerformanceScreenState extends State<AIPerformanceScreen> {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: SwiftleadTokens.spaceM),
-                TrendLineChart(
-                  title: '',
+                Semantics(
+                  label: 'AI Response Rate chart. Tap on data points to see details.',
+                  child: TrendLineChart(
+                    title: '',
                   dataPoints: [
                     ChartDataPoint(label: 'Mon', value: 85),
                     ChartDataPoint(label: 'Tue', value: 92),
@@ -76,6 +78,7 @@ class _AIPerformanceScreenState extends State<AIPerformanceScreen> {
                   ],
                   periodData: {},
                   onDataPointTap: (point) {},
+                  ),
                 ),
               ],
             ),

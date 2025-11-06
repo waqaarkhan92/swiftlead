@@ -60,20 +60,27 @@ class _SwiftleadSearchBarState extends State<SwiftleadSearchBar> {
           onFocusChange: (focused) {
             setState(() => _isFocused = focused);
           },
-          child: TextField(
-            controller: _controller,
-            decoration: InputDecoration(
-              hintText: widget.hintText ?? 'Search...',
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _hasText
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _controller.clear();
-                        widget.onClear?.call();
-                      },
-                    )
-                  : null,
+          child: Semantics(
+            label: widget.hintText ?? 'Search',
+            textField: true,
+            child: TextField(
+              controller: _controller,
+              decoration: InputDecoration(
+                hintText: widget.hintText ?? 'Search...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _hasText
+                    ? Semantics(
+                        label: 'Clear search',
+                        button: true,
+                        child: IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _controller.clear();
+                            widget.onClear?.call();
+                          },
+                        ),
+                      )
+                    : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(24),
                 borderSide: BorderSide(
@@ -105,6 +112,7 @@ class _SwiftleadSearchBarState extends State<SwiftleadSearchBar> {
             onSubmitted: widget.onSubmitted,
             textInputAction: TextInputAction.search,
           ),
+            ),
         ),
         
         // Suggestions/Recent searches

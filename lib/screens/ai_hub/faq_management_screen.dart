@@ -45,21 +45,19 @@ class _FAQManagementScreenState extends State<FAQManagementScreen> {
     return Scaffold(
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: const FrostedAppBar(
+      appBar: FrostedAppBar(
         title: 'FAQ Management',
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => _showAddFAQSheet(context),
+            tooltip: 'Add FAQ',
+          ),
+        ],
       ),
       body: _isLoading
           ? _buildLoadingState()
           : _buildContent(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddFAQSheet(context),
-        backgroundColor: const Color(SwiftleadTokens.primaryTeal),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Add FAQ',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
     );
   }
 
@@ -219,7 +217,7 @@ class _FAQCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FrostedContainer(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

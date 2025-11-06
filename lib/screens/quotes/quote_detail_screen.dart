@@ -60,6 +60,29 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
     }
   }
 
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0.0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          )),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+  }
+
 
   void _handleDeleteQuote() async {
     final confirmed = await SwiftleadConfirmationDialog.show(
@@ -97,20 +120,25 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
+          Semantics(
+            label: 'Edit quote',
+            button: true,
+            child: IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => CreateEditQuoteScreen(
-                    quoteId: widget.quoteId,
-                  ),
-                ),
+                _createPageRoute(CreateEditQuoteScreen(
+                  quoteId: widget.quoteId,
+                )),
               );
             },
+            ),
           ),
-          PopupMenuButton<String>(
+          Semantics(
+            label: 'More options',
+            button: true,
+            child: PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (value) {
               switch (value) {
@@ -199,6 +227,7 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
                 ),
               ),
             ],
+            ),
           ),
         ],
       ),
@@ -214,6 +243,7 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
           if (_status == 'Draft' || _status == 'Sent' || _status == 'Viewed') _buildBottomToolbar(),
         ],
       ),
+      // FloatingActionButton removed - use bottom toolbar instead
     );
   }
 
@@ -659,49 +689,7 @@ class _QuoteDetailScreenState extends State<QuoteDetailScreen> {
     );
   }
 
-  Widget _buildQuickActions() {
-    if (_status == 'Draft') {
-      return FloatingActionButton.extended(
-        onPressed: () {
-          SendQuoteSheet.show(
-            context: context,
-            quoteId: widget.quoteId,
-            quoteNumber: widget.quoteNumber,
-            clientName: 'John Smith',
-            amount: _total,
-          );
-        },
-        icon: const Icon(Icons.send),
-        label: const Text('Send Quote'),
-        backgroundColor: const Color(SwiftleadTokens.primaryTeal),
-      );
-    } else if (_status == 'Sent' || _status == 'Viewed') {
-      return FloatingActionButton.extended(
-        onPressed: () {
-          _handleAcceptQuoteWithDeposit();
-        },
-        icon: const Icon(Icons.check),
-        label: const Text('Accept Quote'),
-        backgroundColor: const Color(SwiftleadTokens.successGreen),
-      );
-    } else if (_status == 'Accepted') {
-      return FloatingActionButton.extended(
-        onPressed: () {
-          ConvertQuoteModal.show(
-            context: context,
-            quoteId: widget.quoteId,
-            quoteNumber: widget.quoteNumber,
-            clientName: 'John Smith',
-            amount: _total,
-          );
-        },
-        icon: const Icon(Icons.arrow_forward),
-        label: const Text('Convert'),
-        backgroundColor: const Color(SwiftleadTokens.successGreen),
-      );
-    }
-    return const SizedBox.shrink();
-  }
+  // _buildQuickActions() method removed - use bottom toolbar instead
 
   Widget _buildBottomToolbar() {
     // iOS-style bottom toolbar: Primary action based on status

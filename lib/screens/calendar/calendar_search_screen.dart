@@ -32,6 +32,29 @@ class _CalendarSearchScreenState extends State<CalendarSearchScreen> {
     super.dispose();
   }
 
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0.0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          )),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+  }
+
   Future<void> _performSearch(String query) async {
     if (query.isEmpty) {
       setState(() {
@@ -51,9 +74,9 @@ class _CalendarSearchScreenState extends State<CalendarSearchScreen> {
     final allBookings = await MockBookings.fetchAll();
     final bookingResults = allBookings.where((booking) {
       final queryLower = query.toLowerCase();
-      return booking.contactName.toLowerCase().contains(queryLower) ||
-          booking.serviceType.toLowerCase().contains(queryLower) ||
-          booking.address.toLowerCase().contains(queryLower) ||
+      return (booking.contactName?.toLowerCase().contains(queryLower) ?? false) ||
+          (booking.serviceType?.toLowerCase().contains(queryLower) ?? false) ||
+          (booking.location?.toLowerCase().contains(queryLower) ?? false) ||
           (booking.notes?.toLowerCase().contains(queryLower) ?? false);
     }).toList();
 
@@ -62,8 +85,8 @@ class _CalendarSearchScreenState extends State<CalendarSearchScreen> {
     final jobResults = allJobs.where((job) {
       final queryLower = query.toLowerCase();
       return job.title.toLowerCase().contains(queryLower) ||
-          job.contactName.toLowerCase().contains(queryLower) ||
-          job.serviceType.toLowerCase().contains(queryLower) ||
+          (job.contactName?.toLowerCase().contains(queryLower) ?? false) ||
+          (job.serviceType?.toLowerCase().contains(queryLower) ?? false) ||
           job.description.toLowerCase().contains(queryLower);
     }).toList();
 
@@ -162,20 +185,18 @@ class _CalendarSearchScreenState extends State<CalendarSearchScreen> {
               padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
               child: BookingCard(
                 bookingId: booking.id,
-                clientName: booking.contactName,
-                serviceName: booking.serviceType,
+                      clientName: booking.contactName ?? '',
+                      serviceName: booking.serviceType ?? '',
                 startTime: booking.startTime,
                 endTime: booking.endTime,
                 status: booking.status.displayName,
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => BookingDetailScreen(
-                        bookingId: booking.id,
-                        clientName: booking.contactName,
-                      ),
-                    ),
+                    _createPageRoute(BookingDetailScreen(
+                      bookingId: booking.id,
+                      clientName: booking.contactName ?? '',
+                    )),
                   );
                 },
               ),

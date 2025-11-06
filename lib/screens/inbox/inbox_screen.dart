@@ -31,7 +31,9 @@ import '../../widgets/components/smart_collapsible_section.dart';
 import '../../widgets/components/celebration_banner.dart';
 import '../../widgets/components/ai_insight_banner.dart';
 import '../../widgets/components/rich_tooltip.dart';
+import '../../widgets/global/spring_animation.dart';
 import '../../utils/keyboard_shortcuts.dart' show AppShortcuts, SearchIntent, CreateIntent, RefreshIntent, CloseIntent;
+import '../../utils/responsive_layout.dart';
 import 'scheduled_messages_screen.dart';
 import '../main_navigation.dart' as main_nav;
 
@@ -68,6 +70,9 @@ class _InboxScreenState extends State<InboxScreen> {
   bool _todayExpanded = true;
   bool _thisWeekExpanded = true;
   bool _olderExpanded = false;
+  
+  // Desktop split-screen: Selected thread
+  String? _selectedThreadId;
 
   @override
   void initState() {
@@ -526,8 +531,11 @@ class _InboxScreenState extends State<InboxScreen> {
             },
           ),
           if (!_isBatchMode)
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
+            Semantics(
+              label: 'More options',
+              button: true,
+              child: PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert),
             tooltip: 'More',
             onSelected: (value) {
               switch (value) {
@@ -548,43 +556,46 @@ class _InboxScreenState extends State<InboxScreen> {
                 value: 'scheduled',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
+                  children: [
                       const Icon(Icons.schedule_outlined, size: 20),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: SwiftleadTokens.spaceS),
                       Text(
                         'Scheduled Messages',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
+              ),
               ),
               PopupMenuItem(
                 value: 'filter',
                 child: Builder(
                   builder: (context) => Row(
-                    children: [
+                  children: [
                       const Icon(Icons.filter_list_outlined, size: 20),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: SwiftleadTokens.spaceS),
                       Text(
                         'Filter',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
+                  ],
                   ),
                 ),
               ),
             ],
+            ),
           ),
         ],
       ),
             body: _isLoading
                 ? _buildLoadingState()
-                : _buildContent(),
+                : ResponsiveLayout.isDesktop(context)
+                    ? _buildDesktopSplitView()
+                    : _buildContent(),
           ),
         ),
       ),
@@ -682,27 +693,32 @@ class _InboxScreenState extends State<InboxScreen> {
                 final count = channel == 'All' ? null : (channel == 'WhatsApp' ? 15 : 3);
                 return Padding(
                   padding: const EdgeInsets.only(right: SwiftleadTokens.spaceS),
-                  child: GestureDetector(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      setState(() {
-                        _selectedChannel = channel;
-                        _applyFilter();
-                      });
-                    },
-                    onLongPress: () {
-                      // Tooltip shows channel name on long-press
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('$channel messages'),
-                          duration: const Duration(seconds: 1),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
-                    child: SwiftleadChip(
-                      label: count != null ? '$channel ($count)' : channel,
-                      isSelected: isSelected,
+                  child: Semantics(
+                    label: '$channel filter${count != null ? ", $count messages" : ""}',
+                    button: true,
+                    selected: isSelected,
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() {
+                          _selectedChannel = channel;
+                          _applyFilter();
+                        });
+                      },
+                      onLongPress: () {
+                        // Tooltip shows channel name on long-press
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('$channel messages'),
+                            duration: const Duration(seconds: 1),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                      child: SwiftleadChip(
+                        label: count != null ? '$channel ($count)' : channel,
+                        isSelected: isSelected,
+                      ),
                     ),
                   ),
                 );
@@ -763,7 +779,7 @@ class _InboxScreenState extends State<InboxScreen> {
                         child: Row(
                           children: [
                             Icon(Icons.push_pin_outlined, size: 20),
-                            SizedBox(width: 12),
+                            SizedBox(width: SwiftleadTokens.spaceS),
                             Text('Pin'),
                           ],
                         ),
@@ -773,7 +789,7 @@ class _InboxScreenState extends State<InboxScreen> {
                         child: Row(
                           children: [
                             Icon(Icons.delete_outline, size: 20, color: Color(SwiftleadTokens.errorRed)),
-                            SizedBox(width: 12),
+                            SizedBox(width: SwiftleadTokens.spaceS),
                             Text('Delete', style: TextStyle(color: Color(SwiftleadTokens.errorRed))),
                           ],
                         ),
@@ -811,7 +827,7 @@ class _InboxScreenState extends State<InboxScreen> {
                   ? const Color(SwiftleadTokens.errorRed)
                   : Theme.of(context).iconTheme.color,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: SwiftleadTokens.spaceXS),
             Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -954,25 +970,45 @@ class _InboxScreenState extends State<InboxScreen> {
             : 'No conversations in $_selectedChannel.',
         icon: Icons.inbox_outlined,
         actionLabel: 'Start conversation',
-        onAction: () {},
+        onAction: () async {
+          final result = await ComposeMessageSheet.show(context: context);
+          if (result != null && mounted) {
+            // TODO: Send message when backend is ready
+            Toast.show(
+              context,
+              message: 'Message sent',
+              type: ToastType.success,
+            );
+            // Navigate to thread if needed
+            Navigator.push(
+              context,
+              _createPageRoute(InboxThreadScreen(
+                contactName: result.contactName,
+                channel: result.channel,
+                contactId: result.contactId,
+              )),
+            );
+          }
+        },
       );
     }
 
-    // Phase 3: Enhanced animations - staggered list animations
+    // Phase 3: Enhanced animations - staggered list animations with spring physics
     return ListView.builder(
-      padding: const EdgeInsets.only(
+      padding: EdgeInsets.only(
         left: SwiftleadTokens.spaceM,
         right: SwiftleadTokens.spaceM,
-        bottom: 96, // 64px nav height + 32px spacing for floating aesthetic
+        bottom: ResponsiveLayout.isDesktop(context) ? SwiftleadTokens.spaceM : 96, // 64px nav height + 32px spacing for floating aesthetic
       ),
       itemCount: _filteredThreads.length,
+      cacheExtent: 200, // Cache items for better performance
       itemBuilder: (context, index) {
         final thread = _filteredThreads[index];
-        // Phase 3: Staggered animation delay for smooth appearance
+        // Phase 3: Staggered animation delay with spring physics
         return TweenAnimationBuilder<double>(
           tween: Tween(begin: 0.0, end: 1.0),
           duration: Duration(milliseconds: 300 + (index * 50).clamp(0, 200)),
-          curve: Curves.easeOutCubic,
+          curve: SpringAnimation.smooth,
           builder: (context, value, child) {
             return Opacity(
               opacity: value,
@@ -998,9 +1034,7 @@ class _InboxScreenState extends State<InboxScreen> {
         '$title ($count)',
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
           fontWeight: FontWeight.w600,
-          color: Theme.of(context).brightness == Brightness.light
-              ? Colors.black.withOpacity(0.6)
-              : Colors.white.withOpacity(0.6),
+          color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
         ),
       ),
     );
@@ -1011,6 +1045,7 @@ class _InboxScreenState extends State<InboxScreen> {
     final isUnread = thread.unreadCount > 0;
     final isMuted = MockMessages.isThreadMuted(thread.id);
     final channelName = thread.channel.displayName;
+    final isSelected = ResponsiveLayout.isDesktop(context) && _selectedThreadId == thread.id;
     
     return Dismissible(
           key: Key('chat_${thread.id}'),
@@ -1068,7 +1103,7 @@ class _InboxScreenState extends State<InboxScreen> {
                     content: const Text('Conversation archived'),
                     action: SnackBarAction(
                       label: 'Undo',
-                      textColor: Colors.white,
+                      textColor: Theme.of(context).colorScheme.onPrimary,
                       onPressed: () {
                         // Restore thread
                         if (kUseMockData) {
@@ -1118,6 +1153,9 @@ class _InboxScreenState extends State<InboxScreen> {
               );
             }
           },
+          child: Semantics(
+            label: 'Conversation with ${thread.contactName}${isUnread ? ", $_unreadCount unread message${thread.unreadCount == 1 ? "" : "s"}" : ""}${isPinned ? ", pinned" : ""}${isMuted ? ", muted" : ""}',
+            button: true,
           child: GestureDetector(
             onTap: () async {
               if (_isBatchMode) {
@@ -1135,19 +1173,27 @@ class _InboxScreenState extends State<InboxScreen> {
               } else {
                 // Normal tap - open thread
                 _trackThreadInteraction(thread.id);
-                final result = await Navigator.push(
-                  context,
-                  _createPageRoute(InboxThreadScreen(
-                    contactName: thread.contactName,
-                    channel: channelName,
-                    contactId: thread.contactId,
-                    threadId: thread.id,
-                  )),
-                );
                 
-                // If mute/archive state changed, refresh the list
-                if (result == true && mounted) {
-                  _loadMessages(); // Reload to update list (removes archived threads)
+                // Desktop: Show in split view, Mobile: Navigate
+                if (ResponsiveLayout.isDesktop(context)) {
+                  setState(() {
+                    _selectedThreadId = thread.id;
+                  });
+                } else {
+                  final result = await Navigator.push(
+                    context,
+                    _createPageRoute(InboxThreadScreen(
+                      contactName: thread.contactName,
+                      channel: channelName,
+                      contactId: thread.contactId,
+                      threadId: thread.id,
+                    )),
+                  );
+                  
+                  // If mute/archive state changed, refresh the list
+                  if (result == true && mounted) {
+                    _loadMessages(); // Reload to update list (removes archived threads)
+                  }
                 }
               }
             },
@@ -1219,7 +1265,16 @@ class _InboxScreenState extends State<InboxScreen> {
                 horizontal: 16,
               ),
               decoration: BoxDecoration(
+                color: isSelected
+                    ? const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1)
+                    : Colors.transparent,
                 border: Border(
+                  left: isSelected
+                      ? BorderSide(
+                          color: const Color(SwiftleadTokens.primaryTeal),
+                          width: 3,
+                        )
+                      : BorderSide.none,
                   bottom: BorderSide(
                     color: Theme.of(context).brightness == Brightness.light
                         ? Colors.black.withOpacity(0.05)
@@ -1301,7 +1356,7 @@ class _InboxScreenState extends State<InboxScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: SwiftleadTokens.spaceXS),
                         Row(
                           children: [
                             Expanded(
@@ -1323,7 +1378,7 @@ class _InboxScreenState extends State<InboxScreen> {
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: const Color(SwiftleadTokens.primaryTeal),
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.5),
                                 ),
                                 child: Text(
                                   '${thread.unreadCount}',
@@ -1346,6 +1401,7 @@ class _InboxScreenState extends State<InboxScreen> {
                     ),
                   ),
                 ],
+              ),
               ),
             ),
           ),
@@ -1370,14 +1426,12 @@ class _InboxScreenState extends State<InboxScreen> {
                 case 'open':
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => InboxThreadScreen(
-                        contactName: thread.contactName,
-                        channel: thread.channel.displayName,
-                        contactId: thread.contactId,
-                        threadId: thread.id,
-                      ),
-                    ),
+                    _createPageRoute(InboxThreadScreen(
+                      contactName: thread.contactName,
+                      channel: thread.channel.displayName,
+                      contactId: thread.contactId,
+                      threadId: thread.id,
+                    )),
                   );
                   break;
                 case 'view_contact':
@@ -1630,7 +1684,7 @@ class _InboxScreenState extends State<InboxScreen> {
               child: Material(
                 color: Colors.transparent,
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.8),
                   child: BackdropFilter(
                     filter: ImageFilter.blur(
                       sigmaX: SwiftleadTokens.blurModal,
@@ -1647,7 +1701,7 @@ class _InboxScreenState extends State<InboxScreen> {
                               ? Colors.black.withOpacity(0.08)
                               : Colors.white.withOpacity(0.12),
                         ),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.8),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(
@@ -1722,5 +1776,155 @@ class _InboxScreenState extends State<InboxScreen> {
       final months = (difference.inDays / 30).floor();
       return months == 1 ? '1 month ago' : '$months months ago';
     }
+  }
+  
+  /// Desktop Split View: List (30%) + Thread (70%)
+  Widget _buildDesktopSplitView() {
+    MessageThread? selectedThread;
+    if (_selectedThreadId != null) {
+      try {
+        selectedThread = _filteredThreads.firstWhere(
+          (t) => t.id == _selectedThreadId,
+        );
+      } catch (e) {
+        // Thread not found in filtered list, try all threads
+        try {
+          selectedThread = _threads.firstWhere(
+            (t) => t.id == _selectedThreadId,
+          );
+        } catch (e2) {
+          // Thread not found, select first thread if available
+          selectedThread = _filteredThreads.isNotEmpty ? _filteredThreads.first : null;
+          if (selectedThread != null) {
+            _selectedThreadId = selectedThread.id;
+          }
+        }
+      }
+    } else if (_filteredThreads.isNotEmpty) {
+      // Auto-select first thread if none selected
+      selectedThread = _filteredThreads.first;
+      _selectedThreadId = selectedThread.id;
+    }
+    
+    return Row(
+      children: [
+        // Thread List (30% width)
+        Container(
+          width: MediaQuery.of(context).size.width * 0.3,
+          decoration: BoxDecoration(
+            border: Border(
+              right: BorderSide(
+                color: Theme.of(context).dividerColor,
+                width: 1,
+              ),
+            ),
+          ),
+          child: Column(
+            children: [
+              // Search and filters (same as mobile)
+              if (_celebrationMessage != null) ...[
+                Padding(
+                  padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                  child: CelebrationBanner(
+                    message: _celebrationMessage!,
+                    onDismiss: () {
+                      setState(() => _celebrationMessage = null);
+                    },
+                  ),
+                ),
+              ],
+              
+              Padding(
+                padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      _createPageRoute(const MessageSearchScreen()),
+                    );
+                  },
+                  child: SwiftleadSearchBar(
+                    hintText: 'Search messages...',
+                  ),
+                ),
+              ),
+              
+              // Channel filters
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: SwiftleadTokens.spaceM),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+                  child: Row(
+                    children: _channels.map((channel) {
+                      final isSelected = channel == _selectedChannel;
+                      final count = channel == 'All' ? null : (channel == 'WhatsApp' ? 15 : 3);
+                      return Padding(
+                        padding: const EdgeInsets.only(right: SwiftleadTokens.spaceS),
+                        child: GestureDetector(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() {
+                              _selectedChannel = channel;
+                              _applyFilter();
+                            });
+                          },
+                          child: SwiftleadChip(
+                            label: count != null ? '$channel ($count)' : channel,
+                            isSelected: isSelected,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              
+              // Thread list
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _loadMessages,
+                  child: _buildChatList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        // Thread View (70% width)
+        Expanded(
+          child: selectedThread != null
+              ? InboxThreadScreen(
+                  contactName: selectedThread.contactName,
+                  channel: selectedThread.channel.displayName,
+                  contactId: selectedThread.contactId,
+                  threadId: selectedThread.id,
+                  onThreadUpdated: () {
+                    // Refresh list when thread is updated
+                    _loadMessages();
+                  },
+                )
+              : Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.inbox_outlined,
+                        size: 64,
+                        color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.3),
+                      ),
+                      const SizedBox(height: SwiftleadTokens.spaceM),
+                      Text(
+                        'Select a conversation',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+        ),
+      ],
+    );
   }
 }

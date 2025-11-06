@@ -1,6 +1,9 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
+// Conditional import for File (not available on web)
+import 'dart:io' if (dart.library.html) 'dart:html' as io;
 import '../../widgets/global/frosted_app_bar.dart';
 import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/primary_button.dart';
@@ -165,7 +168,9 @@ class _CreateEditContactScreenState extends State<CreateEditContactScreen> {
                             shape: BoxShape.circle,
                             image: _selectedImage != null
                                 ? DecorationImage(
-                                    image: FileImage(File(_selectedImage!.path)),
+                                    image: kIsWeb 
+                                        ? NetworkImage(_selectedImage!.path) // On web, XFile.path is a data URL
+                                        : FileImage(io.File(_selectedImage!.path)) as ImageProvider,
                                     fit: BoxFit.cover,
                                   )
                                 : (_avatarUrl != null

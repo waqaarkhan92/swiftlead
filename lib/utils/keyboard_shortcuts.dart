@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -24,34 +24,41 @@ class AppShortcuts {
   static const settingsIntent = NavigateIntent('settings');
   
   // Global shortcuts map
-  static Map<LogicalKeySet, Intent> get globalShortcuts => {
-    // Cmd+K or Ctrl+K: Search/Command palette
-    LogicalKeySet(
-      Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control,
-      LogicalKeyboardKey.keyK,
-    ): searchIntent,
+  static Map<LogicalKeySet, Intent> get globalShortcuts {
+    // Determine if we're on macOS
+    // On web, default to Ctrl (Windows/Linux style) since we can't detect user's OS
+    final isMacOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.macOS;
+    final modifierKey = isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control;
     
-    // Cmd+N or Ctrl+N: Create new item
-    LogicalKeySet(
-      Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control,
-      LogicalKeyboardKey.keyN,
-    ): createIntent,
-    
-    // Cmd+R or Ctrl+R: Refresh
-    LogicalKeySet(
-      Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control,
-      LogicalKeyboardKey.keyR,
-    ): refreshIntent,
-    
-    // Esc: Close modal/sheet
-    LogicalKeySet(LogicalKeyboardKey.escape): closeIntent,
-    
-    // Cmd+? or Ctrl+?: Show help
-    LogicalKeySet(
-      Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control,
-      LogicalKeyboardKey.slash,
-    ): helpIntent,
-  };
+    return {
+      // Cmd+K or Ctrl+K: Search/Command palette
+      LogicalKeySet(
+        modifierKey,
+        LogicalKeyboardKey.keyK,
+      ): searchIntent,
+      
+      // Cmd+N or Ctrl+N: Create new item
+      LogicalKeySet(
+        modifierKey,
+        LogicalKeyboardKey.keyN,
+      ): createIntent,
+      
+      // Cmd+R or Ctrl+R: Refresh
+      LogicalKeySet(
+        modifierKey,
+        LogicalKeyboardKey.keyR,
+      ): refreshIntent,
+      
+      // Esc: Close modal/sheet
+      LogicalKeySet(LogicalKeyboardKey.escape): closeIntent,
+      
+      // Cmd+? or Ctrl+?: Show help
+      LogicalKeySet(
+        modifierKey,
+        LogicalKeyboardKey.slash,
+      ): helpIntent,
+    };
+  }
   
   // Screen-specific shortcuts
   static Map<LogicalKeySet, Intent> getInboxShortcuts(VoidCallback onCompose) => {

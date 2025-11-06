@@ -41,9 +41,13 @@ class SegmentedControl extends StatelessWidget {
               : null;
           
           return Expanded(
-            child: GestureDetector(
-              onTap: () => onSelectionChanged(index),
-              child: AnimatedContainer(
+            child: Semantics(
+              label: '$segment tab${badge != null ? ", $badge items" : ""}',
+              button: true,
+              selected: isSelected,
+              child: GestureDetector(
+                onTap: () => onSelectionChanged(index),
+                child: AnimatedContainer(
                 duration: SwiftleadTokens.motionFast,
                 curve: Curves.easeOutCubic,
                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -82,6 +86,7 @@ class SegmentedControl extends StatelessWidget {
                   ],
                 ),
               ),
+                ),
             ),
           );
         }).toList(),

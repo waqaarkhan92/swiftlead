@@ -69,17 +69,6 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
       body: _isLoading
           ? _buildLoadingState()
           : _buildContent(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Toast.show(
-            context,
-            message: 'Invite team member',
-            type: ToastType.info,
-          );
-        },
-        icon: const Icon(Icons.person_add),
-        label: const Text('Invite Member'),
-      ),
     );
   }
 
@@ -165,7 +154,7 @@ class _TeamMemberCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FrostedContainer(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       child: Row(
         children: [
           Container(

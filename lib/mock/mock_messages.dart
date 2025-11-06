@@ -94,6 +94,7 @@ class MockMessages {
         ),
         Message(
           id: 'm2',
+          orgId: 'org_1',
           threadId: '1',
           contactId: '1',
           content: 'I can come take a look tomorrow at 2pm. Does that work for you? Here\'s a photo of a similar issue I fixed last week.',
@@ -101,8 +102,9 @@ class MockMessages {
           isInbound: false,
           channel: MessageChannel.sms,
           status: MessageStatus.delivered,
-          hasAttachment: true,
-          attachmentUrl: 'https://picsum.photos/800/600?random=2',
+          mediaUrls: ['https://picsum.photos/800/600?random=2'],
+          hasAttachment: true, // Backward compatibility
+          attachmentUrl: 'https://picsum.photos/800/600?random=2', // Backward compatibility
         ),
         Message(
           id: 'm3',
@@ -176,6 +178,7 @@ class MockMessages {
         ),
         Message(
           id: 'm7',
+          orgId: 'org_1',
           threadId: '3',
           contactId: '3',
           content: 'Invoice attached. Please let me know if you have questions.',
@@ -183,8 +186,9 @@ class MockMessages {
           isInbound: false,
           channel: MessageChannel.email,
           status: MessageStatus.delivered,
-          hasAttachment: true,
-          attachmentUrl: 'https://picsum.photos/800/600?random=1',
+          mediaUrls: ['https://picsum.photos/800/600?random=1'],
+          hasAttachment: true, // Backward compatibility
+          attachmentUrl: 'https://picsum.photos/800/600?random=1', // Backward compatibility
         ),
         Message(
           id: 'm8',
@@ -692,31 +696,163 @@ class MessageThread {
 }
 
 
-/// Message model
+/// Message model - Matches backend `messages` table schema
 class Message {
+  // Primary keys
   final String id;
+  final String? orgId; // Required for backend RLS - nullable for backward compatibility
+  
+  // Foreign keys
   final String threadId;
-  final String contactId;
-  final String content;
-  final DateTime timestamp;
-  final bool isInbound;
+  final String? contactId; // FK nullable
+  
+  // Core fields
   final MessageChannel channel;
+  final MessageDirection direction; // Backend: direction enum (was isInbound bool)
+  final String content;
+  final List<String> mediaUrls; // Backend: media_urls (jsonb array)
+  final bool readStatus; // Backend: read_status
+  final String? providerMessageId; // Backend: provider_message_id
   final MessageStatus status;
-  final bool hasAttachment;
-  final String? attachmentUrl;
+  final bool aiGenerated; // Backend: ai_generated
+  final DateTime? scheduledFor; // Backend: scheduled_for (timestamptz nullable)
+  final DateTime? sentAt; // Backend: sent_at (timestamptz nullable)
+  final Map<String, dynamic>? reactions; // Backend: reactions (jsonb nullable)
+  final String? replyToMessageId; // Backend: reply_to_message_id (uuid FK nullable)
+  final DateTime? editedAt; // Backend: edited_at (timestamptz nullable)
+  
+  // Timestamps
+  final DateTime createdAt; // Backend: created_at (was timestamp)
+  
+  // Denormalized/backward compatibility
+  final bool isInbound; // Deprecated - use direction enum
+  final bool hasAttachment; // Computed from mediaUrls.length > 0
+  final String? attachmentUrl; // Deprecated - use mediaUrls array
+  
+  // Backward compatibility: computed properties
+  DateTime get timestamp => createdAt;
+  bool get hasMedia => mediaUrls.isNotEmpty;
 
   Message({
     required this.id,
+    this.orgId,
     required this.threadId,
-    required this.contactId,
-    required this.content,
-    required this.timestamp,
-    required this.isInbound,
+    this.contactId,
     required this.channel,
+    MessageDirection? direction,
+    required this.content,
+    this.mediaUrls = const [],
+    this.readStatus = false,
+    this.providerMessageId,
     required this.status,
+    this.aiGenerated = false,
+    this.scheduledFor,
+    this.sentAt,
+    this.reactions,
+    this.replyToMessageId,
+    this.editedAt,
+    DateTime? createdAt,
+    DateTime? timestamp, // Backward compatibility
+    // Denormalized/backward compatibility
+    bool? isInbound, // Backward compatibility - sets direction
     this.hasAttachment = false,
     this.attachmentUrl,
-  });
+  }) : direction = direction ?? (isInbound == true ? MessageDirection.inbound : MessageDirection.outbound),
+       createdAt = createdAt ?? timestamp ?? DateTime.now(),
+       isInbound = isInbound ?? (direction == MessageDirection.inbound);
+  
+  /// Create from backend JSON
+  factory Message.fromJson(Map<String, dynamic> json) {
+    return Message(
+      id: json['id'] as String,
+      orgId: json['org_id'] as String?,
+      threadId: json['thread_id'] as String,
+      contactId: json['contact_id'] as String?,
+      channel: MessageChannelExtension.fromBackend(json['channel'] as String),
+      direction: MessageDirectionExtension.fromBackend(json['direction'] as String),
+      content: json['content'] as String,
+      mediaUrls: (json['media_urls'] as List?)?.cast<String>() ?? [],
+      readStatus: json['read_status'] as bool? ?? false,
+      providerMessageId: json['provider_message_id'] as String?,
+      status: MessageStatusExtension.fromBackend(json['status'] as String),
+      aiGenerated: json['ai_generated'] as bool? ?? false,
+      scheduledFor: json['scheduled_for'] != null ? DateTime.parse(json['scheduled_for'] as String) : null,
+      sentAt: json['sent_at'] != null ? DateTime.parse(json['sent_at'] as String) : null,
+      reactions: json['reactions'] as Map<String, dynamic>?,
+      replyToMessageId: json['reply_to_message_id'] as String?,
+      editedAt: json['edited_at'] != null ? DateTime.parse(json['edited_at'] as String) : null,
+      createdAt: DateTime.parse(json['created_at'] as String),
+    );
+  }
+  
+  /// Convert to backend JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'org_id': orgId,
+      'thread_id': threadId,
+      'contact_id': contactId,
+      'channel': channel.backendValue,
+      'direction': direction.backendValue,
+      'content': content,
+      'media_urls': mediaUrls,
+      'read_status': readStatus,
+      'provider_message_id': providerMessageId,
+      'status': status.backendValue,
+      'ai_generated': aiGenerated,
+      'scheduled_for': scheduledFor?.toIso8601String(),
+      'sent_at': sentAt?.toIso8601String(),
+      'reactions': reactions,
+      'reply_to_message_id': replyToMessageId,
+      'edited_at': editedAt?.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+    };
+  }
+}
+
+/// Message direction - Matches backend enum: inbound/outbound
+enum MessageDirection {
+  inbound,
+  outbound,
+}
+
+extension MessageDirectionExtension on MessageDirection {
+  String get displayName {
+    switch (this) {
+      case MessageDirection.inbound:
+        return 'Inbound';
+      case MessageDirection.outbound:
+        return 'Outbound';
+    }
+  }
+  
+  String get backendValue {
+    switch (this) {
+      case MessageDirection.inbound:
+        return 'inbound';
+      case MessageDirection.outbound:
+        return 'outbound';
+    }
+  }
+  
+  static MessageDirection fromBackend(String value) {
+    switch (value) {
+      case 'inbound':
+        return MessageDirection.inbound;
+      case 'outbound':
+        return MessageDirection.outbound;
+      default:
+        return MessageDirection.inbound;
+    }
+  }
+  
+  /// Convert from isInbound bool (backward compatibility)
+  static MessageDirection fromBool(bool isInbound) {
+    return isInbound ? MessageDirection.inbound : MessageDirection.outbound;
+  }
+  
+  /// Convert to isInbound bool (backward compatibility)
+  bool get isInbound => this == MessageDirection.inbound;
 }
 
 /// Missed Call model
@@ -766,6 +902,38 @@ extension MessageChannelExtension on MessageChannel {
         return 'Facebook';
       case MessageChannel.instagram:
         return 'Instagram';
+    }
+  }
+  
+  String get backendValue {
+    switch (this) {
+      case MessageChannel.sms:
+        return 'sms';
+      case MessageChannel.whatsapp:
+        return 'whatsapp';
+      case MessageChannel.email:
+        return 'email';
+      case MessageChannel.facebook:
+        return 'facebook';
+      case MessageChannel.instagram:
+        return 'instagram';
+    }
+  }
+  
+  static MessageChannel fromBackend(String value) {
+    switch (value) {
+      case 'sms':
+        return MessageChannel.sms;
+      case 'whatsapp':
+        return MessageChannel.whatsapp;
+      case 'email':
+        return MessageChannel.email;
+      case 'facebook':
+        return MessageChannel.facebook;
+      case 'instagram':
+        return MessageChannel.instagram;
+      default:
+        return MessageChannel.sms;
     }
   }
 }
@@ -884,11 +1052,57 @@ extension MockMessagesScheduled on MockMessages {
   }
 }
 
-/// Message status
+/// Message status - Matches backend enum: sent/delivered/read/failed
 enum MessageStatus {
-  sending,
+  sending, // Frontend only (maps to 'sent' in backend)
   sent,
   delivered,
   read,
   failed,
+}
+
+extension MessageStatusExtension on MessageStatus {
+  String get displayName {
+    switch (this) {
+      case MessageStatus.sending:
+        return 'Sending';
+      case MessageStatus.sent:
+        return 'Sent';
+      case MessageStatus.delivered:
+        return 'Delivered';
+      case MessageStatus.read:
+        return 'Read';
+      case MessageStatus.failed:
+        return 'Failed';
+    }
+  }
+  
+  String get backendValue {
+    switch (this) {
+      case MessageStatus.sending:
+      case MessageStatus.sent:
+        return 'sent';
+      case MessageStatus.delivered:
+        return 'delivered';
+      case MessageStatus.read:
+        return 'read';
+      case MessageStatus.failed:
+        return 'failed';
+    }
+  }
+  
+  static MessageStatus fromBackend(String value) {
+    switch (value) {
+      case 'sent':
+        return MessageStatus.sent;
+      case 'delivered':
+        return MessageStatus.delivered;
+      case 'read':
+        return MessageStatus.read;
+      case 'failed':
+        return MessageStatus.failed;
+      default:
+        return MessageStatus.sent;
+    }
+  }
 }

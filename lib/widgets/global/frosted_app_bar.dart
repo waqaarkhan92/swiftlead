@@ -71,20 +71,23 @@ class FrostedAppBar extends StatelessWidget implements PreferredSizeWidget {
             actions: [
               if (profileIcon != null) profileIcon!,
               if (notificationBadgeCount != null && notificationBadgeCount! > 0)
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.notifications_outlined),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const NotificationsScreen(),
-                          ),
-                        );
-                      },
-                    ),
+                Semantics(
+                  label: 'Notifications',
+                  button: true,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.notifications_outlined),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NotificationsScreen(),
+                            ),
+                          );
+                        },
+                      ),
                     Positioned(
                       right: 8,
                       top: 8,
@@ -111,6 +114,7 @@ class FrostedAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ],
                 ),
+              ),
               if (actions != null) ...actions!,
             ],
             flexibleSpace: flexibleSpace,

@@ -17,6 +17,12 @@ class MoneyFilterSheet {
       'status': initialFilters?['status'] ?? 'All',
       'dateRange': initialFilters?['dateRange'] ?? 'All',
     };
+    
+    // Count active filters for button label
+    int activeFilterCount = 0;
+    if (filters['type'] != 'All') activeFilterCount++;
+    if (filters['status'] != 'All') activeFilterCount++;
+    if (filters['dateRange'] != 'All') activeFilterCount++;
 
     return await SwiftleadBottomSheet.show<Map<String, dynamic>>(
       context: context,
@@ -140,7 +146,9 @@ class MoneyFilterSheet {
                 const SizedBox(width: SwiftleadTokens.spaceM),
                 Expanded(
                   child: PrimaryButton(
-                    label: 'Apply Filters',
+                    label: activeFilterCount > 0 
+                        ? 'Apply ($activeFilterCount)'
+                        : 'Apply Filters',
                     onPressed: () => Navigator.pop(context, filters),
                     icon: Icons.check,
                   ),

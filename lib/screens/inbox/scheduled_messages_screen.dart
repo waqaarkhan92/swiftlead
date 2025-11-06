@@ -268,7 +268,7 @@ class _ScheduledMessagesScreenState extends State<ScheduledMessagesScreen> {
                     value: 'edit',
                     child: Builder(
                       builder: (context) => Row(
-                        children: [
+                      children: [
                           const Icon(Icons.edit, size: 18),
                           const SizedBox(width: 8),
                           Text(
@@ -277,15 +277,15 @@ class _ScheduledMessagesScreenState extends State<ScheduledMessagesScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                        ],
-                      ),
+                      ],
                     ),
+                  ),
                   ),
                   PopupMenuItem(
                     value: 'cancel',
                     child: Builder(
                       builder: (context) => Row(
-                        children: [
+                      children: [
                           const Icon(Icons.cancel_outlined, size: 18),
                           const SizedBox(width: 8),
                           Text(
@@ -294,7 +294,7 @@ class _ScheduledMessagesScreenState extends State<ScheduledMessagesScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                        ],
+                      ],
                       ),
                     ),
                   ),
@@ -303,7 +303,7 @@ class _ScheduledMessagesScreenState extends State<ScheduledMessagesScreen> {
                     value: 'delete',
                     child: Builder(
                       builder: (context) => Row(
-                        children: [
+                      children: [
                           const Icon(Icons.delete_outline, size: 18, color: Color(SwiftleadTokens.errorRed)),
                           const SizedBox(width: 8),
                           Text(
@@ -313,7 +313,7 @@ class _ScheduledMessagesScreenState extends State<ScheduledMessagesScreen> {
                               color: const Color(SwiftleadTokens.errorRed),
                             ),
                           ),
-                        ],
+                      ],
                       ),
                     ),
                   ),

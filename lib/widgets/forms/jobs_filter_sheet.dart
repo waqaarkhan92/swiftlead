@@ -40,7 +40,8 @@ class JobsFilterSheet {
               runSpacing: SwiftleadTokens.spaceS,
               children: [
                 'All',
-                'Scheduled',
+                'Proposed',
+                'Booked',
                 'In Progress',
                 'Completed',
                 'Cancelled',

@@ -10,9 +10,12 @@ class MockContacts {
   static final List<Contact> _contacts = [
     Contact(
       id: '1',
-      name: 'John Smith',
+      orgId: 'org_1',
+      firstName: 'John',
+      lastName: 'Smith',
       email: 'john.smith@example.com',
       phone: '+44 7700 900123',
+      address: '123 High Street, London SW1A 1AA',
       company: 'Smith & Sons Ltd',
       avatarUrl: null,
       stage: ContactStage.customer,
@@ -24,9 +27,12 @@ class MockContacts {
     ),
     Contact(
       id: '2',
-      name: 'Sarah Williams',
+      orgId: 'org_1',
+      firstName: 'Sarah',
+      lastName: 'Williams',
       email: 'sarah.williams@example.com',
       phone: '+44 7700 900456',
+      address: '456 Park Lane, London W1K 7AB',
       company: null,
       avatarUrl: null,
       stage: ContactStage.prospect,
@@ -38,9 +44,12 @@ class MockContacts {
     ),
     Contact(
       id: '3',
-      name: 'Mike Johnson',
+      orgId: 'org_1',
+      firstName: 'Mike',
+      lastName: 'Johnson',
       email: 'mike.j@example.com',
       phone: '+44 7700 900789',
+      address: '789 Victoria Road, London SE1 9SG',
       company: 'Johnson Properties',
       avatarUrl: null,
       stage: ContactStage.customer,
@@ -52,9 +61,12 @@ class MockContacts {
     ),
     Contact(
       id: '4',
-      name: 'Emily Chen',
+      orgId: 'org_1',
+      firstName: 'Emily',
+      lastName: 'Chen',
       email: 'emily.chen@example.com',
       phone: '+44 7700 900321',
+      address: '654 Baker Street, London NW1 6XE',
       company: null,
       avatarUrl: null,
       stage: ContactStage.lead,
@@ -66,9 +78,12 @@ class MockContacts {
     ),
     Contact(
       id: '5',
-      name: 'David Brown',
+      orgId: 'org_1',
+      firstName: 'David',
+      lastName: 'Brown',
       email: 'david.brown@example.com',
       phone: '+44 7700 900654',
+      address: '321 Commercial Street, London E1 6LP',
       company: 'Brown Construction',
       avatarUrl: null,
       stage: ContactStage.repeatCustomer,
@@ -98,11 +113,14 @@ class MockContacts {
   /// Search contacts
   static Future<List<Contact>> search(String query) async {
     await simulateDelay();
+    final queryLower = query.toLowerCase();
     final results = _contacts.where((c) =>
-        c.name.toLowerCase().contains(query.toLowerCase()) ||
-        (c.email?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
+        c.name.toLowerCase().contains(queryLower) ||
+        c.firstName.toLowerCase().contains(queryLower) ||
+        c.lastName.toLowerCase().contains(queryLower) ||
+        (c.email?.toLowerCase().contains(queryLower) ?? false) ||
         (c.phone?.contains(query) ?? false) ||
-        (c.company?.toLowerCase().contains(query.toLowerCase()) ?? false)).toList();
+        (c.company?.toLowerCase().contains(queryLower) ?? false)).toList();
     logMockOperation('Searched contacts for "$query": ${results.length} results');
     return results;
   }
@@ -165,9 +183,12 @@ class MockContacts {
       final oldStage = contact.stage;
       _contacts[contactIndex] = Contact(
         id: contact.id,
-        name: contact.name,
+        orgId: contact.orgId,
+        firstName: contact.firstName,
+        lastName: contact.lastName,
         email: contact.email,
         phone: contact.phone,
+        address: contact.address,
         company: contact.company,
         avatarUrl: contact.avatarUrl,
         stage: newStage,
@@ -269,35 +290,94 @@ class MockContacts {
   }
 }
 
-/// Contact model
+/// Contact model - Matches backend `contacts` table schema
 class Contact {
+  // Primary keys
   final String id;
-  final String name;
+  final String? orgId; // Required for backend RLS - nullable for backward compatibility
+  
+  // Core fields
+  final String firstName; // Backend: first_name
+  final String lastName; // Backend: last_name
   final String? email;
   final String? phone;
+  final String? address; // Backend: address
   final String? company;
-  final String? avatarUrl;
   final ContactStage stage;
-  final int score;
-  final String? source;
-  final List<String> tags;
+  final List<String> tags; // Backend: tags (text[])
+  final Map<String, dynamic>? customFields; // Backend: custom_fields (jsonb nullable)
+  
+  // Timestamps
   final DateTime createdAt;
-  final DateTime? lastContactedAt;
+  final DateTime? updatedAt; // Backend: updated_at
+  
+  // Denormalized/calculated fields (for UI convenience, not in backend)
+  final String? avatarUrl; // May be in separate table or storage
+  final int score; // Calculated field
+  final String? source; // May be in message_threads.lead_source
+  final DateTime? lastContactedAt; // Calculated field
+  
+  // Backward compatibility: computed property
+  String get name => '$firstName $lastName'.trim();
 
   Contact({
     required this.id,
-    required this.name,
+    this.orgId,
+    required this.firstName,
+    required this.lastName,
     this.email,
     this.phone,
+    this.address,
     this.company,
-    this.avatarUrl,
     required this.stage,
-    required this.score,
-    this.source,
     this.tags = const [],
+    this.customFields,
     required this.createdAt,
+    this.updatedAt,
+    // Denormalized/backward compatibility
+    this.avatarUrl,
+    this.score = 0,
+    this.source,
     this.lastContactedAt,
   });
+  
+  /// Create from backend JSON
+  factory Contact.fromJson(Map<String, dynamic> json) {
+    return Contact(
+      id: json['id'] as String,
+      orgId: json['org_id'] as String?,
+      firstName: json['first_name'] as String,
+      lastName: json['last_name'] as String,
+      email: json['email'] as String?,
+      phone: json['phone'] as String?,
+      address: json['address'] as String?,
+      company: json['company'] as String?,
+      stage: ContactStageExtension.fromBackend(json['stage'] as String),
+      tags: (json['tags'] as List?)?.cast<String>() ?? [],
+      customFields: json['custom_fields'] as Map<String, dynamic>?,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at'] as String) : null,
+    );
+  }
+  
+  /// Convert to backend JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'org_id': orgId,
+      'first_name': firstName,
+      'last_name': lastName,
+      'email': email,
+      'phone': phone,
+      'address': address,
+      'company': company,
+      'stage': stage.name,
+      'tags': tags,
+      'custom_fields': customFields,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+    };
+  }
 }
 
 /// Contact lifecycle stages
@@ -325,6 +405,26 @@ extension ContactStageExtension on ContactStage {
         return 'Advocate';
       case ContactStage.inactive:
         return 'Inactive';
+    }
+  }
+  
+  /// Create from backend enum string
+  static ContactStage fromBackend(String value) {
+    switch (value) {
+      case 'lead':
+        return ContactStage.lead;
+      case 'prospect':
+        return ContactStage.prospect;
+      case 'customer':
+        return ContactStage.customer;
+      case 'repeat_customer':
+        return ContactStage.repeatCustomer;
+      case 'advocate':
+        return ContactStage.advocate;
+      case 'inactive':
+        return ContactStage.inactive;
+      default:
+        return ContactStage.lead;
     }
   }
 }

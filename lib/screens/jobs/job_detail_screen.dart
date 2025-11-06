@@ -6,7 +6,7 @@ import '../../widgets/components/date_chip.dart';
 import '../../widgets/components/media_thumbnail.dart';
 import '../../widgets/components/media_preview_modal.dart';
 import '../../widgets/global/frosted_container.dart';
-import '../../widgets/components/segmented_control.dart';
+// SegmentedControl import removed - no longer using tabs
 import '../../widgets/global/primary_button.dart';
 import '../../widgets/global/empty_state_card.dart';
 import '../../widgets/global/bottom_sheet.dart';
@@ -16,6 +16,7 @@ import '../../widgets/forms/media_upload_sheet.dart';
 import '../../widgets/forms/custom_field_editor_sheet.dart';
 import '../../widgets/global/confirmation_dialog.dart';
 import '../../widgets/components/chase_history_timeline.dart';
+import '../../widgets/components/smart_collapsible_section.dart';
 import '../../widgets/global/info_banner.dart';
 import '../../widgets/global/toast.dart';
 import '../../widgets/global/progress_bar.dart';
@@ -48,10 +49,6 @@ class JobDetailScreen extends StatefulWidget {
 }
 
 class _JobDetailScreenState extends State<JobDetailScreen> {
-  int _selectedTabIndex = 0;
-  final List<String> _primaryTabs = ['Timeline', 'Details', 'Notes'];
-  final List<String> _moreOptions = ['Messages', 'Media', 'Chasers'];
-  String? _selectedMoreOption;
   Job? _job;
   bool _isLoading = true;
   String? _error;
@@ -90,6 +87,29 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     if (difference.inDays == 1) return 'Tomorrow';
     if (difference.inDays > 0) return '${difference.inDays} days';
     return 'Overdue';
+  }
+
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0.0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          )),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
   }
 
   Future<void> _loadJob() async {
@@ -134,16 +154,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => CreateEditQuoteScreen(
+      _createPageRoute(CreateEditQuoteScreen(
           initialData: {
             'clientName': _job!.contactName,
             'contactId': _job!.contactId,
             'notes': 'Quote for ${_job!.title}',
             'taxRate': 20.0,
           },
-        ),
-      ),
+        )),
     ).then((_) {
       Toast.show(
         context,
@@ -158,13 +176,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => InboxThreadScreen(
-          contactName: _job!.contactName,
+      _createPageRoute(InboxThreadScreen(
+          contactName: _job!.contactName ?? '',
           contactId: _job!.contactId,
           channel: 'SMS',
-        ),
-      ),
+        )),
     );
   }
 
@@ -172,8 +188,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     // Navigate to invoice creation with job context
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => CreateEditInvoiceScreen(
+      _createPageRoute(CreateEditInvoiceScreen(
           initialData: {
             'clientName': _job?.contactName ?? '',
             'jobId': widget.jobId,
@@ -182,8 +197,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             'notes': 'Invoice for ${widget.jobTitle}',
             'contactId': _job?.contactId,
           },
-        ),
-      ),
+        )),
     );
   }
 
@@ -342,20 +356,25 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
+          Semantics(
+            label: 'Edit job',
+            button: true,
+            child: IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => CreateEditJobScreen(
-                    jobId: widget.jobId,
-                  ),
-                ),
+                _createPageRoute(CreateEditJobScreen(
+                  jobId: widget.jobId,
+                )),
               );
             },
+            ),
           ),
-          PopupMenuButton<String>(
+          Semantics(
+            label: 'More options',
+            button: true,
+            child: PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (value) {
               switch (value) {
@@ -443,12 +462,13 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 ),
               ),
             ],
+            ),
           ),
         ],
       ),
       body: Column(
         children: [
-          // Scrollable content section
+          // Single scrollable view with sections
           Expanded(
             child: SingleChildScrollView(
               child: Column(
@@ -456,13 +476,35 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 children: [
                   // JobSummaryCard - Key information at top
                   _buildJobSummaryCard(),
+                  const SizedBox(height: SwiftleadTokens.spaceL),
+                  
+                  // Timeline Section
+                  _buildTimelineSection(),
+                  const SizedBox(height: SwiftleadTokens.spaceL),
+                  
+                  // Details Section
+                  _buildDetailsSection(),
+                  const SizedBox(height: SwiftleadTokens.spaceL),
+                  
+                  // Messages Section
+                  _buildMessagesSection(),
+                  const SizedBox(height: SwiftleadTokens.spaceL),
+                  
+                  // Media Section
+                  _buildMediaSection(),
+                  const SizedBox(height: SwiftleadTokens.spaceL),
+                  
+                  // Notes Section
+                  _buildNotesSection(),
+                  const SizedBox(height: SwiftleadTokens.spaceL),
+                  
+                  // Chasers Section
+                  _buildChasersSection(),
+                  const SizedBox(height: SwiftleadTokens.spaceL),
                 ],
               ),
             ),
           ),
-          
-          // JobTabView - Horizontal tabs (fixed at bottom)
-          _buildJobTabView(),
           
           // iOS-style bottom toolbar (sticky at bottom)
           _buildBottomToolbar(),
@@ -473,7 +515,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
   Widget _buildJobSummaryCard() {
     return FrostedContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       margin: const EdgeInsets.all(SwiftleadTokens.spaceM),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -487,11 +529,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 height: 48,
                 decoration: BoxDecoration(
                   color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusButton),
                 ),
                 child: Center(
                   child: Text(
-                    _getInitials(_job!.contactName),
+                    _getInitials(_job!.contactName ?? ''),
                     style: const TextStyle(
                       color: Color(SwiftleadTokens.primaryTeal),
                       fontWeight: FontWeight.w600,
@@ -505,7 +547,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _job!.contactName,
+                      _job!.contactName ?? '',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -521,10 +563,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 icon: const Icon(Icons.phone),
                 onPressed: _handleCallClient,
               ),
-              IconButton(
-                icon: const Icon(Icons.message),
-                onPressed: _handleMessageClient,
-              ),
+              // Message button removed - available in bottom toolbar
               IconButton(
                 icon: const Icon(Icons.directions),
                 onPressed: _handleNavigateToAddress,
@@ -570,9 +609,9 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 'Progress',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: SwiftleadTokens.spaceXS),
               ClipRRect(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.2),
                 child: LinearProgressIndicator(
                   value: _job!.status == JobStatus.completed ? 1.0 : (_job!.status == JobStatus.inProgress ? 0.75 : 0.25),
                   backgroundColor: Colors.black.withOpacity(0.1),
@@ -582,7 +621,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   minHeight: 8,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: SwiftleadTokens.spaceXS),
               Text(
                 '${_job!.status == JobStatus.completed ? 100 : (_job!.status == JobStatus.inProgress ? 75 : 25)}% Complete',
                 style: Theme.of(context).textTheme.bodySmall,
@@ -646,20 +685,32 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _ToolbarAction(
-                    icon: Icons.message,
-                    label: 'Message',
-                    onTap: _handleMessageClient,
+                  Semantics(
+                    label: 'Message client',
+                    button: true,
+                    child: _ToolbarAction(
+                      icon: Icons.message,
+                      label: 'Message',
+                      onTap: _handleMessageClient,
+                    ),
                   ),
-                  _ToolbarAction(
-                    icon: Icons.request_quote,
-                    label: 'Quote',
-                    onTap: _handleCreateQuoteFromJob,
+                  Semantics(
+                    label: 'Create quote',
+                    button: true,
+                    child: _ToolbarAction(
+                      icon: Icons.request_quote,
+                      label: 'Quote',
+                      onTap: _handleCreateQuoteFromJob,
+                    ),
                   ),
-                  _ToolbarAction(
-                    icon: Icons.receipt,
-                    label: 'Invoice',
-                    onTap: _handleSendInvoiceFromJob,
+                  Semantics(
+                    label: 'Send invoice',
+                    button: true,
+                    child: _ToolbarAction(
+                      icon: Icons.receipt,
+                      label: 'Invoice',
+                      onTap: _handleSendInvoiceFromJob,
+                    ),
                   ),
                 ],
               ),
@@ -702,7 +753,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 size: 24,
                 color: const Color(SwiftleadTokens.primaryTeal),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: SwiftleadTokens.spaceXS),
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -717,121 +768,26 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     );
   }
 
-  Widget _buildJobTabView() {
-    return Expanded(
-      child: Column(
-        children: [
-          // Primary tabs + More dropdown
-          Padding(
-            padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-            child: Row(
-              children: [
-                // Primary tabs (Timeline, Details, Notes)
-                Expanded(
-                  child: SegmentedControl(
-                    segments: _primaryTabs,
-                    selectedIndex: _selectedTabIndex,
-                    onSelectionChanged: (index) {
-                      setState(() {
-                        _selectedTabIndex = index;
-                        _selectedMoreOption = null; // Clear more option when selecting primary tab
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: SwiftleadTokens.spaceS),
-                // More dropdown menu
-                PopupMenuButton<String>(
-                  icon: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'More',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: _selectedMoreOption != null 
-                            ? const Color(SwiftleadTokens.primaryTeal)
-                            : null,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        _selectedMoreOption != null 
-                          ? Icons.arrow_drop_up 
-                          : Icons.arrow_drop_down,
-                        size: 20,
-                      ),
-                    ],
-                  ),
-                  onSelected: (value) {
-                    setState(() {
-                      _selectedMoreOption = value;
-                      // Map More options to indices for IndexedStack
-                      if (value == 'Messages') {
-                        _selectedTabIndex = 3;
-                      } else if (value == 'Media') {
-                        _selectedTabIndex = 4;
-                      } else if (value == 'Chasers') {
-                        _selectedTabIndex = 5;
-                      }
-                    });
-                  },
-                  itemBuilder: (context) => _moreOptions.map((option) {
-                    return PopupMenuItem(
-                      value: option,
-                      child: Row(
-                        children: [
-                          if (_selectedMoreOption == option)
-                            const Icon(
-                              Icons.check,
-                              size: 18,
-                              color: Color(SwiftleadTokens.primaryTeal),
-                            )
-                          else
-                            const SizedBox(width: 18),
-                          const SizedBox(width: SwiftleadTokens.spaceS),
-                          Text(
-                            option,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-          ),
-          
-          // Tab content - Use IndexedStack
-          Expanded(
-            child: IndexedStack(
-              index: _selectedTabIndex,
-              children: [
-                _buildTimelineTab(),
-                _buildDetailsTab(),
-                _buildNotesTab(),
-                _buildMessagesTab(),
-                _buildMediaTab(),
-                _buildChasersTab(),
-              ],
-            ),
-          ),
-        ],
+  // Section-based methods for single scrollable view (replaces tab view)
+  
+  Widget _buildTimelineSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+      child: SmartCollapsibleSection(
+        title: 'Timeline',
+        initiallyExpanded: true,
+        child: _buildTimelineContent(),
       ),
     );
   }
 
-  Widget _buildTimelineTab() {
-    // Show loading state if job not loaded yet
+  Widget _buildTimelineContent() {
     if (_isLoading || _job == null) {
       return const Center(
         child: CircularProgressIndicator(),
       );
     }
     
-    // Generate timeline events from job data
     final timelineEvents = _generateTimelineEvents();
 
     if (timelineEvents.isEmpty) {
@@ -842,21 +798,465 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       );
     }
 
-    return ListView(
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
+    return Column(
+      children: timelineEvents.take(5).map((event) => Padding(
+        padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+        child: _TimelineItem(
+          icon: event.eventType.icon,
+          title: event.summary,
+          subtitle: event.eventId != null ? 'ID: ${event.eventId}' : event.eventType.displayName,
+          timestamp: event.timestamp,
+          user: event.userName ?? 'System',
+        ),
+      )).toList(),
+    );
+  }
+
+  Widget _buildDetailsSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+      child: SmartCollapsibleSection(
+        title: 'Details',
+        initiallyExpanded: true,
+        child: _buildDetailsContent(),
+      ),
+    );
+  }
+
+  Widget _buildDetailsContent() {
+    return Column(
       children: [
-        ...timelineEvents.map((event) => Padding(
-          padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
-          child: _TimelineItem(
-            icon: event.eventType.icon,
-            title: event.summary,
-            subtitle: event.eventId != null ? 'ID: ${event.eventId}' : event.eventType.displayName,
-            timestamp: event.timestamp,
-            user: event.userName ?? 'System',
-          ),
-        )),
+        _buildServiceDetailsContent(),
+        const SizedBox(height: SwiftleadTokens.spaceM),
+        _buildCustomFieldsContent(),
+        const SizedBox(height: SwiftleadTokens.spaceM),
+        _buildTeamAssignmentContent(),
       ],
     );
+  }
+
+  Widget _buildServiceDetailsContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Service Details',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceS),
+        _DetailRow(
+          label: 'Service Type',
+          value: 'Kitchen Sink Repair',
+        ),
+        const Divider(),
+        _DetailRow(
+          label: 'Priority',
+          value: 'High',
+        ),
+        const Divider(),
+        _DetailRow(
+          label: 'Estimated Duration',
+          value: '2 hours',
+        ),
+        const Divider(),
+        _DetailRow(
+          label: 'Estimated Cost',
+          value: '£300',
+        ),
+        const Divider(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: _DetailRow(
+                label: 'Location',
+                value: _job?.address ?? '123 Main Street, London',
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.map_outlined),
+              onPressed: _handleNavigateToAddress,
+              tooltip: 'Open in maps',
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCustomFieldsContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Custom Fields',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.add, size: 20),
+              onPressed: () async {
+                final field = await CustomFieldEditorSheet.show(
+                  context: context,
+                );
+                if (field != null && mounted) {
+                  setState(() {
+                    _customFields[field['name'] ?? ''] = field['value'] ?? '';
+                  });
+                  Toast.show(
+                    context,
+                    message: 'Custom field added',
+                    type: ToastType.success,
+                  );
+                }
+              },
+              tooltip: 'Add custom field',
+            ),
+          ],
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceS),
+        if (_customFields.isEmpty)
+          Text(
+            'No custom fields added yet. Tap + to add one.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).brightness == Brightness.light
+                  ? Colors.black.withOpacity(0.6)
+                  : Colors.white.withOpacity(0.6),
+            ),
+          )
+        else
+          ...(_customFields.entries.map((entry) {
+            return Column(
+              children: [
+                _CustomFieldRow(
+                  label: entry.key,
+                  value: entry.value,
+                ),
+                if (entry.key != _customFields.keys.last) const Divider(),
+              ],
+            );
+          }).toList()),
+        // Show example fields if no custom fields exist (for demo)
+        if (_customFields.isEmpty) ...[
+          _CustomFieldRow(
+            label: 'Property Type',
+            value: 'Residential',
+          ),
+          const Divider(),
+          _CustomFieldRow(
+            label: 'Warranty Period',
+            value: '12 months',
+          ),
+          const Divider(),
+          _CustomFieldRow(
+            label: 'License Required',
+            value: 'Yes',
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildTeamAssignmentContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Team Assignment',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceS),
+        ListTile(
+          leading: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Text(
+                'SW',
+                style: TextStyle(
+                  color: Color(SwiftleadTokens.primaryTeal),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          title: const Text('Sarah Williams'),
+          subtitle: const Text('Plumber'),
+          trailing: const Icon(Icons.chevron_right),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMessagesSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+      child: SmartCollapsibleSection(
+        title: 'Messages',
+        initiallyExpanded: true,
+        child: _buildMessagesContent(),
+      ),
+    );
+  }
+
+  Widget _buildMessagesContent() {
+    final hasMessages = true; // Replace with actual data check
+
+    if (!hasMessages) {
+      return EmptyStateCard(
+        title: 'No messages yet',
+        description: 'Messages related to this job will appear here.',
+        icon: Icons.message_outlined,
+        actionLabel: 'Send Message',
+        onAction: () {
+          _handleMessageClient();
+        },
+      );
+    }
+
+    return Column(
+      children: List.generate(3, (index) => Padding(
+        padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
+        child: _MessageCard(
+          channel: ['WhatsApp', 'SMS', 'Email'][index],
+          preview: _getMessagePreview(index),
+          timestamp: DateTime.now().subtract(Duration(hours: index * 6)),
+          direction: index % 2 == 0 ? 'inbound' : 'outbound',
+          onTap: () {
+            // Navigate to message thread
+          },
+        ),
+      )),
+    );
+  }
+
+  String _getMessagePreview(int index) {
+    final previews = [
+      'Hi, when can you schedule the repair?',
+      'We can come tomorrow at 2pm. Does that work?',
+      'Perfect! See you then.',
+    ];
+    return previews[index % previews.length];
+  }
+
+  Widget _buildMediaSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+      child: Column(
+        children: [
+          SmartCollapsibleSection(
+            title: 'Media',
+            initiallyExpanded: true,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () => _showMediaUploadSheet(context),
+                  ),
+                ),
+                _buildMediaContent(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMediaContent() {
+    final hasMedia = true; // Replace with actual data check
+
+    if (!hasMedia) {
+      return EmptyStateCard(
+        title: 'No media uploaded',
+        description: 'Add photos and documents for this job.',
+        icon: Icons.photo_library_outlined,
+        actionLabel: 'Add Media',
+        onAction: () => _showMediaUploadSheet(context),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Before',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceS),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: SwiftleadTokens.spaceS,
+            mainAxisSpacing: SwiftleadTokens.spaceS,
+          ),
+          itemCount: 4, // Before photos
+          itemBuilder: (context, index) => MediaThumbnail(
+            label: 'Before ${index + 1}',
+            onTap: () {
+              if (index < 4) {
+                _showBeforeAfterSlider(context, index);
+              } else {
+                MediaPreviewModal.show(
+                  context: context,
+                  mediaUrl: 'https://picsum.photos/800/600?random=before$index',
+                  mediaType: 'image',
+                );
+              }
+            },
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+        Text(
+          'After',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceS),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: SwiftleadTokens.spaceS,
+            mainAxisSpacing: SwiftleadTokens.spaceS,
+          ),
+          itemCount: 5, // After photos
+          itemBuilder: (context, index) => MediaThumbnail(
+            label: 'After ${index + 1}',
+            onTap: () {
+              if (index < 4) {
+                _showBeforeAfterSlider(context, index);
+              } else {
+                MediaPreviewModal.show(
+                  context: context,
+                  mediaUrl: 'https://picsum.photos/800/600?random=after$index',
+                  mediaType: 'image',
+                );
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNotesSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+      child: Column(
+        children: [
+          SmartCollapsibleSection(
+            title: 'Notes',
+            initiallyExpanded: true,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () => _showAddNoteSheet(context),
+                  ),
+                ),
+                _buildNotesContent(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotesContent() {
+    final hasNotes = false; // Replace with actual data check
+
+    if (!hasNotes) {
+      return EmptyStateCard(
+        title: 'No notes yet',
+        description: 'Add notes to track important information about this job.',
+        icon: Icons.note_outlined,
+        actionLabel: 'Add Note',
+        onAction: () {
+          _showAddNoteSheet(context);
+        },
+      );
+    }
+
+    return const SizedBox.shrink(); // Notes list would go here
+  }
+
+  Widget _buildChasersSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SwiftleadTokens.spaceM),
+      child: SmartCollapsibleSection(
+        title: 'Chasers',
+        initiallyExpanded: true,
+        child: _buildChasersContent(),
+      ),
+    );
+  }
+
+  Widget _buildChasersContent() {
+    final chaseRecords = [
+      ChaseRecord(
+        message: 'Quote chaser sent via email (T+1 day)',
+        timestamp: DateTime.now().subtract(const Duration(days: 2)),
+        status: ChaseStatus.sent,
+        channel: ChaseChannel.email,
+      ),
+      ChaseRecord(
+        message: 'Quote chaser sent via SMS (T+3 days)',
+        timestamp: DateTime.now().subtract(const Duration(days: 1)),
+        status: ChaseStatus.delivered,
+        channel: ChaseChannel.sms,
+      ),
+      ChaseRecord(
+        message: 'Quote chaser scheduled (T+7 days)',
+        timestamp: DateTime.now().add(const Duration(days: 4)),
+        status: ChaseStatus.sent,
+        channel: ChaseChannel.email,
+      ),
+    ];
+
+    if (chaseRecords.isEmpty) {
+      return Column(
+        children: [
+          EmptyStateCard(
+            title: 'No chasers scheduled',
+            description: 'Auto-follow-ups help close deals',
+            icon: Icons.schedule,
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          InfoBanner(
+            message: 'Auto-follow-ups help close deals',
+            type: InfoBannerType.info,
+          ),
+        ],
+      );
+    }
+
+    return ChaseHistoryTimeline(chaseRecords: chaseRecords);
   }
 
   List<JobTimelineEvent> _generateTimelineEvents() {
@@ -934,138 +1334,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     return events;
   }
 
-  Widget _buildNotesTab() {
-    final hasNotes = false; // Replace with actual data check
-
-    if (!hasNotes) {
-      return EmptyStateCard(
-        title: 'No notes yet',
-        description: 'Add notes to track important information about this job.',
-        icon: Icons.note_outlined,
-        actionLabel: 'Add Note',
-        onAction: () {
-          _showAddNoteSheet(context);
-        },
-      );
-    }
-
-    return ListView(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Job Notes',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () => _showAddNoteSheet(context),
-            ),
-          ],
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceM),
-        // Notes list would go here
-        FrostedContainer(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'AJ',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Color(SwiftleadTokens.primaryTeal),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: SwiftleadTokens.spaceS),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Alex Johnson',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          '2 hours ago',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.more_vert, size: 18),
-                    onPressed: () {
-                      // Show options menu for timeline event
-                      showModalBottomSheet(
-                        context: context,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).cardTheme.color,
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(20),
-                            ),
-                          ),
-                          child: SafeArea(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ListTile(
-                                  leading: const Icon(Icons.edit_outlined),
-                                  title: const Text('Edit Note'),
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    // TODO: Open edit note sheet
-                                  },
-                                ),
-                                ListTile(
-                                  leading: const Icon(Icons.delete_outline),
-                                  title: const Text('Delete Note'),
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    // TODO: Delete note
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: SwiftleadTokens.spaceS),
-              Text(
-                'Client requested that we come in the morning. Will schedule for 9am.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  // Old tab methods removed - using section-based layout instead
 
   void _showAddNoteSheet(BuildContext context) {
     final TextEditingController noteController = TextEditingController();
@@ -1286,488 +1555,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     );
   }
 
-  Widget _buildDetailsTab() {
-    return ListView(
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-      children: [
-        FrostedContainer(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Service Details',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: SwiftleadTokens.spaceM),
-              _DetailRow(
-                label: 'Service Type',
-                value: 'Kitchen Sink Repair',
-              ),
-              const Divider(),
-              _DetailRow(
-                label: 'Priority',
-                value: 'High',
-              ),
-              const Divider(),
-              _DetailRow(
-                label: 'Estimated Duration',
-                value: '2 hours',
-              ),
-              const Divider(),
-              _DetailRow(
-                label: 'Estimated Cost',
-                value: '£300',
-              ),
-              const Divider(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: _DetailRow(
-                      label: 'Location',
-                      value: _job?.address ?? '123 Main Street, London',
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.map_outlined),
-                    onPressed: _handleNavigateToAddress,
-                    tooltip: 'Open in maps',
-                  ),
-                ],
-              ),
-              // Map Preview (Inline)
-              if (_job?.address.isNotEmpty ?? false) ...[
-                const SizedBox(height: SwiftleadTokens.spaceS),
-                GestureDetector(
-                  onTap: _handleNavigateToAddress,
-                  child: Container(
-                    height: 150,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
-                      color: Colors.grey[200],
-                    ),
-                    child: Stack(
-                      children: [
-                        // Static map preview (using placeholder - would use Google Maps Static API in production)
-                        Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.map,
-                                size: 48,
-                                color: Colors.grey[400],
-                              ),
-                              const SizedBox(height: SwiftleadTokens.spaceS),
-                              Text(
-                                'Map Preview',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                              Text(
-                                'Tap to open in Maps',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  fontSize: 10,
-                                  color: Colors.grey[500],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Note: In production, this would use Google Maps Static API
-                        // Example: https://maps.googleapis.com/maps/api/staticmap?center=${address}&zoom=15&size=400x150&key=API_KEY
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              'Static Map',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceM),
-        FrostedContainer(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Description',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  // Rich Text Formatting Buttons (Note: Requires rich text editor package)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.format_bold, size: 18),
-                        onPressed: () {
-                          Toast.show(
-                            context,
-                            message: 'Rich text formatting requires flutter_quill package',
-                            type: ToastType.info,
-                          );
-                        },
-                        tooltip: 'Bold (requires rich text editor)',
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.format_italic, size: 18),
-                        onPressed: () {
-                          Toast.show(
-                            context,
-                            message: 'Rich text formatting requires flutter_quill package',
-                            type: ToastType.info,
-                          );
-                        },
-                        tooltip: 'Italic (requires rich text editor)',
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.link, size: 18),
-                        onPressed: () {
-                          Toast.show(
-                            context,
-                            message: 'Rich text formatting requires flutter_quill package',
-                            type: ToastType.info,
-                          );
-                        },
-                        tooltip: 'Add Link (requires rich text editor)',
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: SwiftleadTokens.spaceM),
-              Text(
-                'Kitchen sink is leaking from the base. Needs repair or replacement of faucet assembly.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceM),
-        // Custom Fields Section
-        FrostedContainer(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Custom Fields',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add, size: 20),
-                    onPressed: () async {
-                      final field = await CustomFieldEditorSheet.show(
-                        context: context,
-                      );
-                      if (field != null && mounted) {
-                        setState(() {
-                          // Add custom field to job
-                          _customFields[field['name'] ?? ''] = field['value'] ?? '';
-                        });
-                        Toast.show(
-                          context,
-                          message: 'Custom field added',
-                          type: ToastType.success,
-                        );
-                      }
-                    },
-                    tooltip: 'Add custom field',
-                  ),
-                ],
-              ),
-              const SizedBox(height: SwiftleadTokens.spaceM),
-              // Display custom fields
-              if (_customFields.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: SwiftleadTokens.spaceM),
-                  child: Text(
-                    'No custom fields added yet. Tap + to add one.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).brightness == Brightness.light
-                          ? Colors.black.withOpacity(0.6)
-                          : Colors.white.withOpacity(0.6),
-                    ),
-                  ),
-                )
-              else
-                ...(_customFields.entries.map((entry) {
-                  return Column(
-                    children: [
-                      _CustomFieldRow(
-                        label: entry.key,
-                        value: entry.value,
-                      ),
-                      if (entry.key != _customFields.keys.last) const Divider(),
-                    ],
-                  );
-                }).toList()),
-              // Show example fields if no custom fields exist (for demo)
-              if (_customFields.isEmpty) ...[
-                _CustomFieldRow(
-                  label: 'Property Type',
-                  value: 'Residential',
-                ),
-                const Divider(),
-                _CustomFieldRow(
-                  label: 'Warranty Period',
-                  value: '12 months',
-                ),
-                const Divider(),
-                _CustomFieldRow(
-                  label: 'License Required',
-                  value: 'Yes',
-                ),
-              ],
-            ],
-          ),
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceM),
-        FrostedContainer(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Team Assignment',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: SwiftleadTokens.spaceM),
-              ListTile(
-                leading: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'SW',
-                      style: TextStyle(
-                        color: Color(SwiftleadTokens.primaryTeal),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                title: const Text('Sarah Williams'),
-                subtitle: const Text('Plumber'),
-                trailing: const Icon(Icons.chevron_right),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMessagesTab() {
-    final hasMessages = true; // Replace with actual data check
-
-    if (!hasMessages) {
-      return EmptyStateCard(
-        title: 'No messages yet',
-        description: 'Messages related to this job will appear here.',
-        icon: Icons.message_outlined,
-        actionLabel: 'Send Message',
-        onAction: () {
-          // Open message composer
-        },
-      );
-    }
-
-    return ListView(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-      children: [
-        Text(
-          'Linked Messages',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceM),
-        ...List.generate(3, (index) => Padding(
-          padding: const EdgeInsets.only(bottom: SwiftleadTokens.spaceS),
-          child: _MessageCard(
-            channel: ['WhatsApp', 'SMS', 'Email'][index],
-            preview: _getMessagePreview(index),
-            timestamp: DateTime.now().subtract(Duration(hours: index * 6)),
-            direction: index % 2 == 0 ? 'inbound' : 'outbound',
-            onTap: () {
-              // Navigate to message thread
-            },
-          ),
-        )),
-      ],
-    );
-  }
-
-  String _getMessagePreview(int index) {
-    final previews = [
-      'Hi, when can you schedule the repair?',
-      'We can come tomorrow at 2pm. Does that work?',
-      'Perfect! See you then.',
-    ];
-    return previews[index % previews.length];
-  }
-
-  Widget _buildMediaTab() {
-    final hasMedia = true; // Replace with actual data check
-
-    if (!hasMedia) {
-      return EmptyStateCard(
-        title: 'No media uploaded',
-        description: 'Add photos and documents for this job.',
-        icon: Icons.photo_library_outlined,
-        actionLabel: 'Add Media',
-        onAction: () => _showMediaUploadSheet(context),
-      );
-    }
-
-    return ListView(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Media Gallery',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () => _showMediaUploadSheet(context),
-            ),
-          ],
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceM),
-        
-        // Before Section
-        Text(
-          'Before',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceS),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: SwiftleadTokens.spaceS,
-            mainAxisSpacing: SwiftleadTokens.spaceS,
-          ),
-          itemCount: 4, // Before photos
-          itemBuilder: (context, index) => MediaThumbnail(
-            label: 'Before ${index + 1}',
-            onTap: () {
-              // Show before/after comparison slider if both exist
-              if (index < 4) {
-                _showBeforeAfterSlider(context, index);
-              } else {
-                // Open full screen gallery
-                MediaPreviewModal.show(
-                  context: context,
-                  mediaUrl: 'https://picsum.photos/800/600?random=before$index',
-                  mediaType: 'image',
-                );
-              }
-            },
-          ),
-        ),
-        
-        const SizedBox(height: SwiftleadTokens.spaceL),
-        
-        // After Section
-        Text(
-          'After',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceS),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: SwiftleadTokens.spaceS,
-            mainAxisSpacing: SwiftleadTokens.spaceS,
-          ),
-          itemCount: 5, // After photos
-          itemBuilder: (context, index) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              MediaThumbnail(
-                label: 'After ${index + 1}',
-                onTap: () {
-                  // Show before/after comparison slider if both exist
-                  if (index < 4) {
-                    _showBeforeAfterSlider(context, index);
-                  } else {
-                    // Open full screen gallery
-                    MediaPreviewModal.show(
-                      context: context,
-                      mediaUrl: 'https://picsum.photos/800/600?random=after$index',
-                      mediaType: 'image',
-                    );
-                  }
-                },
-              ),
-              // Show timestamp/GPS info
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  '${DateTime.now().subtract(Duration(days: index)).toString().substring(0, 16)} • GPS: 51.5074, -0.1278',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  // Old tab methods removed - using section-based layout instead
 
   void _showMediaUploadSheet(BuildContext context) {
     MediaUploadSheet.show(
@@ -1880,57 +1668,6 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       ),
     );
   }
-
-  Widget _buildChasersTab() {
-    // Mock quote chaser records - according to spec: quote_chasers WHERE job_id
-    // Quote chasers are automated follow-ups sent at T+1, T+3, T+7 days after quote sent
-    final chaseRecords = [
-      ChaseRecord(
-        message: 'Quote chaser sent via email (T+1 day)',
-        timestamp: DateTime.now().subtract(const Duration(days: 2)),
-        status: ChaseStatus.sent,
-        channel: ChaseChannel.email,
-      ),
-      ChaseRecord(
-        message: 'Quote chaser sent via SMS (T+3 days)',
-        timestamp: DateTime.now().subtract(const Duration(days: 1)),
-        status: ChaseStatus.delivered,
-        channel: ChaseChannel.sms,
-      ),
-      ChaseRecord(
-        message: 'Quote chaser scheduled (T+7 days)',
-        timestamp: DateTime.now().add(const Duration(days: 4)),
-        status: ChaseStatus.sent,
-        channel: ChaseChannel.email,
-      ),
-    ];
-
-    return ListView(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-      children: [
-        // Empty state check - according to spec: "No chasers scheduled" + InfoBanner
-        if (chaseRecords.isEmpty)
-          Column(
-            children: [
-              EmptyStateCard(
-                title: 'No chasers scheduled',
-                description: 'Auto-follow-ups help close deals',
-                icon: Icons.schedule,
-              ),
-              const SizedBox(height: SwiftleadTokens.spaceM),
-              InfoBanner(
-                message: 'Auto-follow-ups help close deals',
-                type: InfoBannerType.info,
-              ),
-            ],
-          )
-        else
-          ChaseHistoryTimeline(chaseRecords: chaseRecords),
-      ],
-    );
-  }
 }
 
 class _TimelineItem extends StatelessWidget {
@@ -1963,7 +1700,7 @@ class _TimelineItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FrostedContainer(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1996,7 +1733,7 @@ class _TimelineItem extends StatelessWidget {
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: SwiftleadTokens.spaceXS),
                 Row(
                   children: [
                     Text(
@@ -2086,7 +1823,7 @@ class _MessageCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: FrostedContainer(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
         child: Row(
           children: [
             Container(
@@ -2096,7 +1833,7 @@ class _MessageCard extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                 color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.4),
               ),
               child: Text(
                 channel,
@@ -2118,7 +1855,7 @@ class _MessageCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: SwiftleadTokens.spaceXS),
                   Row(
                     children: [
                       Container(
@@ -2155,57 +1892,6 @@ class _MessageCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildChasersTab() {
-    // Mock quote chaser records - according to spec: quote_chasers WHERE job_id
-    // Quote chasers are automated follow-ups sent at T+1, T+3, T+7 days after quote sent
-    final chaseRecords = [
-      ChaseRecord(
-        message: 'Quote chaser sent via email (T+1 day)',
-        timestamp: DateTime.now().subtract(const Duration(days: 2)),
-        status: ChaseStatus.sent,
-        channel: ChaseChannel.email,
-      ),
-      ChaseRecord(
-        message: 'Quote chaser sent via SMS (T+3 days)',
-        timestamp: DateTime.now().subtract(const Duration(days: 1)),
-        status: ChaseStatus.delivered,
-        channel: ChaseChannel.sms,
-      ),
-      ChaseRecord(
-        message: 'Quote chaser scheduled (T+7 days)',
-        timestamp: DateTime.now().add(const Duration(days: 4)),
-        status: ChaseStatus.sent,
-        channel: ChaseChannel.email,
-      ),
-    ];
-
-    return ListView(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-      children: [
-        // Empty state check - according to spec: "No chasers scheduled" + InfoBanner
-        if (chaseRecords.isEmpty)
-          Column(
-            children: [
-              EmptyStateCard(
-                title: 'No chasers scheduled',
-                description: 'Auto-follow-ups help close deals',
-                icon: Icons.schedule,
-              ),
-              const SizedBox(height: SwiftleadTokens.spaceM),
-              InfoBanner(
-                message: 'Auto-follow-ups help close deals',
-                type: InfoBannerType.info,
-              ),
-            ],
-          )
-        else
-          ChaseHistoryTimeline(chaseRecords: chaseRecords),
-      ],
     );
   }
 }
@@ -2255,7 +1941,7 @@ class _CelebrationDialogState extends State<_CelebrationDialog>
           return Transform.scale(
             scale: _scaleAnimation.value,
             child: Container(
-              padding: const EdgeInsets.all(40),
+              padding: const EdgeInsets.all(SwiftleadTokens.spaceXXL),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
                 shape: BoxShape.circle,
@@ -2395,22 +2081,28 @@ class _BeforeAfterSliderModalState extends State<_BeforeAfterSliderModal> {
           alignment: Alignment.center,
           children: [
             // After image (background)
-            Image.network(
-              widget.afterImageUrl,
-              fit: BoxFit.contain,
-              width: double.infinity,
-              height: double.infinity,
+            Semantics(
+              label: 'After image showing completed work',
+              child: Image.network(
+                widget.afterImageUrl,
+                fit: BoxFit.contain,
+                width: double.infinity,
+                height: double.infinity,
+              ),
             ),
             // Before image (clipped based on slider)
             ClipRect(
               child: Align(
                 alignment: Alignment.centerLeft,
                 widthFactor: _sliderPosition,
-                child: Image.network(
-                  widget.beforeImageUrl,
-                  fit: BoxFit.contain,
-                  width: double.infinity,
-                  height: double.infinity,
+                child: Semantics(
+                  label: 'Before image showing work before completion',
+                  child: Image.network(
+                    widget.beforeImageUrl,
+                    fit: BoxFit.contain,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
                 ),
               ),
             ),

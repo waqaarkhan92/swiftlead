@@ -21,6 +21,29 @@ class _ContactImportWizardScreenState extends State<ContactImportWizardScreen> {
   bool _isProcessing = false;
   String _duplicateHandling = 'create_new'; // 'create_new', 'update_existing', 'skip'
 
+  // Smooth page route transitions
+  PageRoute _createPageRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0.0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          )),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,64 +76,93 @@ class _ContactImportWizardScreenState extends State<ContactImportWizardScreen> {
 
   Widget _buildStepIndicator() {
     return FrostedContainer(
-      padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
-      child: Row(
-        children: List.generate(_totalSteps, (index) {
-          final isActive = index == _currentStep;
-          final isCompleted = index < _currentStep;
-          
-          return Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: isCompleted || isActive
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Step ${_currentStep + 1} of $_totalSteps',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: SwiftleadTokens.spaceM),
+          Row(
+            children: List.generate(_totalSteps, (index) {
+              final isActive = index == _currentStep;
+              final isCompleted = index < _currentStep;
+              
+              return Expanded(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: isCompleted
+                                  ? const Color(SwiftleadTokens.successGreen)
+                                  : isActive
+                                      ? const Color(SwiftleadTokens.primaryTeal)
+                                      : Theme.of(context).brightness == Brightness.light
+                                          ? Colors.black.withOpacity(0.1)
+                                          : Colors.white.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: isCompleted
+                                  ? const Icon(Icons.check, color: Colors.white, size: 20)
+                                  : Text(
+                                      '${index + 1}',
+                                      style: TextStyle(
+                                        color: isActive ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color,
+                                        fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _getStepLabel(index),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                                  color: isActive 
+                                      ? const Color(SwiftleadTokens.primaryTeal)
+                                      : Theme.of(context).textTheme.bodySmall?.color,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (index < _totalSteps - 1)
+                      Expanded(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          height: 2,
+                          margin: const EdgeInsets.only(bottom: 24),
+                          color: index < _currentStep
                               ? const Color(SwiftleadTokens.primaryTeal)
                               : Theme.of(context).brightness == Brightness.light
                                   ? Colors.black.withOpacity(0.1)
                                   : Colors.white.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: isCompleted
-                              ? const Icon(Icons.check, color: Colors.white, size: 18)
-                              : Text(
-                                  '${index + 1}',
-                                  style: TextStyle(
-                                    color: isActive ? Colors.white : null,
-                                  ),
-                                ),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _getStepLabel(index),
-                        style: Theme.of(context).textTheme.bodySmall,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
-                if (index < _totalSteps - 1)
-                  Expanded(
-                    child: Container(
-                      height: 2,
-                      color: index < _currentStep
-                          ? const Color(SwiftleadTokens.primaryTeal)
-                          : Theme.of(context).brightness == Brightness.light
-                              ? Colors.black.withOpacity(0.1)
-                              : Colors.white.withOpacity(0.1),
-                    ),
-                  ),
-              ],
-            ),
-          );
-        }),
+              );
+            }),
+          ),
+        ],
       ),
     );
   }
@@ -437,12 +489,11 @@ class _ContactImportWizardScreenState extends State<ContactImportWizardScreen> {
                           // Navigate to import results screen
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => ContactImportResultsScreen(
-                                importJobId: 'import_${DateTime.now().millisecondsSinceEpoch}',
-                                successCount: 120,
-                                errorCount: 5,
-                                errors: [
+                            _createPageRoute(ContactImportResultsScreen(
+                              importJobId: 'import_${DateTime.now().millisecondsSinceEpoch}',
+                              successCount: 120,
+                              errorCount: 5,
+                              errors: [
                                   ImportError(rowNumber: 3, message: 'Invalid email format'),
                                   ImportError(rowNumber: 7, message: 'Duplicate phone number'),
                                   ImportError(rowNumber: 12, message: 'Missing required field: name'),

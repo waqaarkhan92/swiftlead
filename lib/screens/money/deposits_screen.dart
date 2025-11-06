@@ -4,6 +4,7 @@ import '../../widgets/global/frosted_container.dart';
 import '../../widgets/global/primary_button.dart';
 import '../../widgets/global/empty_state_card.dart';
 import '../../widgets/global/badge.dart';
+import '../../widgets/forms/deposit_request_sheet.dart';
 import '../../theme/tokens.dart';
 
 /// DepositsScreen - Manage deposits
@@ -69,8 +70,28 @@ class _DepositsScreenState extends State<DepositsScreen> {
     return Scaffold(
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: const FrostedAppBar(
+      appBar: FrostedAppBar(
         title: 'Deposits',
+        actions: [
+          if (_selectedFilter == 'All')
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () {
+                DepositRequestSheet.show(
+                  context: context,
+                  onSend: (amount, dueDate, message) {
+                    // TODO: Save deposit request when backend is ready
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Deposit request sent for £${amount.toStringAsFixed(2)}'),
+                      ),
+                    );
+                  },
+                );
+              },
+              tooltip: 'Request Deposit',
+            ),
+        ],
       ),
       body: Column(
         children: [
@@ -111,7 +132,19 @@ class _DepositsScreenState extends State<DepositsScreen> {
                         : 'No ${_selectedFilter.toLowerCase()} deposits.',
                     icon: Icons.payments,
                     actionLabel: _selectedFilter == 'All' ? 'Request Deposit' : null,
-                    onAction: _selectedFilter == 'All' ? () {} : null,
+                    onAction: _selectedFilter == 'All' ? () {
+                      DepositRequestSheet.show(
+                        context: context,
+                        onSend: (amount, dueDate, message) {
+                          // TODO: Save deposit request when backend is ready
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Deposit request sent for £${amount.toStringAsFixed(2)}'),
+                            ),
+                          );
+                        },
+                      );
+                    } : null,
                   )
                 : ListView.builder(
                     padding: const EdgeInsets.all(SwiftleadTokens.spaceM),
@@ -127,16 +160,6 @@ class _DepositsScreenState extends State<DepositsScreen> {
           ),
         ],
       ),
-      floatingActionButton: _selectedFilter == 'All'
-          ? FloatingActionButton.extended(
-              onPressed: () {
-                // TODO: Show request deposit sheet
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('Request Deposit'),
-              backgroundColor: const Color(SwiftleadTokens.primaryTeal),
-            )
-          : null,
     );
   }
 }
@@ -190,7 +213,7 @@ class _DepositCard extends StatelessWidget {
         statusIcon = Icons.check_circle;
         break;
       case DepositStatus.refunded:
-        statusColor = Colors.grey;
+        statusColor = Theme.of(context).textTheme.bodySmall?.color ?? Theme.of(context).textTheme.bodyMedium?.color ?? const Color(SwiftleadTokens.textSecondaryLight);
         statusText = 'Refunded';
         statusIcon = Icons.undo;
         break;
@@ -229,7 +252,7 @@ class _DepositCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: SwiftleadTokens.spaceXS),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -238,7 +261,7 @@ class _DepositCard extends StatelessWidget {
                         size: 16,
                         color: statusColor,
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: SwiftleadTokens.spaceXS),
                       Text(
                         statusText,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(

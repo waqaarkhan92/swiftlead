@@ -30,6 +30,7 @@ import '../../widgets/components/metric_detail_sheet.dart';
 import '../../widgets/components/celebration_banner.dart';
 import '../../widgets/components/smart_collapsible_section.dart';
 import '../../widgets/components/context_menu.dart';
+import '../../utils/responsive_layout.dart';
 
 /// HomeScreen - Dashboard hub
 /// Exact specification from Screen_Layouts_v2.5.1
@@ -154,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final jobsByStatus = await MockJobs.getCountByStatus();
       _activeJobs = (jobsByStatus[JobStatus.inProgress] ?? 0) +
-                    (jobsByStatus[JobStatus.scheduled] ?? 0);
+                    (jobsByStatus[JobStatus.booked] ?? 0);
       _previousActiveJobs = (_activeJobs * 0.8).toInt(); // Mock: 20% growth
 
       _unreadMessages = await MockMessages.getUnreadCount();
@@ -293,9 +294,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final hour = DateTime.now().hour;
     final hasOutdoorJobs = _upcomingBookings.any((b) {
       // Mock: assume some bookings are outdoor
-      return b.serviceType.toLowerCase().contains('outdoor') ||
-             b.serviceType.toLowerCase().contains('garden') ||
-             b.serviceType.toLowerCase().contains('roof');
+      final serviceType = b.serviceType ?? '';
+      return serviceType.toLowerCase().contains('outdoor') ||
+             serviceType.toLowerCase().contains('garden') ||
+             serviceType.toLowerCase().contains('roof');
     });
     
     // Hide if evening/night and no outdoor jobs
@@ -436,12 +438,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void _handleProfileTap() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => SettingsScreen(
-          onThemeChanged: (_) {},
-          currentThemeMode: ThemeMode.system,
-        ),
-      ),
+      _createPageRoute(SettingsScreen(
+        onThemeChanged: (_) {},
+        currentThemeMode: ThemeMode.system,
+      )),
     );
   }
 
@@ -459,7 +459,7 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 32,
             decoration: BoxDecoration(
               color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.8),
             ),
             child: const Icon(
               Icons.person,
@@ -558,111 +558,135 @@ class _HomeScreenState extends State<HomeScreen> {
         HapticFeedback.lightImpact();
         await _loadDashboardData();
       },
-      child: ListView(
-        controller: _scrollController,
-        padding: const EdgeInsets.only(
-          left: SwiftleadTokens.spaceM,
-          right: SwiftleadTokens.spaceM,
-          top: SwiftleadTokens.spaceM,
-          bottom: 96,
-        ),
-        children: [
-          // Celebration banner (if milestone reached)
-          if (_celebrationMessage != null) ...[
-            CelebrationBanner(
-              message: _celebrationMessage!,
-              onDismiss: () {
-                setState(() => _celebrationMessage = null);
-              },
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final padding = ResponsiveLayout.getPadding(context);
+          final maxWidth = ResponsiveLayout.getMaxContentWidth(context);
+          
+          return ListView(
+            controller: _scrollController,
+            padding: EdgeInsets.only(
+              left: padding.left,
+              right: padding.right,
+              top: padding.top,
+              bottom: ResponsiveLayout.isDesktop(context) ? padding.bottom : 96,
             ),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-          ],
-          
-          // Swipeable Cards: Today's Summary + Automation Insights
-          _buildChartCard(),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-          
-          // Time Range Selector
-          _buildDateRangeSelector(),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-          
-          // MetricsRow with TrendTile (sparklines, tooltips, animated counters)
-          _buildMetricsRow(),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-          
-          // Predictive Insights
-          if (_predictedRevenue > 0) ...[
-            _buildPredictiveInsight(),
-            const SizedBox(height: SwiftleadTokens.spaceL),
-          ],
-          
-          // AIInsightBanner (urgent alerts first - if present)
-          if (_showAIBanner) ...[
-            AIInsightBanner(
-              message: 'AI found 3 unconfirmed bookings — confirm now?',
-              onTap: () {
-                HapticFeedback.mediumImpact();
-                Navigator.push(
-                  context,
-                  _createPageRoute(const CalendarScreen()),
-                ).then((_) {
-                  if (mounted) {
-                    setState(() => _showAIBanner = false);
-                  }
-                });
-              },
-              onDismiss: () {
-                HapticFeedback.lightImpact();
-                setState(() => _showAIBanner = false);
-              },
-            ),
-            const SizedBox(height: SwiftleadTokens.spaceL),
-          ],
-
-          // Upcoming Schedule Widget (actionable today) - Collapsible
-          SmartCollapsibleSection(
-            title: 'Upcoming Schedule',
-            initiallyExpanded: _scheduleExpanded,
-            onExpandedChanged: () {
-              HapticFeedback.selectionClick();
-            },
-            child: _buildUpcomingScheduleContent(),
-          ),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-
-          // Weather Widget (context for outdoor work) - Collapsible & Contextual
-          if (_shouldShowWeather()) ...[
-            SmartCollapsibleSection(
-              title: 'Weather Forecast',
-              initiallyExpanded: _weatherExpanded,
-              onExpandedChanged: () {
-                HapticFeedback.selectionClick();
-              },
-              child: _buildWeatherContent(),
-            ),
-            const SizedBox(height: SwiftleadTokens.spaceL),
-          ],
-          
-          // Goal Tracking Summary (analytics/progress) - Collapsible
-          SmartCollapsibleSection(
-            title: 'Goal Progress',
-            initiallyExpanded: _goalsExpanded,
-            onExpandedChanged: () {
-              HapticFeedback.selectionClick();
-            },
-            child: _buildGoalTrackingContent(),
-          ),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-          
-          // QuickActionChipsRow (common tasks)
-          _buildQuickActionChipsRow(),
-          const SizedBox(height: SwiftleadTokens.spaceL),
-          
-          // ActivityFeed (recent activity)
-          _buildActivityFeed(),
-        ],
+            children: [
+              // Center content on desktop with max width
+              if (ResponsiveLayout.isDesktop(context))
+                Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxWidth),
+                    child: Column(
+                      children: _buildContentChildren(),
+                    ),
+                  ),
+                )
+              else
+                ..._buildContentChildren(),
+            ],
+          );
+        },
       ),
     );
+  }
+  
+  List<Widget> _buildContentChildren() {
+    return [
+      // Celebration banner (if milestone reached)
+      if (_celebrationMessage != null) ...[
+        CelebrationBanner(
+          message: _celebrationMessage!,
+          onDismiss: () {
+            setState(() => _celebrationMessage = null);
+          },
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+      ],
+      
+      // Swipeable Cards: Today's Summary + Automation Insights
+      _buildChartCard(),
+      const SizedBox(height: SwiftleadTokens.spaceL),
+      
+      // Time Range Selector
+      _buildDateRangeSelector(),
+      const SizedBox(height: SwiftleadTokens.spaceL),
+      
+      // MetricsRow with TrendTile (sparklines, tooltips, animated counters)
+      _buildMetricsRow(),
+      const SizedBox(height: SwiftleadTokens.spaceL),
+      
+      // Predictive Insights
+      if (_predictedRevenue > 0) ...[
+        _buildPredictiveInsight(),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+      ],
+      
+      // AIInsightBanner (urgent alerts first - if present)
+      if (_showAIBanner) ...[
+        AIInsightBanner(
+          message: 'AI found 3 unconfirmed bookings — confirm now?',
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            Navigator.push(
+              context,
+              _createPageRoute(const CalendarScreen()),
+            ).then((_) {
+              if (mounted) {
+                setState(() => _showAIBanner = false);
+              }
+            });
+          },
+          onDismiss: () {
+            HapticFeedback.lightImpact();
+            setState(() => _showAIBanner = false);
+          },
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+      ],
+
+      // Upcoming Schedule Widget (actionable today) - Collapsible
+      SmartCollapsibleSection(
+        title: 'Upcoming Schedule',
+        initiallyExpanded: _scheduleExpanded,
+        onExpandedChanged: () {
+          HapticFeedback.selectionClick();
+        },
+        child: _buildUpcomingScheduleContent(),
+      ),
+      const SizedBox(height: SwiftleadTokens.spaceL),
+
+      // Weather Widget (context for outdoor work) - Collapsible & Contextual
+      if (_shouldShowWeather()) ...[
+        SmartCollapsibleSection(
+          title: 'Weather Forecast',
+          initiallyExpanded: _weatherExpanded,
+          onExpandedChanged: () {
+            HapticFeedback.selectionClick();
+          },
+          child: _buildWeatherContent(),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceL),
+      ],
+      
+      // Goal Tracking Summary (analytics/progress) - Collapsible
+      SmartCollapsibleSection(
+        title: 'Goal Progress',
+        initiallyExpanded: _goalsExpanded,
+        onExpandedChanged: () {
+          HapticFeedback.selectionClick();
+        },
+        child: _buildGoalTrackingContent(),
+      ),
+      const SizedBox(height: SwiftleadTokens.spaceL),
+      
+      // QuickActionChipsRow (common tasks)
+      _buildQuickActionChipsRow(),
+      const SizedBox(height: SwiftleadTokens.spaceL),
+      
+      // ActivityFeed (recent activity)
+      _buildActivityFeed(),
+    ];
   }
   
   // Smooth page route transitions
@@ -708,33 +732,42 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   
   Widget _buildQuickMetric(String label, String value, String metricId) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        _showMetricDetail(metricId);
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontSize: 10,
+    return Semantics(
+      label: '$label: $value',
+      button: true,
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          _showMetricDetail(metricId);
+        },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontSize: (Theme.of(context).textTheme.bodySmall?.fontSize ?? 10) * MediaQuery.of(context).textScaler.scale(1.0),
+              ),
             ),
-          ),
-          const SizedBox(height: 2),
-          AnimatedCounter(
-            value: metricId == 'Revenue' ? _totalRevenue : 
-                  metricId == 'Active Jobs' ? _activeJobs.toDouble() : 
-                  _unreadMessages.toDouble(),
-            textStyle: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: const Color(SwiftleadTokens.primaryTeal),
+            const SizedBox(height: SwiftleadTokens.spaceXXS),
+            AnimatedCounter(
+              value: metricId == 'Revenue' ? _totalRevenue : 
+                    metricId == 'Active Jobs' ? _activeJobs.toDouble() : 
+                    _unreadMessages.toDouble(),
+              textStyle: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: metricId == 'Revenue' 
+                    ? const Color(SwiftleadTokens.successGreen)
+                    : metricId == 'Active Jobs'
+                        ? const Color(SwiftleadTokens.infoBlue)
+                        : const Color(SwiftleadTokens.warningYellow),
+                fontSize: (Theme.of(context).textTheme.titleSmall?.fontSize ?? 14) * MediaQuery.of(context).textScaler.scale(1.0),
+              ),
+              prefix: metricId == 'Revenue' ? '£' : '',
+              decimals: metricId == 'Revenue' ? 0 : 0,
             ),
-            prefix: metricId == 'Revenue' ? '£' : '',
-            decimals: metricId == 'Revenue' ? 0 : 0,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -747,16 +780,25 @@ class _HomeScreenState extends State<HomeScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
+            Color(0xFF00B89A), // Slightly darker teal for better contrast
             Color(SwiftleadTokens.primaryTeal),
             Color(SwiftleadTokens.accentAqua),
           ],
+          stops: [0.0, 0.5, 1.0],
         ),
         borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
         boxShadow: [
           BoxShadow(
-            color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.4),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.15),
+            blurRadius: 40,
+            offset: const Offset(0, 16),
+            spreadRadius: -4,
           ),
         ],
       ),
@@ -776,29 +818,51 @@ class _HomeScreenState extends State<HomeScreen> {
                       "Today's Summary",
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Colors.white,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: SwiftleadTokens.spaceXS),
                     Text(
                       _getGreeting(),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withOpacity(0.95),
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 2,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(SwiftleadTokens.spaceS),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white.withOpacity(0.25),
+                  borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.6),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.white.withOpacity(0.3),
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: const Icon(
                   Icons.insights,
                   color: Colors.white,
-                  size: 20,
+                  size: 22,
                 ),
               ),
             ],
@@ -812,11 +876,43 @@ class _HomeScreenState extends State<HomeScreen> {
                   Icons.work_outline,
                 ),
               ),
+              Container(
+                width: 1,
+                height: 50,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white.withOpacity(0.0),
+                      Colors.white.withOpacity(0.3),
+                      Colors.white.withOpacity(0.0),
+                    ],
+                  ),
+                ),
+              ),
               Expanded(
                 child: _buildSummaryStat(
                   'Bookings',
                   '$_todayBookings',
                   Icons.calendar_today,
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 50,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white.withOpacity(0.0),
+                      Colors.white.withOpacity(0.3),
+                      Colors.white.withOpacity(0.0),
+                    ],
+                  ),
                 ),
               ),
               Expanded(
@@ -835,27 +931,59 @@ class _HomeScreenState extends State<HomeScreen> {
   
   Widget _buildSummaryStat(String label, String value, IconData icon) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          icon,
-          color: Colors.white,
-          size: 24,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white.withOpacity(0.1),
+                blurRadius: 4,
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: Icon(
+            icon,
             color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
+            size: 20,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: SwiftleadTokens.spaceS),
+        Text(
+          value,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+            shadows: [
+              Shadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: SwiftleadTokens.spaceXXS),
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.9),
-            fontSize: 12,
+            color: Colors.white.withOpacity(0.95),
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.2,
+            shadows: [
+              Shadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 2,
+                offset: const Offset(0, 1),
+              ),
+            ],
           ),
         ),
       ],
@@ -905,95 +1033,109 @@ class _HomeScreenState extends State<HomeScreen> {
         : 0.0;
     final conversionTrend = _conversionRate - _previousConversionRate;
     
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildInteractiveTrendTile(
-                metricId: 'Revenue',
-                label: 'Revenue',
-                currentValue: _totalRevenue,
-                previousValue: _previousRevenue,
-                trend: revenueTrend,
-                isPositive: revenueTrend >= 0,
-                sparklineData: [
-                  _previousRevenue * 0.5,
-                  _previousRevenue * 0.6,
-                  _previousRevenue * 0.7,
-                  _previousRevenue * 0.8,
-                  _previousRevenue * 0.9,
-                  _previousRevenue * 0.95,
-                  _totalRevenue,
-                ],
-                tooltip: 'Total revenue from all paid invoices',
-                prefix: '£',
-              ),
-            ),
-            const SizedBox(width: SwiftleadTokens.spaceS),
-            Expanded(
-              child: _buildInteractiveTrendTile(
-                metricId: 'Active Jobs',
-                label: 'Active Jobs',
-                currentValue: _activeJobs.toDouble(),
-                previousValue: _previousActiveJobs.toDouble(),
-                trend: jobsTrend,
-                isPositive: jobsTrend >= 0,
-                sparklineData: [
-                  (_previousActiveJobs * 0.6).toDouble(),
-                  (_previousActiveJobs * 0.7).toDouble(),
-                  (_previousActiveJobs * 0.8).toDouble(),
-                  (_previousActiveJobs * 0.85).toDouble(),
-                  (_previousActiveJobs * 0.9).toDouble(),
-                  (_previousActiveJobs * 0.95).toDouble(),
-                  _activeJobs.toDouble(),
-                ],
-                tooltip: 'Jobs in progress or scheduled',
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: SwiftleadTokens.spaceS),
-        Row(
-          children: [
-            Expanded(
-              child: _buildInteractiveTrendTile(
-                metricId: 'Messages',
-                label: 'Messages',
-                currentValue: _unreadMessages.toDouble(),
-                previousValue: _previousUnreadMessages.toDouble(),
-                trend: ((_unreadMessages - _previousUnreadMessages) / _previousUnreadMessages) * 100,
-                isPositive: false,
-                sparklineData: [
-                  (_previousUnreadMessages * 0.2).toDouble(),
-                  (_previousUnreadMessages * 0.4).toDouble(),
-                  (_previousUnreadMessages * 0.6).toDouble(),
-                  (_previousUnreadMessages * 0.7).toDouble(),
-                  (_previousUnreadMessages * 0.8).toDouble(),
-                  (_previousUnreadMessages * 0.9).toDouble(),
-                  _unreadMessages.toDouble(),
-                ],
-                tooltip: 'Unread messages across all channels',
-              ),
-            ),
-            const SizedBox(width: SwiftleadTokens.spaceS),
-            Expanded(
-              child: _buildInteractiveTrendTile(
-                metricId: 'Conversion',
-                label: 'Conversion',
-                currentValue: _conversionRate,
-                previousValue: _previousConversionRate,
-                trend: conversionTrend,
-                isPositive: conversionTrend >= 0,
-                sparklineData: [55, 58, 60, 62, 65, 66, _conversionRate],
-                tooltip: 'Quote to job conversion rate',
-                suffix: '%',
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
+    // Responsive layout: Desktop = 3 columns, Tablet = 2 columns, Mobile = 2 columns
+    final columnCount = ResponsiveLayout.getColumnCount(context);
+    final gutter = ResponsiveLayout.getGutter(context);
+    
+    final metrics = [
+      _buildInteractiveTrendTile(
+        metricId: 'Revenue',
+        label: 'Revenue',
+        currentValue: _totalRevenue,
+        previousValue: _previousRevenue,
+        trend: revenueTrend,
+        isPositive: revenueTrend >= 0,
+        sparklineData: [
+          _previousRevenue * 0.5,
+          _previousRevenue * 0.6,
+          _previousRevenue * 0.7,
+          _previousRevenue * 0.8,
+          _previousRevenue * 0.9,
+          _previousRevenue * 0.95,
+          _totalRevenue,
+        ],
+        tooltip: 'Total revenue from all paid invoices',
+        prefix: '£',
+      ),
+      _buildInteractiveTrendTile(
+        metricId: 'Active Jobs',
+        label: 'Active Jobs',
+        currentValue: _activeJobs.toDouble(),
+        previousValue: _previousActiveJobs.toDouble(),
+        trend: jobsTrend,
+        isPositive: jobsTrend >= 0,
+        sparklineData: [
+          (_previousActiveJobs * 0.6).toDouble(),
+          (_previousActiveJobs * 0.7).toDouble(),
+          (_previousActiveJobs * 0.8).toDouble(),
+          (_previousActiveJobs * 0.85).toDouble(),
+          (_previousActiveJobs * 0.9).toDouble(),
+          (_previousActiveJobs * 0.95).toDouble(),
+          _activeJobs.toDouble(),
+        ],
+        tooltip: 'Jobs in progress or scheduled',
+      ),
+      _buildInteractiveTrendTile(
+        metricId: 'Messages',
+        label: 'Messages',
+        currentValue: _unreadMessages.toDouble(),
+        previousValue: _previousUnreadMessages.toDouble(),
+        trend: ((_unreadMessages - _previousUnreadMessages) / _previousUnreadMessages) * 100,
+        isPositive: false,
+        sparklineData: [
+          (_previousUnreadMessages * 0.2).toDouble(),
+          (_previousUnreadMessages * 0.4).toDouble(),
+          (_previousUnreadMessages * 0.6).toDouble(),
+          (_previousUnreadMessages * 0.7).toDouble(),
+          (_previousUnreadMessages * 0.8).toDouble(),
+          (_previousUnreadMessages * 0.9).toDouble(),
+          _unreadMessages.toDouble(),
+        ],
+        tooltip: 'Unread messages across all channels',
+      ),
+      _buildInteractiveTrendTile(
+        metricId: 'Conversion',
+        label: 'Conversion',
+        currentValue: _conversionRate,
+        previousValue: _previousConversionRate,
+        trend: conversionTrend,
+        isPositive: conversionTrend >= 0,
+        sparklineData: [55, 58, 60, 62, 65, 66, _conversionRate],
+        tooltip: 'Quote to job conversion rate',
+        suffix: '%',
+      ),
+    ];
+    
+    // Use responsive grid on desktop, rows on mobile/tablet
+    if (ResponsiveLayout.isDesktop(context)) {
+      return ResponsiveGrid(
+        children: metrics,
+        childAspectRatio: 1.2,
+        crossAxisSpacing: gutter,
+        mainAxisSpacing: gutter,
+      );
+    } else {
+      // Mobile/Tablet: Keep 2x2 grid layout
+      return Column(
+        children: [
+          Row(
+            children: [
+              Expanded(child: metrics[0]),
+              SizedBox(width: gutter),
+              Expanded(child: metrics[1]),
+            ],
+          ),
+          SizedBox(height: gutter),
+          Row(
+            children: [
+              Expanded(child: metrics[2]),
+              SizedBox(width: gutter),
+              Expanded(child: metrics[3]),
+            ],
+          ),
+        ],
+      );
+    }
   }
 
   Widget _buildInteractiveTrendTile({
@@ -1008,7 +1150,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String? prefix,
     String? suffix,
   }) {
-    return GestureDetector(
+    return _HoverableCard(
       onTap: () {
         HapticFeedback.mediumImpact();
         _showMetricDetail(metricId);
@@ -1019,7 +1161,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _showMetricContextMenu(metricId, position);
       },
       child: FrostedContainer(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(SwiftleadTokens.spaceM * 0.75),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -1050,6 +1192,15 @@ class _HomeScreenState extends State<HomeScreen> {
               decimals: prefix == '£' ? 0 : (suffix == '%' ? 0 : 0),
               textStyle: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w700,
+                color: metricId == 'Revenue' 
+                    ? const Color(SwiftleadTokens.successGreen)
+                    : metricId == 'Active Jobs'
+                        ? const Color(SwiftleadTokens.infoBlue)
+                        : metricId == 'Messages'
+                            ? const Color(SwiftleadTokens.warningYellow)
+                            : metricId == 'Conversion'
+                                ? const Color(SwiftleadTokens.primaryTeal)
+                                : Theme.of(context).textTheme.headlineMedium?.color,
               ),
             ),
             if (sparklineData.isNotEmpty) ...[
@@ -1144,7 +1295,7 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 8,
               margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.2),
                 color: _currentAutomationPage == index
                     ? const Color(SwiftleadTokens.primaryTeal)
                     : const Color(SwiftleadTokens.primaryTeal).withOpacity(0.3),
@@ -1200,9 +1351,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => const AIHubScreen(),
-          ),
+          _createPageRoute(const AIHubScreen()),
         );
       },
       child: FrostedContainer(
@@ -1223,10 +1372,10 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(SwiftleadTokens.spaceS),
                   decoration: BoxDecoration(
                     color: accentColor.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.6),
                   ),
                   child: Icon(
                     card['icon'] as IconData,
@@ -1238,7 +1387,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: accentColor.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.6),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -1375,7 +1524,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildActivityFeed() {
     return FrostedContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(SwiftleadTokens.spaceL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1486,7 +1635,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final jobsByStatus = await MockJobs.getCountByStatus();
       _activeJobs = ((jobsByStatus[JobStatus.inProgress] ?? 0) +
-                    (jobsByStatus[JobStatus.scheduled] ?? 0) * periodMultiplier).toInt();
+                    (jobsByStatus[JobStatus.booked] ?? 0) * periodMultiplier).toInt();
       _previousActiveJobs = (_activeJobs * 0.8).toInt();
 
       _unreadMessages = (await MockMessages.getUnreadCount() * periodMultiplier).toInt();
@@ -1695,7 +1844,7 @@ class _HomeScreenState extends State<HomeScreen> {
               color: booking.status == BookingStatus.confirmed
                   ? const Color(SwiftleadTokens.successGreen)
                   : const Color(SwiftleadTokens.warningYellow),
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard * 0.1),
                     ),
           ),
           const SizedBox(width: SwiftleadTokens.spaceS),
@@ -1707,7 +1856,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Expanded(
                     child: Text(
-                        booking.serviceType,
+                        booking.serviceType ?? '',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -1723,7 +1872,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
                 const SizedBox(height: 2),
                 Text(
-                  booking.contactName,
+                  booking.contactName ?? '',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 4),
@@ -1987,7 +2136,7 @@ class _ActivityFeedRow extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: const Color(SwiftleadTokens.primaryTeal).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(SwiftleadTokens.radiusCard),
               ),
               child: Icon(
                 _getIcon(),
@@ -2101,5 +2250,42 @@ class _StickyMetricsHeaderDelegate extends SliverPersistentHeaderDelegate {
     return oldDelegate.minHeight != minHeight ||
         oldDelegate.maxHeight != maxHeight ||
         oldDelegate.child != child;
+  }
+}
+
+/// Hoverable Card - Adds hover effect for web
+class _HoverableCard extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+
+  const _HoverableCard({
+    required this.child,
+    this.onTap,
+    this.onLongPress,
+  });
+
+  @override
+  State<_HoverableCard> createState() => _HoverableCardState();
+}
+
+class _HoverableCardState extends State<_HoverableCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          transform: Matrix4.identity()..scale(_isHovered ? 1.02 : 1.0),
+          child: widget.child,
+        ),
+      ),
+    );
   }
 }
